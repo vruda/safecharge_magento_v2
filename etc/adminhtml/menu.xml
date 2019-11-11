@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Safecharge Safecharge adminhtml menu config.
+ *
+ * @category Safecharge
+ * @package  Safecharge_Safecharge
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <add id="Safecharge_Safecharge::sales_safecharge"
+             title="Safecharge"
+             translate="title"
+             module="Safecharge_Safecharge"
+             sortOrder="20"
+             parent="Magento_Sales::sales"
+             resource="Safecharge_Safecharge::sales_safecharge"/>
+        <add id="Safecharge_Safecharge::sales_safecharge_request"
+             title="Api Requests"
+             translate="title"
+             module="Safecharge_Safecharge"
+             sortOrder="10"
+             parent="Safecharge_Safecharge::sales_safecharge"
+             action="safecharge/request"
+             resource="Safecharge_Safecharge::sales_safecharge_request"/>
+    </menu>
+</config>

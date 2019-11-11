@@ -1,0 +1,12 @@
+<!-- Safecharge - Reload customerData cart -->
+<script>
+    (function  () {
+        require([
+            "Magento_Customer/js/customer-data"
+        ],function(customerData) {
+            customerData.invalidate(['cart']);
+            customerData.reload(['cart'], true);
+        });
+    })();
+</script>
+<!--/ Safecharge - Reload customerData cart -->

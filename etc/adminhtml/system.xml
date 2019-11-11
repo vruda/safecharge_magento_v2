@@ -1,0 +1,250 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Safecharge Safecharge adminhtml system config.
+ *
+ * @category Safecharge
+ * @package  Safecharge_Safecharge
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <section id="payment">
+            <group id="safecharge"
+                   translate="label"
+                   type="text"
+                   sortOrder="40"
+                   showInDefault="1"
+                   showInWebsite="1"
+                   showInStore="1">
+                <label>Safecharge</label>
+                
+                <group id="basic_configuration"
+                       translate="label"
+                       showInDefault="1"
+                       showInWebsite="1"
+                       showInStore="1"
+                       sortOrder="10">
+                    <label>Basic Configuration</label>
+                    
+                    <field id="active"
+                           translate="label"
+                           type="select"
+                           sortOrder="10"
+                           showInDefault="1"
+                           showInWebsite="1"
+                           showInStore="0" >
+                        <label>Enabled</label>
+                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                        <config_path>payment/safecharge/active</config_path>
+                    </field>
+                    
+                    <field id="title"
+                           translate="label"
+                           type="text"
+                           sortOrder="20"
+                           showInDefault="1"
+                           showInWebsite="1"
+                           showInStore="0"
+                           canRestore="1" >
+                        <label>Title</label>
+                        <config_path>payment/safecharge/title</config_path>
+                    </field>
+                    
+                    <field id="mode"
+                           translate="label"
+                           type="select"
+                           sortOrder="30"
+                           showInDefault="1"
+                           showInWebsite="1"
+                           showInStore="0" >
+                        <label>Mode</label>
+                        <source_model>Safecharge\Safecharge\Model\Adminhtml\Source\Mode</source_model>
+                        <config_path>payment/safecharge/mode</config_path>
+                    </field>
+                    
+                    <field id="hash"
+                           translate="label"
+                           type="select"
+                           sortOrder="31"
+                           showInDefault="1"
+                           showInWebsite="1"
+                           showInStore="0" >
+                        <label>Merchant Hash</label>
+                        <source_model>Safecharge\Safecharge\Model\Adminhtml\Source\Hash</source_model>
+                        <config_path>payment/safecharge/hash</config_path>
+                    </field>
+                    
+                    <field id="merchant_id"
+                           translate="label"
+                           type="obscure"
+                           sortOrder="40"
+                           showInDefault="1"
+                           showInWebsite="1"
+                           showInStore="0">
+                        <label>Merchant ID</label>
+                        <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
+                        <comment>Value provided by Safecharge.</comment>
+                        <config_path>payment/safecharge/merchant_id</config_path>
+                    </field>
+                    
+                    <field id="merchant_site_id"
+                           translate="label"
+                           type="text"
+                           sortOrder="50"
+                           showInDefault="1"
+                           showInWebsite="1"
+                           showInStore="0">
+                        <label>Merchant Site Id</label>
+                        <comment>Value provided by Safecharge.</comment>
+                        <config_path>payment/safecharge/merchant_site_id</config_path>
+                    </field>
+                    
+                    <field id="merchant_secret_key"
+                           translate="label"
+                           type="obscure"
+                           sortOrder="60"
+                           showInDefault="1"
+                           showInWebsite="1"
+                           showInStore="0">
+                        <label>Merchant Secret Key</label>
+                        <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
+                        <comment>Value provided by Safecharge.</comment>
+                        <config_path>payment/safecharge/merchant_secret_key</config_path>
+                    </field>
+                    
+                    <field id="sandbox_merchant_id"
+                           translate="label"
+                           type="obscure"
+                           sortOrder="70"
+                           showInDefault="1"
+                           showInWebsite="1"
+                           showInStore="0">
+                        <label>Sandbox Merchant ID</label>
+                        <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
+                        <comment>Value provided by Safecharge.</comment>
+                        <config_path>payment/safecharge/sandbox_merchant_id</config_path>
+                    </field>
+                    
+                    <field id="sandbox_merchant_site_id"
+                           translate="label"
+                           type="text"
+                           sortOrder="80"
+                           showInDefault="1"
+                           showInWebsite="1"
+                           showInStore="0">
+                        <label>Sandbox Merchant Site Id</label>
+                        <comment>Value provided by Safecharge.</comment>
+                        <config_path>payment/safecharge/sandbox_merchant_site_id</config_path>
+                    </field>
+                    
+                    <field id="sandbox_merchant_secret_key"
+                           translate="label"
+                           type="obscure"
+                           sortOrder="90"
+                           showInDefault="1"
+                           showInWebsite="1"
+                           showInStore="0">
+                        <label>Sandbox Merchant Secret Key</label>
+                        <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
+                        <comment>Value provided by Safecharge.</comment>
+                        <config_path>payment/safecharge/sandbox_merchant_secret_key</config_path>
+                    </field>
+                </group>
+                
+                <group id="advanced_configuration"
+                       translate="label"
+                       showInDefault="1"
+                       showInWebsite="1"
+                       showInStore="1"
+                       sortOrder="20">
+                    <label>Advanced Configuration</label>
+                    
+                    <field id="payment_action"
+                           translate="label"
+                           type="select"
+                           sortOrder="20"
+                           showInDefault="1"
+                           showInWebsite="1"
+                           showInStore="0" >
+                        <label>Payment Action</label>
+                        <source_model>Safecharge\Safecharge\Model\Adminhtml\Source\PaymentAction</source_model>
+                        <config_path>payment/safecharge/payment_action</config_path>
+                    </field>
+                    
+                    <field id="debug"
+                           translate="label"
+                           type="select"
+                           sortOrder="60"
+                           showInDefault="1"
+                           showInWebsite="1"
+                           showInStore="0" >
+                        <label>Debug</label>
+                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                        <config_path>payment/safecharge/debug</config_path>
+                    </field>
+                    
+                    <field id="min_order_total"
+                           translate="label"
+                           type="text"
+                           sortOrder="80"
+                           showInDefault="1"
+                           showInWebsite="1"
+                           showInStore="0" >
+                        <label>Minimum Order Total</label>
+                        <config_path>payment/safecharge/min_order_total</config_path>
+                    </field>
+                    
+                    <field id="max_order_total"
+                           translate="label"
+                           type="text"
+                           sortOrder="90"
+                           showInDefault="1"
+                           showInWebsite="1"
+                           showInStore="0" >
+                        <label>Maximum Order Total</label>
+                        <config_path>payment/safecharge/max_order_total</config_path>
+                    </field>
+                    
+                    <field id="sort_order"
+                           translate="label"
+                           type="text"
+                           sortOrder="100"
+                           showInDefault="1"
+                           showInWebsite="1"
+                           showInStore="0" >
+                        <label>Sort Order</label>
+                        <frontend_class>validate-number</frontend_class>
+                        <config_path>payment/safecharge/sort_order</config_path>
+                    </field>
+                    
+                    <field id="allowspecific"
+                           translate="label"
+                           type="allowspecific"
+                           sortOrder="110"
+                           showInDefault="1"
+                           showInWebsite="1"
+                           showInStore="0"
+                           canRestore="1">
+                        <label>Payment from Applicable Countries</label>
+                        <source_model>Magento\Payment\Model\Config\Source\Allspecificcountries</source_model>
+                        <config_path>payment/safecharge/allowspecific</config_path>
+                    </field>
+                    
+                    <field id="specificcountry"
+                           translate="label"
+                           type="multiselect"
+                           sortOrder="120"
+                           showInDefault="1"
+                           showInWebsite="1"
+                           showInStore="0" >
+                        <label>Payment from Specific Countries</label>
+                        <source_model>Magento\Directory\Model\Config\Source\Country</source_model>
+                        <config_path>payment/safecharge/specificcountry</config_path>
+                    </field>
+                </group>
+            </group>
+        </section>
+    </system>
+</config>

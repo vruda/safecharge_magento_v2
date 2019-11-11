@@ -1,0 +1,209 @@
+<!--
+/**
+ * Safecharge Safecharge payment template.
+ *
+ * @category Safecharge
+ * @package  Safecharge_Safecharge
+ */
+-->
+
+<style type="text/css">
+    input#safecharge_cc_owner::placeholder {
+        color: grey;
+        font-size: 15px;
+    }
+    
+    .sc_fields {
+        padding: 0px;
+        max-width: 225px;
+    }
+    
+    span.sc_fields { display: inline-block; }
+    
+    .SfcField {
+        padding: 7px 9px;
+        border: 1px solid #c2c2c2;
+        height: 18px;
+    }
+    
+    .SfcField iframe {
+        height: 18px !important;
+    }
+    
+    .SfcField.focus { box-shadow: 0px 0 3px 1px #00699d; }
+    
+    .sfcModal-dialog {
+        width: 50%;
+        margin: 0 auto;
+        margin-top: 10%;
+    }
+    
+    .is-in {
+        z-index: 9999 !important;
+    }
+</style>
+
+<div class="payment-method" data-bind="css: {'_active': (getCode() == isChecked())}">
+    <div class="payment-method-title field choice">
+        <input type="radio" name="payment[method]" class="radio" data-bind="
+                    attr    : {
+                        'id': getCode()
+                    },
+                    value   : getCode(),
+                    checked : isChecked,
+                    click   : selectPaymentMethod,
+                    visible : isRadioButtonVisible()
+                " />
+        <label class="label" data-bind="attr: {'for': getCode()}">
+            <span data-bind="text: getTitle()"></span>
+        </label>
+    </div>
+
+    <div class="payment-method-content">
+        <!-- ko foreach: getRegion('messages') -->
+        <!-- ko template: getTemplate() -->
+        <!-- /ko -->
+        <!--/ko-->
+
+        <div class="payment-method-billing-address">
+            <!-- ko foreach: $parent.getRegion(getBillingAddressFormName()) -->
+            <!-- ko template: getTemplate() -->
+            <!-- /ko -->
+            <!--/ko-->
+        </div>
+
+		<!--<form class="form" id="co-transparent-form" action="#" method="post">-->
+        <!-- ko if: (!useExternalSolution())-->
+        <div data-bind="foreach: apmMethods">
+            <div class="safecharge-apm-method-container">
+                <input type="radio" 
+					   data-bind="
+							checkedValue: $data.paymentMethod,
+							checked: $parent.chosenApmMethod,
+							attr: {
+								'id': $parent.getCode() + '_' + $data.paymentMethod,
+								'name': $parent.getCode() + '_apm_payment_method'
+							}" />
+                
+				<label class="label safecharge-apm-method-label" 
+					   data-bind="attr: {'for': $parent.getCode() + '_' + $data.paymentMethod}">
+                    
+					<span class="safecharge-apm-method-icon" data-bind="if: $data.logoURL, style: { backgroundImage: $data.logoURL ? 'url(\'' + $data.logoURL + '\')' : 'none' }"></span>
+                    
+					<span class="label safecharge-apm-method-label-title" data-bind="text: $t($data.paymentMethodDisplayName.message)"></span>
+                </label>
+
+                <!-- ko if: ($data.paymentMethod !== 'cc_card')-->
+				<!-- ko if: ($parent.chosenApmMethod() === $data.paymentMethod)-->
+				
+				<!-- ko if: ($data.fields.length > 0) -->
+				<br/>
+				<br/>
+				<fieldset data-bind="
+					attr: {class: 'fieldset payment items ccard fields-' + $data.paymentMethod},
+					foreach: $data.fields"
+				>
+					<div class="field number">
+						<div class="control">
+							<input class="input-text" data-bind="attr: {
+								placeholder: name,
+								type: type,
+								name:  name
+							}" required="" />
+						</div>
+					</div>
+				</fieldset>
+				<!--/ko-->
+				
+				<!-- ko if: ($data.fields.length == 0) -->
+				<div class="safecharge-apm-method-note">
+					<!-- ko i18n: "Please click 'Place Order' in order to proceed to " + $data.paymentMethodDisplayName.message -->
+					<!-- /ko -->
+				</div>
+				<!--/ko-->
+				<!--/ko-->
+				
+                <!--/ko-->
+
+                <!-- ko if: ($data.paymentMethod === 'cc_card' && $parent.chosenApmMethod() === 'cc_card')-->
+                <!--<form class="form" id="co-transparent-form" action="#" method="post">-->
+                    <fieldset data-bind="
+                        attr: {
+                            class: 'fieldset payment items ccard ' + $parent.getCode(),
+                            id: $parent.getCode() + '_form_cc'
+                        }
+                        ">
+                        <!-- ko if: ($parent.isShowLegend())-->
+                        <legend class="legend">
+                            <span>
+                                <!-- ko i18n: 'Credit Card Information' -->
+                                <!-- /ko -->
+                            </span>
+                        </legend><br />
+                        <!-- /ko -->
+
+                        <br/>
+                        <div class="field number sc_fields" style="max-width: 330px; min-height: 30px;">
+                            <div id="card-field-placeholder" data-bind="afterRender: $parent.initFields()"></div>
+                        </div>
+                        
+                        <div class="field number">
+                            <div class="control">
+                                <input type="text" name="payment[cc_owner]" class="input-text" value="" data-bind="
+                                    attr: {
+                                        id: $parent.getCode() + '_cc_owner',
+                                        title: $t('Credit Card Name'),
+                                        placeholder: $t('Name On Card'),
+                                        'data-container': $parent.getCode() + '-cc-owner',
+                                        'data-validate': JSON.stringify({
+                                            required :true
+                                        })
+                                    },
+                                    value: $parent.creditCardOwner,
+                                    valueUpdate: 'keyup'
+                               " />
+                            </div>
+                        </div>
+
+                        <input type="hidden" name="payment[cc_token]" data-bind="
+                            attr: {
+                                id: $parent.getCode() + '_cc_token',
+                                'data-container': $parent.getCode() + '-cc-token',
+                            },
+                            value: $parent.creditCardToken,
+                            valueUpdate: 'change'
+                        " />
+                    </fieldset>
+                <!--</form>-->
+                <!--/ko-->
+            </div>
+        </div>
+        <!--/ko-->
+
+        <div class="payment-method-content">
+            <div class="checkout-agreements-block">
+                <!-- ko foreach: $parent.getRegion('before-place-order') -->
+                <!-- ko template: getTemplate() -->
+                <!-- /ko -->
+                <!--/ko-->
+            </div>
+            <div class="actions-toolbar">
+                <div class="primary">
+                    <button data-role="review-save" type="submit" class="action primary checkout" data-bind="
+                        attr: {
+                            title: $t('Place Order')
+                        },
+                        click: placeOrder,
+                        css: {
+                            disabled: !isPlaceOrderActionAllowed()
+                        } 
+                    ">
+                        <span data-bind="i18n: 'Place Order'"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+		<!--</form>-->
+		
+    </div>
+</div>
