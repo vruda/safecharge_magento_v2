@@ -26,7 +26,6 @@
                 <sandbox_merchant_secret_key backend_model="Magento\Config\Model\Config\Backend\Encrypted"/>
 
                 <!-- Advanced Configuration. -->
-                <payment_action>authorize</payment_action>
                 <debug>1</debug>
                 <min_order_total/>
                 <max_order_total/>

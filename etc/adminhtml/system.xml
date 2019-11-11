@@ -161,18 +161,6 @@
                        sortOrder="20">
                     <label>Advanced Configuration</label>
                     
-                    <field id="payment_action"
-                           translate="label"
-                           type="select"
-                           sortOrder="20"
-                           showInDefault="1"
-                           showInWebsite="1"
-                           showInStore="0" >
-                        <label>Payment Action</label>
-                        <source_model>Safecharge\Safecharge\Model\Adminhtml\Source\PaymentAction</source_model>
-                        <config_path>payment/safecharge/payment_action</config_path>
-                    </field>
-                    
                     <field id="debug"
                            translate="label"
                            type="select"

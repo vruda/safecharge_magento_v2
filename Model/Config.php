@@ -360,16 +360,6 @@ class Config
     }
     
     /**
-     * Return payment action configuration value.
-     *
-     * @return string
-     */
-    public function getPaymentAction()
-    {
-        return $this->getConfigValue('payment_action');
-    }
-
-    /**
      * Return payment solution configuration value.
      *
      * @return string

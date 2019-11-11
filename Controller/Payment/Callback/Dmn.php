@@ -257,28 +257,24 @@ class Dmn extends Action implements CsrfAwareActionInterface
 
 				switch (strtolower($params['transactionType'])) {
 					case 'auth':
-						if ($this->moduleConfig->getPaymentAction() === Payment::ACTION_AUTHORIZE_CAPTURE) {
-							$request = $this->paymentRequestFactory->create(
-								AbstractRequest::PAYMENT_SETTLE_METHOD,
-								$orderPayment,
-								$order->getBaseGrandTotal()
-							);
-							$settleResponse = $request->process();
-							$invoiceTransactionId = $settleResponse->getTransactionId();
-							$message = $this->captureCommand->execute($orderPayment, $order->getBaseGrandTotal(), $order);
-							$transactionType = Transaction::TYPE_CAPTURE;
-							$isSettled = true;
-						} else {
-							$message = $this->authorizeCommand->execute($orderPayment, $order->getBaseGrandTotal(), $order);
-						}
+						$request = $this->paymentRequestFactory->create(
+							AbstractRequest::PAYMENT_SETTLE_METHOD,
+							$orderPayment,
+							$order->getBaseGrandTotal()
+						);
+						$settleResponse = $request->process();
+						$invoiceTransactionId = $settleResponse->getTransactionId();
+						$message = $this->captureCommand->execute($orderPayment, $order->getBaseGrandTotal(), $order);
+						$transactionType = Transaction::TYPE_CAPTURE;
+						$isSettled = true;
+						
 						break;
 						
 					case 'sale':
-						if ($this->moduleConfig->getPaymentAction() === Payment::ACTION_AUTHORIZE_CAPTURE) {
-							$message = $this->captureCommand->execute($orderPayment, $order->getBaseGrandTotal(), $order);
-							$transactionType = Transaction::TYPE_CAPTURE;
-							$isSettled = true;
-						}
+						$message = $this->captureCommand->execute($orderPayment, $order->getBaseGrandTotal(), $order);
+						$transactionType = Transaction::TYPE_CAPTURE;
+						$isSettled = true;
+						
 						break;
 				}
 

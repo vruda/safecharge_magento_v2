@@ -378,7 +378,6 @@ class Payment extends Cc implements TransparentInterface
             ($authCode === null && $paymentSolution === self::SOLUTION_EXTERNAL)
             || (
                 $paymentSolution === self::SOLUTION_INTERNAL
-                && $this->moduleConfig->getPaymentAction() === self::ACTION_AUTHORIZE_CAPTURE
                 && ($chosenApmMethod = $payment->getAdditionalInformation(self::KEY_CHOSEN_APM_METHOD))
                 && $chosenApmMethod !== self::APM_METHOD_CC
             )
