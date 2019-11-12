@@ -101,9 +101,12 @@ abstract class AbstractResponse extends AbstractApi
         );
 
         if ($requestStatus === false) {
-			$this->config->createLog($resp_data['Body'], 'Data when request fail:');
-			
-            throw new PaymentException($this->getErrorMessage());
+			if(!empty($resp_data['Body']['reason'])) {
+				throw new PaymentException($resp_data['Body']['reason']);
+			}
+			else {
+				throw new PaymentException($this->getErrorMessage());
+			}
         }
 
         $this->validateResponseData();

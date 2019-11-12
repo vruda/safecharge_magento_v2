@@ -317,19 +317,23 @@ abstract class AbstractRequest extends AbstractApi
         ];
 
         if ($billing !== null) {
+			$state = $billing->getRegionCode();
+			if(strlen($state) > 5) {
+				$state = substr($state, 0, 2);
+			}
+			
             $orderData['billingAddress'] = [
                 'firstName' => $billing->getFirstname(),
-                'lastName' => $billing->getLastname(),
-                'address' => is_array($billing->getStreet())
-                    ? implode(' ', $billing->getStreet())
-                    : '',
-                'cell' => '',
-                'phone' => $billing->getTelephone(),
-                'zip' => $billing->getPostcode(),
-                'city' => $billing->getCity(),
-                'country' => $billing->getCountryId(),
-                'state' => $billing->getRegionCode(),
-                'email' => $billing->getEmail(),
+                'lastName'	=> $billing->getLastname(),
+                'address'	=> is_array($billing->getStreet())
+                    ? implode(' ', $billing->getStreet()) : '',
+                'cell'		=> '',
+                'phone'		=> $billing->getTelephone(),
+                'zip'		=> $billing->getPostcode(),
+                'city'		=> $billing->getCity(),
+                'country'	=> $billing->getCountryId(),
+                'state'		=> $state,
+                'email'		=> $billing->getEmail(),
             ];
             $orderData = array_merge($orderData, $orderData['billingAddress']);
         }
@@ -389,19 +393,23 @@ abstract class AbstractRequest extends AbstractApi
         ];
 
         if ($billing !== null) {
+			$state = $billing->getRegionCode();
+			if(strlen($state) > 5) {
+				$state = substr($state, 0, 2);
+			}
+			
             $quoteData['billingAddress'] = [
                 'firstName' => $billing->getFirstname(),
-                'lastName' => $billing->getLastname(),
-                'address' => is_array($billing->getStreet())
-                    ? implode(' ', $billing->getStreet())
-                    : '',
-                'cell' => '',
-                'phone' => $billing->getTelephone(),
-                'zip' => $billing->getPostcode(),
-                'city' => $billing->getCity(),
-                'country' => $billing->getCountryId(),
-                'state' => $billing->getRegionCode(),
-                'email' => $billing->getEmail(),
+                'lastName'	=> $billing->getLastname(),
+                'address'	=> is_array($billing->getStreet())
+                    ? implode(' ', $billing->getStreet()) : '',
+                'cell'		=> '',
+                'phone'		=> $billing->getTelephone(),
+                'zip'		=> $billing->getPostcode(),
+                'city'		=> $billing->getCity(),
+                'country'	=> $billing->getCountryId(),
+                'state'		=> $state,
+                'email'		=> $billing->getEmail(),
             ];
             $quoteData = array_merge($quoteData, $quoteData['billingAddress']);
         }
