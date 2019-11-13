@@ -2,12 +2,12 @@
     "name": "safecharge/magento2-module-safecharge",
     "description": "Safecharge Payments For Magento 2",
     "minimum-stability": "alpha",
-    "prefer-stable": true,
+    "prefer-stable": false,
     "require": {
         "php": ">=5.5"
     },
     "type": "magento2-module",
-    "version": "1.6.2",
+    "version": "1.6.3",
     "license": [
         "OSL-3.0",
         "AFL-3.0"
