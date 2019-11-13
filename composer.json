@@ -1,6 +1,7 @@
 {
     "name": "safecharge/magento2-module-safecharge",
     "description": "Safecharge Payments For Magento 2",
+    "minimum-stability": "alpha",
     "require": {
         "php": ">=5.5"
     },
