@@ -27,16 +27,20 @@ abstract class AbstractRequest extends AbstractApi
     /**
      * Payment gateway methods.
      */
-    const GET_SESSION_TOKEN_METHOD              = 'getSessionToken';
-//    const PAYMENT_CC_METHOD                     = 'paymentCC';
-    const PAYMENT_SETTLE_METHOD                 = 'settleTransaction';
-    const CREATE_USER_METHOD                    = 'createUser';
-    const GET_USER_DETAILS_METHOD               = 'getUserDetails';
-    const PAYMENT_REFUND_METHOD                 = 'refundTransaction';
-    const PAYMENT_VOID_METHOD                   = 'voidTransaction';
-    const OPEN_ORDER_METHOD                     = 'openOrder';
-    const PAYMENT_APM_METHOD                    = 'paymentAPM';
-    const GET_MERCHANT_PAYMENT_METHODS_METHOD   = 'getMerchantPaymentMethods';
+    const GET_SESSION_TOKEN_METHOD = 'getSessionToken';
+    const PAYMENT_CC_METHOD = 'paymentCC';
+    const PAYMENT_SETTLE_METHOD = 'settleTransaction';
+    const PAYMENT_CARD_TOKENIZATION_METHOD = 'cardTokenization';
+    const PAYMENT_USER_PAYMENT_OPTION_METHOD = 'addUPOCreditCardByTempToken';
+    const PAYMENT_DYNAMIC_3D_METHOD = 'dynamic3D';
+    const PAYMENT_PAYMENT_3D_METHOD = 'payment3D';
+    const CREATE_USER_METHOD = 'createUser';
+    const GET_USER_DETAILS_METHOD = 'getUserDetails';
+    const PAYMENT_REFUND_METHOD = 'refundTransaction';
+    const PAYMENT_VOID_METHOD = 'voidTransaction';
+    const OPEN_ORDER_METHOD = 'openOrder';
+    const PAYMENT_APM_METHOD = 'paymentAPM';
+    const GET_MERCHANT_PAYMENT_METHODS_METHOD = 'getMerchantPaymentMethods';
 
     /**
      * @var Curl
@@ -130,8 +134,10 @@ abstract class AbstractRequest extends AbstractApi
         $endpoint .= 'api/v1/';
 
         $method = $this->getRequestMethod();
-
-        return $endpoint . $method . '.do';
+		
+		$endpoint .= $method . '.do';
+		
+		return $endpoint;
     }
 
     /**
@@ -164,12 +170,14 @@ abstract class AbstractRequest extends AbstractApi
         $this->initRequest();
 
         $params = [
-            'merchantId'		=> $this->config->getMerchantId(),
-            'merchantSiteId'	=> $this->config->getMerchantSiteId(),
-            'clientRequestId'	=> (string)$this->getRequestId(),
-            'timeStamp'			=> date('YmdHis'),
-			'webMasterId'		=> $this->config->getSourcePlatformField(),
-            'encoding'			=> 'UTF-8',
+            'merchantId' => $this->config->getMerchantId(),
+            'merchantSiteId' => $this->config->getMerchantSiteId(),
+            'clientRequestId' => (string)$this->getRequestId(),
+            'timeStamp' => date('YmdHis'),
+            'merchantDetails' => [
+                'customField1' => $this->config->getSourcePlatformField(),
+            ],
+            'encoding' => 'UTF-8',
         ];
 
         return $params;
@@ -210,10 +218,9 @@ abstract class AbstractRequest extends AbstractApi
 
         $concat .= $this->config->getMerchantSecretKey();
         $concat = utf8_encode($concat);
-        
-        $params['checksum'] = hash($this->config->getHash(), $concat);
-
-        return $params;
+        $params['checksum'] = hash('sha256', $concat);
+		
+		return $params;
     }
 
     /**
@@ -237,24 +244,24 @@ abstract class AbstractRequest extends AbstractApi
      */
     protected function sendRequest()
     {
-        $endpoint	= $this->getEndpoint();
-        $headers	= $this->getHeaders();
-        $params		= $this->prepareParams();
+        $endpoint = $this->getEndpoint();
+        $headers = $this->getHeaders();
+        $params = $this->prepareParams();
+		
+		$this->config->createLog($endpoint, 'Request endpoint:');
+		$this->config->createLog($params, 'Request params:');
 
         $this->curl->setHeaders($headers);
 
-		$this->config->createLog($endpoint,	'Request Endpoint:');
-		$this->config->createLog($params,	'Request params:');
-		
         $this->safechargeLogger->updateRequest(
             $this->getRequestId(),
             [
-                'method' => $this->getRequestMethod(),
-                'request' => [
-                    'Endpoint' => $endpoint,
-                    'Type' => 'POST',
-                    'Headers' => $headers,
-                    'Body' => $params,
+                'method' 	=> $this->getRequestMethod(),
+                'request'	=> [
+                    'Endpoint' 	=> $endpoint,
+                    'Type' 		=> 'POST',
+                    'Headers' 	=> $headers,
+                    'Body' 		=> $params,
                 ],
             ]
         );
@@ -317,23 +324,19 @@ abstract class AbstractRequest extends AbstractApi
         ];
 
         if ($billing !== null) {
-			$state = $billing->getRegionCode();
-			if(strlen($state) > 5) {
-				$state = substr($state, 0, 2);
-			}
-			
             $orderData['billingAddress'] = [
                 'firstName' => $billing->getFirstname(),
-                'lastName'	=> $billing->getLastname(),
-                'address'	=> is_array($billing->getStreet())
-                    ? implode(' ', $billing->getStreet()) : '',
-                'cell'		=> '',
-                'phone'		=> $billing->getTelephone(),
-                'zip'		=> $billing->getPostcode(),
-                'city'		=> $billing->getCity(),
-                'country'	=> $billing->getCountryId(),
-                'state'		=> $state,
-                'email'		=> $billing->getEmail(),
+                'lastName' => $billing->getLastname(),
+                'address' => is_array($billing->getStreet())
+                    ? implode(' ', $billing->getStreet())
+                    : '',
+                'cell' => '',
+                'phone' => $billing->getTelephone(),
+                'zip' => $billing->getPostcode(),
+                'city' => $billing->getCity(),
+                'country' => $billing->getCountryId(),
+                'state' => $billing->getRegionCode(),
+                'email' => $billing->getEmail(),
             ];
             $orderData = array_merge($orderData, $orderData['billingAddress']);
         }
@@ -393,23 +396,19 @@ abstract class AbstractRequest extends AbstractApi
         ];
 
         if ($billing !== null) {
-			$state = $billing->getRegionCode();
-			if(strlen($state) > 5) {
-				$state = substr($state, 0, 2);
-			}
-			
             $quoteData['billingAddress'] = [
                 'firstName' => $billing->getFirstname(),
-                'lastName'	=> $billing->getLastname(),
-                'address'	=> is_array($billing->getStreet())
-                    ? implode(' ', $billing->getStreet()) : '',
-                'cell'		=> '',
-                'phone'		=> $billing->getTelephone(),
-                'zip'		=> $billing->getPostcode(),
-                'city'		=> $billing->getCity(),
-                'country'	=> $billing->getCountryId(),
-                'state'		=> $state,
-                'email'		=> $billing->getEmail(),
+                'lastName' => $billing->getLastname(),
+                'address' => is_array($billing->getStreet())
+                    ? implode(' ', $billing->getStreet())
+                    : '',
+                'cell' => '',
+                'phone' => $billing->getTelephone(),
+                'zip' => $billing->getPostcode(),
+                'city' => $billing->getCity(),
+                'country' => $billing->getCountryId(),
+                'state' => $billing->getRegionCode(),
+                'email' => $billing->getEmail(),
             ];
             $quoteData = array_merge($quoteData, $quoteData['billingAddress']);
         }

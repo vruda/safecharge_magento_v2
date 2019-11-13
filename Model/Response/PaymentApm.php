@@ -32,32 +32,9 @@ class PaymentApm extends AbstractResponse implements ResponseInterface
         parent::process();
 
         $body = $this->getBody();
-		
-		if (!empty($body['redirectURL'])) {
-			$this->redirectUrl = (string) $body['redirectURL'];
-		}
-		else {
-			switch ((string) @$body['transactionStatus']) {
-				case 'APPROVED':
-					$this->redirectUrl = $this->config->getCallbackSuccessUrl();
-					break;
-				
-				case 'PENDING':
-					$this->redirectUrl = $this->config->getCallbackPendingUrl();
-					break;
-				
-				case 'DECLINED':
-				case 'ERROR':
-				default:
-					$this->redirectUrl = $this->config->getCallbackErrorUrl();
-					break;
-			}
-		}
-		
-		$this->config->createLog($this->redirectUrl, 'Payment redirectUrl');
-        
+        $this->redirectUrl = (string) $body['redirectURL'];
         $this->responseStatus = (string) $body['status'];
-		
+
         return $this;
     }
 
@@ -83,7 +60,7 @@ class PaymentApm extends AbstractResponse implements ResponseInterface
     protected function getRequiredResponseDataKeys()
     {
         return [
-        //    'redirectURL', // auto login APMs need credentials and does not return redirect URL
+            'redirectURL',
             'status',
         ];
     }

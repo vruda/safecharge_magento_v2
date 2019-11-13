@@ -28,12 +28,6 @@ class GetMerchantPaymentMethods extends AbstractResponse implements ResponseInte
      * @var array
      */
     protected $paymentMethods = [];
-    
-    /**
-     *
-     * @var string - the session token returned from APMs
-     */
-    protected $sessionToken = '';
 
     /**
      * AbstractResponse constructor.
@@ -70,42 +64,33 @@ class GetMerchantPaymentMethods extends AbstractResponse implements ResponseInte
         parent::process();
 
         $body = $this->getBody();
-        
-        $this->paymentMethods   = (array) $body['paymentMethods'];
-		
-		$this->config->createLog($this->paymentMethods, 'paymentMethods: ');
-		
-		
-        $this->sessionToken     = (string) $body['sessionToken'];
-        $langCode				= $this->getStoreLocale(true);
-        $countryCode			= $countryCode ?: $this->config->getQuoteCountryCode();
-        
-		foreach ($this->paymentMethods as $k => &$method) {
-            if (!$countryCode && isset($method["paymentMethod"]) && $method["paymentMethod"] !== 'cc_card') {
+
+        $this->paymentMethods = (array) $body['paymentMethods'];
+
+        $langCode = $this->getStoreLocale(true);
+        $countryCode = $countryCode ?: $this->config->getQuoteCountryCode();
+        foreach ($this->paymentMethods as $k => &$method) {
+            if ((!$countryCode || $this->config->getPaymentAction() !== Payment::ACTION_AUTHORIZE_CAPTURE) && isset($method["paymentMethod"]) && $method["paymentMethod"] !== 'cc_card') {
                 unset($this->paymentMethods[$k]);
                 continue;
             }
-            
-			if (isset($method["paymentMethodDisplayName"]) && is_array($method["paymentMethodDisplayName"])) {
+            if (isset($method["paymentMethodDisplayName"]) && is_array($method["paymentMethodDisplayName"])) {
                 foreach ($method["paymentMethodDisplayName"] as $kk => $dname) {
                     if ($dname["language"] === $langCode) {
                         $method["paymentMethodDisplayName"] = $dname;
                         break;
                     }
                 }
-				
                 if (!isset($method["paymentMethodDisplayName"]["language"])) {
                     unset($this->paymentMethods[$k]);
                 }
             }
-			
             if (isset($method["logoURL"]) && $method["logoURL"]) {
                 $method["logoURL"] = preg_replace('/\.svg\.svg$/', '.svg', $method["logoURL"]);
             }
         }
-		
         $this->paymentMethods = array_values($this->paymentMethods);
-		
+
         return $this;
     }
 
@@ -115,16 +100,6 @@ class GetMerchantPaymentMethods extends AbstractResponse implements ResponseInte
     public function getPaymentMethods()
     {
         return $this->paymentMethods;
-    }
-    
-    /**
-     * Get the session token from the APMs
-     * 
-     * @return string
-     */
-    public function getSessionToken()
-    {
-        return $this->sessionToken;
     }
 
     /**
@@ -144,7 +119,7 @@ class GetMerchantPaymentMethods extends AbstractResponse implements ResponseInte
     protected function getRequiredResponseDataKeys()
     {
         return [
-            'paymentMethods'
+            'paymentMethods',
         ];
     }
 }

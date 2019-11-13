@@ -94,4 +94,23 @@ abstract class AbstractPayment extends AbstractRequest
 
         return $responseHandler;
     }
+
+    /**
+     * Return action type.
+     *
+     * @return string
+     * @throws PaymentException
+     */
+    protected function getActionType()
+    {
+        $paymentAction = $this->config->getPaymentAction();
+        if ($paymentAction === Payment::ACTION_AUTHORIZE) {
+            return 'Auth';
+        }
+        if ($paymentAction === Payment::ACTION_AUTHORIZE_CAPTURE) {
+            return 'Sale';
+        }
+
+        throw new PaymentException(__('Unsupported payment action type.'));
+    }
 }

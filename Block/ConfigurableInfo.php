@@ -47,6 +47,8 @@ class ConfigurableInfo extends \Magento\Payment\Block\ConfigurableInfo
     {
         $labels = [
             Payment::TRANSACTION_ID => __('Transaction Id'),
+            Payment::TRANSACTION_CARD_TYPE => __('Credit Card Type'),
+            Payment::TRANSACTION_CARD_NUMBER => __('Credit Card Number'),
             Payment::TRANSACTION_AUTH_CODE_KEY => __('Authorization Code'),
             Payment::TRANSACTION_ORDER_ID => __('Safecharge Order Id'),
             Payment::TRANSACTION_REQUEST_ID => __('Internal Request Id'),

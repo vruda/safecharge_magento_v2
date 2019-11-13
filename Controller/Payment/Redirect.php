@@ -78,7 +78,11 @@ class Redirect extends Action
         }
 
         $postData = $this->redirectUrlBuilder->getPostData();
-		
+
+        if ($this->moduleConfig->isDebugEnabled()) {
+            $this->safechargeLogger->debug('PostData: ' . print_r($postData, 1));
+        }
+
         return $result->setData($postData);
     }
 }

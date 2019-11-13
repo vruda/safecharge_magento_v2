@@ -2,6 +2,7 @@
 
 namespace Safecharge\Safecharge\Model\Adminhtml\Source;
 
+use Magento\Payment\Model\Method\AbstractMethod;
 use Magento\Framework\Option\ArrayInterface;
 
 /**
@@ -10,7 +11,7 @@ use Magento\Framework\Option\ArrayInterface;
  * @category Safecharge
  * @package  Safecharge_Safecharge
  */
-class Hash implements ArrayInterface
+class PaymentAction implements ArrayInterface
 {
     /**
      * Possible actions on order place.
@@ -20,8 +21,14 @@ class Hash implements ArrayInterface
     public function toOptionArray()
     {
         return [
-			'sha256'	=> 'SHA 256',
-			'md5'		=> 'MD 5',
+            [
+                'value' => AbstractMethod::ACTION_AUTHORIZE,
+                'label' => __('Authorize'),
+            ],
+            [
+                'value' => AbstractMethod::ACTION_AUTHORIZE_CAPTURE,
+                'label' => __('Authorize and Capture'),
+            ]
         ];
     }
 }

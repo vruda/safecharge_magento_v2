@@ -148,8 +148,8 @@ class Refund extends AbstractPayment implements RequestInterface
             'comment' => '',
             'merchant_unique_id' => $order->getIncrementId(),
             'urlDetails' => [
-                //'notificationUrl' => $this->config->getCallbackDmnUrl($order->getIncrementId(), $order->getStoreId()),
-                'notificationUrl' => '',
+                'notificationUrl' => $this->config->getCallbackDmnUrl($order->getIncrementId(), $order->getStoreId()),
+                //'notificationUrl' => '',
             ],
         ];
 
@@ -161,6 +161,8 @@ class Refund extends AbstractPayment implements RequestInterface
                 'increment_id' => $order->getIncrementId(),
             ]
         );
+		
+		$this->config->createLog($params, 'Refund params:');
 
         return $params;
     }

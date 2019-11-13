@@ -22,7 +22,6 @@
             </argument>
         </arguments>
     </virtualType>
-    
     <virtualType name="SafechargeSafechargeRequestDataProvider"
                  type="Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider">
         <arguments>
@@ -34,7 +33,6 @@
                       shared="false">SafechargeSafechargeRequestGridFilterPool</argument>
         </arguments>
     </virtualType>
-    
     <type name="Safecharge\Safecharge\Model\ResourceModel\Request\Grid\Collection">
         <arguments>
             <argument name="mainTable"
@@ -47,7 +45,6 @@
                       xsi:type="string">Safecharge\Safecharge\Model\ResourceModel\Request</argument>
         </arguments>
     </type>
-    
     <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
         <arguments>
             <argument name="collections"
@@ -65,7 +62,6 @@
                       xsi:type="object">Magento\Framework\Filesystem\Driver\File</argument>
         </arguments>
     </type>
-    
     <type name="Safecharge\Safecharge\Model\Logger">
         <arguments>
             <argument name="name"
@@ -78,10 +74,46 @@
         </arguments>
     </type>
 
+    <!-- Vault configuration. -->
+    <virtualType name="SafechargeCreditCardVaultFacade" type="Magento\Vault\Model\Method\Vault">
+        <arguments>
+            <argument name="config" xsi:type="object">SafechargeVaultPaymentConfig</argument>
+            <argument name="valueHandlerPool" xsi:type="object">SafechargeVaultPaymentValueHandlerPool</argument>
+            <argument name="vaultProvider" xsi:type="object">Safecharge\Safecharge\Model\Payment</argument>
+            <argument name="code" xsi:type="const">Safecharge\Safecharge\Model\Payment::CC_VAULT_CODE</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="SafechargeVaultPaymentValueHandlerPool" type="Magento\Payment\Gateway\Config\Config">
+        <arguments>
+            <argument name="methodCode" xsi:type="const">Safecharge\Safecharge\Model\Payment::CC_VAULT_CODE</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="SafechargeVaultPaymentValueHandlerPool" type="VaultPaymentValueHandlerPool">
+        <arguments>
+            <argument name="handlers" xsi:type="array">
+                <item name="default" xsi:type="string">SafechargeVaultPaymentValueHandler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="SafechargeVaultPaymentValueHandler" type="VaultPaymentDefaultValueHandler">
+        <arguments>
+            <argument name="configInterface" xsi:type="object">SafechargeVaultPaymentConfig</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="SafechargeVaultPaymentConfig" type="Magento\Payment\Gateway\Config\Config">
+        <arguments>
+            <argument name="methodCode" xsi:type="const">Safecharge\Safecharge\Model\Payment::CC_VAULT_CODE</argument>
+        </arguments>
+    </virtualType>
+    <type name="Safecharge\Safecharge\Model\Service\CardTokenization">
+        <arguments>
+            <argument name="paymentTokenFactory" xsi:type="object">Magento\Vault\Model\CreditCardTokenFactory</argument>
+        </arguments>
+    </type>
+
     <!-- Interface preferences. -->
     <preference for="Safecharge\Safecharge\Api\RequestLogRepositoryInterface"
                 type="Safecharge\Safecharge\Model\ResourceModel\RequestLogRepository"/>
-    
     <preference for="Safecharge\Safecharge\Api\Data\RequestLogInterface"
                 type="Safecharge\Safecharge\Model\Data\RequestLog"/>
 </config>

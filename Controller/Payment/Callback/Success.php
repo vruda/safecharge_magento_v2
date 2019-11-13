@@ -23,18 +23,13 @@ use Safecharge\Safecharge\Model\Logger as SafechargeLogger;
 use Safecharge\Safecharge\Model\Payment;
 use Safecharge\Safecharge\Model\Request\Payment\Factory as PaymentRequestFactory;
 
-use Magento\Framework\App\CsrfAwareActionInterface;
-use Magento\Framework\App\Request\InvalidRequestException;
-use Magento\Framework\App\RequestInterface;
-
 /**
  * Safecharge Safecharge redirect success controller.
  *
  * @category Safecharge
  * @package  Safecharge_Safecharge
  */
-//class Success extends Action
-class Success extends Action implements CsrfAwareActionInterface
+class Success extends Action
 {
     /**
      * @var OrderFactory
@@ -127,23 +122,6 @@ class Success extends Action implements CsrfAwareActionInterface
         $this->checkoutSession = $checkoutSession;
         $this->onepageCheckout = $onepageCheckout;
     }
-	
-	/** 
-     * @inheritDoc
-     */
-    public function createCsrfValidationException(
-        RequestInterface $request 
-    ): ?InvalidRequestException {
-        return null;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function validateForCsrf(RequestInterface $request): ?bool
-    {
-        return true;
-    }
 
     /**
      * @return ResultInterface
@@ -154,12 +132,16 @@ class Success extends Action implements CsrfAwareActionInterface
     {
         $params = $this->getRequest()->getParams();
 
+        if ($this->moduleConfig->isDebugEnabled() === true) {
+            $this->safechargeLogger->debug(
+                'Success Callback Response: '
+                . json_encode($params)
+            );
+        }
+
         try {
             $result = $this->placeOrder();
-			
             if ($result->getSuccess() !== true) {
-				$this->moduleConfig->createLog($result->getErrorMessage(), 'Success Callback error - place order error');
-				
                 throw new PaymentException(__($result->getErrorMessage()));
             }
 
@@ -169,57 +151,46 @@ class Success extends Action implements CsrfAwareActionInterface
             /** @var OrderPayment $payment */
             $orderPayment = $order->getPayment();
 
-            if (
-                isset($params['Status'])
-                && !in_array(strtolower($params['Status']), ['approved', 'success'])
-            ) {
+            if (!in_array(strtolower($params['Status']), ['approved', 'success'])) {
                 throw new PaymentException(__('Your payment failed.'));
             }
 
-            if(isset($params['TransactionID'])) {
-                $orderPayment->setAdditionalInformation(
-                    Payment::TRANSACTION_ID,
-                    $params['TransactionID']
-                );
-            }
-            
-            if(isset($params['AuthCode'])) {
-                $orderPayment->setAdditionalInformation(
-                    Payment::TRANSACTION_AUTH_CODE_KEY,
-                    $params['AuthCode']
-                );
-            }
-            
-            if(isset($params['payment_method'])) {
-                $orderPayment->setAdditionalInformation(
-                    Payment::TRANSACTION_EXTERNAL_PAYMENT_METHOD,
-                    $params['payment_method']
-                );
-            }
-            
-            if(isset($params)) {
-                $orderPayment->setTransactionAdditionalInfo(
-                    Transaction::RAW_DETAILS,
-                    $params
-                );
-            }
+			//$transactionId = $params['TransactionID'];
+			$orderPayment->setAdditionalInformation(
+				Payment::TRANSACTION_ID,
+				@$params['TransactionID']
+			);
 			
+            $orderPayment->setAdditionalInformation(
+                Payment::TRANSACTION_AUTH_CODE_KEY,
+                @$params['AuthCode']
+            );
+			
+            $orderPayment->setAdditionalInformation(
+                Payment::TRANSACTION_EXTERNAL_PAYMENT_METHOD,
+                @$params['payment_method']
+            );
+			
+            $orderPayment->setTransactionAdditionalInfo(
+                Transaction::RAW_DETAILS,
+                $params
+            );
+
             $orderPayment->save();
             $order->save();
-        }
-        catch (PaymentException $e) {
-			$this->moduleConfig->createLog($e->getMessage(), 'Success Callback Process Error:');
-			$this->moduleConfig->createLog($this->getRequest()->getParams());
-			
+        } catch (PaymentException $e) {
+            if ($this->moduleConfig->isDebugEnabled() === true) {
+                $this->safechargeLogger->debug(
+                    'Success Callback Process Error: '
+                    . json_encode($this->getRequest()->getParams())
+                );
+            }
             $this->messageManager->addErrorMessage($e->getMessage());
         }
 
         $resultRedirect = $this->resultFactory->create(ResultFactory::TYPE_REDIRECT);
-        $resultRedirect->setUrl(
-			$this->_url->getUrl('checkout/onepage/success/')
-			. (!empty($_GET['form_key']) ? '?form_key=' . $_GET['form_key'] : '')
-		);
-		
+        $resultRedirect->setUrl($this->_url->getUrl('checkout/onepage/success/'));
+
         return $resultRedirect;
     }
 
@@ -252,10 +223,7 @@ class Success extends Action implements CsrfAwareActionInterface
                     'action' => $this,
                 ]
             );
-        }
-        catch (\Exception $exception) {
-			$this->moduleConfig->createLog($exception->getMessage(), 'Success Callback Response Exception: ');
-            
+        } catch (\Exception $exception) {
             $result
                 ->setData('error', true)
                 ->setData(
@@ -278,8 +246,6 @@ class Success extends Action implements CsrfAwareActionInterface
         if ((int)$this->checkoutSession->getQuoteId() === $quoteId) {
             return $quoteId;
         }
-		
-		$this->moduleConfig->createLog('Success error: Session has expired, order has been not placed.');
 
         throw new PaymentException(
             __('Session has expired, order has been not placed.')

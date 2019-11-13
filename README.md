@@ -2,7 +2,7 @@
 
 ---
 
-## Install via composer (recommended)
+## ✓ Install via composer (recommended)
 Run the following command under your Magento 2 root dir:
 
 ```
@@ -31,7 +31,7 @@ php bin/magento cache:flush
 
 https://www.safecharge.com/
 
-© 2007 - 2019 SafeCharge International Group Limited.
+© 2007 - 2018 SafeCharge International Group Limited.
 All rights reserved.
 
 ![Safecharge Logo](https://www.safecharge.com/docs/API/images/Icons_SC_logo.svg)

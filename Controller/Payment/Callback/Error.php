@@ -9,17 +9,13 @@ use Magento\Framework\Controller\ResultInterface;
 use Safecharge\Safecharge\Model\Config as ModuleConfig;
 use Safecharge\Safecharge\Model\Logger as SafechargeLogger;
 
-use Magento\Framework\App\CsrfAwareActionInterface;
-use Magento\Framework\App\Request\InvalidRequestException;
-use Magento\Framework\App\RequestInterface;
-
 /**
  * Safecharge Safecharge payment place controller.
  *
  * @category Safecharge
  * @package  Safecharge_Safecharge
  */
-class Error extends Action implements CsrfAwareActionInterface
+class Error extends Action
 {
     /**
      * @var SafechargeLogger
@@ -47,23 +43,6 @@ class Error extends Action implements CsrfAwareActionInterface
 
         $this->safechargeLogger = $safechargeLogger;
         $this->moduleConfig = $moduleConfig;
-    }
-	
-	/** 
-     * @inheritDoc
-     */
-    public function createCsrfValidationException(
-        RequestInterface $request 
-    ): ?InvalidRequestException {
-        return null;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function validateForCsrf(RequestInterface $request): ?bool
-    {
-        return true;
     }
 
     /**

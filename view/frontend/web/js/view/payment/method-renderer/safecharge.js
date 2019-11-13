@@ -8,45 +8,42 @@ define(
     [
         'jquery',
         'Magento_Payment/js/view/payment/cc-form',
+        'Magento_Checkout/js/model/payment/additional-validators',
         'Magento_Checkout/js/action/redirect-on-success',
         'Magento_Paypal/js/action/set-payment-method',
         'Magento_Customer/js/customer-data',
         'jquery.redirect',
         'ko',
         'Magento_Checkout/js/model/quote',
-        'mage/translate',
+        'Magento_Checkout/js/action/create-billing-address'
     ],
     function(
         $,
         Component,
+        additionalValidators,
         redirectOnSuccessAction,
         setPaymentMethodAction,
         customerData,
         jqueryRedirect,
         ko,
         quote,
-        mage,
+        billingAddress
     ) {
         'use strict';
 
         var self = null;
-        
-        // for the WebSDK
-        var sfc             = null;
-        var card            = null;
-        
+
         return Component.extend({
 
             defaults: {
                 template: 'Safecharge_Safecharge/payment/safecharge',
-                isCcFormShown			: true,
-                creditCardToken			: '',
-                ccNumber				: '',
-                lastSessionToken		: '',
-                creditCardOwner			: '',
-                apmMethods				: [],
-                chosenApmMethod			: '',
-                countryId				: null
+                isCcFormShown: true,
+                creditCardToken: '',
+                creditCardSave: 0,
+                creditCardOwner: '',
+                apmMethods: [],
+                chosenApmMethod: '',
+                countryId: null
             },
 
             initObservable: function() {
@@ -55,17 +52,20 @@ define(
                 self._super()
                     .observe([
                         'creditCardToken',
-                        'ccNumber',
-                        'lastSessionToken',
+                        'creditCardSave',
                         'isCcFormShown',
                         'creditCardOwner',
                         'apmMethods',
                         'chosenApmMethod',
                         'countryId'
                     ]);
-                    
+
+                var savedCards = self.getCardTokens();
+                if (savedCards.length > 0) {
+                    self.creditCardToken(savedCards[0]['value']);
+                }
+
                 var apmMethods = self.getApmMethods();
-				
                 if (apmMethods.length > 0) {
                     self.apmMethods(apmMethods);
                     self.chosenApmMethod(apmMethods[0].paymentMethod);
@@ -73,10 +73,24 @@ define(
 
                 self.reloadApmMethods();
                 quote.billingAddress.subscribe(self.reloadApmMethods, this, 'change');
-                
+
                 return self;
             },
-            
+
+            initCcNumberFormatting: function() {
+                $('#' + self.getCode() + '_form_cc input[name="payment[cc_number]"]')
+                    .bind('input', function(e) {
+                        e.target.value = e.target.value.replace(/[^\dA-Z]/g, '').replace(/(.{4})/g, '$1 ').trim();
+                    });
+            },
+
+            initCcCvvFormatting: function() {
+                $('#' + self.getCode() + '_form_cc input[name="payment[cc_cid]"]')
+                    .bind('input', function(e) {
+                        e.target.value = e.target.value.replace(/[^\dA-Z]/g, '').replace(/(.{4})/g, '$1 ').trim();
+                    });
+            },
+
             context: function() {
                 return self;
             },
@@ -93,19 +107,65 @@ define(
                 return true;
             },
 
+            useVault: function() {
+                var useVault = window.checkoutConfig.payment[self.getCode()].useVault;
+                self.creditCardSave(useVault ? 1 : 0);
+
+                return useVault;
+            },
+
+            isCcDetectionEnabled: function() {
+                return window.checkoutConfig.payment[self.getCode()].isCcDetectionEnabled;
+            },
+
+            getCssClass: function() {
+                return self.isCcDetectionEnabled() ? 'field type detection' : 'field type required';
+            },
+
+            canSaveCard: function() {
+                return window.checkoutConfig.payment[self.getCode()].canSaveCard;
+            },
+
+            getCardTokens: function() {
+                var savedCards = window.checkoutConfig
+                    .payment[self.getCode()]
+                    .savedCards;
+
+                return _.map(savedCards, function(value, key) {
+                    return {
+                        'value': key,
+                        'label': value
+                    };
+                });
+            },
+
             getData: function() {
-				var pmData = {
-					method			: self.item.method,
-                    additional_data	: {
-                        cc_token					: self.creditCardToken(),
-                        cc_number					: self.ccNumber(),
-                        last_session_token			: self.lastSessionToken(),
-                        cc_owner					: self.creditCardOwner(),
-                        chosen_apm_method			: self.chosenApmMethod(),
-                    },
-				};
-				
-                return pmData;
+                return {
+                    'method': self.item.method,
+                    'additional_data': {
+                        'cc_token': self.creditCardToken(),
+                        'cc_save': self.creditCardSave(),
+                        'cc_cid': self.creditCardVerificationNumber(),
+                        'cc_type': self.creditCardType(),
+                        'cc_exp_year': self.creditCardExpYear(),
+                        'cc_exp_month': self.creditCardExpMonth(),
+                        'cc_number': self.creditCardNumber(),
+                        'cc_owner': self.creditCardOwner(),
+                        'chosen_apm_method': self.chosenApmMethod()
+                    }
+                };
+            },
+
+            savedCardSelected: function(token) {
+                if (token === undefined) {
+                    self.isCcFormShown(true);
+                } else {
+                    self.isCcFormShown(false);
+                }
+            },
+
+            is3dSecureEnabled: function() {
+                return window.checkoutConfig.payment[self.getCode()].is3dSecureEnabled;
             },
 
             getAuthenticateUrl: function() {
@@ -135,26 +195,22 @@ define(
             reloadApmMethods: function() {
                 if (quote.billingAddress() && self.countryId() === quote.billingAddress().countryId) {
                     return;
-                }
-                else if (quote.billingAddress()) {
+                } else if (quote.billingAddress()) {
                     self.countryId(quote.billingAddress().countryId);
-                }
-                else if ($('input[name="billing-address-same-as-shipping"]:checked').length && quote.shippingAddress()) {
+                } else if ($('input[name="billing-address-same-as-shipping"]:checked').length && quote.shippingAddress()) {
                     if (self.countryId() === quote.shippingAddress().countryId) {
                         return;
-                    }
-                    else {
+                    } else {
                         self.countryId(quote.shippingAddress().countryId);
                     }
-                }
-                else {
+                } else {
+                    //self.countryId(null)
+                    //self.apmMethods([]);
                     return;
                 }
-                
                 if (self.useExternalSolution()) {
                     return;
                 }
-                
                 $.ajax({
                     dataType: "json",
                     url: self.getMerchantPaymentMethodsUrl(),
@@ -163,19 +219,16 @@ define(
                     },
                     cache: false,
                     showLoader: true
-                })
-                .done(function(res) {
+                }).done(function(res) {
                     if (res && res.error == 0) {
                         self.apmMethods(res.apmMethods);
                         if (res.apmMethods.length > 0) {
                             self.chosenApmMethod(res.apmMethods[0].paymentMethod);
                         }
-                    }
-                    else {
+                    } else {
                         console.error(res);
                     }
-                })
-                .fail(function(e) {
+                }).fail(function(e) {
                     console.error(e);
                 });
             },
@@ -184,195 +237,97 @@ define(
                 if (event) {
                     event.preventDefault();
                 }
-                
-                if(self.chosenApmMethod() === 'cc_card') {
-                    $('.loading-mask').css('display', 'block');
-                    
-                    // create payment with WebSDK
-                    sfc.createPayment({
-                        sessionToken    : window.checkoutConfig.payment[self.getCode()].sessionToken,
-                        currency        : window.checkoutConfig.payment[self.getCode()].currency,
-                        amount          : window.checkoutConfig.payment[self.getCode()].total,
-                        cardHolderName  : document.getElementById('safecharge_cc_owner').value,
-                        paymentOption   : card
-                    }, function(resp){
-                        console.log(resp);
-                        
-                        if(typeof resp.result != 'undefined') {
-                            if(resp.result == 'APPROVED' && resp.transactionId != 'undefined') {
-                                console.log(resp.dsTransID)
-                            
-                                self.ccNumber(resp.ccCardNumber);
-                                self.creditCardToken(resp.dsTransID);
-                                self.continueWithOrder(resp.transactionId);
-                            }
-                            else if(resp.result == 'DECLINED') {
-                                $('.loading-mask').css('display', 'none');
-                                alert($.mage.__('Your Payment was DECLINED. Please try another payment method!'));
-                            }
-                            else {
-                                $('.loading-mask').css('display', 'none');
-                                
-                                if('undefined' != resp.errorDescription && '' != resp.errorDescription) {
-                                    alert($.mage.__(resp.errorDescription));
-                                }
-                                else {
-                                    alert($.mage.__('Error with your Payment. Please try again later!'));
-                                }
-                            }
-                        }
-                        else {
-                            $('.loading-mask').css('display', 'none');
-                            alert($.mage.__('Unexpected error, please try again later!'));
-                        }
-                    });
-                }
-                else {
-                    self.continueWithOrder();
-                }
-            },
-            
-            continueWithOrder: function(transactionId) {
-                if (self.validate()) {
+
+                if (self.validate() && additionalValidators.validate()) {
                     self.isPlaceOrderActionAllowed(false);
 
                     if (!self.useExternalSolution() && self.chosenApmMethod() !== 'cc_card') {
-						var apmFields = {};
-						var choosenMethod = self.chosenApmMethod();
-
-						$('.fields-' + choosenMethod + ' input').each(function(){
-							var _slef = $(this);
-							apmFields[_slef.attr('name')] = _slef.val();
-						});
-						
                         self.selectPaymentMethod();
-                        setPaymentMethodAction(self.messageContainer)
-							.done(function() {
-									$('body').trigger('processStart');
-
-									$.ajax({
-										dataType: "json",
-										data: {
-											chosen_apm_method	: choosenMethod,
-											apm_method_fields	: apmFields
-										},
-										url: self.getPaymentApmUrl(),
-										cache: false
-									})
-									.done(function(res) {
-										if (res && res.error == 0 && res.redirectUrl) {
-											window.location.href = res.redirectUrl;
-										}
-										else {
-											console.error(res);
-											window.location.reload();
-										}
-									})
-									.fail(function(e) {
-										console.error(e);
-										window.location.reload();
-									});
-								}.bind(self)
-							);
+                        setPaymentMethodAction(self.messageContainer).done(
+                            function() {
+                                $('body').trigger('processStart');
+                                $.ajax({
+                                    dataType: "json",
+                                    data: {
+                                        chosen_apm_method: self.chosenApmMethod()
+                                    },
+                                    url: self.getPaymentApmUrl(),
+                                    cache: false
+                                }).done(function(res) {
+                                    if (res && res.error == 0 && res.redirectUrl) {
+                                        window.location.href = res.redirectUrl;
+                                    } else {
+                                        console.error(res);
+                                        window.location.reload();
+                                    }
+                                }).fail(function(e) {
+                                    console.error(e);
+                                    window.location.reload();
+                                });
+                            }.bind(self)
+                        );
 
                         return;
                     }
 
-                    var ajaxData = {
-                        dataType: "json",
-                        url: self.getRedirectUrl(),
-                        cache: false
-                    };
+                    if (self.useExternalSolution()) {
+                        self.selectPaymentMethod();
+                        setPaymentMethodAction(self.messageContainer).done(
+                            function() {
+                                $('body').trigger('processStart');
+                                $.ajax({
+                                    dataType: "json",
+                                    url: self.getRedirectUrl(),
+                                    cache: false
+                                }).done(function(postData) {
+                                    if (postData) {
+                                        $.redirect(postData.url, postData.params, "POST");
+                                    } else {
+                                        window.location.reload();
+                                    }
+                                }).fail(function(e) {
+                                    window.location.reload();
+                                });
 
-                    // in case we use Fields
-                    if(self.chosenApmMethod() === 'cc_card' && transactionId != 'undefined') {
-                        ajaxData.url += '?method=cc_card&transactionId=' + transactionId;
+                                //$('body').trigger('processStop');
+                                //customerData.invalidate(['cart']);
+                            }.bind(self)
+                        );
+
+                        return true;
                     }
 
-                    self.selectPaymentMethod();
-                    setPaymentMethodAction(self.messageContainer)
-                        .done(function() {
-                            $('body').trigger('processStart');
+                    self.getPlaceOrderDeferredObject()
+                        .fail(
+                            function() {
+                                self.isPlaceOrderActionAllowed(true);
+                            }
+                        ).done(
+                            function() {
+                                self.afterPlaceOrder();
 
-                            $.ajax(ajaxData)
-                            .done(function(postData) {
-                                if (postData) {
-                                    if(
-                                        self.chosenApmMethod() === 'cc_card'
-                                        && transactionId != 'undefined'
-                                    ) {
-                                        window.location.href = postData.url;
-                                    }
-
-                                    $.redirect(postData.url, postData.params, "POST");
+                                if (self.is3dSecureEnabled()) {
+                                    $.ajax({
+                                        url: self.getAuthenticateUrl(),
+                                        cache: false
+                                    }).done(function(html) {
+                                        if (html !== '') {
+                                            $('body').append(html);
+                                            $('#safecharge_authenticate').submit();
+                                        } else if (self.redirectAfterPlaceOrder) {
+                                            redirectOnSuccessAction.execute();
+                                        }
+                                    });
+                                } else if (self.redirectAfterPlaceOrder) {
+                                    redirectOnSuccessAction.execute();
                                 }
-                                else {
-                                    window.location.reload();
-                                }
-                            })
-                            .fail(function(e) {
-                                window.location.reload();
-                            });
-                        }.bind(self));
+                            }
+                        );
 
                     return true;
                 }
 
                 return false;
-            },
-            
-            initFields: function() {
-                // for the Fields
-                var scData = {
-                    merchantSiteId  : window.checkoutConfig.payment[self.getCode()].merchantSiteId,
-                    merchantId      : window.checkoutConfig.payment[self.getCode()].merchantId,
-                    sessionToken    : window.checkoutConfig.payment[self.getCode()].sessionToken
-                }
-                
-                if(window.checkoutConfig.payment[self.getCode()].isTestMode == true) {
-                    scData.env = 'test';
-                }
-                
-                sfc = SafeCharge(scData);
-
-                // prepare fields
-                var fields = sfc.fields({
-                    locale: checkoutConfig.payment[self.getCode()].locale
-                });
-
-                // set some classes
-                var elementClasses = {
-                    focus: 'focus',
-                    empty: 'empty',
-                    invalid: 'invalid',
-                };
-
-                card = fields.create('card', {
-                    iconStyle: 'solid',
-                    style: {
-                        base: {
-                            iconColor: "#c4f0ff",
-                            color: "#000",
-                            fontWeight: 500,
-                            fontFamily: "Roboto, Open Sans, Segoe UI, sans-serif",
-                            fontSize: '15px',
-                            fontSmoothing: "antialiased",
-                            ":-webkit-autofill": {
-                                color: "#fce883"
-                            },
-                            "::placeholder": {
-                                color: "grey" 
-                            }
-                        },
-                        invalid: {
-                            iconColor: "#FFC7EE",
-                            color: "#FFC7EE"
-                        }
-                    },
-                    classes: elementClasses
-                });
-                    
-                card.attach('#card-field-placeholder');
             }
         });
     }

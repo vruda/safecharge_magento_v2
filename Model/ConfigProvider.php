@@ -12,7 +12,6 @@ use Magento\Vault\Api\PaymentTokenManagementInterface;
 use Magento\Vault\Model\CreditCardTokenFactory;
 use Safecharge\Safecharge\Model\Config as ModuleConfig;
 use Safecharge\Safecharge\Model\Request\Factory as RequestFactory;
-use Magento\Framework\App\Config\ScopeConfigInterface;
 
 /**
  * Safecharge Safecharge config provider model.
@@ -46,8 +45,6 @@ class ConfigProvider extends CcGenericConfigProvider
      * @var RequestFactory
      */
     private $requestFactory;
-    
-    private $apmsRequest;
 
     /**
      * ConfigProvider constructor.
@@ -101,43 +98,80 @@ class ConfigProvider extends CcGenericConfigProvider
         }
 
         $customerId = $this->customerSession->getCustomerId();
+
+        $useVault = $customerId ? $this->moduleConfig->getUseVault() : false;
+        $savedCards = $this->getSavedCards();
+        $canSaveCard = $customerId ? true : false;
+
         $apmMethods = $this->getApmMethods();
-        
-        $objectManager  = \Magento\Framework\App\ObjectManager::getInstance();
-        $storeManager   = $objectManager->get('\Magento\Store\Model\StoreManagerInterface');
-        
-        $locale = $objectManager
-            ->get('Magento\Framework\App\Config\ScopeConfigInterface')
-            ->getValue('general/locale/code', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
-        
-        $cart = $objectManager->get('\Magento\Checkout\Model\Cart');
-        
-        $quote_id = $cart->getQuote()->getId();
-        
+
         $config = [
             'payment' => [
                 Payment::METHOD_CODE => [
+                    'useVault' => $useVault,
+                    'isCcDetectionEnabled' => $this->moduleConfig->getUseCcDetection(),
+                    'useccv' => $this->moduleConfig->getUseCcv(),
+                    'savedCards' => $savedCards,
+                    'canSaveCard' => $canSaveCard,
                     'countryId' => $this->moduleConfig->getQuoteCountryCode(),
                     'apmMethods' => $apmMethods,
+                    'is3dSecureEnabled' => $this->moduleConfig->is3dSecureEnabled(),
                     'authenticateUrl' => $this->urlBuilder->getUrl('safecharge/payment/authenticate'),
                     'externalSolution' => $this->moduleConfig->getPaymentSolution() === Payment::SOLUTION_EXTERNAL,
                     'redirectUrl' => $this->urlBuilder->getUrl('safecharge/payment/redirect'),
                     'paymentApmUrl' => $this->urlBuilder->getUrl('safecharge/payment/apm'),
                     'getMerchantPaymentMethodsUrl' => $this->urlBuilder->getUrl('safecharge/payment/GetMerchantPaymentMethods'),
-                    
-                    // we need this for the WebSDK
-                    'merchantSiteId'    => $this->moduleConfig->getMerchantSiteId(),
-                    'merchantId'        => $this->moduleConfig->getMerchantId(),
-                    'isTestMode'        => $this->moduleConfig->isTestModeEnabled(),
-                    'sessionToken'      => $this->getApmsSessionToken(),
-                    'locale'            => substr($locale, 0, 2),
-                    'total'             => (string) number_format($cart->getQuote()->getGrandTotal(), 2, '.', ''),
-                    'currency'          => trim($storeManager->getStore()->getCurrentCurrencyCode()),
                 ],
             ],
         ];
 
         return $config;
+    }
+
+    /**
+     * Return saved cards.
+     *
+     * @return array
+     */
+    private function getSavedCards()
+    {
+        $customerId = $this->customerSession->getCustomerId();
+        if (!$customerId) {
+            return [];
+        }
+
+        $savedCards = [];
+        $ccTypes = $this->getCcAvailableTypes(Payment::METHOD_CODE);
+
+        /** @var array $paymentTokens */
+        $paymentTokens = $this->paymentTokenManagement->getListByCustomerId($customerId);
+
+        foreach ($paymentTokens as $paymentToken) {
+            if ($paymentToken->getType() !== CreditCardTokenFactory::TOKEN_TYPE_CREDIT_CARD) {
+                continue;
+            }
+            if ($paymentToken->getPaymentMethodCode() !== Payment::METHOD_CODE) {
+                continue;
+            }
+
+            $cardDetails = json_decode($paymentToken->getDetails(), 1);
+
+            $cardTypeName = isset($ccTypes[$cardDetails['cc_type']])
+                ? $ccTypes[$cardDetails['cc_type']]
+                : $cardDetails['cc_type'];
+
+            $cardLabel = sprintf(
+                '%s xxxx-%s %s/%s',
+                $cardTypeName,
+                $cardDetails['cc_last_4'],
+                str_pad($cardDetails['cc_exp_month'], 2, 0, STR_PAD_LEFT),
+                substr($cardDetails['cc_exp_year'], -2)
+            );
+
+            $savedCards[$paymentToken->getPublicHash()] = $cardLabel;
+        }
+
+        return $savedCards;
     }
 
     /**
@@ -150,31 +184,14 @@ class ConfigProvider extends CcGenericConfigProvider
         if ($this->moduleConfig->getPaymentSolution() === Payment::SOLUTION_EXTERNAL) {
             return [];
         }
-        $this->apmsRequest = $this->requestFactory->create(AbstractRequest::GET_MERCHANT_PAYMENT_METHODS_METHOD);
+        $request = $this->requestFactory->create(AbstractRequest::GET_MERCHANT_PAYMENT_METHODS_METHOD);
 
         try {
-            $apmMethods = $this->apmsRequest ->process();
+            $apmMethods = $request->process();
         } catch (PaymentException $e) {
             return [];
         }
 
         return $apmMethods->getPaymentMethods();
-    }
-    
-    /**
-     * Function getApmsSessionToken
-     * The APMs must be got before we call this method
-     * 
-     * @return string Session Token (returned from the APMs) or empty
-     */
-    private function getApmsSessionToken()
-    {
-        if(isset($this->apmsRequest)) {
-            $class = $apmMethods = $this->apmsRequest ->process();
-            
-            return $class->getSessionToken();
-        }
-        
-        return '';
     }
 }

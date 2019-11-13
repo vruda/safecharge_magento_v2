@@ -115,8 +115,9 @@ class GetMerchantPaymentMethods extends AbstractRequest implements RequestInterf
     protected function getParams()
     {
         $tokenRequest = $this->requestFactory
-            ->create(AbstractRequest::OPEN_ORDER_METHOD);
-        
+            ->create(AbstractRequest::GET_SESSION_TOKEN_METHOD);
+        $tokenResponse = $tokenRequest->process();
+
 		$objectManager	= \Magento\Framework\App\ObjectManager::getInstance();
 		$cart			= $objectManager->get('\Magento\Checkout\Model\Cart');
 		$store			= $objectManager->get('Magento\Store\Api\Data\StoreInterface');
@@ -156,16 +157,16 @@ class GetMerchantPaymentMethods extends AbstractRequest implements RequestInterf
 			$currencyCode = empty($cart->getQuote()->getOrderCurrencyCode())
 				? $cart->getQuote()->getStoreCurrencyCode() : $cart->getQuote()->getOrderCurrencyCode();
 		}
-		
+
         $params = [
-            'sessionToken'	=> $tokenResponse->getSessionToken(),
-            "currencyCode"	=> $currencyCode,
-            "countryCode"	=> $country_code,
+            'sessionToken'	=> $tokenResponse->getToken(),
+            "currencyCode" 	=> $currencyCode,
+            "countryCode" 	=> $country_code,
             "languageCode"	=> $languageCode,
         ];
 
         $params = array_merge_recursive(parent::getParams(), $params);
-		
+
 		$this->config->createLog('Get the APMs.');
 
         return $params;

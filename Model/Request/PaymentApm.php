@@ -27,11 +27,6 @@ class PaymentApm extends AbstractRequest implements RequestInterface
      * @var string|null
      */
     protected $paymentMethod;
-	
-    /**
-     * @var array|null
-     */
-    protected $paymentMethodFields;
 
     /**
      * @var RequestFactory
@@ -73,22 +68,11 @@ class PaymentApm extends AbstractRequest implements RequestInterface
     }
 
     /**
-     * @param string $paymentMethod
-	 * @return $this
+     * @return $this
      */
     public function setPaymentMethod($paymentMethod)
     {
         $this->paymentMethod = trim((string)$paymentMethod);
-        return $this;
-    }
-	
-    /**
-     * @param array $paymentMethodFields
-	 * @return $this
-     */
-    public function setPaymentMethodFields($paymentMethodFields)
-    {
-        $this->paymentMethodFields = $paymentMethodFields;
         return $this;
     }
 
@@ -98,14 +82,6 @@ class PaymentApm extends AbstractRequest implements RequestInterface
     public function getPaymentMethod()
     {
         return $this->paymentMethod;
-    }
-	
-    /**
-     * @return string
-     */
-    public function getPaymentMethodFields()
-    {
-        return $this->paymentMethodFields;
     }
 
     /**
@@ -136,6 +112,7 @@ class PaymentApm extends AbstractRequest implements RequestInterface
      */
     protected function getParams()
     {
+
         /** @var Quote $quote */
         $quote = $this->checkoutSession->getQuote();
 
@@ -169,10 +146,6 @@ class PaymentApm extends AbstractRequest implements RequestInterface
                 'paymentMethod' => $this->getPaymentMethod(),
             ]
         );
-		
-		if( !is_null($pmFields = $this->getPaymentMethodFields()) ) {
-			$params['userAccountDetails'] = $pmFields;
-		}
 
         $params = array_merge_recursive($params, parent::getParams());
 

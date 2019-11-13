@@ -3,6 +3,7 @@
 namespace Safecharge\Safecharge\Model\Adminhtml\Source;
 
 use Magento\Framework\Option\ArrayInterface;
+use Safecharge\Safecharge\Model\Payment;
 
 /**
  * Safecharge Safecharge mode source model.
@@ -19,9 +20,27 @@ class Mode implements ArrayInterface
      */
     public function toOptionArray()
     {
+        $optionArray = [];
+        foreach ($this->toArray() as $value => $label) {
+            $optionArray[] = [
+                'value' => $value,
+                'label' => $label,
+            ];
+        }
+
+        return $optionArray;
+    }
+
+    /**
+     * Get options in "key-value" format
+     *
+     * @return array
+     */
+    public function toArray()
+    {
         return [
-            'live'		=> __('Live'),
-            'sandbox'	=> __('Sandbox'),
+            Payment::MODE_LIVE => __('Live'),
+            Payment::MODE_SANDBOX => __('Sandbox'),
         ];
     }
 }

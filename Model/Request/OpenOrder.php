@@ -84,6 +84,7 @@ class OpenOrder extends AbstractRequest implements RequestInterface
     public function setOrderData(array $orderData)
     {
         $this->orderData = $orderData;
+
         return $this;
     }
 
@@ -95,38 +96,21 @@ class OpenOrder extends AbstractRequest implements RequestInterface
      */
     protected function getParams()
     {
-		$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
-		$cart = $objectManager->get('\Magento\Checkout\Model\Cart');
-		
-        if (null === $cart || empty($cart)) {
-            throw new PaymentException(__('There is no Cart data.'));
+        if ($this->orderData === null) {
+            throw new PaymentException(__('Order data has been not set.'));
         }
-		
-		$billingAddress = $cart->getQuote()->getBillingAddress()->getData();
+
+        $tokenRequest = $this->requestFactory
+            ->create(AbstractRequest::GET_SESSION_TOKEN_METHOD);
+        $tokenResponse = $tokenRequest->process();
 
         $params = array_merge_recursive(
-			[
-				'amount'            => (string) round($cart->getQuote()->getGrandTotal(), 2),
-				'currency'          => empty($cart->getQuote()->getOrderCurrencyCode())
-					? $cart->getQuote()->getStoreCurrencyCode() : $cart->getQuote()->getOrderCurrencyCode(),
-				'urlDetails'        => array(
-					'successUrl'        => $this->config->getCallbackSuccessUrl(),
-					'failureUrl'        => $this->config->getCallbackErrorUrl(),
-					'pendingUrl'        => $this->config->getCallbackPendingUrl(),
-					'backUrl'			=> $this->config->getBackUrl(),
-					'notificationUrl'   => $this->config->getCallbackDmnUrl(),
-				),
-				'deviceDetails'     => $this->config->getDeviceDetails(),
-				'userTokenId'       => $cart->getQuote()->getCustomerEmail(),
-				'billingAddress'    => array(
-					'country' => $billingAddress['country_id'],
-				),
-				'paymentOption'		=> ['card' => ['threeD' => ['isDynamic3D' => 1]]],
-			],
+            [
+                'sessionToken' => $tokenResponse->getToken(),
+            ],
+            $this->orderData,
             parent::getParams()
         );
-		
-		$this->config->createLog('Open Order.');
 
         return $params;
     }

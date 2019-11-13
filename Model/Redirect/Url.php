@@ -6,7 +6,6 @@ use Magento\Checkout\Model\Session\Proxy as CheckoutSession;
 use Magento\Quote\Model\Quote;
 use Safecharge\Safecharge\Model\Config as ModuleConfig;
 use Safecharge\Safecharge\Model\Payment;
-use Magento\Framework\App\Request\Http as Http;
 
 /**
  * Safecharge Safecharge config provider model.
@@ -25,8 +24,6 @@ class Url
      * @var CheckoutSession
      */
     private $checkoutSession;
-    
-    private $request;
 
     /**
      * Url constructor.
@@ -36,14 +33,12 @@ class Url
      */
     public function __construct(
         ModuleConfig $moduleConfig,
-        CheckoutSession $checkoutSession,
-        Http $request
+        CheckoutSession $checkoutSession
     ) {
-        $this->moduleConfig     = $moduleConfig;
-        $this->checkoutSession  = $checkoutSession;
-        $this->request          = $request;
+        $this->moduleConfig = $moduleConfig;
+        $this->checkoutSession = $checkoutSession;
     }
-	
+
     /**
      * @return string
      */
@@ -57,19 +52,6 @@ class Url
      */
     public function getPostData()
     {
-        // in case we use Fields just go to Success page
-        if($this->request->getParam('method') === 'cc_card' && $this->request->getParam('transactionId')) {
-            $objectManager  = \Magento\Framework\App\ObjectManager::getInstance();
-            $storeManager   = $objectManager->get('\Magento\Store\Model\StoreManagerInterface');
-            
-            $cart = $objectManager->get('\Magento\Checkout\Model\Cart');
-            $quote_id = $cart->getQuote()->getId();
-            
-            return [
-				'url' => $this->moduleConfig->getCallbackSuccessUrl()
-            ];
-        }
-        
         return [
             "url" => $this->moduleConfig->getEndpoint(),
             "params" => $this->prepareParams()
@@ -143,10 +125,24 @@ class Url
         $queryParams['item_quantity_1'] = 1;
         $queryParams['numberofitems'] = 1;
 
-        $queryParams['checksum'] = hash(
-            $this->moduleConfig->getHash(),
-            utf8_encode($this->moduleConfig->getMerchantSecretKey() . implode("", $queryParams))
-        );
+        /*$numberOfItems = 0;
+        $i = 1;
+
+        $quoteItems = $quote->getAllVisibleItems();
+        foreach ($quoteItems as $quoteItem) {
+            if (!($price = $quoteItem->getBasePrice())) {
+                continue;
+            }
+            $queryParams['item_name_' . $i] = $quoteItem->getName();
+            $queryParams['item_amount_' . $i] = round($price, 2);
+            $queryParams['item_quantity_' . $i] = (int)$quoteItem->getQty();
+            $numberOfItems++;
+            $i++;
+        }
+
+        $queryParams['numberofitems'] = $numberOfItems;*/
+
+        $queryParams['checksum'] = hash('sha256', utf8_encode($this->moduleConfig->getMerchantSecretKey() . implode("", $queryParams)));
 
         return $queryParams;
     }

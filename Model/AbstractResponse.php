@@ -17,21 +17,26 @@ abstract class AbstractResponse extends AbstractApi
     /**
      * Response handlers.
      */
-    const TOKEN_HANDLER							= 'token';
-    const PAYMENT_SETTLE_HANDLER				= 'payment_settle';
-    const CREATE_USER_HANDLER					= 'create_user';
-    const GET_USER_DETAILS_HANDLER				= 'get_user_details';
-    const PAYMENT_REFUND_HANDLER				= 'payment_refund';
-    const PAYMENT_VOID_HANDLER					= 'payment_void';
-    const OPEN_ORDER_HANDLER					= 'open_order';
-    const PAYMENT_APM_HANDLER					= 'payment_apm';
-    const GET_MERCHANT_PAYMENT_METHODS_HANDLER	= 'get_merchant_payment_methods';
+    const TOKEN_HANDLER = 'token';
+    const PAYMENT_CC_HANDLER = 'payment_cc';
+    const PAYMENT_SETTLE_HANDLER = 'payment_settle';
+    const PAYMENT_CC_TOKENIZATION_HANDLER = 'payment_cc_tokenization';
+    const PAYMENT_USER_PAYMENT_OPTION_HANDLER = 'payment_user_payment_option';
+    const PAYMENT_DYNAMIC_3D_HANDLER = 'payment_dynamic_3d';
+    const PAYMENT_PAYMENT_3D_HANDLER = 'payment_payment_3d';
+    const CREATE_USER_HANDLER = 'create_user';
+    const GET_USER_DETAILS_HANDLER = 'get_user_details';
+    const PAYMENT_REFUND_HANDLER = 'payment_refund';
+    const PAYMENT_VOID_HANDLER = 'payment_void';
+    const OPEN_ORDER_HANDLER = 'open_order';
+    const PAYMENT_APM_HANDLER = 'payment_apm';
+    const GET_MERCHANT_PAYMENT_METHODS_HANDLER = 'get_merchant_payment_methods';
 
     /**
      * Response result const.
      */
-    const STATUS_SUCCESS	= 1;
-    const STATUS_FAILED		= 2;
+    const STATUS_SUCCESS = 1;
+    const STATUS_FAILED = 2;
 
     /**
      * @var int
@@ -87,26 +92,20 @@ abstract class AbstractResponse extends AbstractApi
      */
     public function process()
     {
-        $requestStatus	= $this->getRequestStatus();
-		$resp_data		= $this->prepareResponseData();
-		
-		$this->config->createLog($resp_data['Body'], 'Response data:');
+        $requestStatus = $this->getRequestStatus();
 
         $this->safechargeLogger->updateRequest(
             $this->requestId,
             [
-                'response'	=> $resp_data,
-                'status'	=> $requestStatus === true ? self::STATUS_SUCCESS : self::STATUS_FAILED,
+                'response' => $this->prepareResponseData(),
+                'status' => $requestStatus === true
+                    ? self::STATUS_SUCCESS
+                    : self::STATUS_FAILED,
             ]
         );
 
         if ($requestStatus === false) {
-			if(!empty($resp_data['Body']['reason'])) {
-				throw new PaymentException($resp_data['Body']['reason']);
-			}
-			else {
-				throw new PaymentException($this->getErrorMessage());
-			}
+            throw new PaymentException($this->getErrorMessage());
         }
 
         $this->validateResponseData();
@@ -147,29 +146,22 @@ abstract class AbstractResponse extends AbstractApi
     protected function getRequestStatus()
     {
         $httpStatus = $this->getStatus();
-		
         if ($httpStatus !== 200 && $httpStatus !== 100) {
             return false;
         }
 
         $body = $this->getBody();
 
-        $responseStatus				= strtolower(!empty($body['status']) ? $body['status'] : '');
-        $responseTransactionStatus	= strtolower(!empty($body['transactionStatus']) ? $body['transactionStatus'] : '');
-        $responseTransactionType	= strtolower(!empty($body['transactionType']) ? $body['transactionType'] : '');
-    //    $responsetThreeDFlow		= (int)(!empty($body['threeDFlow']) ? $body['threeDFlow'] : '');
+        $responseStatus = strtolower(!empty($body['status']) ? $body['status'] : '');
+        $responseTransactionStatus = strtolower(!empty($body['transactionStatus']) ? $body['transactionStatus'] : '');
+        $responseTransactionType = strtolower(!empty($body['transactionType']) ? $body['transactionType'] : '');
+        $responsetThreeDFlow = (int)(!empty($body['threeDFlow']) ? $body['threeDFlow'] : '');
 
         if (
             !(
-                (
-					!(
-						in_array($responseTransactionType, ['auth', 'sale'])
-					//	|| ($responseTransactionType === 'sale3d' && $responsetThreeDFlow === 0)
-					) 
-					&& $responseStatus === 'success' && $responseTransactionType !== 'error'
-				)
-			//	|| ($responseTransactionType === 'sale3d' && $responsetThreeDFlow === 0 && $responseTransactionStatus === 'approved')
-				|| (in_array($responseTransactionType, ['auth', 'sale']) && $responseTransactionStatus === 'approved')
+                (!(in_array($responseTransactionType, ['auth', 'sale']) || ($responseTransactionType === 'sale3d' && $responsetThreeDFlow === 0)) && $responseStatus === 'success' && $responseTransactionType !== 'error') ||
+                ($responseTransactionType === 'sale3d' && $responsetThreeDFlow === 0 && $responseTransactionStatus === 'approved') ||
+                (in_array($responseTransactionType, ['auth', 'sale']) && $responseTransactionStatus === 'approved')
             )
         ) {
             return false;
@@ -228,9 +220,9 @@ abstract class AbstractResponse extends AbstractApi
     protected function prepareResponseData()
     {
         return [
-            'Status'	=> $this->getStatus(),
-            'Headers'	=> $this->getHeaders(),
-            'Body'		=> $this->getBody(),
+            'Status' => $this->getStatus(),
+            'Headers' => $this->getHeaders(),
+            'Body' => $this->getBody(),
         ];
     }
 
@@ -242,12 +234,9 @@ abstract class AbstractResponse extends AbstractApi
     {
         $requiredKeys = $this->getRequiredResponseDataKeys();
         $bodyKeys = array_keys($this->getBody());
-		
+
         $diff = array_diff($requiredKeys, $bodyKeys);
-		
         if (!empty($diff)) {
-			$this->config->createLog($diff, 'Mising response parameters:');
-			
             throw new PaymentException(
                 __(
                     'Required response data fields are missing: %1.',

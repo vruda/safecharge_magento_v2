@@ -80,22 +80,16 @@ class Settle extends AbstractPayment implements ResponseInterface
     {
         parent::updateTransaction();
 
-		try {
-			if(!empty($this->getAuthCode())) {
-				$this->orderPayment->setAdditionalInformation(
-					Payment::TRANSACTION_AUTH_CODE_KEY,
-					$this->getAuthCode()
-				);
-            }
-			
-			if(!empty($this->getTransactionId())) {
-				$this->orderPayment->setAdditionalInformation(
-					Payment::TRANSACTION_ID,
-					$this->getTransactionId()
-				);
-			}
-		}
-		catch (Exception $ex) {}
+        if ($this->config->getPaymentAction() === Payment::ACTION_AUTHORIZE_CAPTURE) {
+            $this->orderPayment->setAdditionalInformation(
+                Payment::TRANSACTION_AUTH_CODE_KEY,
+                $this->getAuthCode()
+            );
+            $this->orderPayment->setAdditionalInformation(
+                Payment::TRANSACTION_ID,
+                $this->getTransactionId()
+            );
+        }
 
         $this->orderPayment
             ->setParentTransactionId($this->orderPayment->getTransactionId())

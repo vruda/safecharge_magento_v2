@@ -149,8 +149,7 @@ class Logger extends \Monolog\Logger
         if ((!empty($requestDataArray['request']) || !empty($requestDataArray['response']))
             && $this->moduleConfig->isDebugEnabled() === true
         ) {
-            $string = print_r(json_encode($requestDataArray), true) . "\r\n\r\n";
-            $this->debug($string);
+            $this->debug(json_encode($requestDataArray));
         }
 
         $requestLogData = $this->requestLogRepository->getById($requestId);

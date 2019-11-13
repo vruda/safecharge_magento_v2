@@ -24,7 +24,12 @@ class Factory
      */
     private $invokableClasses = [
         AbstractResponse::TOKEN_HANDLER => \Safecharge\Safecharge\Model\Response\Token::class,
+        AbstractResponse::PAYMENT_CC_HANDLER => \Safecharge\Safecharge\Model\Response\Payment\Cc::class,
         AbstractResponse::PAYMENT_SETTLE_HANDLER => \Safecharge\Safecharge\Model\Response\Payment\Settle::class,
+        AbstractResponse::PAYMENT_CC_TOKENIZATION_HANDLER => \Safecharge\Safecharge\Model\Response\Payment\CardTokenization::class,
+        AbstractResponse::PAYMENT_USER_PAYMENT_OPTION_HANDLER => \Safecharge\Safecharge\Model\Response\Payment\UserPaymentOption::class,
+        AbstractResponse::PAYMENT_DYNAMIC_3D_HANDLER => \Safecharge\Safecharge\Model\Response\Payment\Dynamic3D::class,
+        AbstractResponse::PAYMENT_PAYMENT_3D_HANDLER => \Safecharge\Safecharge\Model\Response\Payment\Payment3D::class,
         AbstractResponse::CREATE_USER_HANDLER => \Safecharge\Safecharge\Model\Response\CreateUser::class,
         AbstractResponse::GET_USER_DETAILS_HANDLER => \Safecharge\Safecharge\Model\Response\GetUserDetails::class,
         AbstractResponse::PAYMENT_REFUND_HANDLER => \Safecharge\Safecharge\Model\Response\Payment\Refund::class,

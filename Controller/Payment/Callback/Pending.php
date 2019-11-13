@@ -23,17 +23,13 @@ use Safecharge\Safecharge\Model\Logger as SafechargeLogger;
 use Safecharge\Safecharge\Model\Payment;
 use Safecharge\Safecharge\Model\Request\Payment\Factory as PaymentRequestFactory;
 
-use Magento\Framework\App\CsrfAwareActionInterface;
-use Magento\Framework\App\Request\InvalidRequestException;
-use Magento\Framework\App\RequestInterface;
-
 /**
  * Safecharge Safecharge redirect success controller.
- * 
+ *
  * @category Safecharge
  * @package  Safecharge_Safecharge
  */
-class Pending extends Action implements CsrfAwareActionInterface
+class Pending extends Action
 {
     /**
      * @var OrderFactory
@@ -125,23 +121,6 @@ class Pending extends Action implements CsrfAwareActionInterface
         $this->cartManagement = $cartManagement;
         $this->checkoutSession = $checkoutSession;
         $this->onepageCheckout = $onepageCheckout;
-    }
-	
-	/** 
-     * @inheritDoc
-     */
-    public function createCsrfValidationException(
-        RequestInterface $request 
-    ): ?InvalidRequestException {
-        return null;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function validateForCsrf(RequestInterface $request): ?bool
-    {
-        return true;
     }
 
     /**

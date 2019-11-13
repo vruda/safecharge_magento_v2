@@ -81,10 +81,9 @@ class Apm extends Action
             ->setHttpResponseCode(\Magento\Framework\Webapi\Response::HTTP_OK);
 
         if (!$this->moduleConfig->isActive()) {
-//            if ($this->moduleConfig->isDebugEnabled()) {
-//                $this->safechargeLogger->debug('Apm Controller: Safecharge payments module is not active at the moment!');
-//            }
-			
+            if ($this->moduleConfig->isDebugEnabled()) {
+                $this->safechargeLogger->debug('Apm Controller: Safecharge payments module is not active at the moment!');
+            }
             return $result->setData(['error_message' => __('Safecharge payments module is not active at the moment!')]);
         }
 
@@ -93,35 +92,27 @@ class Apm extends Action
             $this->getRequest()->getPostValue()
         );
 
-		$this->moduleConfig->createLog($params, 'Apm Controller - Request:');
+        if ($this->moduleConfig->isDebugEnabled()) {
+            $this->safechargeLogger->debug('Apm Controller - Request: ' . print_r($params, 1));
+        }
 
         try {
             $request = $this->requestFactory->create(AbstractRequest::PAYMENT_APM_METHOD);
-            
-			$request->setPaymentMethod($params["chosen_apm_method"]);
-			
-			if(!empty($params["apm_method_fields"])) {
-				$request->setPaymentMethodFields($params["apm_method_fields"]);
-			}
-			
-			$response = $request->process();
-			
-			$redirectUrl	= $response->getRedirectUrl();
-            $status			= $response->getResponseStatus();
-        }
-		catch (PaymentException $e) {
-			$this->moduleConfig->createLog(
-				$e->getMessage() . "\n" . $e->getTraceAsString(),
-				'Apm Controller - Error:'
-			);
-			
+            $request->setPaymentMethod($params["chosen_apm_method"]);
+            $response = $request->process();
+            $redirectUrl = $response->getRedirectUrl();
+            $status = $response->getResponseStatus();
+        } catch (PaymentException $e) {
+            if ($this->moduleConfig->isDebugEnabled()) {
+                $this->safechargeLogger->debug('Apm Controller - Error: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
+            }
             return $result->setData([
                 "error" => 1,
                 "redirectUrl" => null,
                 "message" => $e->getMessage()
             ]);
         }
-		
+
         return $result->setData([
             "error" => 0,
             "redirectUrl" => $redirectUrl,

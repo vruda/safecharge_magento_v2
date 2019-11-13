@@ -17,11 +17,6 @@ class OpenOrder extends AbstractResponse implements ResponseInterface
      * @var string
      */
     protected $orderId;
-	
-	/**
-     * @var string
-     */
-    protected $sessionToken;
 
     /**
      * @return AbstractResponse
@@ -32,8 +27,7 @@ class OpenOrder extends AbstractResponse implements ResponseInterface
         parent::process();
 
         $body = $this->getBody();
-        $this->orderId		= $body['orderId'];
-        $this->sessionToken = $body['sessionToken'];
+        $this->orderId = $body['orderId'];
 
         return $this;
     }
@@ -45,14 +39,6 @@ class OpenOrder extends AbstractResponse implements ResponseInterface
     {
         return $this->orderId;
     }
-	
-    /**
-     * @return string
-     */
-    public function getSessionToken()
-    {
-        return $this->sessionToken;
-    }
 
     /**
      * @return array
@@ -61,7 +47,6 @@ class OpenOrder extends AbstractResponse implements ResponseInterface
     {
         return [
             'orderId',
-			'sessionToken'
         ];
     }
 }
