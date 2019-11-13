@@ -346,7 +346,7 @@ class Dmn extends Action implements CsrfAwareActionInterface
 			else {
                 $concat .= $params[$checksumKey];
             }
-        }
+        } 
 
         $checksum = hash($this->moduleConfig->getHash(), utf8_encode($concat));
         
