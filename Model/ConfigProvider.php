@@ -117,13 +117,12 @@ class ConfigProvider extends CcGenericConfigProvider
         $config = [
             'payment' => [
                 Payment::METHOD_CODE => [
-                    'countryId' => $this->moduleConfig->getQuoteCountryCode(),
-                    'apmMethods' => $apmMethods,
-                    'authenticateUrl' => $this->urlBuilder->getUrl('safecharge/payment/authenticate'),
-                    'externalSolution' => $this->moduleConfig->getPaymentSolution() === Payment::SOLUTION_EXTERNAL,
-                    'redirectUrl' => $this->urlBuilder->getUrl('safecharge/payment/redirect'),
-                    'paymentApmUrl' => $this->urlBuilder->getUrl('safecharge/payment/apm'),
-                    'getMerchantPaymentMethodsUrl' => $this->urlBuilder->getUrl('safecharge/payment/GetMerchantPaymentMethods'),
+                    'countryId'						=> $this->moduleConfig->getQuoteCountryCode(),
+                    'apmMethods'					=> $apmMethods,
+                    'authenticateUrl'				=> $this->urlBuilder->getUrl('safecharge/payment/authenticate'),
+                    'redirectUrl'					=> $this->urlBuilder->getUrl('safecharge/payment/redirect'),
+                    'paymentApmUrl'					=> $this->urlBuilder->getUrl('safecharge/payment/apm'),
+                    'getMerchantPaymentMethodsUrl'	=> $this->urlBuilder->getUrl('safecharge/payment/GetMerchantPaymentMethods'),
                     
                     // we need this for the WebSDK
                     'merchantSiteId'    => $this->moduleConfig->getMerchantSiteId(),
@@ -147,14 +146,12 @@ class ConfigProvider extends CcGenericConfigProvider
      */
     private function getApmMethods()
     {
-        if ($this->moduleConfig->getPaymentSolution() === Payment::SOLUTION_EXTERNAL) {
-            return [];
-        }
         $this->apmsRequest = $this->requestFactory->create(AbstractRequest::GET_MERCHANT_PAYMENT_METHODS_METHOD);
 
         try {
             $apmMethods = $this->apmsRequest ->process();
-        } catch (PaymentException $e) {
+        }
+		catch (PaymentException $e) {
             return [];
         }
 

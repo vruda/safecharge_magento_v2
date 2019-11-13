@@ -57,7 +57,7 @@ class Url
      */
     public function getPostData()
     {
-        // in case we use Fields just go to Success page
+        // in case we use WebSDK just go to Success page
         if($this->request->getParam('method') === 'cc_card' && $this->request->getParam('transactionId')) {
             $objectManager  = \Magento\Framework\App\ObjectManager::getInstance();
             $storeManager   = $objectManager->get('\Magento\Store\Model\StoreManagerInterface');
@@ -81,9 +81,13 @@ class Url
      */
     protected function prepareParams()
     {
-        if ($this->moduleConfig->getPaymentSolution() === Payment::SOLUTION_INTERNAL) {
-            return '';
-        }
+		$this->moduleConfig->createLog('URL.php prepareParams()');
+		return '';
+		
+		// TODO - do we use this
+//        if ($this->moduleConfig->getPaymentSolution() === Payment::SOLUTION_INTERNAL) {
+//            return '';
+//        }
 
         /** @var Quote $quote */
         $quote = $this->checkoutSession->getQuote();

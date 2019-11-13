@@ -35,14 +35,17 @@
                 <!-- this option is mandatory, but we do not show it in the admin because all cards payments use SafeCharge WebSDK -->
                 <cctypes>AE,VI,MC,MI,DN</cctypes>
                 
-                <payment_solution>internal</payment_solution>
+                <!--<payment_solution>internal</payment_solution>-->
                 <order_status>sc_auth</order_status>
                 <can_use_checkout>1</can_use_checkout>
                 
                 <!-- Gateway Configuration. -->
                 <model>Safecharge\Safecharge\Model\Payment</model>
-                <privateInfoKeys>payment_solution,external_payment_method,authorization_code,transaction_id,safecharge_order_id,transaction_request_id</privateInfoKeys>
-                <paymentInfoKeys>payment_solution,external_payment_method,authorization_code,transaction_id,safecharge_order_id,transaction_request_id</paymentInfoKeys>
+<!--                <privateInfoKeys>payment_solution,external_payment_method,authorization_code,transaction_id,safecharge_order_id,transaction_request_id</privateInfoKeys>-->
+                <privateInfoKeys>external_payment_method,authorization_code,transaction_id,safecharge_order_id,transaction_request_id</privateInfoKeys>
+                
+<!--				<paymentInfoKeys>payment_solution,external_payment_method,authorization_code,transaction_id,safecharge_order_id,transaction_request_id</paymentInfoKeys>-->
+				<paymentInfoKeys>external_payment_method,authorization_code,transaction_id,safecharge_order_id,transaction_request_id</paymentInfoKeys>
             </safecharge>
         </payment>
     </default>

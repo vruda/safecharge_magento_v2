@@ -138,6 +138,10 @@ class Config
 		
 		if (!empty($data)) {
 			if(is_array($data) or is_object($data)) {
+				if(!empty($data['paymentMethods'])) {
+					$data['paymentMethods'] = json_encode($data['paymentMethods']);
+				}
+				
 				$string .= print_r($data, true);
 			}
 			elseif (is_bool($data)) {
@@ -161,7 +165,7 @@ class Config
 
 			if(is_dir($logsPath)) {
 				file_put_contents(
-					$logsPath . DIRECTORY_SEPARATOR . date('Y-m-d') . '.txt',
+					$logsPath . DIRECTORY_SEPARATOR . 'SafeCharge-' . date('Y-m-d') . '.txt',
 					$string,
 					FILE_APPEND
 				);

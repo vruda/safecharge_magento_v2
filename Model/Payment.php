@@ -74,8 +74,8 @@ class Payment extends Cc implements TransparentInterface
     const TRANSACTION_ID                        = 'transaction_id';
     const TRANSACTION_USER_PAYMENT_OPTION_ID    = 'user_payment_option_id';
     const TRANSACTION_SESSION_TOKEN             = 'session_token';
-    const TRANSACTION_PAYMENT_SOLUTION          = 'payment_solution';
-    const TRANSACTION_EXTERNAL_PAYMENT_METHOD   = 'external_payment_method';
+//    const TRANSACTION_PAYMENT_SOLUTION          = 'payment_solution';
+//    const TRANSACTION_EXTERNAL_PAYMENT_METHOD   = 'external_payment_method';
 
     /**
      * Order statuses.
@@ -88,8 +88,8 @@ class Payment extends Cc implements TransparentInterface
     /**
      * Payment solutions.
      */
-    const SOLUTION_INTERNAL = 'internal';
-    const SOLUTION_EXTERNAL = 'external';
+//    const SOLUTION_INTERNAL = 'internal';
+//    const SOLUTION_EXTERNAL = 'external';
 
     const APM_METHOD_CC     = 'cc_card';
 
@@ -375,10 +375,13 @@ class Payment extends Cc implements TransparentInterface
         $authCode = $payment->getAdditionalInformation(self::TRANSACTION_AUTH_CODE_KEY);
         
         if (
-            ($authCode === null && $paymentSolution === self::SOLUTION_EXTERNAL)
+            (
+				$authCode === null
+			//	&& $paymentSolution === self::SOLUTION_EXTERNAL
+			)
             || (
-                $paymentSolution === self::SOLUTION_INTERNAL
-                && ($chosenApmMethod = $payment->getAdditionalInformation(self::KEY_CHOSEN_APM_METHOD))
+            //    $paymentSolution === self::SOLUTION_INTERNAL &&
+				($chosenApmMethod = $payment->getAdditionalInformation(self::KEY_CHOSEN_APM_METHOD))
                 && $chosenApmMethod !== self::APM_METHOD_CC
             )
         ) {
