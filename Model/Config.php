@@ -153,11 +153,21 @@ class Config
 		
 		$string .= "\r\n" . "\r\n";
 		
-		file_put_contents(
-			dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . 'logs' . DIRECTORY_SEPARATOR . date('Y-m-d') . '.txt',
-			$string,
-			FILE_APPEND
-		);
+		try {
+			$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+			$directory = $objectManager->get('\Magento\Framework\Filesystem\DirectoryList');
+
+			$logsPath = $directory->getPath('log');
+
+			if(is_dir($logsPath)) {
+				file_put_contents(
+					$logsPath . DIRECTORY_SEPARATOR . date('Y-m-d') . '.txt',
+					$string,
+					FILE_APPEND
+				);
+			}	
+		}
+		catch(exception $e) {}
 	}
 	
 	/**
