@@ -66,7 +66,7 @@ class Url
             $quote_id = $cart->getQuote()->getId();
             
             return [
-				'url' => $this->moduleConfig->getCallbackSuccessUrl()
+				'url' => $this->moduleConfig->getCallbackCompleteUrl()
             ];
         }
         
@@ -105,25 +105,25 @@ class Url
         $reservedOrderId = $quotePayment->getAdditionalInformation(Payment::TRANSACTION_ORDER_ID) ?: $this->moduleConfig->getReservedOrderId();
 
         $queryParams = [
-            'merchant_id' => $this->moduleConfig->getMerchantId(),
-            'merchant_site_id' => $this->moduleConfig->getMerchantSiteId(),
-            'customField1' => $this->moduleConfig->getSourcePlatformField(),
-            'total_amount' => number_format((float)$quote->getBaseGrandTotal(), 2, '.', ''),
-            'discount' => 0,
-            'shipping' => 0,
-            'total_tax' => 0,
-            'currency' => $quote->getBaseCurrencyCode(),
-            'user_token_id' => $quote->getCustomerId(),
-            'time_stamp' => date('YmdHis'),
-            'version' => '4.0.0',
-            'success_url' => $this->moduleConfig->getCallbackSuccessUrl(),
-            'pending_url' => $this->moduleConfig->getCallbackPendingUrl(),
-            'error_url' => $this->moduleConfig->getCallbackErrorUrl(),
-            'back_url' => $this->moduleConfig->getBackUrl(),
-            'notify_url' => $this->moduleConfig->getCallbackDmnUrl($reservedOrderId),
-            'merchant_unique_id' => $reservedOrderId,
-            'ipAddress' => $quote->getRemoteIp(),
-            'encoding' => 'UTF-8',
+            'merchant_id'			=> $this->moduleConfig->getMerchantId(),
+            'merchant_site_id'		=> $this->moduleConfig->getMerchantSiteId(),
+            'customField1'			=> $this->moduleConfig->getSourcePlatformField(),
+            'total_amount'			=> number_format((float)$quote->getBaseGrandTotal(), 2, '.', ''),
+            'discount'				=> 0,
+            'shipping'				=> 0,
+            'total_tax'				=> 0,
+            'currency'				=> $quote->getBaseCurrencyCode(),
+            'user_token_id'			=> $quote->getCustomerId(),
+            'time_stamp'			=> date('YmdHis'),
+            'version'				=> '4.0.0',
+            'success_url'			=> $this->moduleConfig->getCallbackCompleteUrl(),
+            'pending_url'			=> $this->moduleConfig->getCallbackCompleteUrl(),
+            'error_url'				=> $this->moduleConfig->getCallbackCompleteUrl(),
+            'back_url'				=> $this->moduleConfig->getBackUrl(),
+            'notify_url'			=> $this->moduleConfig->getCallbackDmnUrl($reservedOrderId),
+            'merchant_unique_id'	=> $reservedOrderId,
+            'ipAddress'				=> $quote->getRemoteIp(),
+            'encoding'				=> 'UTF-8',
         ];
 
         if (($billing = $quote->getBillingAddress()) && $billing !== null) {

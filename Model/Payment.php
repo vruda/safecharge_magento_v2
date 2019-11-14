@@ -366,11 +366,12 @@ class Payment extends Cc implements TransparentInterface
 
     private function processPayment(InfoInterface $payment, $amount)
     {
-        $paymentSolution = $this->moduleConfig->getPaymentSolution();
-        $payment->setAdditionalInformation(
-            self::TRANSACTION_PAYMENT_SOLUTION,
-            $paymentSolution
-        );
+//        $paymentSolution = $this->moduleConfig->getPaymentSolution();
+//		
+//        $payment->setAdditionalInformation(
+//            self::TRANSACTION_PAYMENT_SOLUTION,
+//            $paymentSolution
+//        );
 
         $authCode = $payment->getAdditionalInformation(self::TRANSACTION_AUTH_CODE_KEY);
         

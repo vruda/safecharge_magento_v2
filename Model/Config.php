@@ -138,7 +138,7 @@ class Config
 		
 		if (!empty($data)) {
 			if(is_array($data) or is_object($data)) {
-				if(!empty($data['paymentMethods'])) {
+				if(is_array($data) and !empty($data['paymentMethods'])) {
 					$data['paymentMethods'] = json_encode($data['paymentMethods']);
 				}
 				
@@ -378,10 +378,10 @@ class Config
      *
      * @return string
      */
-    public function getPaymentSolution()
-    {
-        return $this->getConfigValue('payment_solution');
-    }
+//    public function getPaymentSolution()
+//    {
+//        return $this->getConfigValue('payment_solution');
+//    }
 
     /**
      * Return bool value depends of that if payment method sandbox mode
@@ -432,66 +432,24 @@ class Config
     /**
      * @return string
      */
-    public function getCallbackSuccessUrl()
-    {
-        $quoteId = $this->checkoutSession->getQuoteId();
-		
-		if($this->versionNum >= 220) {
-			return $this->urlBuilder->getUrl(
-					'safecharge/payment/callback_success',
-					['quote' => $quoteId]
-				)
-				. '?form_key=' . $this->formKey->getFormKey();
-		}
-		
-		return $this->urlBuilder->getUrl(
-            'safecharge/payment/callback_successold',
-            ['quote' => $quoteId]
-        );
-    }
-
-    /**
-     * @return string
-     */
-    public function getCallbackPendingUrl()
-    {
-        $quoteId = $this->checkoutSession->getQuoteId();
-		
-		if($this->versionNum >= 220) {
-			return $this->urlBuilder->getUrl(
-					'safecharge/payment/callback_pending',
-					['quote' => $quoteId]
-				)
-				. '?form_key=' . $this->formKey->getFormKey();
-		}
-		
-		return $this->urlBuilder->getUrl(
-			'safecharge/payment/callback_pendingold',
-			['quote' => $quoteId]
-		);
-    }
-
-    /**
-     * @return string
-     */
-    public function getCallbackErrorUrl()
+    public function getCallbackCompleteUrl()
     {
         $quoteId = $this->checkoutSession->getQuoteId();
 
 		if($this->versionNum >= 220) {
 			 return $this->urlBuilder->getUrl(
-					'safecharge/payment/callback_error',
+					'safecharge/payment/callback_complete',
 					['quote' => $quoteId]
 				)
 				. '?form_key=' . $this->formKey->getFormKey();
 		}
 		
 		return $this->urlBuilder->getUrl(
-			'safecharge/payment/callback_errorold',
+			'safecharge/payment/callback_completeold',
 			['quote' => $quoteId]
 		);
     }
-
+	
     /**
      * @return string
      */

@@ -12,15 +12,11 @@ use Magento\Framework\DataObject;
 use Magento\Framework\DataObjectFactory;
 use Magento\Framework\Exception\PaymentException;
 use Magento\Quote\Api\CartManagementInterface;
-use Magento\Sales\Model\Order;
-use Magento\Sales\Model\Order\Payment as OrderPayment;
 use Magento\Sales\Model\Order\Payment\State\AuthorizeCommand;
 use Magento\Sales\Model\Order\Payment\State\CaptureCommand;
-use Magento\Sales\Model\Order\Payment\Transaction;
 use Magento\Sales\Model\OrderFactory;
 use Safecharge\Safecharge\Model\Config as ModuleConfig;
 use Safecharge\Safecharge\Model\Logger as SafechargeLogger;
-use Safecharge\Safecharge\Model\Payment;
 use Safecharge\Safecharge\Model\Request\Payment\Factory as PaymentRequestFactory;
 
 use Magento\Framework\App\CsrfAwareActionInterface;
@@ -34,7 +30,7 @@ use Magento\Framework\App\RequestInterface;
  * @package  Safecharge_Safecharge
  */
 //class Success extends Action
-class Success extends Action implements CsrfAwareActionInterface
+class Complete extends Action implements CsrfAwareActionInterface
 {
     /**
      * @var OrderFactory
@@ -152,73 +148,41 @@ class Success extends Action implements CsrfAwareActionInterface
      */
     public function execute()
     {
-        $params = $this->getRequest()->getParams();
+		$params = $this->getRequest()->getParams();
+		$this->moduleConfig->createLog($params, 'Complete Callback params:');
 
         try {
-            $result = $this->placeOrder();
+			$result = $this->placeOrder();
 			
             if ($result->getSuccess() !== true) {
-				$this->moduleConfig->createLog($result->getErrorMessage(), 'Success Callback error - place order error');
+				$this->moduleConfig->createLog($result->getErrorMessage(), 'Complete Callback error - place order error');
 				
                 throw new PaymentException(__($result->getErrorMessage()));
             }
-
-            /** @var Order $order */
-            $order = $this->orderFactory->create()->load($result->getOrderId());
-
-            /** @var OrderPayment $payment */
-            $orderPayment = $order->getPayment();
-
-            if (
-                isset($params['Status'])
-                && !in_array(strtolower($params['Status']), ['approved', 'success'])
-            ) {
-                throw new PaymentException(__('Your payment failed.'));
-            }
-
-            if(isset($params['TransactionID'])) {
-                $orderPayment->setAdditionalInformation(
-                    Payment::TRANSACTION_ID,
-                    $params['TransactionID']
-                );
-            }
-            
-            if(isset($params['AuthCode'])) {
-                $orderPayment->setAdditionalInformation(
-                    Payment::TRANSACTION_AUTH_CODE_KEY,
-                    $params['AuthCode']
-                );
-            }
-            
-            if(isset($params['payment_method'])) {
-                $orderPayment->setAdditionalInformation(
-                    Payment::TRANSACTION_EXTERNAL_PAYMENT_METHOD,
-                    $params['payment_method']
-                );
-            }
-            
-            if(isset($params)) {
-                $orderPayment->setTransactionAdditionalInfo(
-                    Transaction::RAW_DETAILS,
-                    $params
-                );
-            }
-			
-            $orderPayment->save();
-            $order->save();
         }
         catch (PaymentException $e) {
 			$this->moduleConfig->createLog($e->getMessage(), 'Success Callback Process Error:');
-			$this->moduleConfig->createLog($this->getRequest()->getParams());
-			
             $this->messageManager->addErrorMessage($e->getMessage());
         }
 
         $resultRedirect = $this->resultFactory->create(ResultFactory::TYPE_REDIRECT);
-        $resultRedirect->setUrl(
-			$this->_url->getUrl('checkout/onepage/success/')
-			. (!empty($_GET['form_key']) ? '?form_key=' . $_GET['form_key'] : '')
-		);
+		
+		if(!empty($params['Status'])) {
+			if(in_array(strtolower($params['Status']), array('approved', 'success', 'pending'))) {
+				$resultRedirect->setUrl(
+					$this->_url->getUrl('checkout/onepage/success/')
+					. (!empty($_GET['form_key']) ? '?form_key=' . $_GET['form_key'] : '')
+				);
+			}
+			else {
+				$resultRedirect->setUrl($this->_url->getUrl('checkout/cart'));
+				$this->messageManager->addErrorMessage(__('Error - Order Status: ' . $params['Status']));
+			}
+		}
+		else {
+			$resultRedirect->setUrl($this->_url->getUrl('checkout/cart'));
+			$this->messageManager->addErrorMessage(__('Error - Missing Order Status.'));
+		}
 		
         return $resultRedirect;
     }
