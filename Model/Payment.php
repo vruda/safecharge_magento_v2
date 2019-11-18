@@ -90,7 +90,6 @@ class Payment extends Cc implements TransparentInterface
      */
     const SOLUTION_INTERNAL = 'internal';
     const SOLUTION_EXTERNAL = 'external';
-
     const APM_METHOD_CC     = 'cc_card';
 
     /**

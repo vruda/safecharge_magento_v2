@@ -24,13 +24,11 @@ use Safecharge\Safecharge\Model\Request\Payment\Factory as PaymentRequestFactory
 
 /**
  * Safecharge Safecharge payment redirect controller.
- * 
- * The old version is for Magento 2 < v2.2 - it is no support Csrf Validation
  *
  * @category Safecharge
  * @package  Safecharge_Safecharge
  */
-class DmnOld extends Action
+class DmnOld extends Action implements CsrfAwareActionInterface
 {
     /**
      * @var OrderFactory
@@ -137,8 +135,8 @@ class DmnOld extends Action
      */
     public function execute()
     {
-		if (!$this->moduleConfig->isActive()) {
-			echo 'Error - SafeCharge payment module is not active!';
+        if (!$this->moduleConfig->isActive()) {
+			echo 'DMN Error - SafeCharge payment module is not active!';
 			return;
 		}
 		
@@ -148,18 +146,24 @@ class DmnOld extends Action
 				$this->getRequest()->getPostValue()
 			);
 
-			$this->moduleConfig->createLog($params, 'DMN Old params:');
+			$this->moduleConfig->createLog($params, 'DMN params:');
 
 			$this->validateChecksum($params);
 
 			if (isset($params["merchant_unique_id"]) && $params["merchant_unique_id"]) {
 				$orderIncrementId = $params["merchant_unique_id"];
-			} elseif (isset($params["order"]) && $params["order"]) {
+			}
+			elseif (isset($params["order"]) && $params["order"]) {
 				$orderIncrementId = $params["order"];
-			} elseif (isset($params["orderId"]) && $params["orderId"]) {
+			}
+			elseif (isset($params["orderId"]) && $params["orderId"]) {
 				$orderIncrementId = $params["orderId"];
-			} else {
-				$orderIncrementId = null;
+			}
+			else {
+				$this->moduleConfig->createLog('DMN error - no order id parameter.');
+				
+				echo 'DMN error - no order id parameter.';
+				return;
 			}
 
 			$tryouts = 0;
@@ -170,31 +174,39 @@ class DmnOld extends Action
 				$order = $this->orderFactory->create()->loadByIncrementId($orderIncrementId);
 
 				if (!($order && $order->getId())) {
+					$this->moduleConfig->createLog('DMN try ' . $tryouts . ' there is NO order yet.');
 					sleep(3);
 				}
-			} while ($tryouts <=10 && !($order && $order->getId()));
+			}
+			while ($tryouts <=10 && !($order && $order->getId()));
 
 			if (!($order && $order->getId())) {
-				throw new \Exception(__('Order #%1 not found!', $orderIncrementId));
+				echo 'Order '. $orderIncrementId .' not found!';
+				return;
 			}
+			
+			$this->moduleConfig->createLog('DMN try ' . $tryouts . ' there IS order.');
 
 			/** @var OrderPayment $payment */
 			$orderPayment = $order->getPayment();
 
-			$transactionId = $params['TransactionID'];
-			$orderPayment->setAdditionalInformation(
-				Payment::TRANSACTION_ID,
-				$transactionId
-			);
+			$transactionId = @$params['TransactionID'];
+			
+			if ($transactionId) {
+				$orderPayment->setAdditionalInformation(
+					Payment::TRANSACTION_ID,
+					$transactionId
+				);
+			}
 
-			if (isset($params['AuthCode']) && $params['AuthCode']) {
+			if (!empty($params['AuthCode'])) {
 				$orderPayment->setAdditionalInformation(
 					Payment::TRANSACTION_AUTH_CODE_KEY,
 					$params['AuthCode']
 				);
 			}
 
-			if (isset($params['payment_method']) && $params['AuthCode']) {
+			if (!empty($params['payment_method'])) {
 				$orderPayment->setAdditionalInformation(
 					Payment::TRANSACTION_EXTERNAL_PAYMENT_METHOD,
 					$params['payment_method']
@@ -206,44 +218,47 @@ class DmnOld extends Action
 				$params
 			);
 
-			$params['Status'] = $params['Status'] ?: null;
+			$status = !empty($params['Status']) ? strtolower($params['Status']) : null;
 
-			if (in_array(strtolower($params['Status']), ['declined', 'error'])) {
-				$params['ErrCode'] = (isset($params['ErrCode'])) ? $params['ErrCode'] : "Unknown";
-				$params['ExErrCode'] = (isset($params['ExErrCode'])) ? $params['ExErrCode'] : "Unknown";
-				$order->addStatusHistoryComment("Payment returned a '{$params['Status']}' status (Code: {$params['ErrCode']}, Reason: {$params['ExErrCode']}).");
-			} elseif ($params['Status']) {
+			if (in_array($status, ['declined', 'error'])) {
+				$params['ErrCode']		= (isset($params['ErrCode'])) ? $params['ErrCode'] : "Unknown";
+				$params['ExErrCode']	= (isset($params['ExErrCode'])) ? $params['ExErrCode'] : "Unknown";
+				
+				$order->addStatusHistoryComment("Payment returned a '{$params['Status']}' status "
+					. "(Code: {$params['ErrCode']}, Reason: {$params['ExErrCode']}).");
+			}
+			elseif ($status) {
 				$order->addStatusHistoryComment("Payment returned a '" . $params['Status'] . "' status");
 			}
 
-			if (strtolower($params['Status']) === "pending") {
+			if ($status === "pending") {
 				$order->setState(Order::STATE_NEW)->setStatus('pending');
 			}
 
 			if (
-				in_array(strtolower($params['Status']), ['approved', 'success'])
+				in_array($status, ['approved', 'success'])
 				&& $orderPayment->getAdditionalInformation(Payment::KEY_CHOSEN_APM_METHOD) !== Payment::APM_METHOD_CC
 			) {
-				$params['transactionType'] = isset($params['transactionType']) ? $params['transactionType'] : null;
-				$invoiceTransactionId = $transactionId;
+//				$params['transactionType'] = isset($params['transactionType']) ? $params['transactionType'] : null;
+//				$invoiceTransactionId = $transactionId;
 				$transactionType = Transaction::TYPE_AUTH;
 				$isSettled = false;
 
 				switch (strtolower($params['transactionType'])) {
 					case 'auth':
-						$request = $this->paymentRequestFactory->create(
-							AbstractRequest::PAYMENT_SETTLE_METHOD,
-							$orderPayment,
-							$order->getBaseGrandTotal()
-						);
-						$settleResponse = $request->process();
-						$invoiceTransactionId = $settleResponse->getTransactionId();
+//						$request = $this->paymentRequestFactory->create(
+//							AbstractRequest::PAYMENT_SETTLE_METHOD,
+//							$orderPayment,
+//							$order->getBaseGrandTotal()
+//						);
+//						$settleResponse = $request->process();
+//						$invoiceTransactionId = $settleResponse->getTransactionId();
 						$message = $this->captureCommand->execute($orderPayment, $order->getBaseGrandTotal(), $order);
-						$transactionType = Transaction::TYPE_CAPTURE;
-						$isSettled = true;
+//						$transactionType = Transaction::TYPE_CAPTURE;
+//						$isSettled = true;
 						
 						break;
-				
+						
 					case 'sale':
 						$message = $this->captureCommand->execute($orderPayment, $order->getBaseGrandTotal(), $order);
 						$transactionType = Transaction::TYPE_CAPTURE;
@@ -261,7 +276,8 @@ class DmnOld extends Action
 					/** @var Invoice $invoice */
 					foreach ($order->getInvoiceCollection() as $invoice) {
 						$invoice
-							->setTransactionId($invoiceTransactionId)
+//							->setTransactionId($invoiceTransactionId)
+							->setTransactionId($transactionId)
 							->pay()
 							->save();
 					}
@@ -280,10 +296,10 @@ class DmnOld extends Action
 			$order->save();
 		}
 		catch (\Exception $e) {
-			if ($this->moduleConfig->isDebugEnabled()) {
-				$this->moduleConfig->createLog($e->getMessage(), 'DMN Excception:');
-				$this->moduleConfig->createLog($e->getTraceAsString());
-			}
+			$msg = $e->getMessage();
+
+			$this->moduleConfig->createLog($e->getMessage(), 'DMN Excception:');
+//			$this->moduleConfig->createLog($e->getTraceAsString());
 
 			echo 'Error: ' . $e->getMessage();
 			return;
@@ -302,8 +318,10 @@ class DmnOld extends Action
                 __('Required key advanceResponseChecksum for checksum calculation is missing.')
             );
         }
-        $concat = $this->moduleConfig->getMerchantSecretKey();
-        foreach (['totalAmount', 'currency', 'responseTimeStamp', 'PPP_TransactionID', 'Status', 'productId'] as $checksumKey) {
+        
+		$concat = $this->moduleConfig->getMerchantSecretKey();
+        
+		foreach (['totalAmount', 'currency', 'responseTimeStamp', 'PPP_TransactionID', 'Status', 'productId'] as $checksumKey) {
             if (!isset($params[$checksumKey])) {
                 throw new \Exception(
                     __('Required key %1 for checksum calculation is missing.', $checksumKey)
@@ -314,7 +332,8 @@ class DmnOld extends Action
                 foreach ($params[$checksumKey] as $subKey => $subVal) {
                     $concat .= $subVal;
                 }
-            } else {
+            }
+			else {
                 $concat .= $params[$checksumKey];
             }
         }

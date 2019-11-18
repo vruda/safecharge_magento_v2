@@ -157,7 +157,7 @@ class Dmn extends Action implements CsrfAwareActionInterface
     public function execute()
     {
         if (!$this->moduleConfig->isActive()) {
-			echo 'Error - SafeCharge payment module is not active!';
+			echo 'DMN Error - SafeCharge payment module is not active!';
 			return;
 		}
 		
@@ -181,7 +181,10 @@ class Dmn extends Action implements CsrfAwareActionInterface
 				$orderIncrementId = $params["orderId"];
 			}
 			else {
-				$orderIncrementId = null;
+				$this->moduleConfig->createLog('DMN error - no order id parameter.');
+				
+				echo 'DMN error - no order id parameter.';
+				return;
 			}
 
 			$tryouts = 0;
@@ -192,32 +195,39 @@ class Dmn extends Action implements CsrfAwareActionInterface
 				$order = $this->orderFactory->create()->loadByIncrementId($orderIncrementId);
 
 				if (!($order && $order->getId())) {
+					$this->moduleConfig->createLog('DMN try ' . $tryouts . ' there is NO order yet.');
 					sleep(3);
 				}
 			}
 			while ($tryouts <=10 && !($order && $order->getId()));
 
 			if (!($order && $order->getId())) {
-				throw new \Exception(__('Order #%1 not found!', $orderIncrementId));
+				echo 'Order '. $orderIncrementId .' not found!';
+				return;
 			}
+			
+			$this->moduleConfig->createLog('DMN try ' . $tryouts . ' there IS order.');
 
 			/** @var OrderPayment $payment */
 			$orderPayment = $order->getPayment();
 
-			$transactionId = $params['TransactionID'];
-			$orderPayment->setAdditionalInformation(
-				Payment::TRANSACTION_ID,
-				$transactionId
-			);
+			$transactionId = @$params['TransactionID'];
+			
+			if ($transactionId) {
+				$orderPayment->setAdditionalInformation(
+					Payment::TRANSACTION_ID,
+					$transactionId
+				);
+			}
 
-			if (isset($params['AuthCode']) && $params['AuthCode']) {
+			if (!empty($params['AuthCode'])) {
 				$orderPayment->setAdditionalInformation(
 					Payment::TRANSACTION_AUTH_CODE_KEY,
 					$params['AuthCode']
 				);
 			}
 
-			if (isset($params['payment_method']) && $params['AuthCode']) {
+			if (!empty($params['payment_method'])) {
 				$orderPayment->setAdditionalInformation(
 					Payment::TRANSACTION_EXTERNAL_PAYMENT_METHOD,
 					$params['payment_method']
@@ -229,44 +239,44 @@ class Dmn extends Action implements CsrfAwareActionInterface
 				$params
 			);
 
-			$params['Status'] = $params['Status'] ?: null;
+			$status = !empty($params['Status']) ? strtolower($params['Status']) : null;
 
-			if (in_array(strtolower($params['Status']), ['declined', 'error'])) {
-				$params['ErrCode'] = (isset($params['ErrCode'])) ? $params['ErrCode'] : "Unknown";
-				$params['ExErrCode'] = (isset($params['ExErrCode'])) ? $params['ExErrCode'] : "Unknown";
+			if (in_array($status, ['declined', 'error'])) {
+				$params['ErrCode']		= (isset($params['ErrCode'])) ? $params['ErrCode'] : "Unknown";
+				$params['ExErrCode']	= (isset($params['ExErrCode'])) ? $params['ExErrCode'] : "Unknown";
 				
 				$order->addStatusHistoryComment("Payment returned a '{$params['Status']}' status "
 					. "(Code: {$params['ErrCode']}, Reason: {$params['ExErrCode']}).");
 			}
-			elseif ($params['Status']) {
+			elseif ($status) {
 				$order->addStatusHistoryComment("Payment returned a '" . $params['Status'] . "' status");
 			}
 
-			if (strtolower($params['Status']) === "pending") {
+			if ($status === "pending") {
 				$order->setState(Order::STATE_NEW)->setStatus('pending');
 			}
 
 			if (
-				in_array(strtolower($params['Status']), ['approved', 'success'])
-				&& $orderPayment->getAdditionalInformation(Payment::KEY_CHOSEN_APM_METHOD) !== Payment::APM_METHOD_CC
+				in_array($status, ['approved', 'success'])
+//				&& $orderPayment->getAdditionalInformation(Payment::KEY_CHOSEN_APM_METHOD) !== Payment::APM_METHOD_CC
 			) {
-				$params['transactionType'] = isset($params['transactionType']) ? $params['transactionType'] : null;
-				$invoiceTransactionId = $transactionId;
+//				$params['transactionType'] = isset($params['transactionType']) ? $params['transactionType'] : null;
+//				$invoiceTransactionId = $transactionId;
 				$transactionType = Transaction::TYPE_AUTH;
 				$isSettled = false;
 
 				switch (strtolower($params['transactionType'])) {
 					case 'auth':
-						$request = $this->paymentRequestFactory->create(
-							AbstractRequest::PAYMENT_SETTLE_METHOD,
-							$orderPayment,
-							$order->getBaseGrandTotal()
-						);
-						$settleResponse = $request->process();
-						$invoiceTransactionId = $settleResponse->getTransactionId();
+//						$request = $this->paymentRequestFactory->create(
+//							AbstractRequest::PAYMENT_SETTLE_METHOD,
+//							$orderPayment,
+//							$order->getBaseGrandTotal()
+//						);
+//						$settleResponse = $request->process();
+//						$invoiceTransactionId = $settleResponse->getTransactionId();
 						$message = $this->captureCommand->execute($orderPayment, $order->getBaseGrandTotal(), $order);
-						$transactionType = Transaction::TYPE_CAPTURE;
-						$isSettled = true;
+//						$transactionType = Transaction::TYPE_CAPTURE;
+//						$isSettled = true;
 						
 						break;
 						
@@ -287,7 +297,8 @@ class Dmn extends Action implements CsrfAwareActionInterface
 					/** @var Invoice $invoice */
 					foreach ($order->getInvoiceCollection() as $invoice) {
 						$invoice
-							->setTransactionId($invoiceTransactionId)
+//							->setTransactionId($invoiceTransactionId)
+							->setTransactionId($transactionId)
 							->pay()
 							->save();
 					}
@@ -309,7 +320,7 @@ class Dmn extends Action implements CsrfAwareActionInterface
 			$msg = $e->getMessage();
 
 			$this->moduleConfig->createLog($e->getMessage(), 'DMN Excception:');
-			$this->moduleConfig->createLog($e->getTraceAsString());
+//			$this->moduleConfig->createLog($e->getTraceAsString());
 
 			echo 'Error: ' . $e->getMessage();
 			return;
