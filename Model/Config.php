@@ -434,16 +434,16 @@ class Config
 		
 		if($this->versionNum >= 220) {
 			return $this->urlBuilder->getUrl(
-//					'safecharge/payment/callback_success',
-					'safecharge/payment/callback_complete',
+					'safecharge/payment/callback_success',
+//					'safecharge/payment/callback_complete',
 					['quote' => $quoteId]
 				)
 				. '?form_key=' . $this->formKey->getFormKey();
 		}
 		
 		return $this->urlBuilder->getUrl(
-//            'safecharge/payment/callback_successold',
-            'safecharge/payment/callback_completeold',
+            'safecharge/payment/callback_successold',
+//            'safecharge/payment/callback_completeold',
             ['quote' => $quoteId]
         );
     }
@@ -453,22 +453,22 @@ class Config
      */
     public function getCallbackPendingUrl()
     {
-//        $quoteId = $this->checkoutSession->getQuoteId();
-//		
-//		if($this->versionNum >= 220) {
-//			return $this->urlBuilder->getUrl(
-//					'safecharge/payment/callback_pending',
-//					['quote' => $quoteId]
-//				)
-//				. '?form_key=' . $this->formKey->getFormKey();
-//		}
-//		
-//		return $this->urlBuilder->getUrl(
-//			'safecharge/payment/callback_pendingold',
-//			['quote' => $quoteId]
-//		);
+        $quoteId = $this->checkoutSession->getQuoteId();
 		
-		return $this->getCallbackSuccessUrl();
+		if($this->versionNum >= 220) {
+			return $this->urlBuilder->getUrl(
+					'safecharge/payment/callback_pending',
+					['quote' => $quoteId]
+				)
+				. '?form_key=' . $this->formKey->getFormKey();
+		}
+		
+		return $this->urlBuilder->getUrl(
+			'safecharge/payment/callback_pendingold',
+			['quote' => $quoteId]
+		);
+		
+//		return $this->getCallbackSuccessUrl();
     }
 
     /**

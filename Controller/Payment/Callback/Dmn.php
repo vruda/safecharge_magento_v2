@@ -156,6 +156,8 @@ class Dmn extends Action implements CsrfAwareActionInterface
      */
     public function execute()
     {
+		return;
+		
         if (!$this->moduleConfig->isActive()) {
 			echo 'DMN Error - SafeCharge payment module is not active!';
 			return;
@@ -233,7 +235,7 @@ class Dmn extends Action implements CsrfAwareActionInterface
 					$params['payment_method']
 				);
 			}
-
+			
 			$orderPayment->setTransactionAdditionalInfo(
 				Transaction::RAW_DETAILS,
 				$params
@@ -258,7 +260,7 @@ class Dmn extends Action implements CsrfAwareActionInterface
 
 			if (
 				in_array($status, ['approved', 'success'])
-//				&& $orderPayment->getAdditionalInformation(Payment::KEY_CHOSEN_APM_METHOD) !== Payment::APM_METHOD_CC
+				&& $orderPayment->getAdditionalInformation(Payment::KEY_CHOSEN_APM_METHOD) !== Payment::APM_METHOD_CC
 			) {
 //				$params['transactionType'] = isset($params['transactionType']) ? $params['transactionType'] : null;
 //				$invoiceTransactionId = $transactionId;
@@ -289,11 +291,13 @@ class Dmn extends Action implements CsrfAwareActionInterface
 				}
 
 				$orderPayment
-					->setTransactionId($transactionId)
-					->setIsTransactionPending(false)
+//					->setTransactionId($transactionId)
+					->setIsTransactionPending($status === "pending" ? true: false)
 					->setIsTransactionClosed($isSettled ? 1 : 0);
 
 				if ($transactionType === Transaction::TYPE_CAPTURE) {
+					$this->moduleConfig->createLog('DMN create Invoice.');
+					
 					/** @var Invoice $invoice */
 					foreach ($order->getInvoiceCollection() as $invoice) {
 						$invoice
@@ -303,10 +307,10 @@ class Dmn extends Action implements CsrfAwareActionInterface
 							->save();
 					}
 				}
-
-				$transaction = $orderPayment->addTransaction($transactionType);
-
-				$message = $orderPayment->prependMessage($message);
+				
+				$transaction	= $orderPayment->addTransaction($transactionType);
+				$message		= $orderPayment->prependMessage($message);
+				
 				$orderPayment->addTransactionCommentsToOrder(
 					$transaction,
 					$message

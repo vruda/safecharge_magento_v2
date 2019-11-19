@@ -166,10 +166,10 @@ class Success extends Action implements CsrfAwareActionInterface
 
             /** @var Order $order */
 //            $order = $this->orderFactory->create()->load($result->getOrderId());
-
-            /** @var OrderPayment $payment */
+//
+//            /** @var OrderPayment $payment */
 //            $orderPayment = $order->getPayment();
-
+//
 //            if (
 //                isset($params['Status'])
 //                && !in_array(strtolower($params['Status']), ['approved', 'success'])
@@ -197,6 +197,10 @@ class Success extends Action implements CsrfAwareActionInterface
 //                    $params['payment_method']
 //                );
 //            }
+//			
+////			$orderPayment
+////				->setIsTransactionPending(true)
+////				->setIsTransactionClosed(0);
 //            
 //            if(isset($params)) {
 //                $orderPayment->setTransactionAdditionalInfo(
@@ -204,7 +208,7 @@ class Success extends Action implements CsrfAwareActionInterface
 //                    $params
 //                );
 //            }
-			
+//			
 //            $orderPayment->save();
 //            $order->save();
         }
@@ -246,13 +250,13 @@ class Success extends Action implements CsrfAwareActionInterface
                 ->setData('success', true)
                 ->setData('order_id', $orderId);
 
-            $this->_eventManager->dispatch(
-                'safecharge_place_order',
-                [
-                    'result' => $result,
-                    'action' => $this,
-                ]
-            );
+//            $this->_eventManager->dispatch(
+//                'safecharge_place_order',
+//                [
+//                    'result' => $result,
+//                    'action' => $this,
+//                ]
+//            );
         }
         catch (\Exception $exception) {
 			$this->moduleConfig->createLog($exception->getMessage(), 'Success Callback Response Exception: ');

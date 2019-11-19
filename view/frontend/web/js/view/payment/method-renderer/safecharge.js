@@ -151,9 +151,9 @@ define(
                     return;
                 }
                 
-                if (self.useExternalSolution()) {
-                    return;
-                }
+//                if (self.useExternalSolution()) {
+//                    return;
+//                }
                 
                 $.ajax({
                     dataType: "json",
@@ -236,7 +236,8 @@ define(
                 if (self.validate()) {
                     self.isPlaceOrderActionAllowed(false);
 
-                    if (!self.useExternalSolution() && self.chosenApmMethod() !== 'cc_card') {
+//                    if (!self.useExternalSolution() && self.chosenApmMethod() !== 'cc_card') {
+                    if (self.chosenApmMethod() !== 'cc_card') {
 						var apmFields = {};
 						var choosenMethod = self.chosenApmMethod();
 

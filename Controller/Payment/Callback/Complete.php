@@ -14,9 +14,11 @@ use Magento\Framework\Exception\PaymentException;
 use Magento\Quote\Api\CartManagementInterface;
 use Magento\Sales\Model\Order\Payment\State\AuthorizeCommand;
 use Magento\Sales\Model\Order\Payment\State\CaptureCommand;
+use Magento\Sales\Model\Order\Payment\Transaction;
 use Magento\Sales\Model\OrderFactory;
 use Safecharge\Safecharge\Model\Config as ModuleConfig;
 use Safecharge\Safecharge\Model\Logger as SafechargeLogger;
+use Safecharge\Safecharge\Model\Payment;
 use Safecharge\Safecharge\Model\Request\Payment\Factory as PaymentRequestFactory;
 
 use Magento\Framework\App\CsrfAwareActionInterface;
@@ -159,6 +161,54 @@ class Complete extends Action implements CsrfAwareActionInterface
 				
                 throw new PaymentException(__($result->getErrorMessage()));
             }
+			
+			/** @var Order $order */
+            $order = $this->orderFactory->create()->load($result->getOrderId());
+
+            /** @var OrderPayment $payment */
+            $orderPayment = $order->getPayment();
+
+            if (
+                isset($params['Status'])
+                && !in_array(strtolower($params['Status']), ['approved', 'success'])
+            ) {
+                throw new PaymentException(__('Your payment failed.'));
+            }
+
+            if(isset($params['TransactionID'])) {
+                $orderPayment->setAdditionalInformation(
+                    Payment::TRANSACTION_ID,
+                    $params['TransactionID']
+                );
+            }
+            
+            if(isset($params['AuthCode'])) {
+                $orderPayment->setAdditionalInformation(
+                    Payment::TRANSACTION_AUTH_CODE_KEY,
+                    $params['AuthCode']
+                );
+            }
+            
+            if(isset($params['payment_method'])) {
+                $orderPayment->setAdditionalInformation(
+                    Payment::TRANSACTION_EXTERNAL_PAYMENT_METHOD,
+                    $params['payment_method']
+                );
+            }
+			
+			$orderPayment
+				->setIsTransactionPending(true)
+				->setIsTransactionClosed(0);
+            
+            if(isset($params)) {
+                $orderPayment->setTransactionAdditionalInfo(
+                    Transaction::RAW_DETAILS,
+                    $params
+                );
+            }
+			
+            $orderPayment->save();
+            $order->save();
         }
         catch (PaymentException $e) {
 			$this->moduleConfig->createLog($e->getMessage(), 'Complete Callback Process Error:');

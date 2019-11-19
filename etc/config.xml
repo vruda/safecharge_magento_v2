@@ -36,7 +36,7 @@
                 <cctypes>AE,VI,MC,MI,DN</cctypes>
                 
                 <payment_solution>internal</payment_solution>
-                <order_status>sc_auth</order_status>
+                <order_status>processing</order_status>
                 <can_use_checkout>1</can_use_checkout>
                 
                 <!-- Gateway Configuration. -->
