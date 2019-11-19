@@ -69,8 +69,8 @@ class Payment extends Cc implements TransparentInterface
     const TRANSACTION_ID                        = 'transaction_id';
     const TRANSACTION_USER_PAYMENT_OPTION_ID    = 'user_payment_option_id';
     const TRANSACTION_SESSION_TOKEN             = 'session_token';
-    const TRANSACTION_PAYMENT_SOLUTION          = 'payment_solution';
-    const TRANSACTION_EXTERNAL_PAYMENT_METHOD   = 'external_payment_method';
+//    const TRANSACTION_PAYMENT_SOLUTION          = 'payment_solution';
+//    const TRANSACTION_EXTERNAL_PAYMENT_METHOD   = 'external_payment_method';
 
     /**
      * Order statuses.

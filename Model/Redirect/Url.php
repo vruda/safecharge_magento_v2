@@ -57,7 +57,7 @@ class Url
      */
     public function getPostData()
     {
-        // in case we use Fields just go to Success page
+        // in case we use WebSDK just go to Success page
         if($this->request->getParam('method') === 'cc_card' && $this->request->getParam('transactionId')) {
             $objectManager  = \Magento\Framework\App\ObjectManager::getInstance();
             $storeManager   = $objectManager->get('\Magento\Store\Model\StoreManagerInterface');

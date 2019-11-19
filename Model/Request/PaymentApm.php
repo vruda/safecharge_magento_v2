@@ -156,17 +156,17 @@ class PaymentApm extends AbstractRequest implements RequestInterface
         $params = array_merge_recursive(
             $this->getQuoteData($quote),
             [
-                'sessionToken' => $tokenResponse->getToken(),
-                'amount' => (float)$quote->getGrandTotal(),
-                'merchant_unique_id' => $reservedOrderId,
-                'urlDetails' => [
-                    'successUrl' => $this->config->getCallbackSuccessUrl(),
-                    'failureUrl' => $this->config->getCallbackErrorUrl(),
-                    'pendingUrl' => $this->config->getCallbackPendingUrl(),
-                    'backUrl' => $this->config->getBackUrl(),
-                    'notificationUrl' => $this->config->getCallbackDmnUrl($reservedOrderId),
+                'sessionToken'			=> $tokenResponse->getToken(),
+                'amount'				=> (float)$quote->getGrandTotal(),
+                'merchant_unique_id'	=> $reservedOrderId,
+                'urlDetails'			=> [
+                    'successUrl'		=> $this->config->getCallbackCompleteUrl(),
+                    'failureUrl'		=> $this->config->getCallbackCompleteUrl(),
+                    'pendingUrl'		=> $this->config->getCallbackCompleteUrl(),
+                    'backUrl'			=> $this->config->getBackUrl(),
+                    'notificationUrl'	=> $this->config->getCallbackDmnUrl($reservedOrderId),
                 ],
-                'paymentMethod' => $this->getPaymentMethod(),
+                'paymentMethod'			=> $this->getPaymentMethod(),
             ]
         );
 		

@@ -39,25 +39,22 @@ class PaymentApm extends AbstractResponse implements ResponseInterface
 		else {
 			switch ((string) @$body['transactionStatus']) {
 				case 'APPROVED':
-					$this->redirectUrl = $this->config->getCallbackSuccessUrl();
+					$this->redirectUrl = $this->config->getCallbackCompleteUrl();
 					break;
 				
 				case 'PENDING':
-					$this->redirectUrl = $this->config->getCallbackPendingUrl();
+					$this->redirectUrl = $this->config->getCallbackCompleteUrl();
 					break;
 				
 				case 'DECLINED':
 				case 'ERROR':
 				default:
-					$this->redirectUrl = $this->config->getCallbackErrorUrl();
+					$this->redirectUrl = $this->config->getCallbackCompleteUrl();
 					break;
 			}
 		}
 		
-		$this->config->createLog($this->redirectUrl, 'Payment redirectUrl');
-        
         $this->responseStatus = (string) $body['status'];
-		
         return $this;
     }
 

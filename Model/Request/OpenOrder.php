@@ -110,9 +110,9 @@ class OpenOrder extends AbstractRequest implements RequestInterface
 				'currency'          => empty($cart->getQuote()->getOrderCurrencyCode())
 					? $cart->getQuote()->getStoreCurrencyCode() : $cart->getQuote()->getOrderCurrencyCode(),
 				'urlDetails'        => array(
-					'successUrl'        => $this->config->getCallbackSuccessUrl(),
-					'failureUrl'        => $this->config->getCallbackErrorUrl(),
-					'pendingUrl'        => $this->config->getCallbackPendingUrl(),
+					'successUrl'        => $this->config->getCallbackCompleteUrl(),
+					'failureUrl'        => $this->config->getCallbackCompleteUrl(),
+					'pendingUrl'        => $this->config->getCallbackCompleteUrl(),
 					'backUrl'			=> $this->config->getBackUrl(),
 					'notificationUrl'   => $this->config->getCallbackDmnUrl(),
 				),
