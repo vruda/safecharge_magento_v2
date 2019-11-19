@@ -49,7 +49,7 @@ class Url
      */
     public function getUrl()
     {
-        return $this->moduleConfig->getEndpoint() . '?' . http_build_query($this->prepareParams());
+        return $this->moduleConfig->getEndpoint();
     }
 
     /**
@@ -62,92 +62,16 @@ class Url
             $objectManager  = \Magento\Framework\App\ObjectManager::getInstance();
             $storeManager   = $objectManager->get('\Magento\Store\Model\StoreManagerInterface');
             
-            $cart = $objectManager->get('\Magento\Checkout\Model\Cart');
-            $quote_id = $cart->getQuote()->getId();
+            $cart		= $objectManager->get('\Magento\Checkout\Model\Cart');
+            $quote_id	= $cart->getQuote()->getId();
             
             return [
-				'url' => $this->moduleConfig->getCallbackSuccessUrl()
+				'url' => $this->moduleConfig->getCallbackSuccessUrl(),
             ];
         }
         
         return [
             "url" => $this->moduleConfig->getEndpoint(),
-            "params" => $this->prepareParams()
         ];
-    }
-
-    /**
-     * @return array
-     */
-    protected function prepareParams()
-    {
-        if ($this->moduleConfig->getPaymentSolution() === Payment::SOLUTION_INTERNAL) {
-            return '';
-        }
-
-        /** @var Quote $quote */
-        $quote = $this->checkoutSession->getQuote();
-
-        $quotePayment = $quote->getPayment();
-
-        $shipping = 0;
-        $totalTax = 0;
-        $shippingAddress = $quote->getShippingAddress();
-        if ($shippingAddress !== null) {
-            $shipping = $shippingAddress->getBaseShippingAmount();
-            $totalTax = $shippingAddress->getBaseTaxAmount();
-        }
-
-        $reservedOrderId = $quotePayment->getAdditionalInformation(Payment::TRANSACTION_ORDER_ID) ?: $this->moduleConfig->getReservedOrderId();
-
-        $queryParams = [
-            'merchant_id' => $this->moduleConfig->getMerchantId(),
-            'merchant_site_id' => $this->moduleConfig->getMerchantSiteId(),
-            'customField1' => $this->moduleConfig->getSourcePlatformField(),
-            'total_amount' => number_format((float)$quote->getBaseGrandTotal(), 2, '.', ''),
-            'discount' => 0,
-            'shipping' => 0,
-            'total_tax' => 0,
-            'currency' => $quote->getBaseCurrencyCode(),
-            'user_token_id' => $quote->getCustomerId(),
-            'time_stamp' => date('YmdHis'),
-            'version' => '4.0.0',
-            'success_url' => $this->moduleConfig->getCallbackSuccessUrl(),
-            'pending_url' => $this->moduleConfig->getCallbackPendingUrl(),
-            'error_url' => $this->moduleConfig->getCallbackErrorUrl(),
-            'back_url' => $this->moduleConfig->getBackUrl(),
-            'notify_url' => $this->moduleConfig->getCallbackDmnUrl($reservedOrderId),
-            'merchant_unique_id' => $reservedOrderId,
-            'ipAddress' => $quote->getRemoteIp(),
-            'encoding' => 'UTF-8',
-        ];
-
-        if (($billing = $quote->getBillingAddress()) && $billing !== null) {
-            $billingAddress = [
-                'first_name' => $billing->getFirstname(),
-                'last_name' => $billing->getLastname(),
-                'address' => is_array($billing->getStreet()) ? implode(' ', $billing->getStreet()) : '',
-                'cell' => '',
-                'phone' => $billing->getTelephone(),
-                'zip' => $billing->getPostcode(),
-                'city' => $billing->getCity(),
-                'country' => $billing->getCountryId(),
-                'state' => $billing->getRegionCode(),
-                'email' => $billing->getEmail(),
-            ];
-            $queryParams = array_merge($queryParams, $billingAddress);
-        }
-
-        $queryParams['item_name_1'] = 'product1';
-        $queryParams['item_amount_1'] = $queryParams['total_amount'];
-        $queryParams['item_quantity_1'] = 1;
-        $queryParams['numberofitems'] = 1;
-
-        $queryParams['checksum'] = hash(
-            $this->moduleConfig->getHash(),
-            utf8_encode($this->moduleConfig->getMerchantSecretKey() . implode("", $queryParams))
-        );
-
-        return $queryParams;
     }
 }

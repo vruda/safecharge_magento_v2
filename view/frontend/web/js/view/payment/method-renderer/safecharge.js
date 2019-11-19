@@ -108,14 +108,6 @@ define(
                 return pmData;
             },
 
-            getAuthenticateUrl: function() {
-                return window.checkoutConfig.payment[self.getCode()].authenticateUrl;
-            },
-
-            useExternalSolution: function() {
-                return window.checkoutConfig.payment[self.getCode()].externalSolution;
-            },
-
             getRedirectUrl: function() {
                 return window.checkoutConfig.payment[self.getCode()].redirectUrl;
             },
@@ -150,10 +142,6 @@ define(
                 else {
                     return;
                 }
-                
-//                if (self.useExternalSolution()) {
-//                    return;
-//                }
                 
                 $.ajax({
                     dataType: "json",
@@ -236,7 +224,6 @@ define(
                 if (self.validate()) {
                     self.isPlaceOrderActionAllowed(false);
 
-//                    if (!self.useExternalSolution() && self.chosenApmMethod() !== 'cc_card') {
                     if (self.chosenApmMethod() !== 'cc_card') {
 						var apmFields = {};
 						var choosenMethod = self.chosenApmMethod();

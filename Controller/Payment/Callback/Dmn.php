@@ -156,8 +156,6 @@ class Dmn extends Action implements CsrfAwareActionInterface
      */
     public function execute()
     {
-		return;
-		
         if (!$this->moduleConfig->isActive()) {
 			echo 'DMN Error - SafeCharge payment module is not active!';
 			return;
@@ -260,7 +258,7 @@ class Dmn extends Action implements CsrfAwareActionInterface
 
 			if (
 				in_array($status, ['approved', 'success'])
-				&& $orderPayment->getAdditionalInformation(Payment::KEY_CHOSEN_APM_METHOD) !== Payment::APM_METHOD_CC
+//				&& $orderPayment->getAdditionalInformation(Payment::KEY_CHOSEN_APM_METHOD) !== Payment::APM_METHOD_CC
 			) {
 //				$params['transactionType'] = isset($params['transactionType']) ? $params['transactionType'] : null;
 //				$invoiceTransactionId = $transactionId;

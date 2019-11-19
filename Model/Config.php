@@ -138,6 +138,10 @@ class Config
 		
 		if (!empty($data)) {
 			if(is_array($data) or is_object($data)) {
+				if(is_array($data) && !empty($data['paymentMethods'])) {
+					$data['paymentMethods'] = json_encode($data['paymentMethods']);
+				}
+				
 				$string .= print_r($data, true);
 			}
 			elseif (is_bool($data)) {
@@ -434,16 +438,16 @@ class Config
 		
 		if($this->versionNum >= 220) {
 			return $this->urlBuilder->getUrl(
-					'safecharge/payment/callback_success',
-//					'safecharge/payment/callback_complete',
+//					'safecharge/payment/callback_success',
+					'safecharge/payment/callback_complete',
 					['quote' => $quoteId]
 				)
 				. '?form_key=' . $this->formKey->getFormKey();
 		}
 		
 		return $this->urlBuilder->getUrl(
-            'safecharge/payment/callback_successold',
-//            'safecharge/payment/callback_completeold',
+//            'safecharge/payment/callback_successold',
+            'safecharge/payment/callback_completeold',
             ['quote' => $quoteId]
         );
     }
@@ -457,14 +461,16 @@ class Config
 		
 		if($this->versionNum >= 220) {
 			return $this->urlBuilder->getUrl(
-					'safecharge/payment/callback_pending',
+//					'safecharge/payment/callback_pending',
+					'safecharge/payment/callback_complete',
 					['quote' => $quoteId]
 				)
 				. '?form_key=' . $this->formKey->getFormKey();
 		}
 		
 		return $this->urlBuilder->getUrl(
-			'safecharge/payment/callback_pendingold',
+//			'safecharge/payment/callback_pendingold',
+			'safecharge/payment/callback_completeold',
 			['quote' => $quoteId]
 		);
 		

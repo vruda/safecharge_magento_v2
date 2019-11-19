@@ -52,11 +52,6 @@ class Payment extends Cc implements TransparentInterface
     const MODE_SANDBOX  = 'sandbox';
 
     /**
-     * Method vault code const.
-     */
-    const CC_VAULT_CODE = 'safecharge_vault';
-
-    /**
      * Additional information const.
      */
     const KEY_CC_SAVE           = 'cc_save';
@@ -197,7 +192,7 @@ class Payment extends Cc implements TransparentInterface
     /**
      * @var PrivateDataKeysProvider
      */
-    private $privateDataKeysProvider;
+//    private $privateDataKeysProvider;
 
     /**
      * @var CheckoutSession
@@ -265,7 +260,7 @@ class Payment extends Cc implements TransparentInterface
         $this->paymentTokenManagement = $paymentTokenManagement;
         $this->customerSession = $customerSession;
         $this->moduleConfig = $moduleConfig;
-        $this->privateDataKeysProvider = $privateDataKeysProvider;
+//        $this->privateDataKeysProvider = $privateDataKeysProvider;
         $this->checkoutSession = $checkoutSession;
     }
 
@@ -281,6 +276,8 @@ class Payment extends Cc implements TransparentInterface
     {
         parent::assignData($data);
 
+		$this->moduleConfig->createLog('Payment assignData');
+		
         $additionalData = $data->getData(PaymentInterface::KEY_ADDITIONAL_DATA);
 
         $ccToken = !empty($additionalData[self::KEY_CC_TOKEN])
@@ -308,6 +305,8 @@ class Payment extends Cc implements TransparentInterface
      */
     public function validate()
     {
+		$this->moduleConfig->createLog('Payment assignData');
+		
         return $this;
     }
 
@@ -365,30 +364,15 @@ class Payment extends Cc implements TransparentInterface
 
     private function processPayment(InfoInterface $payment, $amount)
     {
-        $paymentSolution = $this->moduleConfig->getPaymentSolution();
-        $payment->setAdditionalInformation(
-            self::TRANSACTION_PAYMENT_SOLUTION,
-            $paymentSolution
-        );
-
+		$this->moduleConfig->createLog('Payment processPayment');
+		
         $authCode = $payment->getAdditionalInformation(self::TRANSACTION_AUTH_CODE_KEY);
         
-        if (
-            ($authCode === null && $paymentSolution === self::SOLUTION_EXTERNAL)
-            || (
-                $paymentSolution === self::SOLUTION_INTERNAL
-                && ($chosenApmMethod = $payment->getAdditionalInformation(self::KEY_CHOSEN_APM_METHOD))
-                && $chosenApmMethod !== self::APM_METHOD_CC
-            )
-        ) {
-            $payment->setIsTransactionPending(true);
+        if ($authCode === null) {
+            $payment->setIsTransactionPending(true); // TODO do we need this
             return $this;
         }
 
-        if ($authCode === null) {
-            return $this;
-        }
-        
         $method = AbstractRequest::PAYMENT_SETTLE_METHOD;
 
         /** @var RequestInterface $request */
@@ -400,9 +384,8 @@ class Payment extends Cc implements TransparentInterface
         
         $response = $request->process();
         
-        if ($authCode === null && $paymentSolution === self::SOLUTION_EXTERNAL) {
-            $this->checkoutSession
-                ->setRedirectUrl($response->getRedirectUrl());
+        if ($authCode === null) {
+            $this->checkoutSession->setRedirectUrl($response->getRedirectUrl());
         }
 
         return $this;
@@ -482,13 +465,13 @@ class Payment extends Cc implements TransparentInterface
      *
      * @return array
      */
-    public function getDebugReplacePrivateDataKeys()
-    {
-        return array_merge_recursive(
-            parent::getDebugReplacePrivateDataKeys(),
-            $this->privateDataKeysProvider->getConfig()
-        );
-    }
+//    public function getDebugReplacePrivateDataKeys()
+//    {
+//        return array_merge_recursive(
+//            parent::getDebugReplacePrivateDataKeys(),
+//            $this->privateDataKeysProvider->getConfig()
+//        );
+//    }
 
     /**
      * {inheritdoc}

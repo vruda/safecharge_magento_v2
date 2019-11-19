@@ -16,8 +16,8 @@ class PrivateDataKeysProvider
     public function getConfig()
     {
         return [
-            'cardNumber',
-            'CVV',
+//            'cardNumber',
+//            'CVV',
         ];
     }
 }

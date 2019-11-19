@@ -35,7 +35,7 @@
                 <!-- this option is mandatory, but we do not show it in the admin because all cards payments use SafeCharge WebSDK -->
                 <cctypes>AE,VI,MC,MI,DN</cctypes>
                 
-                <payment_solution>internal</payment_solution>
+                <payment_solution>external</payment_solution>
                 <order_status>processing</order_status>
                 <can_use_checkout>1</can_use_checkout>
                 
