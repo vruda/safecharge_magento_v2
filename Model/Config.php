@@ -463,7 +463,7 @@ class Config
 
 			if(is_dir($logsPath)) {
 				file_put_contents(
-					$logsPath . DIRECTORY_SEPARATOR . date('Y-m-d') . '.txt',
+					$logsPath . DIRECTORY_SEPARATOR . 'SafeCharge-' . date('Y-m-d') . '.txt',
 					$string,
 					FILE_APPEND
 				);

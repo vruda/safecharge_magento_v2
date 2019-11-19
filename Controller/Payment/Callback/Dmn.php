@@ -129,8 +129,6 @@ class Dmn extends Action
         $this->onepageCheckout = $onepageCheckout;
         $this->jsonResultFactory = $jsonResultFactory;
 		
-		$this->moduleConfig->createLog('DMN constructor');
-		
 		$this->execute();
     }
 

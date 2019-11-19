@@ -141,6 +141,7 @@ class Success extends Action
 
         try {
             $result = $this->placeOrder();
+			
             if ($result->getSuccess() !== true) {
                 throw new PaymentException(__($result->getErrorMessage()));
             }
@@ -155,7 +156,6 @@ class Success extends Action
                 throw new PaymentException(__('Your payment failed.'));
             }
 
-			//$transactionId = $params['TransactionID'];
 			$orderPayment->setAdditionalInformation(
 				Payment::TRANSACTION_ID,
 				@$params['TransactionID']

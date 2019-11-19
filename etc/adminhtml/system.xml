@@ -139,7 +139,8 @@
                        showInStore="1"
                        sortOrder="20">
                     <label>Advanced Configuration</label>
-                    <field id="enable_cc_detection"
+                    
+<!--					<field id="enable_cc_detection"
                            translate="label"
                            type="select"
                            sortOrder="10"
@@ -151,8 +152,9 @@
                         <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                         <comment>Typing in a credit card number will automatically select the credit card type.</comment>
                         <config_path>payment/safecharge/enable_cc_detection</config_path>
-                    </field>
-                    <field id="payment_action"
+                    </field>-->
+                    
+					<field id="payment_action"
                            translate="label"
                            type="select"
                            sortOrder="20"
@@ -164,7 +166,8 @@
                         <source_model>Safecharge\Safecharge\Model\Adminhtml\Source\PaymentAction</source_model>
                         <config_path>payment/safecharge/payment_action</config_path>
                     </field>
-                    <field id="payment_solution"
+                    
+					<field id="payment_solution"
                            translate="label"
                            type="select"
                            sortOrder="30"
@@ -176,7 +179,8 @@
                         <source_model>Safecharge\Safecharge\Model\Adminhtml\Source\PaymentSolution</source_model>
                         <config_path>payment/safecharge/payment_solution</config_path>
                     </field>
-                    <field id="use_vault"
+                    
+<!--					<field id="use_vault"
                            translate="label"
                            type="select"
                            sortOrder="50"
@@ -188,7 +192,8 @@
                         <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                         <comment>When vault is enabled customers will be able so save their credit cards and use them in future orders.</comment>
                         <config_path>payment/safecharge/use_vault</config_path>
-                    </field>
+                    </field>-->
+					
                     <field id="debug"
                            translate="label"
                            type="select"
@@ -201,7 +206,8 @@
                         <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                         <config_path>payment/safecharge/debug</config_path>
                     </field>
-                    <field id="cctypes"
+					
+<!--                    <field id="cctypes"
                            translate="label"
                            type="multiselect"
                            sortOrder="70"
@@ -212,8 +218,9 @@
                         <label>Credit Card Types</label>
                         <source_model>Safecharge\Safecharge\Model\Adminhtml\Source\CcType</source_model>
                         <config_path>payment/safecharge/cctypes</config_path>
-                    </field>
-                    <field id="min_order_total"
+                    </field>-->
+                    
+					<field id="min_order_total"
                            translate="label"
                            type="text"
                            sortOrder="80"
@@ -224,6 +231,7 @@
                         <label>Minimum Order Total</label>
                         <config_path>payment/safecharge/min_order_total</config_path>
                     </field>
+					
                     <field id="max_order_total"
                            translate="label"
                            type="text"
@@ -235,6 +243,7 @@
                         <label>Maximum Order Total</label>
                         <config_path>payment/safecharge/max_order_total</config_path>
                     </field>
+					
                     <field id="sort_order"
                            translate="label"
                            type="text"
@@ -247,6 +256,7 @@
                         <frontend_class>validate-number</frontend_class>
                         <config_path>payment/safecharge/sort_order</config_path>
                     </field>
+					
                     <field id="allowspecific"
                            translate="label"
                            type="allowspecific"
@@ -259,6 +269,7 @@
                         <source_model>Magento\Payment\Model\Config\Source\Allspecificcountries</source_model>
                         <config_path>payment/safecharge/allowspecific</config_path>
                     </field>
+					
                     <field id="specificcountry"
                            translate="label"
                            type="multiselect"

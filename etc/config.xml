@@ -28,9 +28,9 @@
                 <enable_cc_detection>1</enable_cc_detection>
                 <secure_3d>1</secure_3d>
                 <payment_action>authorize</payment_action>
-                <payment_solution>internal</payment_solution>
+                <payment_solution>external</payment_solution>
                 <order_status>sc_auth</order_status>
-                <use_vault>1</use_vault>
+                <use_vault>0</use_vault>
                 <debug>0</debug>
                 <cctypes>AE,VI,MC,MI,DN</cctypes>
                 <useccv>1</useccv>
@@ -49,10 +49,10 @@
             </safecharge>
 
             <!-- Payment Method CC Vault Configuration. -->
-            <safecharge_cc_vault>
+<!--            <safecharge_cc_vault>
                 <model>SafechargeCreditCardVaultFacade</model>
                 <title>Stored Cards (Safecharge)</title>
-            </safecharge_cc_vault>
+            </safecharge_cc_vault>-->
         </payment>
     </default>
 </config>
