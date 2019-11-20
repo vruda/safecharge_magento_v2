@@ -263,6 +263,7 @@ class Dmn extends Action implements CsrfAwareActionInterface
 //				$params['transactionType'] = isset($params['transactionType']) ? $params['transactionType'] : null;
 //				$invoiceTransactionId = $transactionId;
 				$transactionType = Transaction::TYPE_AUTH;
+				$sc_transaction_type = Payment::SC_AUTH;
 				$isSettled = false;
 
 				switch (strtolower($params['transactionType'])) {
@@ -281,8 +282,10 @@ class Dmn extends Action implements CsrfAwareActionInterface
 						break;
 						
 					case 'sale':
+					case 'settle':
 						$message = $this->captureCommand->execute($orderPayment, $order->getBaseGrandTotal(), $order);
 						$transactionType = Transaction::TYPE_CAPTURE;
+						$sc_transaction_type = Payment::SC_SETTLED;
 						$isSettled = true;
 						
 						break;
@@ -307,6 +310,7 @@ class Dmn extends Action implements CsrfAwareActionInterface
 				}
 				
 				$transaction	= $orderPayment->addTransaction($transactionType);
+//				$transaction	= $orderPayment->addTransaction($sc_transaction_type);
 				$message		= $orderPayment->prependMessage($message);
 				
 				$orderPayment->addTransactionCommentsToOrder(

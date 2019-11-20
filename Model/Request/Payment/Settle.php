@@ -54,18 +54,6 @@ class Settle extends AbstractPayment implements RequestInterface
         /** @var Order $order */
         $order = $orderPayment->getOrder();
 
-        $tokenRequest = $this->requestFactory
-            ->create(AbstractRequest::GET_SESSION_TOKEN_METHOD);
-        $tokenResponse = $tokenRequest->process();
-
-        $this->safechargeLogger->updateRequest(
-            $tokenRequest->getRequestId(),
-            [
-                'parent_request_id' => $orderPayment
-                    ->getAdditionalInformation(Payment::TRANSACTION_REQUEST_ID),
-            ]
-        );
-
         $authCode = $orderPayment
             ->getAdditionalInformation(Payment::TRANSACTION_AUTH_CODE_KEY);
         $relatedTransactionId = $orderPayment
@@ -74,33 +62,21 @@ class Settle extends AbstractPayment implements RequestInterface
         if (!$authCode) {
             throw new PaymentException(__('Authorization code is missing.'));
         }
+		
+		$getIncrementId = $order->getIncrementId();
 
         $params = [
-            'sessionToken' => $tokenResponse->getToken(),
-            'clientUniqueId' => $order->getIncrementId(),
-            'currency' => $order->getBaseCurrencyCode(),
-            'amount' => (float)$this->amount,
-            'relatedTransactionId' => $relatedTransactionId,
-            'authCode' => $authCode,
-            'descriptorMerchantName' => 'Merchant Name',
-            'descriptorMerchantPhone' => '12345789',
-            'comment' => 'No Comment',
-            'merchant_unique_id' => $order->getIncrementId(),
-            'urlDetails' => [
-                //'notificationUrl' => $this->config->getCallbackDmnUrl($order->getIncrementId(), $order->getStoreId()),
-                'notificationUrl' => '',
+            'clientUniqueId'			=> $getIncrementId,
+			'amount'					=> (float)$this->amount,
+            'currency'					=> $order->getBaseCurrencyCode(),
+            'relatedTransactionId'		=> $relatedTransactionId,
+			'authCode'					=> $authCode,
+			'urlDetails'				=> [
+                'notificationUrl' => $this->config->getCallbackDmnUrl($getIncrementId),
             ],
         ];
 
         $params = array_merge_recursive($params, parent::getParams());
-
-        $this->safechargeLogger->updateRequest(
-            $this->getRequestId(),
-            [
-                'parent_request_id' => $tokenRequest->getRequestId(),
-                'increment_id' => $order->getIncrementId(),
-            ]
-        );
 
         return $params;
     }
@@ -121,9 +97,6 @@ class Settle extends AbstractPayment implements RequestInterface
             'currency',
             'relatedTransactionId',
             'authCode',
-            'descriptorMerchantName',
-            'descriptorMerchantPhone',
-            'comment',
             'urlDetails',
             'timeStamp',
         ];

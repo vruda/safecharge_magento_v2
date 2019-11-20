@@ -51,7 +51,7 @@ class ConfigurableInfo extends \Magento\Payment\Block\ConfigurableInfo
             Payment::TRANSACTION_ORDER_ID					=> __('Safecharge Order Id'),
             Payment::TRANSACTION_REQUEST_ID					=> __('Internal Request Id'),
             Payment::TRANSACTION_PAYMENT_SOLUTION			=> __('Payment Solution'),
-            Payment::TRANSACTION_EXTERNAL_PAYMENT_METHOD	=> __('External Payment Method'),
+            Payment::TRANSACTION_EXTERNAL_PAYMENT_METHOD	=> __('Payment Method'),
         ];
 
         $label = $field;
