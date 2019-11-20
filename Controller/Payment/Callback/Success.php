@@ -138,7 +138,7 @@ class Success extends Action
                 . json_encode($params)
             );
         }
-
+		
         try {
             $result = $this->placeOrder();
 			
@@ -171,11 +171,16 @@ class Success extends Action
                 @$params['payment_method']
             );
 			
+            $orderPayment->setAdditionalInformation(
+                Payment::TRANSACTION_STATUS,
+                @$params['Status']
+            );
+			
             $orderPayment->setTransactionAdditionalInfo(
                 Transaction::RAW_DETAILS,
                 $params
             );
-
+			
             $orderPayment->save();
             $order->save();
         } catch (PaymentException $e) {

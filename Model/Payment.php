@@ -73,6 +73,7 @@ class Payment extends Cc implements TransparentInterface
     const TRANSACTION_CARD_CVV = 'card_cvv';
     const TRANSACTION_PAYMENT_SOLUTION = 'payment_solution';
     const TRANSACTION_EXTERNAL_PAYMENT_METHOD = 'external_payment_method';
+    const TRANSACTION_STATUS = 'sc_status';
 
     /**
      * Order statuses.

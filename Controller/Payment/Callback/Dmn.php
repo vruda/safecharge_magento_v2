@@ -175,7 +175,7 @@ class Dmn extends Action
                     $order = $this->orderFactory->create()->loadByIncrementId($orderIncrementId);
 
                     if (!($order && $order->getId())) {
-                        sleep(3);
+                        sleep(5);
                     }
                 } while ($tryouts <=10 && !($order && $order->getId()));
 
@@ -184,33 +184,19 @@ class Dmn extends Action
                 }
 
                 /** @var OrderPayment $payment */
-                $orderPayment = $order->getPayment();
+                $orderPayment		= $order->getPayment();
+				$transaction_status = $orderPayment->getAdditionalInformation(Payment::TRANSACTION_STATUS);
 				
-				$raw_details_info = $orderPayment->getTransactionAdditionalInfo(Transaction::RAW_DETAILS);
-				
-				if(is_array($raw_details_info)) {
-					$info = [];
-					
-					if(!empty($raw_details_info['raw_details_info'])) {
-						$info = $raw_details_info['raw_details_info'];
-					}
-					elseif(!empty($raw_details_info['Status'])) {
-						$info = $raw_details_info;
-					}
-					
-					if(!empty($info['Status'])) {
-						if(
-							strtolower($info['Status']) == 'approved'
-							and !empty($params['Status'])
-							and strtolower($params['Status']) != 'approved'
-						) {
-							echo 'The last Order Status is APPROVED, the incoming is ' . $params['Status'] . '. Abort!';
-							exit;
-						}
-					}
+				if(
+					strtolower($transaction_status) == 'approved'
+					&& $params['Status'] !== $transaction_status
+				) {
+					$this->moduleConfig->createLog('The last Order Status is APPROVED, the incoming is ' . $params['Status'] . '. Abort!');
+					echo 'The last Order Status is APPROVED, the incoming is ' . $params['Status'] . '. Abort!';
+					exit;
 				}
 				
-                $transactionId = $params['TransactionID'];
+                $transactionId = @$params['TransactionID'];
                 $orderPayment->setAdditionalInformation(
                     Payment::TRANSACTION_ID,
                     $transactionId
@@ -229,6 +215,11 @@ class Dmn extends Action
                         $params['payment_method']
                     );
                 }
+				
+				$orderPayment->setAdditionalInformation(
+					Payment::TRANSACTION_STATUS,
+					@$params['Status']
+				);
 
                 $orderPayment->setTransactionAdditionalInfo(
                     Transaction::RAW_DETAILS,
@@ -329,7 +320,7 @@ class Dmn extends Action
         }
 		*/
 		
-		$this->moduleConfig->createLog('DMN SUCCESS');
+		$this->moduleConfig->createLog('DMN Accepted');
 
         return $this->jsonResultFactory->create()
             ->setHttpResponseCode(\Magento\Framework\Webapi\Response::HTTP_OK)
