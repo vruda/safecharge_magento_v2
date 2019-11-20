@@ -185,7 +185,31 @@ class Dmn extends Action
 
                 /** @var OrderPayment $payment */
                 $orderPayment = $order->getPayment();
-
+				
+				$raw_details_info = $orderPayment->getTransactionAdditionalInfo(Transaction::RAW_DETAILS);
+				
+				if(is_array($raw_details_info)) {
+					$info = [];
+					
+					if(!empty($raw_details_info['raw_details_info'])) {
+						$info = $raw_details_info['raw_details_info'];
+					}
+					elseif(!empty($raw_details_info['Status'])) {
+						$info = $raw_details_info;
+					}
+					
+					if(!empty($info['Status'])) {
+						if(
+							strtolower($info['Status']) == 'approved'
+							and !empty($params['Status'])
+							and strtolower($params['Status']) != 'approved'
+						) {
+							echo 'The last Order Status is APPROVED, the incoming is ' . $params['Status'] . '. Abort!';
+							exit;
+						}
+					}
+				}
+				
                 $transactionId = $params['TransactionID'];
                 $orderPayment->setAdditionalInformation(
                     Payment::TRANSACTION_ID,
