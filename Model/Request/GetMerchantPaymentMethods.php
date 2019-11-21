@@ -114,6 +114,7 @@ class GetMerchantPaymentMethods extends AbstractRequest implements RequestInterf
      */
     protected function getParams()
     {
+		$this->config->createLog('requestFactory OPEN_ORDER_METHOD - GetMerchantPaymentMethods.php');
         $tokenRequest = $this->requestFactory
             ->create(AbstractRequest::OPEN_ORDER_METHOD);
         
@@ -142,13 +143,11 @@ class GetMerchantPaymentMethods extends AbstractRequest implements RequestInterf
 		}
 		
 		$languageCode = 'en';
-			
 		if ($store && $store->getLocaleCode()) {
 			$languageCode = $store->getLocaleCode();
 		}
 		
 		$currencyCode = $this->config->getQuoteBaseCurrency();
-		
 		if (
 			(empty($currencyCode) || is_null($currencyCode))
 			&& $cart
@@ -166,8 +165,6 @@ class GetMerchantPaymentMethods extends AbstractRequest implements RequestInterf
 
         $params = array_merge_recursive(parent::getParams(), $params);
 		
-		$this->config->createLog('Get the APMs.');
-
         return $params;
     }
 

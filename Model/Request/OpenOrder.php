@@ -106,7 +106,7 @@ class OpenOrder extends AbstractRequest implements RequestInterface
 
         $params = array_merge_recursive(
 			[
-				'amount'            => (string) round($cart->getQuote()->getGrandTotal(), 2),
+				'amount'            => (string) number_format($cart->getQuote()->getGrandTotal(), 2, '.', ''),
 				'currency'          => empty($cart->getQuote()->getOrderCurrencyCode())
 					? $cart->getQuote()->getStoreCurrencyCode() : $cart->getQuote()->getOrderCurrencyCode(),
 				'urlDetails'        => array(
@@ -126,8 +126,6 @@ class OpenOrder extends AbstractRequest implements RequestInterface
             parent::getParams()
         );
 		
-		$this->config->createLog('Open Order.');
-
         return $params;
     }
 

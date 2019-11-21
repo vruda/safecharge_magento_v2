@@ -76,7 +76,7 @@ class Settle extends AbstractPayment implements RequestInterface
             ],
         ];
 
-        $params = array_merge_recursive($params, parent::getParams());
+        $params = array_merge_recursive(parent::getParams(), $params);
 
         return $params;
     }

@@ -68,8 +68,8 @@ class PaymentApm extends AbstractRequest implements RequestInterface
             $responseFactory
         );
 
-        $this->requestFactory = $requestFactory;
-        $this->checkoutSession = $checkoutSession;
+        $this->requestFactory	= $requestFactory;
+        $this->checkoutSession	= $checkoutSession;
     }
 
     /**
@@ -141,6 +141,7 @@ class PaymentApm extends AbstractRequest implements RequestInterface
 
         $quotePayment = $quote->getPayment();
 
+		$this->moduleConfig->createLog('requestFactory GET_SESSION_TOKEN_METHOD - PaymentApm.php');
         $tokenRequest = $this->requestFactory
             ->create(AbstractRequest::GET_SESSION_TOKEN_METHOD);
         $tokenResponse = $tokenRequest->process();

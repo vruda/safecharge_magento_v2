@@ -9,10 +9,10 @@ use Magento\Payment\Helper\Data as PaymentHelper;
 use Magento\Payment\Model\CcConfig;
 use Magento\Payment\Model\CcGenericConfigProvider;
 use Magento\Vault\Api\PaymentTokenManagementInterface;
-use Magento\Vault\Model\CreditCardTokenFactory;
+//use Magento\Vault\Model\CreditCardTokenFactory;
 use Safecharge\Safecharge\Model\Config as ModuleConfig;
 use Safecharge\Safecharge\Model\Request\Factory as RequestFactory;
-use Magento\Framework\App\Config\ScopeConfigInterface;
+//use Magento\Framework\App\Config\ScopeConfigInterface;
 
 /**
  * Safecharge Safecharge config provider model.
@@ -71,11 +71,11 @@ class ConfigProvider extends CcGenericConfigProvider
         RequestFactory $requestFactory,
         array $methodCodes
     ) {
-        $this->moduleConfig = $moduleConfig;
-        $this->customerSession = $customerSession;
-        $this->paymentTokenManagement = $paymentTokenManagement;
-        $this->urlBuilder = $urlBuilder;
-        $this->requestFactory = $requestFactory;
+        $this->moduleConfig				= $moduleConfig;
+        $this->customerSession			= $customerSession;
+        $this->paymentTokenManagement	= $paymentTokenManagement;
+        $this->urlBuilder				= $urlBuilder;
+        $this->requestFactory			= $requestFactory;
 
         $methodCodes = array_merge_recursive(
             $methodCodes,
@@ -99,29 +99,27 @@ class ConfigProvider extends CcGenericConfigProvider
         if (!$this->moduleConfig->isActive()) {
             return [];
         }
-
-        $customerId = $this->customerSession->getCustomerId();
-        $apmMethods = $this->getApmMethods();
+		
+//        $customerId = $this->customerSession->getCustomerId();
+//        $apmMethods = $this->getApmMethods();
         
         $objectManager  = \Magento\Framework\App\ObjectManager::getInstance();
         $storeManager   = $objectManager->get('\Magento\Store\Model\StoreManagerInterface');
-        
-        $locale = $objectManager
+        $locale			= $objectManager
             ->get('Magento\Framework\App\Config\ScopeConfigInterface')
             ->getValue('general/locale/code', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
         
-        $cart = $objectManager->get('\Magento\Checkout\Model\Cart');
-        
-        $quote_id = $cart->getQuote()->getId();
+        $cart		= $objectManager->get('\Magento\Checkout\Model\Cart');
+//        $quote_id	= $cart->getQuote()->getId();
+		
+		$this->moduleConfig->createLog($cart->getQuote()->getTotals(), 'The totals:');
+//		$this->moduleConfig->createLog($this->getApmsSessionToken(), 'SessionToken:');
         
         $config = [
             'payment' => [
                 Payment::METHOD_CODE => [
                     'countryId'						=> $this->moduleConfig->getQuoteCountryCode(),
-                    'apmMethods'					=> $apmMethods,
-//                    'authenticateUrl'				=> $this->urlBuilder->getUrl('safecharge/payment/authenticate'),
-//                    'externalSolution'				=> $this->moduleConfig->getPaymentSolution() === Payment::SOLUTION_EXTERNAL,
-                    'externalSolution'				=> true,
+//                    'apmMethods'					=> $apmMethods,
                     'redirectUrl'					=> $this->urlBuilder->getUrl('safecharge/payment/redirect'),
                     'paymentApmUrl'					=> $this->urlBuilder->getUrl('safecharge/payment/apm'),
                     'getMerchantPaymentMethodsUrl'	=> $this->urlBuilder->getUrl('safecharge/payment/GetMerchantPaymentMethods'),
@@ -130,7 +128,7 @@ class ConfigProvider extends CcGenericConfigProvider
                     'merchantSiteId'    => $this->moduleConfig->getMerchantSiteId(),
                     'merchantId'        => $this->moduleConfig->getMerchantId(),
                     'isTestMode'        => $this->moduleConfig->isTestModeEnabled(),
-                    'sessionToken'      => $this->getApmsSessionToken(),
+//                    'sessionToken'      => $this->getApmsSessionToken(),
                     'locale'            => substr($locale, 0, 2),
                     'total'             => (string) number_format($cart->getQuote()->getGrandTotal(), 2, '.', ''),
                     'currency'          => trim($storeManager->getStore()->getCurrentCurrencyCode()),
@@ -145,17 +143,17 @@ class ConfigProvider extends CcGenericConfigProvider
      * Return AMP Methods.
      *
      * @return array
+	 * @deprecated since version 2.0.0
      */
     private function getApmMethods()
     {
-//        if ($this->moduleConfig->getPaymentSolution() === Payment::SOLUTION_EXTERNAL) {
-//            return [];
-//        }
+		$this->moduleConfig->createLog('requestFactory GET_MERCHANT_PAYMENT_METHODS_METHOD - ConfigProvider.php');
         $this->apmsRequest = $this->requestFactory->create(AbstractRequest::GET_MERCHANT_PAYMENT_METHODS_METHOD);
 
         try {
             $apmMethods = $this->apmsRequest ->process();
-        } catch (PaymentException $e) {
+        }
+		catch (PaymentException $e) {
             return [];
         }
 
@@ -167,6 +165,7 @@ class ConfigProvider extends CcGenericConfigProvider
      * The APMs must be got before we call this method
      * 
      * @return string Session Token (returned from the APMs) or empty
+	 * @deprecated since version 2.0.0
      */
     private function getApmsSessionToken()
     {

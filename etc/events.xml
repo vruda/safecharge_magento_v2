@@ -23,4 +23,9 @@
         <observer name="safecharge_void_order_status_update"
                   instance="Safecharge\Safecharge\Observer\Sales\Order\Void\Register"/>
     </event>
+	
+	<event name="sales_order_shipment_save_after">
+        <observer name="safecharge_order_last_step_function" 
+				  instance="Safecharge\Safecharge\Observer\Sales\Order\PrepareData" />
+    </event>
 </config>

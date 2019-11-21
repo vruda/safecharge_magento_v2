@@ -71,6 +71,8 @@ class Payment extends Cc implements TransparentInterface
     const TRANSACTION_SESSION_TOKEN             = 'session_token';
     const TRANSACTION_PAYMENT_SOLUTION          = 'payment_solution';
     const TRANSACTION_EXTERNAL_PAYMENT_METHOD   = 'external_payment_method';
+    const TRANSACTION_STATUS					= 'sc_status';
+    const TRANSACTION_TYPE						= 'sc_transaction_type';
 
     /**
      * Order statuses.
@@ -273,8 +275,6 @@ class Payment extends Cc implements TransparentInterface
     {
         parent::assignData($data);
 
-		$this->moduleConfig->createLog('Payment assignData');
-		
         $additionalData = $data->getData(PaymentInterface::KEY_ADDITIONAL_DATA);
 
         $ccToken = !empty($additionalData[self::KEY_CC_TOKEN])
@@ -302,8 +302,6 @@ class Payment extends Cc implements TransparentInterface
      */
     public function validate()
     {
-		$this->moduleConfig->createLog('Payment assignData');
-		
         return $this;
     }
 
@@ -361,8 +359,6 @@ class Payment extends Cc implements TransparentInterface
 
     private function processPayment(InfoInterface $payment, $amount)
     {
-		$this->moduleConfig->createLog('Payment processPayment');
-		
         $authCode = $payment->getAdditionalInformation(self::TRANSACTION_AUTH_CODE_KEY);
         
         if ($authCode === null) {

@@ -65,11 +65,11 @@ class Apm extends Action
     ) {
         parent::__construct($context);
 
-        $this->redirectUrlBuilder = $redirectUrlBuilder;
-        $this->safechargeLogger = $safechargeLogger;
-        $this->moduleConfig = $moduleConfig;
-        $this->jsonResultFactory = $jsonResultFactory;
-        $this->requestFactory = $requestFactory;
+        $this->redirectUrlBuilder	= $redirectUrlBuilder;
+        $this->safechargeLogger		= $safechargeLogger;
+        $this->moduleConfig			= $moduleConfig;
+        $this->jsonResultFactory	= $jsonResultFactory;
+        $this->requestFactory		= $requestFactory;
     }
 
     /**
@@ -81,10 +81,6 @@ class Apm extends Action
             ->setHttpResponseCode(\Magento\Framework\Webapi\Response::HTTP_OK);
 
         if (!$this->moduleConfig->isActive()) {
-//            if ($this->moduleConfig->isDebugEnabled()) {
-//                $this->safechargeLogger->debug('Apm Controller: Safecharge payments module is not active at the moment!');
-//            }
-			
             return $result->setData(['error_message' => __('Safecharge payments module is not active at the moment!')]);
         }
 
@@ -96,6 +92,7 @@ class Apm extends Action
 		$this->moduleConfig->createLog($params, 'Apm Controller - Request:');
 
         try {
+			$this->moduleConfig->createLog('requestFactory PAYMENT_APM_METHOD - APM.php');
             $request = $this->requestFactory->create(AbstractRequest::PAYMENT_APM_METHOD);
             
 			$request->setPaymentMethod($params["chosen_apm_method"]);

@@ -65,11 +65,11 @@ class GetMerchantPaymentMethods extends Action
     ) {
         parent::__construct($context);
 
-        $this->redirectUrlBuilder = $redirectUrlBuilder;
-        $this->safechargeLogger = $safechargeLogger;
-        $this->moduleConfig = $moduleConfig;
-        $this->jsonResultFactory = $jsonResultFactory;
-        $this->requestFactory = $requestFactory;
+        $this->redirectUrlBuilder	= $redirectUrlBuilder;
+        $this->safechargeLogger		= $safechargeLogger;
+        $this->moduleConfig			= $moduleConfig;
+        $this->jsonResultFactory	= $jsonResultFactory;
+        $this->requestFactory		= $requestFactory;
     }
 
     /**
@@ -113,6 +113,7 @@ class GetMerchantPaymentMethods extends Action
      */
     private function getApmMethods($countryCode = null)
     {
+		$this->moduleConfig->createLog('requestFactory GET_MERCHANT_PAYMENT_METHODS_METHOD - GetMerchantPaymentMethods.php');
         $request = $this->requestFactory->create(AbstractRequest::GET_MERCHANT_PAYMENT_METHODS_METHOD);
 
         try {

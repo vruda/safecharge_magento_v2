@@ -209,10 +209,26 @@ class Dmn extends Action implements CsrfAwareActionInterface
 			$this->moduleConfig->createLog('DMN try ' . $tryouts . ' there IS order.');
 
 			/** @var OrderPayment $payment */
-			$orderPayment = $order->getPayment();
+			$orderPayment	= $order->getPayment();
+			$order_status	= $orderPayment->getAdditionalInformation(Payment::TRANSACTION_STATUS);
+			$order_tr_type	= $orderPayment->getAdditionalInformation(Payment::TRANSACTION_TYPE);
+			
+			if(
+				$order_tr_type === @$params['transactionType']
+				&& strtolower($order_status) == 'approved'
+				&& $order_status != $params['Status']
+			) {
+				$msg = 'Current Order status is APPROVED, but incoming DMN status is '
+					. $params['Status'] . ', for Transaction type '. $order_tr_type
+					.'. Do not apply DMN data on the Order!';
+				
+				$this->moduleConfig->createLog($msg);
+				
+				echo $msg;
+				return;
+			}
 
 			$transactionId = @$params['TransactionID'];
-			
 			if ($transactionId) {
 				$orderPayment->setAdditionalInformation(
 					Payment::TRANSACTION_ID,
@@ -234,6 +250,20 @@ class Dmn extends Action implements CsrfAwareActionInterface
 				);
 			}
 			
+			if (!empty($params['Status'])) {
+				$orderPayment->setAdditionalInformation(
+					Payment::TRANSACTION_STATUS,
+					$params['Status']
+				);
+			}
+			
+			if (!empty($params['transactionType'])) {
+				$orderPayment->setAdditionalInformation(
+					Payment::TRANSACTION_TYPE,
+					$params['transactionType']
+				);
+			}
+			
 			$orderPayment->setTransactionAdditionalInfo(
 				Transaction::RAW_DETAILS,
 				$params
@@ -245,11 +275,12 @@ class Dmn extends Action implements CsrfAwareActionInterface
 				$params['ErrCode']		= (isset($params['ErrCode'])) ? $params['ErrCode'] : "Unknown";
 				$params['ExErrCode']	= (isset($params['ExErrCode'])) ? $params['ExErrCode'] : "Unknown";
 				
-				$order->addStatusHistoryComment("Payment returned a '{$params['Status']}' status "
+				$order->addStatusHistoryComment("The {$params['transactionType']} request returned a '{$params['Status']}' status "
 					. "(Code: {$params['ErrCode']}, Reason: {$params['ExErrCode']}).");
 			}
 			elseif ($status) {
-				$order->addStatusHistoryComment("Payment returned a '" . $params['Status'] . "' status");
+				$order->addStatusHistoryComment("The {$params['transactionType']} request returned a '" 
+					. $params['Status'] . "' status.");
 			}
 
 			if ($status === "pending") {
@@ -326,15 +357,14 @@ class Dmn extends Action implements CsrfAwareActionInterface
 			$msg = $e->getMessage();
 
 			$this->moduleConfig->createLog($e->getMessage(), 'DMN Excception:');
-//			$this->moduleConfig->createLog($e->getTraceAsString());
 
 			echo 'Error: ' . $e->getMessage();
 			return;
 		}
 
-		$this->moduleConfig->createLog($orderIncrementId, 'DMN Success for order #');
+		$this->moduleConfig->createLog('DMN process end for order #' . $orderIncrementId);
 
-		echo 'SUCCESS';
+		echo 'DMN process completed.';
 		return;
     }
 

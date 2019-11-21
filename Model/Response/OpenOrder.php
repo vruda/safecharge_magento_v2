@@ -31,7 +31,7 @@ class OpenOrder extends AbstractResponse implements ResponseInterface
     {
         parent::process();
 
-        $body = $this->getBody();
+        $body				= $this->getBody();
         $this->orderId		= $body['orderId'];
         $this->sessionToken = $body['sessionToken'];
 

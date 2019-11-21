@@ -66,7 +66,7 @@ define(
                     
                 var apmMethods = self.getApmMethods();
 				
-                if (apmMethods.length > 0) {
+                if (typeof apmMethods != 'undefined' && apmMethods.length > 0) {
                     self.apmMethods(apmMethods);
                     self.chosenApmMethod(apmMethods[0].paymentMethod);
                 }
@@ -310,6 +310,9 @@ define(
             },
             
             initFields: function() {
+				console.log(window.checkoutConfig.payment[self.getCode()].total)
+				console.log(window.checkoutConfig.payment[self.getCode()].sessionToken)
+				
                 // for the Fields
                 var scData = {
                     merchantSiteId  : window.checkoutConfig.payment[self.getCode()].merchantSiteId,
