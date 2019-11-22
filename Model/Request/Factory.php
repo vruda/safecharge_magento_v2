@@ -49,12 +49,13 @@ class Factory
     /**
      * Create request model.
      *
-     * @param string $method
+     * @param string $method - the name of the method
+     * @param array $args - arguments to pass
      *
      * @return RequestInterface
      * @throws LocalizedException
      */
-    public function create($method)
+    public function create($method, $args = [])
     {
         $className = !empty($this->invokableClasses[$method])
             ? $this->invokableClasses[$method]
@@ -66,11 +67,12 @@ class Factory
             );
         }
 
-        $model = $this->objectManager->create($className);
-        if (!$model instanceof RequestInterface) {
+        $model = $this->objectManager->create($className, $args);
+        
+		if (!$model instanceof RequestInterface) {
             throw new LocalizedException(
                 __(
-                    '%1 doesn\'t implement \Safecharge\Safecharge\Mode\RequestInterface',
+                    '%1 doesn\'t implement \Safecharge\Safecharge\Model\RequestInterface',
                     $className
                 )
             );

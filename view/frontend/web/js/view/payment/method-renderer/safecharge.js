@@ -32,9 +32,10 @@ define(
         var self = null;
         
         // for the WebSDK
-        var sfc             = null;
-        var card            = null;
-        
+        var sfc     = null;
+        var card	= null;
+		var scData	= {};
+		
         return Component.extend({
 
             defaults: {
@@ -42,13 +43,14 @@ define(
                 isCcFormShown			: true,
                 creditCardToken			: '',
                 ccNumber				: '',
-                lastSessionToken		: '',
                 creditCardOwner			: '',
                 apmMethods				: [],
                 chosenApmMethod			: '',
                 countryId				: null
             },
-
+			
+			totals: quote.getTotals(),
+			
             initObservable: function() {
                 self = this;
 
@@ -56,7 +58,6 @@ define(
                     .observe([
                         'creditCardToken',
                         'ccNumber',
-                        'lastSessionToken',
                         'isCcFormShown',
                         'creditCardOwner',
                         'apmMethods',
@@ -64,13 +65,6 @@ define(
                         'countryId'
                     ]);
                     
-                var apmMethods = self.getApmMethods();
-				
-                if (typeof apmMethods != 'undefined' && apmMethods.length > 0) {
-                    self.apmMethods(apmMethods);
-                    self.chosenApmMethod(apmMethods[0].paymentMethod);
-                }
-
                 self.reloadApmMethods();
                 quote.billingAddress.subscribe(self.reloadApmMethods, this, 'change');
                 
@@ -99,7 +93,6 @@ define(
                     additional_data	: {
                         cc_token					: self.creditCardToken(),
                         cc_number					: self.ccNumber(),
-                        last_session_token			: self.lastSessionToken(),
                         cc_owner					: self.creditCardOwner(),
                         chosen_apm_method			: self.chosenApmMethod(),
                     },
@@ -114,10 +107,6 @@ define(
 
             getPaymentApmUrl: function() {
                 return window.checkoutConfig.payment[self.getCode()].paymentApmUrl;
-            },
-
-            getApmMethods: function() {
-                return window.checkoutConfig.payment[self.getCode()].apmMethods;
             },
 
             getMerchantPaymentMethodsUrl: function() {
@@ -155,13 +144,18 @@ define(
                 .done(function(res) {
                     if (res && res.error == 0) {
                         self.apmMethods(res.apmMethods);
-                        if (res.apmMethods.length > 0) {
+                        
+						if (res.apmMethods.length > 0) {
                             self.chosenApmMethod(res.apmMethods[0].paymentMethod);
                         }
+						
+						scData.sessionToken = res.sessionToken;
                     }
                     else {
                         console.error(res);
                     }
+					
+					self.initFields();
                 })
                 .fail(function(e) {
                     console.error(e);
@@ -178,9 +172,9 @@ define(
                     
                     // create payment with WebSDK
                     sfc.createPayment({
-                        sessionToken    : window.checkoutConfig.payment[self.getCode()].sessionToken,
+                        sessionToken    : scData.sessionToken,
                         currency        : window.checkoutConfig.payment[self.getCode()].currency,
-                        amount          : window.checkoutConfig.payment[self.getCode()].total,
+                        amount          : quote.totals().grand_total.toFixed(2),
                         cardHolderName  : document.getElementById('safecharge_cc_owner').value,
                         paymentOption   : card
                     }, function(resp){
@@ -188,8 +182,6 @@ define(
                         
                         if(typeof resp.result != 'undefined') {
                             if(resp.result == 'APPROVED' && resp.transactionId != 'undefined') {
-                                console.log(resp.dsTransID)
-                            
                                 self.ccNumber(resp.ccCardNumber);
                                 self.creditCardToken(resp.dsTransID);
                                 self.continueWithOrder(resp.transactionId);
@@ -310,16 +302,10 @@ define(
             },
             
             initFields: function() {
-				console.log(window.checkoutConfig.payment[self.getCode()].total)
-				console.log(window.checkoutConfig.payment[self.getCode()].sessionToken)
-				
                 // for the Fields
-                var scData = {
-                    merchantSiteId  : window.checkoutConfig.payment[self.getCode()].merchantSiteId,
-                    merchantId      : window.checkoutConfig.payment[self.getCode()].merchantId,
-                    sessionToken    : window.checkoutConfig.payment[self.getCode()].sessionToken
-                }
-                
+				scData.merchantSiteId	= window.checkoutConfig.payment[self.getCode()].merchantSiteId;
+				scData.merchantId		= window.checkoutConfig.payment[self.getCode()].merchantId;
+				
                 if(window.checkoutConfig.payment[self.getCode()].isTestMode == true) {
                     scData.env = 'test';
                 }

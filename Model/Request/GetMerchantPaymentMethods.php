@@ -28,7 +28,7 @@ class GetMerchantPaymentMethods extends AbstractRequest implements RequestInterf
      * @var string
      */
     protected $countryCode;
-
+	
     /**
      * OpenOrder constructor.
      *
@@ -84,7 +84,7 @@ class GetMerchantPaymentMethods extends AbstractRequest implements RequestInterf
         $this->countryCode = (string)$countryCode;
         return $this;
     }
-
+	
     /**
      * @return string
      */
@@ -92,7 +92,7 @@ class GetMerchantPaymentMethods extends AbstractRequest implements RequestInterf
     {
         return $this->countryCode;
     }
-
+	
     /**
      * @return AbstractResponse
      * @throws \Magento\Framework\Exception\LocalizedException
@@ -114,16 +114,12 @@ class GetMerchantPaymentMethods extends AbstractRequest implements RequestInterf
      */
     protected function getParams()
     {
-		$this->config->createLog('requestFactory OPEN_ORDER_METHOD - GetMerchantPaymentMethods.php');
-        $tokenRequest = $this->requestFactory
-            ->create(AbstractRequest::OPEN_ORDER_METHOD);
-        
+		$country_code	= $this->getCountryCode() ?: $this->config->getQuoteCountryCode();
+		$tokenRequest	= $this->requestFactory->create(AbstractRequest::OPEN_ORDER_METHOD);
 		$objectManager	= \Magento\Framework\App\ObjectManager::getInstance();
 		$cart			= $objectManager->get('\Magento\Checkout\Model\Cart');
 		$store			= $objectManager->get('Magento\Store\Api\Data\StoreInterface');
-		
 		$tokenResponse	= $tokenRequest->process();
-		$country_code	= $this->getCountryCode() ?: $this->config->getQuoteCountryCode();
 		
 		if (empty($country_code)) {
 			try {

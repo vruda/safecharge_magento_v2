@@ -124,55 +124,53 @@
                 <!--/ko-->
 
                 <!-- ko if: ($data.paymentMethod === 'cc_card' && $parent.chosenApmMethod() === 'cc_card')-->
-                <!--<form class="form" id="co-transparent-form" action="#" method="post">-->
-                    <fieldset data-bind="
-                        attr: {
-                            class: 'fieldset payment items ccard ' + $parent.getCode(),
-                            id: $parent.getCode() + '_form_cc'
-                        }
-                        ">
-                        <!-- ko if: ($parent.isShowLegend())-->
-                        <legend class="legend">
-                            <span>
-                                <!-- ko i18n: 'Credit Card Information' -->
-                                <!-- /ko -->
-                            </span>
-                        </legend><br />
-                        <!-- /ko -->
+				<fieldset data-bind="
+					attr: {
+						class: 'fieldset payment items ccard ' + $parent.getCode(),
+						id: $parent.getCode() + '_form_cc'
+					}
+					">
+					<!-- ko if: ($parent.isShowLegend())-->
+					<legend class="legend">
+						<span>
+							<!-- ko i18n: 'Credit Card Information' -->
+							<!-- /ko -->
+						</span>
+					</legend><br />
+					<!-- /ko -->
 
-                        <br/>
-                        <div class="field number sc_fields" style="max-width: 330px; min-height: 30px;">
-                            <div id="card-field-placeholder" data-bind="afterRender: $parent.initFields()"></div>
-                        </div>
-                        
-                        <div class="field number">
-                            <div class="control">
-                                <input type="text" name="payment[cc_owner]" class="input-text" value="" data-bind="
-                                    attr: {
-                                        id: $parent.getCode() + '_cc_owner',
-                                        title: $t('Credit Card Name'),
-                                        placeholder: $t('Name On Card'),
-                                        'data-container': $parent.getCode() + '-cc-owner',
-                                        'data-validate': JSON.stringify({
-                                            required :true
-                                        })
-                                    },
-                                    value: $parent.creditCardOwner,
-                                    valueUpdate: 'keyup'
-                               " />
-                            </div>
-                        </div>
+					<br/>
+					<div class="field number sc_fields" style="max-width: 330px; min-height: 30px;">
+						<div id="card-field-placeholder"></div>
+					</div>
 
-                        <input type="hidden" name="payment[cc_token]" data-bind="
-                            attr: {
-                                id: $parent.getCode() + '_cc_token',
-                                'data-container': $parent.getCode() + '-cc-token',
-                            },
-                            value: $parent.creditCardToken,
-                            valueUpdate: 'change'
-                        " />
-                    </fieldset>
-                <!--</form>-->
+					<div class="field number">
+						<div class="control">
+							<input type="text" name="payment[cc_owner]" class="input-text" value="" data-bind="
+								attr: {
+									id: $parent.getCode() + '_cc_owner',
+									title: $t('Credit Card Name'),
+									placeholder: $t('Name On Card'),
+									'data-container': $parent.getCode() + '-cc-owner',
+									'data-validate': JSON.stringify({
+										required :true
+									})
+								},
+								value: $parent.creditCardOwner,
+								valueUpdate: 'keyup'
+						   " />
+						</div>
+					</div>
+
+					<input type="hidden" name="payment[cc_token]" data-bind="
+						attr: {
+							id: $parent.getCode() + '_cc_token',
+							'data-container': $parent.getCode() + '-cc-token',
+						},
+						value: $parent.creditCardToken,
+						valueUpdate: 'change'
+					" />
+				</fieldset>
                 <!--/ko-->
             </div>
         </div>

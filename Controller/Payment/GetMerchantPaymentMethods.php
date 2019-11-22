@@ -80,48 +80,60 @@ class GetMerchantPaymentMethods extends Action
         $result = $this->jsonResultFactory->create()->setHttpResponseCode(\Magento\Framework\Webapi\Response::HTTP_OK);
 
         if (!$this->moduleConfig->isActive()) {
-            if ($this->moduleConfig->isDebugEnabled()) {
-                $this->safechargeLogger->debug('GetMerchantPaymentMethods Controller: Safecharge payments module is not active at the moment!');
-            }
+			$this->moduleConfig->createLog('Safecharge payments module is not active at the moment!');
             return $result->setData(['error_message' => __('Safecharge payments module is not active at the moment!')]);
         }
 
         try {
-            $apmMethods = $this->getApmMethods($this->getRequest()->getParam('countryCode'));
-        } catch (PaymentException $e) {
-            if ($this->moduleConfig->isDebugEnabled()) {
-                $this->safechargeLogger->debug('GetMerchantPaymentMethods Controller - Error: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
-            }
-            return $result->setData([
-                "error" => 1,
-                "apmMethods" => [],
-                "message" => $e->getMessage()
+			$countryCode	= $this->getRequest()->getParam('countryCode');
+			$grandTotal		= $this->getRequest()->getParam('grandTotal');
+			
+            $apmMethodsData = $this->getApmMethods($countryCode, $grandTotal);
+        }
+		catch (PaymentException $e) {
+			$this->moduleConfig->createLog('GetMerchantPaymentMethods Controller - Error: ' . $e->getMessage());
+			
+			return $result->setData([
+                "error"			=> 1,
+                "apmMethods"	=> [],
+                "message"		=> $e->getMessage()
             ]);
         }
 
         return $result->setData([
-            "error" => 0,
-            "apmMethods" => $apmMethods,
-            "message" => "Success"
+            "error"			=> 0,
+            "apmMethods"	=> $apmMethodsData['apmMethods'],
+            "sessionToken"	=> $apmMethodsData['sessionToken'],
+            "message"		=> "Success"
         ]);
     }
 
     /**
      * Return AMP Methods.
-     *
+     * We pass both parameters from JS via Ajax request
+	 * 
+	 * @param string $countryCode
+	 * @param string $grandTotal
+	 * 
      * @return array
      */
-    private function getApmMethods($countryCode = null)
+    private function getApmMethods($countryCode = null, $grandTotal = null)
     {
 		$this->moduleConfig->createLog('requestFactory GET_MERCHANT_PAYMENT_METHODS_METHOD - GetMerchantPaymentMethods.php');
         $request = $this->requestFactory->create(AbstractRequest::GET_MERCHANT_PAYMENT_METHODS_METHOD);
 
         try {
-            $apmMethods = $request->setCountryCode($countryCode)->process();
-        } catch (PaymentException $e) {
+            $apmMethods = $request
+				->setCountryCode($countryCode)
+				->process();
+        }
+		catch (PaymentException $e) {
             return [];
         }
 
-        return $apmMethods->getPaymentMethods();
+        return [
+			'apmMethods'	=> $apmMethods->getPaymentMethods(),
+			'sessionToken'	=> $apmMethods->getSessionToken(),
+		];
     }
 }

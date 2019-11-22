@@ -9,10 +9,8 @@ use Magento\Payment\Helper\Data as PaymentHelper;
 use Magento\Payment\Model\CcConfig;
 use Magento\Payment\Model\CcGenericConfigProvider;
 use Magento\Vault\Api\PaymentTokenManagementInterface;
-//use Magento\Vault\Model\CreditCardTokenFactory;
 use Safecharge\Safecharge\Model\Config as ModuleConfig;
 use Safecharge\Safecharge\Model\Request\Factory as RequestFactory;
-//use Magento\Framework\App\Config\ScopeConfigInterface;
 
 /**
  * Safecharge Safecharge config provider model.
@@ -100,9 +98,6 @@ class ConfigProvider extends CcGenericConfigProvider
             return [];
         }
 		
-//        $customerId = $this->customerSession->getCustomerId();
-//        $apmMethods = $this->getApmMethods();
-        
         $objectManager  = \Magento\Framework\App\ObjectManager::getInstance();
         $storeManager   = $objectManager->get('\Magento\Store\Model\StoreManagerInterface');
         $locale			= $objectManager
@@ -110,16 +105,16 @@ class ConfigProvider extends CcGenericConfigProvider
             ->getValue('general/locale/code', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
         
         $cart		= $objectManager->get('\Magento\Checkout\Model\Cart');
-//        $quote_id	= $cart->getQuote()->getId();
 		
-		$this->moduleConfig->createLog($cart->getQuote()->getTotals(), 'The totals:');
-//		$this->moduleConfig->createLog($this->getApmsSessionToken(), 'SessionToken:');
-        
+		$order_total = (string) number_format($cart->getQuote()->getGrandTotal(), 2, '.', '');
+		$this->moduleConfig->createLog($order_total, 'The totals:');
+		
+		$cart_total_rep_i   = $objectManager->get('\Magento\Quote\Api\CartTotalRepositoryInterface');
+		
         $config = [
             'payment' => [
                 Payment::METHOD_CODE => [
                     'countryId'						=> $this->moduleConfig->getQuoteCountryCode(),
-//                    'apmMethods'					=> $apmMethods,
                     'redirectUrl'					=> $this->urlBuilder->getUrl('safecharge/payment/redirect'),
                     'paymentApmUrl'					=> $this->urlBuilder->getUrl('safecharge/payment/apm'),
                     'getMerchantPaymentMethodsUrl'	=> $this->urlBuilder->getUrl('safecharge/payment/GetMerchantPaymentMethods'),
@@ -128,9 +123,8 @@ class ConfigProvider extends CcGenericConfigProvider
                     'merchantSiteId'    => $this->moduleConfig->getMerchantSiteId(),
                     'merchantId'        => $this->moduleConfig->getMerchantId(),
                     'isTestMode'        => $this->moduleConfig->isTestModeEnabled(),
-//                    'sessionToken'      => $this->getApmsSessionToken(),
                     'locale'            => substr($locale, 0, 2),
-                    'total'             => (string) number_format($cart->getQuote()->getGrandTotal(), 2, '.', ''),
+                    'total'             => $order_total,
                     'currency'          => trim($storeManager->getStore()->getCurrentCurrencyCode()),
                 ],
             ],

@@ -438,7 +438,6 @@ class Config
 		
 		if($this->versionNum >= 220) {
 			return $this->urlBuilder->getUrl(
-//					'safecharge/payment/callback_success',
 					'safecharge/payment/callback_complete',
 					['quote' => $quoteId]
 				)
@@ -446,7 +445,6 @@ class Config
 		}
 		
 		return $this->urlBuilder->getUrl(
-//            'safecharge/payment/callback_successold',
             'safecharge/payment/callback_completeold',
             ['quote' => $quoteId]
         );
@@ -461,7 +459,6 @@ class Config
 		
 		if($this->versionNum >= 220) {
 			return $this->urlBuilder->getUrl(
-//					'safecharge/payment/callback_pending',
 					'safecharge/payment/callback_complete',
 					['quote' => $quoteId]
 				)
@@ -469,12 +466,9 @@ class Config
 		}
 		
 		return $this->urlBuilder->getUrl(
-//			'safecharge/payment/callback_pendingold',
 			'safecharge/payment/callback_completeold',
 			['quote' => $quoteId]
 		);
-		
-//		return $this->getCallbackSuccessUrl();
     }
 
     /**
