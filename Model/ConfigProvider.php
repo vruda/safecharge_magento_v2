@@ -103,13 +103,7 @@ class ConfigProvider extends CcGenericConfigProvider
         $locale			= $objectManager
             ->get('Magento\Framework\App\Config\ScopeConfigInterface')
             ->getValue('general/locale/code', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
-        
-        $cart		= $objectManager->get('\Magento\Checkout\Model\Cart');
-		
-		$order_total = (string) number_format($cart->getQuote()->getGrandTotal(), 2, '.', '');
-		$this->moduleConfig->createLog($order_total, 'The totals:');
-		
-		$cart_total_rep_i   = $objectManager->get('\Magento\Quote\Api\CartTotalRepositoryInterface');
+        $cart			= $objectManager->get('\Magento\Checkout\Model\Cart');
 		
         $config = [
             'payment' => [
@@ -118,57 +112,17 @@ class ConfigProvider extends CcGenericConfigProvider
                     'redirectUrl'					=> $this->urlBuilder->getUrl('safecharge/payment/redirect'),
                     'paymentApmUrl'					=> $this->urlBuilder->getUrl('safecharge/payment/apm'),
                     'getMerchantPaymentMethodsUrl'	=> $this->urlBuilder->getUrl('safecharge/payment/GetMerchantPaymentMethods'),
-                    
                     // we need this for the WebSDK
-                    'merchantSiteId'    => $this->moduleConfig->getMerchantSiteId(),
-                    'merchantId'        => $this->moduleConfig->getMerchantId(),
-                    'isTestMode'        => $this->moduleConfig->isTestModeEnabled(),
-                    'locale'            => substr($locale, 0, 2),
-                    'total'             => $order_total,
-                    'currency'          => trim($storeManager->getStore()->getCurrentCurrencyCode()),
+                    'merchantSiteId'				=> $this->moduleConfig->getMerchantSiteId(),
+                    'merchantId'					=> $this->moduleConfig->getMerchantId(),
+                    'isTestMode'					=> $this->moduleConfig->isTestModeEnabled(),
+                    'locale'						=> substr($locale, 0, 2),
+                    'total'							=> (string) number_format($cart->getQuote()->getGrandTotal(), 2, '.', ''),
+                    'currency'						=> trim($storeManager->getStore()->getCurrentCurrencyCode()),
                 ],
             ],
         ];
 
         return $config;
-    }
-
-    /**
-     * Return AMP Methods.
-     *
-     * @return array
-	 * @deprecated since version 2.0.0
-     */
-    private function getApmMethods()
-    {
-		$this->moduleConfig->createLog('requestFactory GET_MERCHANT_PAYMENT_METHODS_METHOD - ConfigProvider.php');
-        $this->apmsRequest = $this->requestFactory->create(AbstractRequest::GET_MERCHANT_PAYMENT_METHODS_METHOD);
-
-        try {
-            $apmMethods = $this->apmsRequest ->process();
-        }
-		catch (PaymentException $e) {
-            return [];
-        }
-
-        return $apmMethods->getPaymentMethods();
-    }
-    
-    /**
-     * Function getApmsSessionToken
-     * The APMs must be got before we call this method
-     * 
-     * @return string Session Token (returned from the APMs) or empty
-	 * @deprecated since version 2.0.0
-     */
-    private function getApmsSessionToken()
-    {
-        if(isset($this->apmsRequest)) {
-            $class = $apmMethods = $this->apmsRequest ->process();
-            
-            return $class->getSessionToken();
-        }
-        
-        return '';
     }
 }

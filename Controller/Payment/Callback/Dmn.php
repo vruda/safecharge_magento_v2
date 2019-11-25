@@ -287,43 +287,19 @@ class Dmn extends Action implements CsrfAwareActionInterface
 				$order->setState(Order::STATE_NEW)->setStatus('pending');
 			}
 
-			if (
-				in_array($status, ['approved', 'success'])
-//				&& $orderPayment->getAdditionalInformation(Payment::KEY_CHOSEN_APM_METHOD) !== Payment::APM_METHOD_CC
-			) {
-//				$params['transactionType'] = isset($params['transactionType']) ? $params['transactionType'] : null;
-//				$invoiceTransactionId = $transactionId;
-				$transactionType = Transaction::TYPE_AUTH;
-				$sc_transaction_type = Payment::SC_AUTH;
-				$isSettled = false;
+			if (in_array($status, ['approved', 'success'])) {
+				$transactionType		= Transaction::TYPE_AUTH;
+				$sc_transaction_type	= Payment::SC_AUTH;
+				$isSettled				= false;
+				$message				= $this->captureCommand->execute($orderPayment, $order->getBaseGrandTotal(), $order);
 
-				switch (strtolower($params['transactionType'])) {
-					case 'auth':
-//						$request = $this->paymentRequestFactory->create(
-//							AbstractRequest::PAYMENT_SETTLE_METHOD,
-//							$orderPayment,
-//							$order->getBaseGrandTotal()
-//						);
-//						$settleResponse = $request->process();
-//						$invoiceTransactionId = $settleResponse->getTransactionId();
-						$message = $this->captureCommand->execute($orderPayment, $order->getBaseGrandTotal(), $order);
-//						$transactionType = Transaction::TYPE_CAPTURE;
-//						$isSettled = true;
-						
-						break;
-						
-					case 'sale':
-					case 'settle':
-						$message = $this->captureCommand->execute($orderPayment, $order->getBaseGrandTotal(), $order);
-						$transactionType = Transaction::TYPE_CAPTURE;
-						$sc_transaction_type = Payment::SC_SETTLED;
-						$isSettled = true;
-						
-						break;
+				if(in_array(strtolower($params['transactionType']), ['sale', 'settle'])) {
+					$transactionType		= Transaction::TYPE_CAPTURE;
+					$sc_transaction_type	= Payment::SC_SETTLED;
+					$isSettled				= true;
 				}
-
+				
 				$orderPayment
-//					->setTransactionId($transactionId)
 					->setIsTransactionPending($status === "pending" ? true: false)
 					->setIsTransactionClosed($isSettled ? 1 : 0);
 
@@ -333,7 +309,6 @@ class Dmn extends Action implements CsrfAwareActionInterface
 					/** @var Invoice $invoice */
 					foreach ($order->getInvoiceCollection() as $invoice) {
 						$invoice
-//							->setTransactionId($invoiceTransactionId)
 							->setTransactionId($transactionId)
 							->pay()
 							->save();
@@ -341,7 +316,6 @@ class Dmn extends Action implements CsrfAwareActionInterface
 				}
 				
 				$transaction	= $orderPayment->addTransaction($transactionType);
-//				$transaction	= $orderPayment->addTransaction($sc_transaction_type);
 				$message		= $orderPayment->prependMessage($message);
 				
 				$orderPayment->addTransactionCommentsToOrder(

@@ -108,9 +108,9 @@ class Refund extends AbstractPayment implements RequestInterface
         /** @var int|null $transactionId */
         $transactionId = $orderPayment->getRefundTransactionId();
         if ($transactionId === null) {
-            throw new PaymentException(
-                __('Invoice transaction id has been not provided.')
-            );
+			$msg = __('Invoice transaction id has been not provided.');
+			$this->config->createLog($msg);
+            throw new PaymentException($msg);
         }
 
         /** @var OrderTransaction $transaction */
@@ -123,20 +123,22 @@ class Refund extends AbstractPayment implements RequestInterface
         $authCode = null;
         if ($transaction === false) {
             $authCode = $orderPayment->getAdditionalInformation(Payment::TRANSACTION_AUTH_CODE_KEY);
-        } else {
+        }
+		else {
             $transactionDetails = $transaction->getAdditionalInformation(OrderTransaction::RAW_DETAILS);
 
             if (empty($transactionDetails['authCode'])) {
                 $authCode = $orderPayment->getAdditionalInformation(Payment::TRANSACTION_AUTH_CODE_KEY);
-            } else {
+            }
+			else {
                 $authCode = $transactionDetails['authCode'];
             }
         }
 
         if ($authCode === null) {
-            throw new PaymentException(
-                __('Transaction does not contain authorization code.')
-            );
+			$msg = __('Transaction does not contain authorization code.');
+			$this->config->createLog($msg);
+            throw new PaymentException($msg);
         }
 
         $params = [
@@ -148,8 +150,8 @@ class Refund extends AbstractPayment implements RequestInterface
             'comment' => '',
             'merchant_unique_id' => $order->getIncrementId(),
             'urlDetails' => [
-                //'notificationUrl' => $this->config->getCallbackDmnUrl($order->getIncrementId(), $order->getStoreId()),
-                'notificationUrl' => '',
+                'notificationUrl' => $this->config->getCallbackDmnUrl($order->getIncrementId(), $order->getStoreId()),
+//                'notificationUrl' => '',
             ],
         ];
 
@@ -157,9 +159,7 @@ class Refund extends AbstractPayment implements RequestInterface
 
         $this->safechargeLogger->updateRequest(
             $this->getRequestId(),
-            [
-                'increment_id' => $order->getIncrementId(),
-            ]
+            ['increment_id' => $order->getIncrementId(),]
         );
 
         return $params;

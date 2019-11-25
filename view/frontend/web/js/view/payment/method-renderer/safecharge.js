@@ -65,8 +65,8 @@ define(
                         'countryId'
                     ]);
                     
-                self.reloadApmMethods();
-                quote.billingAddress.subscribe(self.reloadApmMethods, this, 'change');
+                self.getApmMethods();
+                quote.billingAddress.subscribe(self.getApmMethods, this, 'change');
                 
                 return self;
             },
@@ -113,7 +113,7 @@ define(
                 return window.checkoutConfig.payment[self.getCode()].getMerchantPaymentMethodsUrl;
             },
 
-            reloadApmMethods: function() {
+            getApmMethods: function() {
                 if (quote.billingAddress() && self.countryId() === quote.billingAddress().countryId) {
                     return;
                 }
@@ -178,8 +178,6 @@ define(
                         cardHolderName  : document.getElementById('safecharge_cc_owner').value,
                         paymentOption   : card
                     }, function(resp){
-                        console.log(resp);
-                        
                         if(typeof resp.result != 'undefined') {
                             if(resp.result == 'APPROVED' && resp.transactionId != 'undefined') {
                                 self.ccNumber(resp.ccCardNumber);
