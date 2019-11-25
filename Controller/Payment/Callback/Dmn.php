@@ -171,13 +171,13 @@ class Dmn extends Action implements CsrfAwareActionInterface
 
 			$this->validateChecksum($params);
 
-			if (isset($params["merchant_unique_id"]) && $params["merchant_unique_id"]) {
-				$orderIncrementId = $params["merchant_unique_id"];
-			}
-			elseif (isset($params["order"]) && $params["order"]) {
+			if (!empty($params["order"])) {
 				$orderIncrementId = $params["order"];
 			}
-			elseif (isset($params["orderId"]) && $params["orderId"]) {
+			elseif (!empty($params["merchant_unique_id"]) && intval($params["merchant_unique_id"]) != 0) {
+				$orderIncrementId = $params["merchant_unique_id"];
+			}
+			elseif (!empty($params["orderId"])) {
 				$orderIncrementId = $params["orderId"];
 			}
 			else {
