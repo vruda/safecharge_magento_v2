@@ -88,6 +88,10 @@ class Dmn extends Action implements CsrfAwareActionInterface
      * @var JsonFactory
      */
     private $jsonResultFactory;
+	
+	private $transaction;
+	private $invoiceService;
+	private $objectManager;
 
     /**
      * Object constructor.
@@ -117,21 +121,25 @@ class Dmn extends Action implements CsrfAwareActionInterface
         CartManagementInterface $cartManagement,
         CheckoutSession $checkoutSession,
         Onepage $onepageCheckout,
-        JsonFactory $jsonResultFactory
+        JsonFactory $jsonResultFactory,
+		\Magento\Framework\DB\Transaction $transaction,
+		\Magento\Sales\Model\Service\InvoiceService $invoiceService
     ) {
         parent::__construct($context);
 
-        $this->orderFactory = $orderFactory;
-        $this->moduleConfig = $moduleConfig;
-        $this->authorizeCommand = $authorizeCommand;
-        $this->captureCommand = $captureCommand;
-        $this->safechargeLogger = $safechargeLogger;
-        $this->paymentRequestFactory = $paymentRequestFactory;
-        $this->dataObjectFactory = $dataObjectFactory;
-        $this->cartManagement = $cartManagement;
-        $this->checkoutSession = $checkoutSession;
-        $this->onepageCheckout = $onepageCheckout;
-        $this->jsonResultFactory = $jsonResultFactory;
+        $this->orderFactory				= $orderFactory;
+        $this->moduleConfig				= $moduleConfig;
+        $this->authorizeCommand			= $authorizeCommand;
+        $this->captureCommand			= $captureCommand;
+        $this->safechargeLogger			= $safechargeLogger;
+        $this->paymentRequestFactory	= $paymentRequestFactory;
+        $this->dataObjectFactory		= $dataObjectFactory;
+        $this->cartManagement			= $cartManagement;
+        $this->checkoutSession			= $checkoutSession;
+        $this->onepageCheckout			= $onepageCheckout;
+        $this->jsonResultFactory		= $jsonResultFactory;
+        $this->transaction				= $transaction;
+        $this->invoiceService			= $invoiceService;
     }
 	
 	/** 
@@ -275,11 +283,11 @@ class Dmn extends Action implements CsrfAwareActionInterface
 				$params['ErrCode']		= (isset($params['ErrCode'])) ? $params['ErrCode'] : "Unknown";
 				$params['ExErrCode']	= (isset($params['ExErrCode'])) ? $params['ExErrCode'] : "Unknown";
 				
-				$order->addStatusHistoryComment("The {$params['transactionType']} request returned a '{$params['Status']}' status "
+				$order->addStatusHistoryComment("The {$params['transactionType']} request returned '{$params['Status']}' status "
 					. "(Code: {$params['ErrCode']}, Reason: {$params['ExErrCode']}).");
 			}
 			elseif ($status) {
-				$order->addStatusHistoryComment("The {$params['transactionType']} request returned a '" 
+				$order->addStatusHistoryComment("The {$params['transactionType']} request returned '" 
 					. $params['Status'] . "' status.");
 			}
 
@@ -297,6 +305,8 @@ class Dmn extends Action implements CsrfAwareActionInterface
 					$transactionType		= Transaction::TYPE_CAPTURE;
 					$sc_transaction_type	= Payment::SC_SETTLED;
 					$isSettled				= true;
+					
+//					$order->setState(Invoice::STATE_PAID);
 				}
 				
 				$orderPayment
@@ -304,15 +314,43 @@ class Dmn extends Action implements CsrfAwareActionInterface
 					->setIsTransactionClosed($isSettled ? 1 : 0);
 
 				if ($transactionType === Transaction::TYPE_CAPTURE) {
-					$this->moduleConfig->createLog('DMN create Invoice.');
+					$invCollection = $order->getInvoiceCollection();
 					
-					/** @var Invoice $invoice */
-					foreach ($order->getInvoiceCollection() as $invoice) {
-						$invoice
-							->setTransactionId($transactionId)
-							->pay()
-							->save();
+					if(count($invCollection) > 0) {
+						$this->moduleConfig->createLog('There is/are invoice/s');
+						
+						foreach ($order->getInvoiceCollection() as $invoice) {
+							$invoice
+								->setTransactionId($transactionId)
+								->pay()
+								->save();
+						}
 					}
+					// do this only for CPanel Settle
+					elseif(
+						@$params["order"] != @$params["merchant_unique_id"]
+						&& $order->canInvoice()
+					) {
+						$this->moduleConfig->createLog('We can create invoice.');
+						
+						$invoice = $this->invoiceService->prepareInvoice($order);
+						
+						$invoice
+							->register()
+							->save();
+						
+						 $transactionSave = $this->transaction
+							 ->addObject($invoice)
+							 ->addObject($invoice->getOrder())
+							 ->save();
+						 
+						 $order->addStatusHistoryComment(
+								__('Generated invoice #%1.', $invoice->getId())
+							)
+							->setIsCustomerNotified(false);
+					}
+					
+					$order->setStatus($sc_transaction_type);
 				}
 				
 				$transaction	= $orderPayment->addTransaction($transactionType);

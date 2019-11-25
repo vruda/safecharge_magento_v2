@@ -28,7 +28,7 @@ use Safecharge\Safecharge\Model\Request\Payment\Factory as PaymentRequestFactory
  * @category Safecharge
  * @package  Safecharge_Safecharge
  */
-class DmnOld extends Action implements CsrfAwareActionInterface
+class DmnOld extends Action
 {
     /**
      * @var OrderFactory

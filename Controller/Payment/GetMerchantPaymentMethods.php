@@ -119,7 +119,6 @@ class GetMerchantPaymentMethods extends Action
      */
     private function getApmMethods($countryCode = null, $grandTotal = null)
     {
-		$this->moduleConfig->createLog('requestFactory GET_MERCHANT_PAYMENT_METHODS_METHOD - GetMerchantPaymentMethods.php');
         $request = $this->requestFactory->create(AbstractRequest::GET_MERCHANT_PAYMENT_METHODS_METHOD);
 
         try {
