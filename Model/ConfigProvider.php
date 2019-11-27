@@ -46,6 +46,9 @@ class ConfigProvider extends CcGenericConfigProvider
     private $requestFactory;
     
     private $apmsRequest;
+    private $storeManager;
+    private $scopeConfig;
+    private $cart;
 
     /**
      * ConfigProvider constructor.
@@ -67,13 +70,19 @@ class ConfigProvider extends CcGenericConfigProvider
         PaymentTokenManagementInterface $paymentTokenManagement,
         UrlInterface $urlBuilder,
         RequestFactory $requestFactory,
-        array $methodCodes
+        array $methodCodes,
+		\Magento\Store\Model\StoreManagerInterface $storeManager,
+		\Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
+		\Magento\Checkout\Model\Cart $cart
     ) {
         $this->moduleConfig				= $moduleConfig;
         $this->customerSession			= $customerSession;
         $this->paymentTokenManagement	= $paymentTokenManagement;
         $this->urlBuilder				= $urlBuilder;
         $this->requestFactory			= $requestFactory;
+        $this->storeManager				= $storeManager;
+        $this->scopeConfig				= $scopeConfig;
+        $this->cart						= $cart;
 
         $methodCodes = array_merge_recursive(
             $methodCodes,
@@ -99,12 +108,11 @@ class ConfigProvider extends CcGenericConfigProvider
         }
 		
         $objectManager  = \Magento\Framework\App\ObjectManager::getInstance();
-        $storeManager   = $objectManager->get('\Magento\Store\Model\StoreManagerInterface');
-        $locale			= $objectManager
-            ->get('Magento\Framework\App\Config\ScopeConfigInterface')
-            ->getValue('general/locale/code', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
-        $cart			= $objectManager->get('\Magento\Checkout\Model\Cart');
-		
+        $locale			= $this->scopeConfig->getValue(
+			'general/locale/code',
+			\Magento\Store\Model\ScopeInterface::SCOPE_STORE
+		);
+        
         $config = [
             'payment' => [
                 Payment::METHOD_CODE => [
@@ -117,8 +125,8 @@ class ConfigProvider extends CcGenericConfigProvider
                     'merchantId'					=> $this->moduleConfig->getMerchantId(),
                     'isTestMode'					=> $this->moduleConfig->isTestModeEnabled(),
                     'locale'						=> substr($locale, 0, 2),
-                    'total'							=> (string) number_format($cart->getQuote()->getGrandTotal(), 2, '.', ''),
-                    'currency'						=> trim($storeManager->getStore()->getCurrentCurrencyCode()),
+                    'total'							=> (string) number_format($this->cart->getQuote()->getGrandTotal(), 2, '.', ''),
+                    'currency'						=> trim($this->storeManager->getStore()->getCurrentCurrencyCode()),
                 ],
             ],
         ];

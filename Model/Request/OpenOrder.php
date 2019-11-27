@@ -29,6 +29,8 @@ class OpenOrder extends AbstractRequest implements RequestInterface
      * @var array
      */
     protected $orderData;
+	
+    protected $cart;
 
     /**
      * OpenOrder constructor.
@@ -44,7 +46,8 @@ class OpenOrder extends AbstractRequest implements RequestInterface
         Config $config,
         Curl $curl,
         ResponseFactory $responseFactory,
-        RequestFactory $requestFactory
+        RequestFactory $requestFactory,
+		\Magento\Checkout\Model\Cart $cart
     ) {
         parent::__construct(
             $safechargeLogger,
@@ -53,7 +56,8 @@ class OpenOrder extends AbstractRequest implements RequestInterface
             $responseFactory
         );
 
-        $this->requestFactory = $requestFactory;
+        $this->requestFactory	= $requestFactory;
+        $this->cart				= $cart;
     }
 
     /**
@@ -95,20 +99,17 @@ class OpenOrder extends AbstractRequest implements RequestInterface
      */
     protected function getParams()
     {
-		$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
-		$cart = $objectManager->get('\Magento\Checkout\Model\Cart');
-		
-        if (null === $cart || empty($cart)) {
+        if (null === $this->cart || empty($this->cart)) {
             throw new PaymentException(__('There is no Cart data.'));
         }
 		
-		$billingAddress = $cart->getQuote()->getBillingAddress()->getData();
+		$billingAddress = $this->cart->getQuote()->getBillingAddress()->getData();
 
         $params = array_merge_recursive(
 			[
-				'amount'            => (string) number_format($cart->getQuote()->getGrandTotal(), 2, '.', ''),
-				'currency'          => empty($cart->getQuote()->getOrderCurrencyCode())
-					? $cart->getQuote()->getStoreCurrencyCode() : $cart->getQuote()->getOrderCurrencyCode(),
+				'amount'            => (string) number_format($this->cart->getQuote()->getGrandTotal(), 2, '.', ''),
+				'currency'          => empty($this->cart->getQuote()->getOrderCurrencyCode())
+					? $this->cart->getQuote()->getStoreCurrencyCode() : $this->cart->getQuote()->getOrderCurrencyCode(),
 				'urlDetails'        => array(
 					'successUrl'        => $this->config->getCallbackSuccessUrl(),
 					'failureUrl'        => $this->config->getCallbackErrorUrl(),
@@ -117,7 +118,7 @@ class OpenOrder extends AbstractRequest implements RequestInterface
 					'notificationUrl'   => $this->config->getCallbackDmnUrl(),
 				),
 				'deviceDetails'     => $this->config->getDeviceDetails(),
-				'userTokenId'       => $cart->getQuote()->getCustomerEmail(),
+				'userTokenId'       => $this->cart->getQuote()->getCustomerEmail(),
 				'billingAddress'    => array(
 					'country' => $billingAddress['country_id'],
 				),

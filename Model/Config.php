@@ -81,6 +81,8 @@ class Config
 	 * @var FormKey
 	 */
 	private $formKey;
+	
+	private $directory;
 
     /**
      * Object initialization.
@@ -98,7 +100,9 @@ class Config
         ProductMetadataInterface $productMetadata,
         ModuleListInterface $moduleList,
         CheckoutSession $checkoutSession,
-        UrlInterface $urlBuilder
+        UrlInterface $urlBuilder,
+		\Magento\Framework\Data\Form\FormKey $formKey,
+		\Magento\Framework\Filesystem\DirectoryList $directory
     ) {
         $this->scopeConfig = $scopeConfig;
         $this->storeManager = $storeManager;
@@ -109,9 +113,8 @@ class Config
 
         $this->storeId		= $this->getStoreId();
 		$this->versionNum	= intval(str_replace('.', '', $this->productMetadata->getVersion()));
-		
-		$objectManager		= \Magento\Framework\App\ObjectManager::getInstance(); 
-		$this->formKey		= $objectManager->get('Magento\Framework\Data\Form\FormKey');
+		$this->formKey		= $formKey;
+		$this->directory	= $directory;
     }
 
     /**
@@ -158,10 +161,7 @@ class Config
 		$string .= "\r\n" . "\r\n";
 		
 		try {
-			$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
-			$directory = $objectManager->get('\Magento\Framework\Filesystem\DirectoryList');
-
-			$logsPath = $directory->getPath('log');
+			$logsPath = $this->directory->getPath('log');
 
 			if(is_dir($logsPath)) {
 				file_put_contents(

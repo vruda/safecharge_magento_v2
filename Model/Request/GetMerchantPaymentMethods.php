@@ -29,6 +29,9 @@ class GetMerchantPaymentMethods extends AbstractRequest implements RequestInterf
      */
     protected $countryCode;
 	
+    protected $cart;
+    protected $store;
+	
     /**
      * OpenOrder constructor.
      *
@@ -43,7 +46,9 @@ class GetMerchantPaymentMethods extends AbstractRequest implements RequestInterf
         Config $config,
         Curl $curl,
         ResponseFactory $responseFactory,
-        RequestFactory $requestFactory
+        RequestFactory $requestFactory,
+		\Magento\Checkout\Model\Cart $cart,
+		\Magento\Store\Api\Data\StoreInterface $store
     ) {
         parent::__construct(
             $safechargeLogger,
@@ -52,7 +57,9 @@ class GetMerchantPaymentMethods extends AbstractRequest implements RequestInterf
             $responseFactory
         );
 
-        $this->requestFactory = $requestFactory;
+        $this->requestFactory	= $requestFactory;
+        $this->cart				= $cart;
+        $this->store			= $store;
     }
 
     /**
@@ -116,15 +123,12 @@ class GetMerchantPaymentMethods extends AbstractRequest implements RequestInterf
     {
 		$country_code	= $this->getCountryCode() ?: $this->config->getQuoteCountryCode();
 		$tokenRequest	= $this->requestFactory->create(AbstractRequest::OPEN_ORDER_METHOD);
-		$objectManager	= \Magento\Framework\App\ObjectManager::getInstance();
-		$cart			= $objectManager->get('\Magento\Checkout\Model\Cart');
-		$store			= $objectManager->get('Magento\Store\Api\Data\StoreInterface');
 		$tokenResponse	= $tokenRequest->process();
 		
 		if (empty($country_code)) {
 			try {
 				
-				$billingAddress = $cart->getQuote()->getBillingAddress()->getData();
+				$billingAddress = $this->cart->getQuote()->getBillingAddress()->getData();
 				
 				if (!empty($billingAddress)) {
 					$country_code = $country_code;
@@ -139,17 +143,17 @@ class GetMerchantPaymentMethods extends AbstractRequest implements RequestInterf
 		}
 		
 		$languageCode = 'en';
-		if ($store && $store->getLocaleCode()) {
-			$languageCode = $store->getLocaleCode();
+		if ($this->store && $this->store->getLocaleCode()) {
+			$languageCode = $this->store->getLocaleCode();
 		}
 		
 		$currencyCode = $this->config->getQuoteBaseCurrency();
 		if (
 			(empty($currencyCode) || is_null($currencyCode))
-			&& $cart
+			&& $this->cart
 		) {
-			$currencyCode = empty($cart->getQuote()->getOrderCurrencyCode())
-				? $cart->getQuote()->getStoreCurrencyCode() : $cart->getQuote()->getOrderCurrencyCode();
+			$currencyCode = empty($this->cart->getQuote()->getOrderCurrencyCode())
+				? $this->cart->getQuote()->getStoreCurrencyCode() : $this->cart->getQuote()->getOrderCurrencyCode();
 		}
 		
         $params = [

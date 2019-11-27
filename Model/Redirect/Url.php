@@ -59,12 +59,6 @@ class Url
     {
         // in case we use WebSDK just go to Success page
         if($this->request->getParam('method') === 'cc_card' && $this->request->getParam('transactionId')) {
-            $objectManager  = \Magento\Framework\App\ObjectManager::getInstance();
-            $storeManager   = $objectManager->get('\Magento\Store\Model\StoreManagerInterface');
-            
-            $cart		= $objectManager->get('\Magento\Checkout\Model\Cart');
-            $quote_id	= $cart->getQuote()->getId();
-            
             return [
 				'url' => $this->moduleConfig->getCallbackSuccessUrl(),
             ];
