@@ -92,7 +92,7 @@ class Dmn extends Action implements CsrfAwareActionInterface
 	private $transaction;
 	private $invoiceService;
 	private $invoiceRepository;
-	private $order;
+	private $transObj;
 
     /**
      * Object constructor.
@@ -125,7 +125,8 @@ class Dmn extends Action implements CsrfAwareActionInterface
         JsonFactory $jsonResultFactory,
 		\Magento\Framework\DB\Transaction $transaction,
 		\Magento\Sales\Model\Service\InvoiceService $invoiceService,
-		\Magento\Sales\Api\InvoiceRepositoryInterface $invoiceRepository
+		\Magento\Sales\Api\InvoiceRepositoryInterface $invoiceRepository,
+		\Magento\Sales\Model\Order\Payment\Transaction\BuilderInterface $transObj
     ) {
         parent::__construct($context);
 
@@ -143,6 +144,7 @@ class Dmn extends Action implements CsrfAwareActionInterface
         $this->transaction				= $transaction;
         $this->invoiceService			= $invoiceService;
         $this->invoiceRepository		= $invoiceRepository;
+        $this->transObj					= $transObj;
     }
 	
 	/** 
@@ -203,16 +205,16 @@ class Dmn extends Action implements CsrfAwareActionInterface
 				$tryouts++;
 
 				/** @var Order $order */
-				$this->order = $this->orderFactory->create()->loadByIncrementId($orderIncrementId);
+				$order = $this->orderFactory->create()->loadByIncrementId($orderIncrementId);
 
-				if (!($this->order && $this->order->getId())) {
+				if (!($order && $order->getId())) {
 					$this->moduleConfig->createLog('DMN try ' . $tryouts . ' there is NO order yet.');
 					sleep(3);
 				}
 			}
-			while ($tryouts <=10 && !($this->order && $this->order->getId()));
+			while ($tryouts <=10 && !($order && $order->getId()));
 
-			if (!($this->order && $this->order->getId())) {
+			if (!($order && $order->getId())) {
 				echo 'Order '. $orderIncrementId .' not found!';
 				return;
 			}
@@ -220,7 +222,7 @@ class Dmn extends Action implements CsrfAwareActionInterface
 			$this->moduleConfig->createLog('DMN try ' . $tryouts . ' there IS order.');
 
 			/** @var OrderPayment $payment */
-			$orderPayment	= $this->order->getPayment();
+			$orderPayment	= $order->getPayment();
 			$order_status	= $orderPayment->getAdditionalInformation(Payment::TRANSACTION_STATUS);
 			$order_tr_type	= $orderPayment->getAdditionalInformation(Payment::TRANSACTION_TYPE);
 			
@@ -286,30 +288,30 @@ class Dmn extends Action implements CsrfAwareActionInterface
 				$params['ErrCode']		= (isset($params['ErrCode'])) ? $params['ErrCode'] : "Unknown";
 				$params['ExErrCode']	= (isset($params['ExErrCode'])) ? $params['ExErrCode'] : "Unknown";
 				
-				$this->order->addStatusHistoryComment("The {$params['transactionType']} request returned '{$params['Status']}' status "
+				$order->addStatusHistoryComment("The {$params['transactionType']} request returned '{$params['Status']}' status "
 					. "(Code: {$params['ErrCode']}, Reason: {$params['ExErrCode']}).");
 			}
 			elseif ($status) {
-				$this->order->addStatusHistoryComment("The {$params['transactionType']} request returned '" 
+				$order->addStatusHistoryComment("The {$params['transactionType']} request returned '" 
 					. $params['Status'] . "' status.");
 			}
 
 			if ($status === "pending") {
-				$this->order->setState(Order::STATE_NEW)->setStatus('pending');
+				$order->setState(Order::STATE_NEW)->setStatus('pending');
 			}
 
 			if (in_array($status, ['approved', 'success'])) {
 				$transactionType		= Transaction::TYPE_AUTH;
 				$sc_transaction_type	= Payment::SC_AUTH;
 				$isSettled				= false;
-				$message				= $this->captureCommand->execute($orderPayment, $this->order->getBaseGrandTotal(), $this->order);
+				$message				= $this->captureCommand->execute($orderPayment, $order->getBaseGrandTotal(), $order);
 
 				if(in_array(strtolower($params['transactionType']), ['sale', 'settle'])) {
 					$transactionType		= Transaction::TYPE_CAPTURE;
 					$sc_transaction_type	= Payment::SC_SETTLED;
 					$isSettled				= true;
 					
-//					$this->order->setState(Invoice::STATE_PAID);
+//					$order->setState(Invoice::STATE_PAID);
 				}
 				
 				$orderPayment
@@ -317,12 +319,12 @@ class Dmn extends Action implements CsrfAwareActionInterface
 					->setIsTransactionClosed($isSettled ? 1 : 0);
 
 				if ($transactionType === Transaction::TYPE_CAPTURE) {
-					$invCollection = $this->order->getInvoiceCollection();
+					$invCollection = $order->getInvoiceCollection();
 					
 					if(count($invCollection) > 0) {
 						$this->moduleConfig->createLog('There is/are invoice/s');
 						
-						foreach ($this->order->getInvoiceCollection() as $invoice) {
+						foreach ($order->getInvoiceCollection() as $invoice) {
 							$invoice
 								->setTransactionId($transactionId)
 								->pay()
@@ -332,29 +334,49 @@ class Dmn extends Action implements CsrfAwareActionInterface
 					// do this only for CPanel Settle
 					elseif(
 						@$params["order"] != @$params["merchant_unique_id"]
-						&& $this->order->canInvoice()
+						&& $order->canInvoice()
 					) {
 						$this->moduleConfig->createLog('We can create invoice.');
 						
-						$this->createInvoice();
-//						$invoice = $this->invoiceService->prepareInvoice($this->order);
-//						
-//						$invoice
-//							->register()
-//							->save();
-//						
-//						 $transactionSave = $this->transaction
-//							 ->addObject($invoice)
-//							 ->addObject($invoice->getOrder())
-//							 ->save();
-//						 
-//						 $this->order->addStatusHistoryComment(
-//								__('Generated invoice #%1.', $invoice->getId())
-//							)
-//							->setIsCustomerNotified(false);
+						// Prepare the invoice
+						$invoice = $this->invoiceService->prepareInvoice($order);
+						$invoice->setRequestedCaptureCase(Invoice::CAPTURE_ONLINE)
+							->setTransactionId(@$params['TransactionID'])
+							->setState(Invoice::STATE_PAID)
+							->setBaseGrandTotal($order->getBaseGrandTotal());
+
+						$invoice->register();
+						$invoice->getOrder()->setIsInProcess(true);
+						$invoice->pay();
+
+						// Create the transaction
+						$transactionSave = $this->transaction
+							->addObject($invoice)
+							->addObject($invoice->getOrder());
+						$transactionSave->save(); 
+
+						$transaction = $this->transObj->setPayment($orderPayment)
+							->setOrder($order)
+							->setTransactionId(@$params['TransactionID'])
+							->setFailSafe(true)
+							->build(\Magento\Sales\Model\Order\Payment\Transaction::TYPE_CAPTURE);
+						
+						$transaction->save();
+
+						$formatedPrice = $order->getBaseCurrency()->formatTxt($order->getGrandTotal());
+
+//						$orderPayment->addTransactionCommentsToOrder($transaction, __('The authorized amount is %1.', $formatedPrice));
+						$orderPayment->setParentTransactionId(null);
+
+						// Update the order
+						$order->setTotalPaid($order->getTotalPaid());
+						$order->setBaseTotalPaid($order->getBaseTotalPaid());
+
+						// Save the invoice
+						$this->invoiceRepository->save($invoice);
 					}
 					
-					$this->order->setStatus($sc_transaction_type);
+					$order->setStatus($sc_transaction_type);
 				}
 				
 				$transaction	= $orderPayment->addTransaction($transactionType);
@@ -367,7 +389,7 @@ class Dmn extends Action implements CsrfAwareActionInterface
 			}
 
 			$orderPayment->save();
-			$this->order->save();
+			$order->save();
 		}
 		catch (\Exception $e) {
 			$msg = $e->getMessage();
@@ -384,33 +406,6 @@ class Dmn extends Action implements CsrfAwareActionInterface
 		return;
     }
 	
-	private function createInvoice()
-	{
-		// Prepare the invoice
-		$invoice = $this->invoiceService->prepareInvoice($this->order);
-		$invoice->setRequestedCaptureCase(Invoice::CAPTURE_ONLINE);
-		$invoice->setState(Invoice::STATE_PAID);
-		
-		$invoice->setBaseGrandTotal(@$this->order->getBaseGrandTotal());
-		$invoice->register();
-		$invoice->getOrder()->setIsInProcess(true);
-		$invoice->pay();
-		
-		// Create the transaction
-		$transactionSave = $this->transaction
-			->addObject($invoice)
-			->addObject($this->order);
-		$transactionSave->save();
-		
-		// Update the order
-		$this->order->setTotalPaid(@$this->order->getTotalPaid());
-		$this->order->setBaseTotalPaid(@$this->order->getBaseTotalPaid());
-		$this->order->save();
-		
-		// Save the invoice
-		$this->invoiceRepository->save($invoice);
-	}
-
     private function validateChecksum($params)
     {
         if (!isset($params["advanceResponseChecksum"])) {
