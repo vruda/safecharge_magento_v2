@@ -141,8 +141,9 @@ class PaymentApm extends AbstractRequest implements RequestInterface
 
         $quotePayment = $quote->getPayment();
 
-		$this->moduleConfig->createLog('requestFactory GET_SESSION_TOKEN_METHOD - PaymentApm.php');
-        $tokenRequest = $this->requestFactory
+		$this->config->createLog('requestFactory GET_SESSION_TOKEN_METHOD - PaymentApm.php');
+        
+		$tokenRequest = $this->requestFactory
             ->create(AbstractRequest::GET_SESSION_TOKEN_METHOD);
         $tokenResponse = $tokenRequest->process();
 
@@ -161,9 +162,9 @@ class PaymentApm extends AbstractRequest implements RequestInterface
                 'amount'				=> (float)$quote->getGrandTotal(),
                 'merchant_unique_id'	=> $reservedOrderId,
                 'urlDetails'			=> [
-                    'successUrl'		=> $this->config->getCallbackCompleteUrl(),
-                    'failureUrl'		=> $this->config->getCallbackCompleteUrl(),
-                    'pendingUrl'		=> $this->config->getCallbackCompleteUrl(),
+                    'successUrl'		=> $this->config->getCallbackSuccessUrl(),
+                    'failureUrl'		=> $this->config->getCallbackErrorUrl(),
+                    'pendingUrl'		=> $this->config->getCallbackPendingUrl(),
                     'backUrl'			=> $this->config->getBackUrl(),
                     'notificationUrl'	=> $this->config->getCallbackDmnUrl($reservedOrderId),
                 ],
