@@ -127,6 +127,7 @@ class ConfigProvider extends CcGenericConfigProvider
                     'locale'						=> substr($locale, 0, 2),
                     'total'							=> (string) number_format($this->cart->getQuote()->getGrandTotal(), 2, '.', ''),
                     'currency'						=> trim($this->storeManager->getStore()->getCurrentCurrencyCode()),
+                    'webMasterId'					=> $this->moduleConfig->getSourcePlatformField(),
                 ],
             ],
         ];

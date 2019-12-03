@@ -176,7 +176,8 @@ define(
                         currency        : window.checkoutConfig.payment[self.getCode()].currency,
                         amount          : quote.totals().grand_total.toFixed(2),
                         cardHolderName  : document.getElementById('safecharge_cc_owner').value,
-                        paymentOption   : card
+                        paymentOption   : card,
+						webMasterId		: window.checkoutConfig.payment[self.getCode()].webMasterId
                     }, function(resp){
                         if(typeof resp.result != 'undefined') {
                             if(resp.result == 'APPROVED' && resp.transactionId != 'undefined') {
