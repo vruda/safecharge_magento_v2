@@ -219,7 +219,7 @@ class Dmn extends Action implements CsrfAwareActionInterface
 				return;
 			}
 			
-			$this->moduleConfig->createLog('DMN try ' . $tryouts . ' there IS order.');
+			$this->moduleConfig->createLog('DMN try ' . $tryouts . ', there IS order.');
 
 			/** @var OrderPayment $payment */
 			$orderPayment	= $order->getPayment();

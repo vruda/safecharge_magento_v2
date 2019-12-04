@@ -10,7 +10,6 @@ use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Data\Collection\AbstractDb;
 use Magento\Framework\DataObject;
 use Magento\Framework\Exception\LocalizedException;
-use Magento\Framework\Exception\PaymentException;
 use Magento\Framework\Model\Context;
 use Magento\Framework\Model\ResourceModel\AbstractResource;
 use Magento\Framework\Module\ModuleListInterface;
@@ -25,7 +24,6 @@ use Magento\Quote\Api\Data\PaymentInterface;
 use Magento\Vault\Api\PaymentTokenManagementInterface;
 use Safecharge\Safecharge\Model\Config as ModuleConfig;
 use Safecharge\Safecharge\Model\Request\Payment\Factory as PaymentRequestFactory;
-use Safecharge\Safecharge\Model\Response\Payment\Dynamic3D as Dynamic3DResponse;
 
 /**
  * Safecharge Safecharge payment model.
