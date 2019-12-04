@@ -313,6 +313,11 @@ class Dmn extends Action implements CsrfAwareActionInterface
 					
 //					$order->setState(Invoice::STATE_PAID);
 				}
+				elseif (strtolower($params['transactionType']) == 'void') {
+					$transactionType		= Transaction::TYPE_VOID;
+					$sc_transaction_type	= Payment::TYPE_VOID;
+					$isSettled				= false;
+				}
 				
 				$orderPayment
 					->setIsTransactionPending($status === "pending" ? true: false)
@@ -355,16 +360,7 @@ class Dmn extends Action implements CsrfAwareActionInterface
 							->addObject($invoice->getOrder());
 						$transactionSave->save(); 
 
-						$transaction = $this->transObj->setPayment($orderPayment)
-							->setOrder($order)
-							->setTransactionId(@$params['TransactionID'])
-							->setFailSafe(true)
-							->build(\Magento\Sales\Model\Order\Payment\Transaction::TYPE_CAPTURE);
-						
-						$transaction->save();
-
-						$formatedPrice = $order->getBaseCurrency()->formatTxt($order->getGrandTotal());
-
+//						$formatedPrice = $order->getBaseCurrency()->formatTxt($order->getGrandTotal());
 //						$orderPayment->addTransactionCommentsToOrder($transaction, __('The authorized amount is %1.', $formatedPrice));
 						$orderPayment->setParentTransactionId(null);
 
@@ -379,11 +375,20 @@ class Dmn extends Action implements CsrfAwareActionInterface
 					$order->setStatus($sc_transaction_type);
 				}
 				
-				$transaction	= $orderPayment->addTransaction($transactionType);
-				$message		= $orderPayment->prependMessage($message);
+				// set transaction for Auth and Settle or Void button will miss
+				$transaction = $this->transObj->setPayment($orderPayment)
+					->setOrder($order)
+					->setTransactionId(@$params['TransactionID'])
+					->setFailSafe(true)
+					->build($transactionType);
+
+				$transaction->save();
+				
+				$ord_transaction	= $orderPayment->addTransaction($transactionType);
+				$message			= $orderPayment->prependMessage($message);
 				
 				$orderPayment->addTransactionCommentsToOrder(
-					$transaction,
+					$ord_transaction,
 					$message
 				);
 			}

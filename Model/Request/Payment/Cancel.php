@@ -61,7 +61,8 @@ class Cancel extends AbstractPayment implements RequestInterface
         $authCode = null;
         if (empty($transactionDetails['authCode'])) {
             $authCode = $orderPayment->getAdditionalInformation(Payment::TRANSACTION_AUTH_CODE_KEY);
-        } else {
+        }
+		else {
             $authCode = $transactionDetails['authCode'];
         }
 
@@ -70,18 +71,24 @@ class Cancel extends AbstractPayment implements RequestInterface
                 __('Transaction does not contain authorization code.')
             );
         }
-
+		
+		$transaction_id = $orderPayment->getAdditionalInformation(Payment::TRANSACTION_ID);
+		if(!$transaction_id) {
+			throw new PaymentException(
+                __('Transaction does not contain Transaction ID code.')
+            );
+		}
+		
         $params = [
             'clientUniqueId' => $order->getIncrementId(),
             'currency' => $order->getBaseCurrencyCode(),
             'amount' => (float)$order->getBaseGrandTotal(),
-            'relatedTransactionId' => $transaction->getTxnId(),
+            'relatedTransactionId' => $transaction_id,
             'authCode' => $authCode,
             'comment' => '',
             'merchant_unique_id' => $order->getIncrementId(),
             'urlDetails' => [
-                //'notificationUrl' => $this->config->getCallbackDmnUrl($order->getIncrementId(), $order->getStoreId()),
-                'notificationUrl' => '',
+                'notificationUrl' => $this->config->getCallbackDmnUrl($order->getIncrementId(), $order->getStoreId()),
             ],
         ];
 
