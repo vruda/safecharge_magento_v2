@@ -159,12 +159,18 @@ class Dmn extends Action
 
                 if (isset($params["merchant_unique_id"]) && $params["merchant_unique_id"]) {
                     $orderIncrementId = $params["merchant_unique_id"];
-                } elseif (isset($params["order"]) && $params["order"]) {
+                }
+				elseif (isset($params["order"]) && $params["order"]) {
                     $orderIncrementId = $params["order"];
-                } elseif (isset($params["orderId"]) && $params["orderId"]) {
+                }
+				elseif (isset($params["orderId"]) && $params["orderId"]) {
                     $orderIncrementId = $params["orderId"];
-                } else {
-                    $orderIncrementId = null;
+                }
+				else {
+                    $this->moduleConfig->createLog('DMN error - there is no order number!');
+                    
+					echo 'DMN error - there is no order number!';
+					exit;
                 }
 
                 $tryouts = 0;
@@ -228,10 +234,12 @@ class Dmn extends Action
 
                 $params['Status'] = $params['Status'] ?: null;
                 if (in_array(strtolower($params['Status']), ['declined', 'error'])) {
-                    $params['ErrCode'] = (isset($params['ErrCode'])) ? $params['ErrCode'] : "Unknown";
-                    $params['ExErrCode'] = (isset($params['ExErrCode'])) ? $params['ExErrCode'] : "Unknown";
-                    $order->addStatusHistoryComment("Payment returned a '{$params['Status']}' status (Code: {$params['ErrCode']}, Reason: {$params['ExErrCode']}).");
-                } elseif ($params['Status']) {
+                    $params['ErrCode']		= (isset($params['ErrCode'])) ? $params['ErrCode'] : "Unknown";
+                    $params['ExErrCode']	= (isset($params['ExErrCode'])) ? $params['ExErrCode'] : "Unknown";
+                    
+					$order->addStatusHistoryComment("Payment returned a '{$params['Status']}' status (Code: {$params['ErrCode']}, Reason: {$params['ExErrCode']}).");
+                }
+				elseif ($params['Status']) {
                     $order->addStatusHistoryComment("Payment returned a '" . $params['Status'] . "' status");
                 }
 
@@ -306,7 +314,7 @@ class Dmn extends Action
                 }
 				*/
 				
-				$this->moduleConfig->createLog($e->getMessage() . "\n" . $e->getTraceAsString(), 'DMN exception:');
+				$this->moduleConfig->createLog($e->getMessage(), 'DMN exception:');
 				
 				return $this->jsonResultFactory->create()
                     ->setHttpResponseCode(500)
@@ -320,7 +328,7 @@ class Dmn extends Action
         }
 		*/
 		
-		$this->moduleConfig->createLog('DMN Accepted');
+		$this->moduleConfig->createLog('DMN Accepted.');
 
         return $this->jsonResultFactory->create()
             ->setHttpResponseCode(\Magento\Framework\Webapi\Response::HTTP_OK)

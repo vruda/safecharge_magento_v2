@@ -53,6 +53,7 @@ class Error extends Action
     public function execute()
     {
         $params = $this->getRequest()->getParams();
+		$this->moduleConfig->createLog($params, 'Error page params:');
 
         if ($this->moduleConfig->isDebugEnabled() === true) {
             $this->safechargeLogger->debug(
