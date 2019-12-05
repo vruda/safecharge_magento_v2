@@ -22,4 +22,8 @@
             </argument>
         </arguments>
     </type>
+	
+	<type name="Magento\Backend\Block\Widget\Button\Toolbar">
+        <plugin name="orderFormToolbarButtons" type="Safecharge\Safecharge\Plugin\Block\Widget\Button\Toolbar" />
+    </type>
 </config>

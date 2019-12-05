@@ -181,7 +181,7 @@ class Config
 	 *
 	 * @return array $device_details
 	 */
-	public static function getDeviceDetails() {
+	public function getDeviceDetails() {
 		$server = filter_input_array(INPUT_SERVER, $_SERVER);
 		
 		$SC_DEVICES			= array('iphone', 'ipad', 'android', 'silk', 'blackberry', 'touch', 'linux', 'windows', 'mac');
