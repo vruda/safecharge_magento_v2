@@ -145,6 +145,10 @@ class Config
 					$data['paymentMethods'] = json_encode($data['paymentMethods']);
 				}
 				
+				if(!empty($data['userAccountDetails'])) {
+					$data['userAccountDetails'] = [];
+				}
+				
 				$string .= print_r($data, true);
 			}
 			elseif (is_bool($data)) {

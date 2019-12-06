@@ -92,9 +92,7 @@ class Apm extends Action
 		$this->moduleConfig->createLog($params, 'Apm Controller - Request:');
 
         try {
-			$this->moduleConfig->createLog('requestFactory PAYMENT_APM_METHOD - APM.php');
             $request = $this->requestFactory->create(AbstractRequest::PAYMENT_APM_METHOD);
-            
 			$request->setPaymentMethod($params["chosen_apm_method"]);
 			
 			if(!empty($params["apm_method_fields"])) {

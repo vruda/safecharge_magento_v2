@@ -178,10 +178,17 @@ class Dmn extends Action implements CsrfAwareActionInterface
 				$this->getRequest()->getParams(),
 				$this->getRequest()->getPostValue()
 			);
+			
+			$status = !empty($params['Status']) ? strtolower($params['Status']) : null;
 
 			$this->moduleConfig->createLog($params, 'DMN params:');
 
 			$this->validateChecksum($params);
+			
+			if(empty($params['transactionType'])) {
+				echo 'DMN error - missing Transaction Type.';
+				return;
+			}
 
 			if (!empty($params["order"])) {
 				$orderIncrementId = $params["order"];
@@ -219,6 +226,7 @@ class Dmn extends Action implements CsrfAwareActionInterface
 			}
 			
 			$this->moduleConfig->createLog('DMN try ' . $tryouts . ', there IS order.');
+			$this->moduleConfig->createLog($status, 'DMN with status:');
 
 			/** @var OrderPayment $payment */
 			$orderPayment	= $order->getPayment();
@@ -226,9 +234,9 @@ class Dmn extends Action implements CsrfAwareActionInterface
 			$order_tr_type	= $orderPayment->getAdditionalInformation(Payment::TRANSACTION_TYPE);
 			
 			if(
-				$order_tr_type === @$params['transactionType']
+				strtolower($order_tr_type) == strtolower($params['transactionType'])
 				&& strtolower($order_status) == 'approved'
-				&& $order_status != $params['Status']
+				&& $order_status != $status
 			) {
 				$msg = 'Current Order status is APPROVED, but incoming DMN status is '
 					. $params['Status'] . ', for Transaction type '. $order_tr_type
@@ -269,19 +277,15 @@ class Dmn extends Action implements CsrfAwareActionInterface
 				);
 			}
 			
-			if (!empty($params['transactionType'])) {
-				$orderPayment->setAdditionalInformation(
-					Payment::TRANSACTION_TYPE,
-					$params['transactionType']
-				);
-			}
+			$orderPayment->setAdditionalInformation(
+				Payment::TRANSACTION_TYPE,
+				$params['transactionType']
+			);
 			
 			$orderPayment->setTransactionAdditionalInfo(
 				Transaction::RAW_DETAILS,
 				$params
 			);
-
-			$status = !empty($params['Status']) ? strtolower($params['Status']) : null;
 
 			if (in_array($status, ['declined', 'error'])) {
 				$params['ErrCode']		= (isset($params['ErrCode'])) ? $params['ErrCode'] : "Unknown";
@@ -296,7 +300,9 @@ class Dmn extends Action implements CsrfAwareActionInterface
 			}
 
 			if ($status === "pending") {
-				$order->setState(Order::STATE_NEW)->setStatus('pending');
+				$order
+					->setState(Order::STATE_NEW)
+					->setStatus('pending');
 			}
 
 			if (in_array($status, ['approved', 'success'])) {
@@ -314,7 +320,7 @@ class Dmn extends Action implements CsrfAwareActionInterface
 				}
 				elseif (strtolower($params['transactionType']) == 'void') {
 					$transactionType		= Transaction::TYPE_VOID;
-					$sc_transaction_type	= Payment::TYPE_VOID;
+					$sc_transaction_type	= Payment::SC_VOIDED;
 					$isSettled				= false;
 				}
 				
@@ -340,6 +346,8 @@ class Dmn extends Action implements CsrfAwareActionInterface
 						@$params["order"] != @$params["merchant_unique_id"]
 						&& $order->canInvoice()
 					) {
+						$this->moduleConfig->createLog('DMN CPanel Settle.');
+						
 						$this->moduleConfig->createLog('We can create invoice.');
 						
 						// Prepare the invoice
@@ -359,8 +367,6 @@ class Dmn extends Action implements CsrfAwareActionInterface
 							->addObject($invoice->getOrder());
 						$transactionSave->save(); 
 
-//						$formatedPrice = $order->getBaseCurrency()->formatTxt($order->getGrandTotal());
-//						$orderPayment->addTransactionCommentsToOrder($transaction, __('The authorized amount is %1.', $formatedPrice));
 						$orderPayment->setParentTransactionId(null);
 
 						// Update the order
@@ -406,7 +412,7 @@ class Dmn extends Action implements CsrfAwareActionInterface
 
 		$this->moduleConfig->createLog('DMN process end for order #' . $orderIncrementId);
 
-		echo 'DMN process completed.';
+		echo 'DMN with status '. $status .' process completed.';
 		return;
     }
 	

@@ -32,9 +32,10 @@ define(
         var self = null;
         
         // for the WebSDK
-        var sfc     = null;
-        var card	= null;
-		var scData	= {};
+        var sfc				= null;
+        var card			= null;
+		var scData			= {};
+		var fieldsInited	= false;
 		
         return Component.extend({
 
@@ -154,8 +155,6 @@ define(
                     else {
                         console.error(res);
                     }
-					
-					self.initFields();
                 })
                 .fail(function(e) {
                     console.error(e);
@@ -301,6 +300,8 @@ define(
             },
             
             initFields: function() {
+				console.log('initFields')
+				
                 // for the Fields
 				scData.merchantSiteId	= window.checkoutConfig.payment[self.getCode()].merchantSiteId;
 				scData.merchantId		= window.checkoutConfig.payment[self.getCode()].merchantId;
