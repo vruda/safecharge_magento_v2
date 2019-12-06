@@ -42,9 +42,12 @@ class Toolbar
         }
 		
 		try {
-			$orderId	= $this->request->getParam('order_id');
-			$order		= $this->orderRepository->get($orderId);
-			$ord_status	= $order->getStatus();
+			$orderId			= $this->request->getParam('order_id');
+			$order				= $this->orderRepository->get($orderId);
+			$orderPayment		= $order->getPayment();
+			
+			$ord_status			= $order->getStatus();
+			$payment_method		= $orderPayment->getAdditionalInformation(Payment::TRANSACTION_EXTERNAL_PAYMENT_METHOD);
 
 			// Examples
 	//		$buttonList->update('order_edit', 'class', 'edit');
@@ -57,7 +60,10 @@ class Toolbar
 	//            ]
 	//        );
 			
-			if(Payment::SC_VOIDED == $ord_status) {
+			if(
+				!in_array($payment_method, ['cc_card', 'apmgw_expresscheckout'])
+				|| Payment::SC_VOIDED == $ord_status
+			) {
 				$buttonList->remove('order_creditmemo');
 			}
 		}
