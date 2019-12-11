@@ -35,7 +35,7 @@ define(
         var sfc				= null;
         var card			= null;
 		var scData			= {};
-		var fieldsInited	= false;
+		var isCardAttached	= false;
 		
         return Component.extend({
 
@@ -68,7 +68,7 @@ define(
                     
                 self.getApmMethods();
                 quote.billingAddress.subscribe(self.getApmMethods, this, 'change');
-                
+				
                 return self;
             },
             
@@ -148,9 +148,16 @@ define(
                         
 						if (res.apmMethods.length > 0) {
                             self.chosenApmMethod(res.apmMethods[0].paymentMethod);
+							
+							for(var i in res.apmMethods) {
+								if('cc_card' == res.apmMethods[i].paymentMethod) {
+									scData.sessionToken = res.sessionToken;
+									self.initFields();
+									
+									break;
+								}
+							}
                         }
-						
-						scData.sessionToken = res.sessionToken;
                     }
                     else {
                         console.error(res);
@@ -165,19 +172,24 @@ define(
                 if (event) {
                     event.preventDefault();
                 }
-                
+				
                 if(self.chosenApmMethod() === 'cc_card') {
                     $('.loading-mask').css('display', 'block');
-                    
-                    // create payment with WebSDK
-                    sfc.createPayment({
+					
+					// we use variable just for debug
+					var payParams = {
                         sessionToken    : scData.sessionToken,
                         currency        : window.checkoutConfig.payment[self.getCode()].currency,
                         amount          : quote.totals().grand_total.toFixed(2),
                         cardHolderName  : document.getElementById('safecharge_cc_owner').value,
                         paymentOption   : card,
 						webMasterId		: window.checkoutConfig.payment[self.getCode()].webMasterId
-                    }, function(resp){
+                    };
+					
+//					console.log('placeOrder', payParams)
+                    
+                    // create payment with WebSDK
+                    sfc.createPayment(payParams, function(resp){
                         if(typeof resp.result != 'undefined') {
                             if(resp.result == 'APPROVED' && resp.transactionId != 'undefined') {
                                 self.ccNumber(resp.ccCardNumber);
@@ -300,7 +312,11 @@ define(
             },
             
             initFields: function() {
-				console.log('initFields')
+//				if(card !== null) {
+//					console.log('card exists, use it')
+//					card.attach('#card-field-placeholder');
+//					return;
+//				}
 				
                 // for the Fields
 				scData.merchantSiteId	= window.checkoutConfig.payment[self.getCode()].merchantSiteId;
@@ -309,6 +325,8 @@ define(
                 if(window.checkoutConfig.payment[self.getCode()].isTestMode == true) {
                     scData.env = 'test';
                 }
+				
+				console.log('initFields', scData)
                 
                 sfc = SafeCharge(scData);
 
@@ -316,13 +334,6 @@ define(
                 var fields = sfc.fields({
                     locale: checkoutConfig.payment[self.getCode()].locale
                 });
-
-                // set some classes
-                var elementClasses = {
-                    focus: 'focus',
-                    empty: 'empty',
-                    invalid: 'invalid',
-                };
 
                 card = fields.create('card', {
                     iconStyle: 'solid',
@@ -346,11 +357,29 @@ define(
                             color: "#FFC7EE"
                         }
                     },
-                    classes: elementClasses
+                    classes: {
+						focus: 'focus',
+						empty: 'empty',
+						invalid: 'invalid',
+					}
                 });
                     
-                card.attach('#card-field-placeholder');
-            }
+				console.log(isCardAttached);
+				if(!isCardAttached && $('#card-field-placeholder').length > 0) {
+					card.attach('#card-field-placeholder');
+				}
+            },
+			
+			attachFields: function() {
+				if(null !== card) {
+					console.log('attach existing card')
+					card.attach('#card-field-placeholder');
+					isCardAttached = true;
+				}
+				else {
+					console.log('card is null')
+				}
+			}
         });
     }
 );

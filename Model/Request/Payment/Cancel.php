@@ -55,8 +55,8 @@ class Cancel extends AbstractPayment implements RequestInterface
         $order = $orderPayment->getOrder();
 
         /** @var OrderTransaction $transaction */
-        $transaction = $orderPayment->getAuthorizationTransaction();
-        $transactionDetails = $transaction->getAdditionalInformation(OrderTransaction::RAW_DETAILS);
+        $transaction		= $orderPayment->getAuthorizationTransaction();
+        $transactionDetails	= $transaction->getAdditionalInformation(OrderTransaction::RAW_DETAILS);
 
         $authCode = null;
         if (empty($transactionDetails['authCode'])) {
@@ -80,14 +80,14 @@ class Cancel extends AbstractPayment implements RequestInterface
 		}
 		
         $params = [
-            'clientUniqueId' => $order->getIncrementId(),
-            'currency' => $order->getBaseCurrencyCode(),
-            'amount' => (float)$order->getBaseGrandTotal(),
-            'relatedTransactionId' => $transaction_id,
-            'authCode' => $authCode,
-            'comment' => '',
-            'merchant_unique_id' => $order->getIncrementId(),
-            'urlDetails' => [
+            'clientUniqueId'		=> $order->getIncrementId(),
+            'currency'				=> $order->getBaseCurrencyCode(),
+            'amount'				=> (float)$order->getBaseGrandTotal(),
+            'relatedTransactionId'	=> $transaction_id,
+            'authCode'				=> $authCode,
+            'comment'				=> '',
+            'merchant_unique_id'	=> $order->getIncrementId(),
+            'urlDetails'			=> [
                 'notificationUrl' => $this->config->getCallbackDmnUrl($order->getIncrementId(), $order->getStoreId()),
             ],
         ];

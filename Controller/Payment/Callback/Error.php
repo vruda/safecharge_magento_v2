@@ -87,7 +87,10 @@ class Error extends Action implements CsrfAwareActionInterface
         );
 
         $resultRedirect = $this->resultFactory->create(ResultFactory::TYPE_REDIRECT);
-        $resultRedirect->setUrl($this->_url->getUrl('checkout/cart'));
+        $resultRedirect->setUrl(
+			$this->_url->getUrl('checkout/cart')
+			. (!empty($_GET['form_key']) ? '?form_key=' . $_GET['form_key'] : '')
+		);
 
         return $resultRedirect;
     }

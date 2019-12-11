@@ -101,12 +101,9 @@ abstract class AbstractResponse extends AbstractApi
         );
 
         if ($requestStatus === false) {
-			if(!empty($resp_data['Body']['reason'])) {
-				throw new PaymentException($resp_data['Body']['reason']);
-			}
-			else {
-				throw new PaymentException($this->getErrorMessage());
-			}
+			throw new PaymentException($this->getErrorMessage(
+				!empty($resp_data['Body']['reason']) ? $resp_data['Body']['reason'] : ''
+			));
         }
 
         $this->validateResponseData();
@@ -117,13 +114,16 @@ abstract class AbstractResponse extends AbstractApi
     /**
      * @return \Magento\Framework\Phrase
      */
-    protected function getErrorMessage()
+    protected function getErrorMessage($msg = '')
     {
         $errorReason = $this->getErrorReason();
         if ($errorReason !== false) {
             return __('Request to payment gateway failed. Details: "%1".', $errorReason);
         }
-
+		elseif(!empty($msg)) {
+			return __($msg);
+		}
+		
         return __('Request to payment gateway failed.');
     }
 

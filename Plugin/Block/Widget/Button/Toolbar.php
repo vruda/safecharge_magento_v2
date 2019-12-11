@@ -66,6 +66,10 @@ class Toolbar
 			) {
 				$buttonList->remove('order_creditmemo');
 			}
+			
+			if(Payment::SC_VOIDED == $ord_status) {
+				$buttonList->remove('order_invoice');
+			}
 		}
 		catch(Exception $e) {
 			$this->config->createLog($e->getMessage(), 'Class Toolbar exception:');

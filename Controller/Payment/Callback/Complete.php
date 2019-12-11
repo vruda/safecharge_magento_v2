@@ -150,12 +150,14 @@ class Complete extends Action implements CsrfAwareActionInterface
     {
 		$params = $this->getRequest()->getParams();
 		$this->moduleConfig->createLog($params, 'Success params:');
+		
+		$resultRedirect = $this->resultFactory->create(ResultFactory::TYPE_REDIRECT);
 
         try {
             $result = $this->placeOrder();
 			
             if ($result->getSuccess() !== true) {
-				$this->moduleConfig->createLog($result->getErrorMessage(), 'Success Callback error - place order error');
+				$this->moduleConfig->createLog($result->getErrorMessage(), 'Complete Callback error - place order error');
 				
                 throw new PaymentException(__($result->getErrorMessage()));
             }
@@ -171,10 +173,14 @@ class Complete extends Action implements CsrfAwareActionInterface
 			$this->moduleConfig->createLog($e->getMessage(), 'Complete Callback Process Error:');
             $this->messageManager->addErrorMessage($e->getMessage());
 			
+			$resultRedirect->setUrl(
+				$this->_url->getUrl('checkout/cart')
+				. (!empty($_GET['form_key']) ? '?form_key=' . $_GET['form_key'] : '')
+			);
+			
 			return $resultRedirect;
         }
 
-		$resultRedirect = $this->resultFactory->create(ResultFactory::TYPE_REDIRECT);
 		$resultRedirect->setUrl(
 			$this->_url->getUrl('checkout/onepage/success/')
 			. (!empty($_GET['form_key']) ? '?form_key=' . $_GET['form_key'] : '')

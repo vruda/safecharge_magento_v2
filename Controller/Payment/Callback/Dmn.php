@@ -189,6 +189,11 @@ class Dmn extends Action implements CsrfAwareActionInterface
 				echo 'DMN error - missing Transaction Type.';
 				return;
 			}
+			
+			if(empty($params['TransactionID'])) {
+				echo 'DMN error - missing Transaction ID.';
+				return;
+			}
 
 			if (!empty($params["order"])) {
 				$orderIncrementId = $params["order"];
@@ -238,8 +243,8 @@ class Dmn extends Action implements CsrfAwareActionInterface
 				&& strtolower($order_status) == 'approved'
 				&& $order_status != $status
 			) {
-				$msg = 'Current Order status is APPROVED, but incoming DMN status is '
-					. $params['Status'] . ', for Transaction type '. $order_tr_type
+				$msg = 'Current Order status is "'. $order_status .'", but incoming DMN status is "'
+					. $params['Status'] . '", for Transaction type '. $order_tr_type
 					.'. Do not apply DMN data on the Order!';
 				
 				$this->moduleConfig->createLog($msg);
@@ -248,13 +253,10 @@ class Dmn extends Action implements CsrfAwareActionInterface
 				return;
 			}
 
-			$transactionId = @$params['TransactionID'];
-			if ($transactionId) {
-				$orderPayment->setAdditionalInformation(
-					Payment::TRANSACTION_ID,
-					$transactionId
-				);
-			}
+			$orderPayment->setAdditionalInformation(
+				Payment::TRANSACTION_ID,
+				$params['TransactionID']
+			);
 
 			if (!empty($params['AuthCode'])) {
 				$orderPayment->setAdditionalInformation(
@@ -304,31 +306,38 @@ class Dmn extends Action implements CsrfAwareActionInterface
 					->setState(Order::STATE_NEW)
 					->setStatus('pending');
 			}
+			
+			/* TODO - recognize CPanel actions, for them we must create manual transactions */
 
 			if (in_array($status, ['approved', 'success'])) {
+				$message				= $this->captureCommand->execute($orderPayment, $order->getBaseGrandTotal(), $order);
 				$transactionType		= Transaction::TYPE_AUTH;
 				$sc_transaction_type	= Payment::SC_AUTH;
-				$isSettled				= false;
-				$message				= $this->captureCommand->execute($orderPayment, $order->getBaseGrandTotal(), $order);
+				
+				if (strtolower($params['transactionType']) == 'auth') {
+					$orderPayment
+						->setIsTransactionPending(false)
+						->setIsTransactionClosed(false)
+						->setParentTransactionId(!empty($params['relatedTransactionId']) ? $params['relatedTransactionId'] : null);
 
-				if(in_array(strtolower($params['transactionType']), ['sale', 'settle'])) {
+					// set transaction
+					$transaction = $this->transObj->setPayment($orderPayment)
+						->setOrder($order)
+						->setTransactionId($params['TransactionID'])
+						->setFailSafe(true)
+						->build($transactionType);
+
+					$transaction->save();
+
+					$tr_type	= $orderPayment->addTransaction($transactionType);
+					$msg		= $orderPayment->prependMessage($message);
+
+					$orderPayment->addTransactionCommentsToOrder($tr_type, $msg);
+				}
+				elseif (in_array(strtolower($params['transactionType']), ['sale', 'settle'])) {
 					$transactionType		= Transaction::TYPE_CAPTURE;
 					$sc_transaction_type	= Payment::SC_SETTLED;
-					$isSettled				= true;
 					
-//					$order->setState(Invoice::STATE_PAID);
-				}
-				elseif (strtolower($params['transactionType']) == 'void') {
-					$transactionType		= Transaction::TYPE_VOID;
-					$sc_transaction_type	= Payment::SC_VOIDED;
-					$isSettled				= false;
-				}
-				
-				$orderPayment
-					->setIsTransactionPending($status === "pending" ? true: false)
-					->setIsTransactionClosed($isSettled ? 1 : 0);
-
-				if ($transactionType === Transaction::TYPE_CAPTURE) {
 					$invCollection = $order->getInvoiceCollection();
 					
 					if(count($invCollection) > 0) {
@@ -336,24 +345,32 @@ class Dmn extends Action implements CsrfAwareActionInterface
 						
 						foreach ($order->getInvoiceCollection() as $invoice) {
 							$invoice
-								->setTransactionId($transactionId)
+								->setTransactionId($params['TransactionID'])
 								->pay()
 								->save();
 						}
 					}
-					// do this only for CPanel Settle
+					// create Invoicees and Transactions for non-Magento actions
 					elseif(
-						@$params["order"] != @$params["merchant_unique_id"]
-						&& $order->canInvoice()
+						$order->canInvoice()
+						&& (
+							'Sale' == $params['transactionType'] // Sale flow
+							|| (
+								@$params["order"] == @$params["merchant_unique_id"]
+								&& $params["payment_method"] != 'cc_card'
+							) // APMs flow
+							|| (
+								!empty($params["merchant_unique_id"])
+								&& $params["merchant_unique_id"] != @$params["order"]
+							) // CPanel Settle
+						)
 					) {
-						$this->moduleConfig->createLog('DMN CPanel Settle.');
-						
-						$this->moduleConfig->createLog('We can create invoice.');
+						$this->moduleConfig->createLog('DMN - we can create invoice.');
 						
 						// Prepare the invoice
 						$invoice = $this->invoiceService->prepareInvoice($order);
 						$invoice->setRequestedCaptureCase(Invoice::CAPTURE_ONLINE)
-							->setTransactionId(@$params['TransactionID'])
+							->setTransactionId($params['TransactionID'])
 							->setState(Invoice::STATE_PAID)
 							->setBaseGrandTotal($order->getBaseGrandTotal());
 
@@ -367,37 +384,69 @@ class Dmn extends Action implements CsrfAwareActionInterface
 							->addObject($invoice->getOrder());
 						$transactionSave->save(); 
 
-						$orderPayment->setParentTransactionId(null);
-
 						// Update the order
 						$order->setTotalPaid($order->getTotalPaid());
 						$order->setBaseTotalPaid($order->getBaseTotalPaid());
 
 						// Save the invoice
 						$this->invoiceRepository->save($invoice);
+						
+						// create fake Auth before the Settle for sale ONLY
+						if('Sale' == $params['transactionType']) {
+							$this->moduleConfig->createLog('Sale - create an Auth transaction');
+
+							$orderPayment
+								->setIsTransactionPending(false)
+								->setIsTransactionClosed(false)
+								->setParentTransactionId(null);
+
+							$transaction = $this->transObj->setPayment($orderPayment)
+								->setOrder($order)
+								->setTransactionId(!empty($params['relatedTransactionId']) ? $params['relatedTransactionId'] : uniqid())
+								->setFailSafe(true)
+								->build(Transaction::TYPE_AUTH);
+
+							$transaction->save();
+
+							$tr_type	= $orderPayment->addTransaction(Transaction::TYPE_AUTH);
+							$msg		= $orderPayment->prependMessage($message);
+
+							$orderPayment->addTransactionCommentsToOrder($tr_type, $msg);
+							$orderPayment->save();
+						}
+						
+						$orderPayment
+							->setIsTransactionPending($status === "pending" ? true: false)
+							->setIsTransactionClosed(false)
+							->setParentTransactionId(!empty($params['relatedTransactionId']) ? $params['relatedTransactionId'] : null);
+						
+						// set transaction
+						$transaction = $this->transObj->setPayment($orderPayment)
+							->setOrder($order)
+							->setTransactionId($params['TransactionID'])
+							->setFailSafe(true)
+							->build($transactionType);
+		
+						$transaction->save();
+						
+						$tr_type	= $orderPayment->addTransaction($transactionType);
+						$msg		= $orderPayment->prependMessage($message);
+						
+						$orderPayment->addTransactionCommentsToOrder($tr_type, $msg);
 					}
-					
-					$order->setStatus($sc_transaction_type);
+					elseif(!$order->canInvoice()) {
+						$this->moduleConfig->createLog('We can NOT create invoice.');
+					}
+				}
+				elseif (strtolower($params['transactionType']) == 'void') {
+//					$transactionType		= Transaction::TYPE_VOID;
+					$sc_transaction_type	= Payment::SC_VOIDED;
+//					$is_closed				= true;
 				}
 				
-				// set transaction for Auth and Settle or Void button will miss
-				$transaction = $this->transObj->setPayment($orderPayment)
-					->setOrder($order)
-					->setTransactionId(@$params['TransactionID'])
-					->setFailSafe(true)
-					->build($transactionType);
-
-				$transaction->save();
-				
-				$ord_transaction	= $orderPayment->addTransaction($transactionType);
-				$message			= $orderPayment->prependMessage($message);
-				
-				$orderPayment->addTransactionCommentsToOrder(
-					$ord_transaction,
-					$message
-				);
+				$order->setStatus($sc_transaction_type);
 			}
-
+			
 			$orderPayment->save();
 			$order->save();
 		}

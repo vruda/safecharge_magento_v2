@@ -134,24 +134,25 @@ class Refund extends AbstractPayment implements RequestInterface
                 $authCode = $transactionDetails['authCode'];
             }
         }
+		
+		$payment_method = $orderPayment->getAdditionalInformation(Payment::TRANSACTION_EXTERNAL_PAYMENT_METHOD);
 
-        if ($authCode === null) {
+        if ($authCode === null && Payment::APM_METHOD_CC == $payment_method) {
 			$msg = __('Transaction does not contain authorization code.');
 			$this->config->createLog($msg);
             throw new PaymentException($msg);
         }
 
         $params = [
-            'clientUniqueId' => $order->getIncrementId(),
-            'currency' => $order->getBaseCurrencyCode(),
-            'amount' => (float)$this->amount,
-            'relatedTransactionId' => $transactionId,
-            'authCode' => $authCode,
-            'comment' => '',
-            'merchant_unique_id' => $order->getIncrementId(),
-            'urlDetails' => [
+            'clientUniqueId'		=> $order->getIncrementId(),
+            'currency'				=> $order->getBaseCurrencyCode(),
+            'amount'				=> (float)$this->amount,
+            'relatedTransactionId'	=> $transactionId,
+            'authCode'				=> is_null($authCode) ? '' : $authCode,
+            'comment'				=> '',
+            'merchant_unique_id'	=> $order->getIncrementId(),
+            'urlDetails'			=> [
                 'notificationUrl' => $this->config->getCallbackDmnUrl($order->getIncrementId(), $order->getStoreId()),
-//                'notificationUrl' => '',
             ],
         ];
 
