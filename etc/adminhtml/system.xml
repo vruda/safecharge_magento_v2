@@ -20,7 +20,6 @@
                    showInStore="1">
                 <label>Safecharge</label>
                 
-                    
 				<field id="active"
 					   translate="label"
 					   type="select"
@@ -145,6 +144,19 @@
 					<config_path>payment/safecharge/sandbox_merchant_secret_key</config_path>
 				</field>
                     
+				<field id="save_order_before_success"
+					   translate="label"
+					   type="select"
+					   sortOrder="105"
+					   showInDefault="1"
+					   showInWebsite="1"
+					   showInStore="0"
+					   canRestore="1">
+					<label>Save Order before Success page</label>
+					<source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+					<config_path>payment/safecharge/save_order_before_success</config_path>
+				</field>
+				
 				<field id="debug"
 					   translate="label"
 					   type="select"

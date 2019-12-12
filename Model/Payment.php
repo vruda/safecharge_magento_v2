@@ -79,6 +79,8 @@ class Payment extends Cc implements TransparentInterface
     const SC_SETTLED            = 'sc_settled';
     const SC_PARTIALLY_SETTLED  = 'sc_partially_settled';
     const SC_VOIDED             = 'sc_voided';
+    const SC_REFUNDED           = 'sc_refunded';
+    const SC_PROCESSING         = 'sc_processing';
 
     const SOLUTION_INTERNAL		= 'internal';
     const SOLUTION_EXTERNAL		= 'external';

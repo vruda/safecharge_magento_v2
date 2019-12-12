@@ -377,14 +377,12 @@ class Config
         return $this->getConfigValue('hash');
     }
     
-    /**
-     * Return payment solution configuration value.
-     *
-     * @return string
+	/**
+     * @return bool
      */
-    public function getPaymentSolution()
+    public function doSaveOrderBeforeSuccess()
     {
-        return $this->getConfigValue('payment_solution');
+        return (bool)$this->getConfigValue('save_order_before_success');
     }
 
     /**
@@ -439,6 +437,16 @@ class Config
     public function getCallbackSuccessUrl()
     {
         $quoteId = $this->checkoutSession->getQuoteId();
+		
+//		$this->createLog(
+//			$this->urlBuilder->getUrl(
+//					'safecharge/payment/callback_complete',
+//					['quote' => $quoteId]
+//				)
+//				. '?form_key=' . $this->formKey->getFormKey(),
+//			'success url:');
+//		
+//		return 'https://srv-aws-magento.sccdev-qa.com/magentover2';
 		
 		if($this->versionNum >= 220) {
 			return $this->urlBuilder->getUrl(
@@ -501,7 +509,8 @@ class Config
      */
     public function getCallbackDmnUrl($incrementId = null, $storeId = null)
     {
-        $url =  $this->getStoreManager()
+		$quoteId	= $this->checkoutSession->getQuoteId();
+        $url		=  $this->getStoreManager()
             ->getStore((is_null($incrementId)) ? $this->storeId : $storeId)
             ->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_WEB);
 		
@@ -509,12 +518,14 @@ class Config
 			return $url
 				. 'safecharge/payment/callback_dmn/order/'
 				. (is_null($incrementId) ? $this->getReservedOrderId() : $incrementId)
-				. '?form_key=' . $this->formKey->getFormKey();
+				. '?form_key=' . $this->formKey->getFormKey()
+				. '&quote=' . $quoteId;
 		}
 		
 		return $url
 			. 'safecharge/payment/callback_dmnold/order/'
-			. (is_null($incrementId) ? $this->getReservedOrderId() : $incrementId);
+			. (is_null($incrementId) ? $this->getReservedOrderId() : $incrementId)
+			. '?quote=' . $quoteId;
     }
 
     /**

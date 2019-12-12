@@ -70,6 +70,11 @@ class Toolbar
 			if(Payment::SC_VOIDED == $ord_status) {
 				$buttonList->remove('order_invoice');
 			}
+			
+			// after Refund
+			if('closed' == $ord_status) {
+				$buttonList->remove('void_payment');
+			}
 		}
 		catch(Exception $e) {
 			$this->config->createLog($e->getMessage(), 'Class Toolbar exception:');

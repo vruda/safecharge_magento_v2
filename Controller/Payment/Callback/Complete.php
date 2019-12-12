@@ -112,16 +112,16 @@ class Complete extends Action implements CsrfAwareActionInterface
     ) {
         parent::__construct($context);
 
-        $this->orderFactory = $orderFactory;
-        $this->moduleConfig = $moduleConfig;
-        $this->authorizeCommand = $authorizeCommand;
-        $this->captureCommand = $captureCommand;
-        $this->safechargeLogger = $safechargeLogger;
-        $this->paymentRequestFactory = $paymentRequestFactory;
-        $this->dataObjectFactory = $dataObjectFactory;
-        $this->cartManagement = $cartManagement;
-        $this->checkoutSession = $checkoutSession;
-        $this->onepageCheckout = $onepageCheckout;
+        $this->orderFactory				= $orderFactory;
+        $this->moduleConfig				= $moduleConfig;
+        $this->authorizeCommand			= $authorizeCommand;
+        $this->captureCommand			= $captureCommand;
+        $this->safechargeLogger			= $safechargeLogger;
+        $this->paymentRequestFactory	= $paymentRequestFactory;
+        $this->dataObjectFactory		= $dataObjectFactory;
+        $this->cartManagement			= $cartManagement;
+        $this->checkoutSession			= $checkoutSession;
+        $this->onepageCheckout			= $onepageCheckout;
     }
 	
 	/** 
@@ -154,13 +154,20 @@ class Complete extends Action implements CsrfAwareActionInterface
 		$resultRedirect = $this->resultFactory->create(ResultFactory::TYPE_REDIRECT);
 
         try {
-            $result = $this->placeOrder();
-			
-            if ($result->getSuccess() !== true) {
-				$this->moduleConfig->createLog($result->getErrorMessage(), 'Complete Callback error - place order error');
+			// the Order was not saved in the Redirect class
+			if (empty($params['order_db_id'])) {
+//				$reservedOrderId = $this->checkoutSession->getQuote()->getReservedOrderId();
+//				$this->moduleConfig->createLog($reservedOrderId, '$reservedOrderId');
 				
-                throw new PaymentException(__($result->getErrorMessage()));
-            }
+				// if the option for save the order in the Redirect is ON, skip placeOrder !!!
+				$result = $this->placeOrder();
+
+				if ($result->getSuccess() !== true) {
+					$this->moduleConfig->createLog($result->getErrorMessage(), 'Complete Callback error - place order error');
+
+					throw new PaymentException(__($result->getErrorMessage()));
+				}
+			}
 			
             if (
                 isset($params['Status'])
@@ -226,7 +233,7 @@ class Complete extends Action implements CsrfAwareActionInterface
                 ->setData('error', true)
                 ->setData(
                     'error_message',
-                    __('An error occurred on the server. Please try to place the order again.')
+                    __('An error occurred on the server. Please check your Order History and if the Order is not there, try to place it again!')
                 );
         }
 

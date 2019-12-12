@@ -226,8 +226,24 @@ class Dmn extends Action implements CsrfAwareActionInterface
 			while ($tryouts <=10 && !($order && $order->getId()));
 
 			if (!($order && $order->getId())) {
-				echo 'Order '. $orderIncrementId .' not found!';
-				return;
+				# try to create the order
+				$this->moduleConfig->createLog('Order '. $orderIncrementId .' not found, try to create it!');
+				
+				$result = $this->placeOrder();
+				
+				if ($result->getSuccess() !== true) {
+					$this->moduleConfig->createLog($result->getErrorMessage(), 'DMN Callback error - place order error:');
+					echo 'DMN Callback error - place order error:' . $result->getErrorMessage();
+					return;
+				}
+				
+				$order = $this->orderFactory->create()->loadByIncrementId($orderIncrementId);
+				
+				$this->moduleConfig->createLog('An Order with ID '. $orderIncrementId .' was created in the DMN page.');
+				# try to create the order END
+				
+//				echo 'Order '. $orderIncrementId .' not found!';
+//				return;
 			}
 			
 			$this->moduleConfig->createLog('DMN try ' . $tryouts . ', there IS order.');
@@ -289,18 +305,6 @@ class Dmn extends Action implements CsrfAwareActionInterface
 				$params
 			);
 
-			if (in_array($status, ['declined', 'error'])) {
-				$params['ErrCode']		= (isset($params['ErrCode'])) ? $params['ErrCode'] : "Unknown";
-				$params['ExErrCode']	= (isset($params['ExErrCode'])) ? $params['ExErrCode'] : "Unknown";
-				
-				$order->addStatusHistoryComment("The {$params['transactionType']} request returned '{$params['Status']}' status "
-					. "(Code: {$params['ErrCode']}, Reason: {$params['ExErrCode']}).");
-			}
-			elseif ($status) {
-				$order->addStatusHistoryComment("The {$params['transactionType']} request returned '" 
-					. $params['Status'] . "' status.");
-			}
-
 			if ($status === "pending") {
 				$order
 					->setState(Order::STATE_NEW)
@@ -310,11 +314,12 @@ class Dmn extends Action implements CsrfAwareActionInterface
 			/* TODO - recognize CPanel actions, for them we must create manual transactions */
 
 			if (in_array($status, ['approved', 'success'])) {
-				$message				= $this->captureCommand->execute($orderPayment, $order->getBaseGrandTotal(), $order);
-				$transactionType		= Transaction::TYPE_AUTH;
-				$sc_transaction_type	= Payment::SC_AUTH;
+				$message = $this->captureCommand->execute($orderPayment, $order->getBaseGrandTotal(), $order);
 				
 				if (strtolower($params['transactionType']) == 'auth') {
+					$transactionType		= Transaction::TYPE_AUTH;
+					$sc_transaction_type	= Payment::SC_AUTH;
+					
 					$orderPayment
 						->setIsTransactionPending(false)
 						->setIsTransactionClosed(false)
@@ -445,6 +450,18 @@ class Dmn extends Action implements CsrfAwareActionInterface
 				}
 				
 				$order->setStatus($sc_transaction_type);
+				
+				$order->addStatusHistoryComment(
+					"The {$params['transactionType']} request returned '" . $params['Status'] . "' status.",
+					$sc_transaction_type
+				);
+			}
+			elseif (in_array($status, ['declined', 'error'])) {
+				$params['ErrCode']		= (isset($params['ErrCode'])) ? $params['ErrCode'] : "Unknown";
+				$params['ExErrCode']	= (isset($params['ExErrCode'])) ? $params['ExErrCode'] : "Unknown";
+				
+				$order->addStatusHistoryComment("The {$params['transactionType']} request returned '{$params['Status']}' status "
+					. "(Code: {$params['ErrCode']}, Reason: {$params['ExErrCode']}).");
 			}
 			
 			$orderPayment->save();
@@ -453,7 +470,7 @@ class Dmn extends Action implements CsrfAwareActionInterface
 		catch (\Exception $e) {
 			$msg = $e->getMessage();
 
-			$this->moduleConfig->createLog($e->getMessage(), 'DMN Excception:');
+			$this->moduleConfig->createLog($e->getMessage() . "\n\r" . $e->getTraceAsString(), 'DMN Excception:');
 
 			echo 'Error: ' . $e->getMessage();
 			return;
@@ -463,6 +480,56 @@ class Dmn extends Action implements CsrfAwareActionInterface
 
 		echo 'DMN with status '. $status .' process completed.';
 		return;
+    }
+	
+	/**
+     * Place order.
+     *
+     * @return DataObject
+     */
+    private function placeOrder()
+    {
+        $result = $this->dataObjectFactory->create();
+		$params = array_merge(
+				$this->getRequest()->getParams(),
+				$this->getRequest()->getPostValue()
+			);
+
+        try {
+            /**
+             * Current workaround depends on Onepage checkout model defect
+             * Method Onepage::getCheckoutMethod performs setCheckoutMethod
+             */
+            $this->onepageCheckout->getCheckoutMethod();
+
+            $orderId = $this->cartManagement->placeOrder((int) @$params['quote']);
+
+            $result
+                ->setData('success', true)
+                ->setData('order_id', $orderId);
+
+            $this->_eventManager->dispatch(
+                'safecharge_place_order',
+                [
+                    'result' => $result,
+                    'action' => $this,
+                ]
+            );
+        }
+        catch (\Exception $exception) {
+			$this->moduleConfig->createLog($exception->getMessage(), 'DMN placeOrder Exception: ');
+            
+            $result
+                ->setData('error', true)
+                ->setData(
+                    'error_message',
+                    __('An error occurred on the server. Please try to place the order again.')
+                );
+        }
+		
+		$this->moduleConfig->createLog($result, 'DMN placeOrder result: ');
+
+        return $result;
     }
 	
     private function validateChecksum($params)

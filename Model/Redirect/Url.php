@@ -42,6 +42,8 @@ class Url
         $this->moduleConfig     = $moduleConfig;
         $this->checkoutSession  = $checkoutSession;
         $this->request          = $request;
+		
+		$this->moduleConfig->createLog('call to Url class');
     }
 	
     /**
@@ -64,6 +66,7 @@ class Url
             ];
         }
         
+		// non active case
         return [
             "url" => $this->moduleConfig->getEndpoint(),
         ];

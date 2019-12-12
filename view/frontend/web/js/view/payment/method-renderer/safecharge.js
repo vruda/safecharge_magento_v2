@@ -36,6 +36,7 @@ define(
         var card			= null;
 		var scData			= {};
 		var isCardAttached	= false;
+		var	codeName		= 'safecharge';
 		
         return Component.extend({
 
@@ -274,13 +275,14 @@ define(
                         cache: false
                     };
 
-                    // in case we use Fields
+                    // in case we use WebSDK
                     if(self.chosenApmMethod() === 'cc_card' && transactionId != 'undefined') {
                         ajaxData.url += '?method=cc_card&transactionId=' + transactionId;
                     }
 
                     self.selectPaymentMethod();
-                    setPaymentMethodAction(self.messageContainer)
+					
+					setPaymentMethodAction(self.messageContainer)
                         .done(function() {
                             $('body').trigger('processStart');
 
@@ -300,7 +302,7 @@ define(
                                     window.location.reload();
                                 }
                             })
-                            .fail(function(e) {
+                            .fail(function() {
                                 window.location.reload();
                             });
                         }.bind(self));
@@ -312,12 +314,6 @@ define(
             },
             
             initFields: function() {
-//				if(card !== null) {
-//					console.log('card exists, use it')
-//					card.attach('#card-field-placeholder');
-//					return;
-//				}
-				
                 // for the Fields
 				scData.merchantSiteId	= window.checkoutConfig.payment[self.getCode()].merchantSiteId;
 				scData.merchantId		= window.checkoutConfig.payment[self.getCode()].merchantId;
@@ -326,8 +322,6 @@ define(
                     scData.env = 'test';
                 }
 				
-				console.log('initFields', scData)
-                
                 sfc = SafeCharge(scData);
 
                 // prepare fields
@@ -364,7 +358,6 @@ define(
 					}
                 });
                     
-				console.log(isCardAttached);
 				if(!isCardAttached && $('#card-field-placeholder').length > 0) {
 					card.attach('#card-field-placeholder');
 				}
@@ -372,7 +365,6 @@ define(
 			
 			attachFields: function() {
 				if(null !== card) {
-					console.log('attach existing card')
 					card.attach('#card-field-placeholder');
 					isCardAttached = true;
 				}

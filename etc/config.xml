@@ -26,6 +26,7 @@
                 <sandbox_merchant_secret_key backend_model="Magento\Config\Model\Config\Backend\Encrypted"/>
 
                 <!-- Advanced Configuration. -->
+                <save_order_before_success>0</save_order_before_success>
                 <debug>1</debug>
                 <min_order_total/>
                 <max_order_total/>
@@ -36,7 +37,7 @@
                 <cctypes>AE,VI,MC,MI,DN</cctypes>
                 
                 <payment_solution>external</payment_solution>
-                <order_status>sc_auth</order_status>
+                <order_status>sc_processing</order_status>
                 <can_use_checkout>1</can_use_checkout>
                 
                 <!-- Gateway Configuration. -->

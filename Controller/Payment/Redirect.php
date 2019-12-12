@@ -7,7 +7,6 @@ use Magento\Framework\App\Action\Context;
 use Magento\Framework\App\ResponseInterface;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Safecharge\Safecharge\Model\Config as ModuleConfig;
-use Safecharge\Safecharge\Model\Logger as SafechargeLogger;
 use Safecharge\Safecharge\Model\Redirect\Url as RedirectUrlBuilder;
 
 /**
@@ -19,16 +18,6 @@ use Safecharge\Safecharge\Model\Redirect\Url as RedirectUrlBuilder;
 class Redirect extends Action
 {
     /**
-     * @var RedirectUrlBuilder
-     */
-    private $redirectUrlBuilder;
-
-    /**
-     * @var SafechargeLogger
-     */
-    private $safechargeLogger;
-
-    /**
      * @var ModuleConfig
      */
     private $moduleConfig;
@@ -37,29 +26,38 @@ class Redirect extends Action
      * @var JsonFactory
      */
     private $jsonResultFactory;
+	
+    private $request;
+    private $dataObjectFactory;
+	private $cartManagement;
+	private $onepageCheckout;
+	private $checkoutSession;
 
     /**
      * Redirect constructor.
      *
      * @param Context            $context
      * @param RedirectUrlBuilder $redirectUrlBuilder
-     * @param SafechargeLogger   $safechargeLogger
      * @param ModuleConfig       $moduleConfig
      * @param JsonFactory        $jsonResultFactory
      */
     public function __construct(
         Context $context,
-        RedirectUrlBuilder $redirectUrlBuilder,
-        SafechargeLogger $safechargeLogger,
         ModuleConfig $moduleConfig,
-        JsonFactory $jsonResultFactory
+        JsonFactory $jsonResultFactory,
+		\Magento\Framework\App\Request\Http $request,
+		\Magento\Framework\DataObjectFactory $dataObjectFactory,
+		\Magento\Quote\Api\CartManagementInterface $cartManagement,
+		\Magento\Checkout\Model\Type\Onepage $onepageCheckout
     ) {
         parent::__construct($context);
 
-        $this->redirectUrlBuilder = $redirectUrlBuilder;
-        $this->safechargeLogger = $safechargeLogger;
-        $this->moduleConfig = $moduleConfig;
-        $this->jsonResultFactory = $jsonResultFactory;
+        $this->moduleConfig			= $moduleConfig;
+        $this->jsonResultFactory	= $jsonResultFactory;
+        $this->request				= $request;
+		$this->dataObjectFactory	= $dataObjectFactory;
+		$this->cartManagement		= $cartManagement;
+		$this->onepageCheckout		= $onepageCheckout;
     }
 
     /**
@@ -71,14 +69,115 @@ class Redirect extends Action
             ->setHttpResponseCode(\Magento\Framework\Webapi\Response::HTTP_OK);
 
         if (!$this->moduleConfig->isActive()) {
-            if ($this->moduleConfig->isDebugEnabled()) {
-                $this->safechargeLogger->debug('Redirect Controller: Safecharge payments module is not active at the moment!');
-            }
-            return $result->setData(['error_message' => __('Safecharge payments module is not active at the moment!')]);
+			$msg = 'Redirect Controller: Safecharge payments module is not active at the moment!';
+			
+			$this->moduleConfig->createLog($msg);
+            return $result->setData(['error_message' => __($msg)]);
         }
-
-        $postData = $this->redirectUrlBuilder->getPostData();
+		
+		$this->moduleConfig->createLog($this->request->getParams(), 'Redirect class params:');
+		
+		$postData['url'] = $this->moduleConfig->getCallbackErrorUrl();
+		
+		// for the WebSDK
+		if($this->request->getParam('method') === 'cc_card' && $this->request->getParam('transactionId')) {
+            $postData['url'] = $this->moduleConfig->getCallbackSuccessUrl();
+			
+			// try to place an order
+			if(
+				$this->moduleConfig->doSaveOrderBeforeSuccess()
+				&& strpos($postData['url'], 'callback_complete') !== false
+			) {
+				$this->moduleConfig->createLog('Try to save the Order in Redirect class');
+				
+				$order_id = $this->saveOrder();
+				
+				$postData['url'] .= '&order_db_id=' . $order_id;
+			}
+        }
 		
         return $result->setData($postData);
     }
+	
+	/**
+	 * @return int $orderId - the new Order ID
+	 */
+	private function saveOrder()
+	{
+        try {
+			$result = $this->dataObjectFactory->create();
+
+			/**
+			 * Current workaround depends on Onepage checkout model defect
+			 * Method Onepage::getCheckoutMethod performs setCheckoutMethod
+			 */
+			$this->onepageCheckout->getCheckoutMethod();
+			
+			/* TODO - replace it with constructor call */
+			$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+			$checkoutSession = $objectManager->create('\Magento\Checkout\Model\Session\Proxy');
+
+			$orderId = $this->cartManagement->placeOrder((int)$checkoutSession->getQuoteId());
+			
+			$this->_eventManager->dispatch(
+				'safecharge_place_order',
+				[
+					'result' => $result,
+					'action' => $this,
+				]
+			);
+			
+			$this->moduleConfig->createLog('Place order in Redirect success');
+        }
+        catch (PaymentException $e) {
+			$this->moduleConfig->createLog($e->getMessage(), 'Place order in Redirect Exception:');
+        }
+		
+		return $orderId;
+	}
+	
+	/**
+     * Place order.
+     *
+     * @return DataObject
+     */
+    private function placeOrder()
+    {
+        $result = $this->dataObjectFactory->create();
+
+        try {
+            /**
+             * Current workaround depends on Onepage checkout model defect
+             * Method Onepage::getCheckoutMethod performs setCheckoutMethod
+             */
+            $this->onepageCheckout->getCheckoutMethod();
+
+            $orderId = $this->cartManagement->placeOrder((int)$this->checkoutSession->getQuoteId());
+
+            $result
+                ->setData('success', true)
+                ->setData('order_id', $orderId);
+
+            $this->_eventManager->dispatch(
+                'safecharge_place_order',
+                [
+                    'result' => $result,
+                    'action' => $this,
+                ]
+            );
+        }
+        catch (\Exception $exception) {
+			$this->moduleConfig->createLog($exception->getMessage(), 'Redirect Exception: ');
+            
+            $result
+                ->setData('error', true)
+                ->setData(
+                    'error_message',
+                    __('An error occurred on the server. Please try to place the order again.')
+                );
+        }
+
+        return $result;
+    }
+	
 }
