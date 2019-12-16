@@ -67,6 +67,19 @@
 					<source_model>Safecharge\Safecharge\Model\Adminhtml\Source\Hash</source_model>
 					<config_path>payment/safecharge/hash</config_path>
 				</field>
+				
+				<field id="payment_action"
+					   translate="label"
+					   type="select"
+					   sortOrder="45"
+					   showInDefault="1"
+					   showInWebsite="1"
+					   showInStore="0" 
+					   canRestore="1">
+					<label>Payment Action</label>
+					<source_model>Safecharge\Safecharge\Model\Adminhtml\Source\PaymentAction</source_model>
+					<config_path>payment/safecharge/payment_action</config_path>
+				</field>
 
 				<field id="merchant_id"
 					   translate="label"

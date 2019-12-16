@@ -52,7 +52,7 @@ class UpgradeData implements UpgradeDataInterface
                 ->setData('status', 'sc_voided')
                 ->setData('label', 'SC Voided')
                 ->save();
-            $scVoided->assignState(Order::STATE_CLOSED, false, true);
+            $scVoided->assignState(Order::STATE_PROCESSING, false, true);
 
             $scSettled = $this->orderStatusFactory->create()
                 ->setData('status', 'sc_settled')
@@ -82,7 +82,7 @@ class UpgradeData implements UpgradeDataInterface
                 ->setData('status', 'sc_refunded')
                 ->setData('label', 'SC Refunded')
                 ->save();
-            $scRefunded->assignState(Order::STATE_CLOSED, true, true);
+            $scRefunded->assignState(Order::STATE_PROCESSING, true, true);
         }
 
         $setup->endSetup();

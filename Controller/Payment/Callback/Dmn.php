@@ -314,7 +314,9 @@ class Dmn extends Action implements CsrfAwareActionInterface
 			/* TODO - recognize CPanel actions, for them we must create manual transactions */
 
 			if (in_array($status, ['approved', 'success'])) {
-				$message = $this->captureCommand->execute($orderPayment, $order->getBaseGrandTotal(), $order);
+				$message				= $this->captureCommand->execute($orderPayment, $order->getBaseGrandTotal(), $order);
+				$sc_transaction_type	= Payment::SC_PROCESSING;
+				$is_closed				= false;
 				
 				if (strtolower($params['transactionType']) == 'auth') {
 					$transactionType		= Transaction::TYPE_AUTH;
@@ -342,8 +344,7 @@ class Dmn extends Action implements CsrfAwareActionInterface
 				elseif (in_array(strtolower($params['transactionType']), ['sale', 'settle'])) {
 					$transactionType		= Transaction::TYPE_CAPTURE;
 					$sc_transaction_type	= Payment::SC_SETTLED;
-					
-					$invCollection = $order->getInvoiceCollection();
+					$invCollection			= $order->getInvoiceCollection();
 					
 					if(count($invCollection) > 0) {
 						$this->moduleConfig->createLog('There is/are invoice/s');
@@ -444,15 +445,24 @@ class Dmn extends Action implements CsrfAwareActionInterface
 					}
 				}
 				elseif (strtolower($params['transactionType']) == 'void') {
-//					$transactionType		= Transaction::TYPE_VOID;
+					$transactionType		= Transaction::TYPE_VOID;
 					$sc_transaction_type	= Payment::SC_VOIDED;
+					$is_closed				= true;
+					
+					$order->setData('state', Order::STATE_CLOSED);
+				}
+				elseif (strtolower($params['transactionType']) == 'credit') {
+					$transactionType		= Transaction::TYPE_REFUND;
+					$sc_transaction_type	= Payment::SC_REFUNDED;
 //					$is_closed				= true;
 				}
 				
 				$order->setStatus($sc_transaction_type);
 				
 				$order->addStatusHistoryComment(
-					"The {$params['transactionType']} request returned '" . $params['Status'] . "' status.",
+					__("The <b>{$params['transactionType']}</b> request returned <b>" . $params['Status'] . "</b> status."
+						. '<br/>Transaction ID: ' . $params['TransactionID'] .', Related Transaction ID: ')
+						. $params['relatedTransactionId'],
 					$sc_transaction_type
 				);
 			}
@@ -460,8 +470,10 @@ class Dmn extends Action implements CsrfAwareActionInterface
 				$params['ErrCode']		= (isset($params['ErrCode'])) ? $params['ErrCode'] : "Unknown";
 				$params['ExErrCode']	= (isset($params['ExErrCode'])) ? $params['ExErrCode'] : "Unknown";
 				
-				$order->addStatusHistoryComment("The {$params['transactionType']} request returned '{$params['Status']}' status "
-					. "(Code: {$params['ErrCode']}, Reason: {$params['ExErrCode']}).");
+				$order->addStatusHistoryComment(
+					__("The {$params['transactionType']} request returned '{$params['Status']}' status "
+					. "(Code: {$params['ErrCode']}, Reason: {$params['ExErrCode']}).")
+				);
 			}
 			
 			$orderPayment->save();

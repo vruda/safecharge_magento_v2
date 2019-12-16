@@ -72,9 +72,9 @@ class Toolbar
 			}
 			
 			// after Refund
-			if('closed' == $ord_status) {
-				$buttonList->remove('void_payment');
-			}
+//			if('closed' == $ord_status) {
+//				$buttonList->remove('void_payment');
+//			}
 		}
 		catch(Exception $e) {
 			$this->config->createLog($e->getMessage(), 'Class Toolbar exception:');

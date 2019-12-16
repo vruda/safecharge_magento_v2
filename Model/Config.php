@@ -536,6 +536,11 @@ class Config
         return $this->urlBuilder->getUrl('checkout/cart');
     }
 
+    public function getPaymentAction()
+    {
+        return $this->getConfigValue('payment_action');
+    }
+	
     public function getQuoteId()
     {
         return (($quote = $this->checkoutSession->getQuote())) ? $quote->getId() : null;

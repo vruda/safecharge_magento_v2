@@ -122,7 +122,8 @@ class OpenOrder extends AbstractRequest implements RequestInterface
 				'billingAddress'    => array(
 					'country' => $billingAddress['country_id'],
 				),
-				'paymentOption'		=> ['card' => ['threeD' => ['isDynamic3D' => 1]]],
+				'paymentOption'			=> ['card' => ['threeD' => ['isDynamic3D' => 1]]],
+				'transactionType'		=> $this->config->getPaymentAction(),
 			],
             parent::getParams()
         );

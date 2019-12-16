@@ -48,7 +48,8 @@ class Redirect extends Action
 		\Magento\Framework\App\Request\Http $request,
 		\Magento\Framework\DataObjectFactory $dataObjectFactory,
 		\Magento\Quote\Api\CartManagementInterface $cartManagement,
-		\Magento\Checkout\Model\Type\Onepage $onepageCheckout
+		\Magento\Checkout\Model\Type\Onepage $onepageCheckout,
+		\Magento\Checkout\Model\Session\Proxy $checkoutSession
     ) {
         parent::__construct($context);
 
@@ -58,6 +59,7 @@ class Redirect extends Action
 		$this->dataObjectFactory	= $dataObjectFactory;
 		$this->cartManagement		= $cartManagement;
 		$this->onepageCheckout		= $onepageCheckout;
+		$this->checkoutSession		= $checkoutSession;
     }
 
     /**
@@ -104,6 +106,8 @@ class Redirect extends Action
 	 */
 	private function saveOrder()
 	{
+		$orderId = '';
+		
         try {
 			$result = $this->dataObjectFactory->create();
 
@@ -113,11 +117,7 @@ class Redirect extends Action
 			 */
 			$this->onepageCheckout->getCheckoutMethod();
 			
-			/* TODO - replace it with constructor call */
-			$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
-			$checkoutSession = $objectManager->create('\Magento\Checkout\Model\Session\Proxy');
-
-			$orderId = $this->cartManagement->placeOrder((int)$checkoutSession->getQuoteId());
+			$orderId = $this->cartManagement->placeOrder((int)$this->checkoutSession->getQuoteId());
 			
 			$this->_eventManager->dispatch(
 				'safecharge_place_order',
