@@ -21,8 +21,8 @@ class PaymentAction implements ArrayInterface
     public function toOptionArray()
     {
         return [
-			'Sale' => __('Authorize'),
-			'Auth' => __('Authorize and Capture')
+			'Sale' => __('Authorize and Capture'),
+			'Auth' => __('Authorize')
         ];
     }
 }
