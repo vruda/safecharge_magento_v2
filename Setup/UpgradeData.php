@@ -47,7 +47,7 @@ class UpgradeData implements UpgradeDataInterface
     ) {
         $setup->startSetup();
 
-        if (version_compare($context->getVersion(), '1.0.1', '<')) {
+        if (version_compare($context->getVersion(), '2.0.1', '<')) {
             $scVoided = $this->orderStatusFactory->create()
                 ->setData('status', 'sc_voided')
                 ->setData('label', 'SC Voided')
@@ -76,7 +76,7 @@ class UpgradeData implements UpgradeDataInterface
                 ->setData('status', 'sc_processing')
                 ->setData('label', 'SC Processing')
                 ->save();
-            $scAuth->assignState(Order::STATE_PROCESSING, true, true);
+            $scProcessing->assignState(Order::STATE_PROCESSING, true, true);
 			
             $scRefunded = $this->orderStatusFactory->create()
                 ->setData('status', 'sc_refunded')

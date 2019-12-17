@@ -71,6 +71,13 @@ class Toolbar
 				$buttonList->remove('order_invoice');
 			}
 			
+			if(
+				Payment::SC_REFUNDED == $ord_status
+				&& 'apmgw_expresscheckout' == $payment_method
+			) {
+				$buttonList->remove('void_payment');
+			}
+			
 			// after Refund
 //			if('closed' == $ord_status) {
 //				$buttonList->remove('void_payment');
