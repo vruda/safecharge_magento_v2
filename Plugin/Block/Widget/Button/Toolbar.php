@@ -72,8 +72,8 @@ class Toolbar
 			}
 			
 			if(
-				Payment::SC_REFUNDED == $ord_status
-				&& 'apmgw_expresscheckout' == $payment_method
+				'apmgw_expresscheckout' == $payment_method
+				&& in_array($ord_status, [Payment::SC_REFUNDED, 'closed'])
 			) {
 				$buttonList->remove('void_payment');
 			}

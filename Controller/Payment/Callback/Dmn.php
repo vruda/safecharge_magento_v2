@@ -254,8 +254,10 @@ class Dmn extends Action implements CsrfAwareActionInterface
 			$order_status	= $orderPayment->getAdditionalInformation(Payment::TRANSACTION_STATUS);
 			$order_tr_type	= $orderPayment->getAdditionalInformation(Payment::TRANSACTION_TYPE);
 			
+			$tr_type_param	= strtolower($params['transactionType']);
+			
 			if(
-				strtolower($order_tr_type) == strtolower($params['transactionType'])
+				strtolower($order_tr_type) == $tr_type_param
 				&& strtolower($order_status) == 'approved'
 				&& $order_status != $status
 			) {
@@ -317,8 +319,9 @@ class Dmn extends Action implements CsrfAwareActionInterface
 				$message				= $this->captureCommand->execute($orderPayment, $order->getBaseGrandTotal(), $order);
 				$sc_transaction_type	= Payment::SC_PROCESSING;
 				$is_closed				= false;
+				$refund_msg				= '';
 				
-				if (strtolower($params['transactionType']) == 'auth') {
+				if ($tr_type_param == 'auth') {
 					$transactionType		= Transaction::TYPE_AUTH;
 					$sc_transaction_type	= Payment::SC_AUTH;
 					
@@ -341,7 +344,7 @@ class Dmn extends Action implements CsrfAwareActionInterface
 
 					$orderPayment->addTransactionCommentsToOrder($tr_type, $msg);
 				}
-				elseif (in_array(strtolower($params['transactionType']), ['sale', 'settle'])) {
+				elseif (in_array($tr_type_param, ['sale', 'settle'])) {
 					$transactionType		= Transaction::TYPE_CAPTURE;
 					$sc_transaction_type	= Payment::SC_SETTLED;
 					$invCollection			= $order->getInvoiceCollection();
@@ -360,7 +363,7 @@ class Dmn extends Action implements CsrfAwareActionInterface
 					elseif(
 						$order->canInvoice()
 						&& (
-							'Sale' == $params['transactionType'] // Sale flow
+							'sale' == $tr_type_param // Sale flow
 							|| (
 								@$params["order"] == @$params["merchant_unique_id"]
 								&& $params["payment_method"] != 'cc_card'
@@ -398,7 +401,7 @@ class Dmn extends Action implements CsrfAwareActionInterface
 						$this->invoiceRepository->save($invoice);
 						
 						// create fake Auth before the Settle for sale ONLY
-						if('Sale' == $params['transactionType']) {
+						if('sale' == $tr_type_param) {
 							$this->moduleConfig->createLog('Sale - create an Auth transaction');
 
 							$orderPayment
@@ -444,17 +447,23 @@ class Dmn extends Action implements CsrfAwareActionInterface
 						$this->moduleConfig->createLog('We can NOT create invoice.');
 					}
 				}
-				elseif (strtolower($params['transactionType']) == 'void') {
+				elseif ($tr_type_param == 'void') {
 					$transactionType		= Transaction::TYPE_VOID;
 					$sc_transaction_type	= Payment::SC_VOIDED;
 					$is_closed				= true;
 					
 					$order->setData('state', Order::STATE_CLOSED);
 				}
-				elseif (strtolower($params['transactionType']) == 'credit') {
+				elseif (in_array($tr_type_param, ['credit', 'refund'])) {
 					$transactionType		= Transaction::TYPE_REFUND;
 					$sc_transaction_type	= Payment::SC_REFUNDED;
-//					$is_closed				= true;
+					
+					if(!empty($params['totalAmount'])) {
+						$refund_msg = '<br/>The Refunded amount is <b>'
+							. $params['totalAmount'] . ' ' . $params['currency'] . '</b>.';
+					}
+					
+					$order->setData('state', Order::STATE_PROCESSING);
 				}
 				
 				$order->setStatus($sc_transaction_type);
@@ -462,7 +471,7 @@ class Dmn extends Action implements CsrfAwareActionInterface
 				$order->addStatusHistoryComment(
 					__("The <b>{$params['transactionType']}</b> request returned <b>" . $params['Status'] . "</b> status."
 						. '<br/>Transaction ID: ' . $params['TransactionID'] .', Related Transaction ID: ')
-						. $params['relatedTransactionId'],
+						. $params['relatedTransactionId'] . $refund_msg,
 					$sc_transaction_type
 				);
 			}
