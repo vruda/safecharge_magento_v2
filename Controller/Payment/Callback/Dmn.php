@@ -447,7 +447,7 @@ class Dmn extends Action implements CsrfAwareActionInterface
 						$this->moduleConfig->createLog('We can NOT create invoice.');
 					}
 				}
-				elseif ($tr_type_param == 'void') {
+				elseif (in_array($tr_type_param, ['void', 'voidcredit'])) {
 					$transactionType		= Transaction::TYPE_VOID;
 					$sc_transaction_type	= Payment::SC_VOIDED;
 					$is_closed				= true;
@@ -463,7 +463,7 @@ class Dmn extends Action implements CsrfAwareActionInterface
 							. $params['totalAmount'] . ' ' . $params['currency'] . '</b>.';
 					}
 					
-					$order->setData('state', Order::STATE_PROCESSING);
+//					$order->setData('state', Order::STATE_PROCESSING);
 				}
 				
 				$order->setStatus($sc_transaction_type);

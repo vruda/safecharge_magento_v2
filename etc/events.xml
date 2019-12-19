@@ -24,8 +24,13 @@
                   instance="Safecharge\Safecharge\Observer\Sales\Order\Void\Register"/>
     </event>
 	
-	<event name="sales_order_shipment_save_after">
+    <event name="sales_order_payment_refund">
+        <observer name="safecharge_refund_order_status_update"
+                  instance="Safecharge\Safecharge\Observer\Sales\Order\Payment\Refund"/>
+    </event>
+	
+<!--	<event name="sales_order_shipment_save_after">
         <observer name="safecharge_order_last_step_function" 
 				  instance="Safecharge\Safecharge\Observer\Sales\Order\PrepareData" />
-    </event>
+    </event>-->
 </config>
