@@ -16,7 +16,6 @@ use Magento\Sales\Model\Order\Payment\State\AuthorizeCommand;
 use Magento\Sales\Model\Order\Payment\State\CaptureCommand;
 use Magento\Sales\Model\Order\Payment\Transaction;
 use Magento\Sales\Model\OrderFactory;
-use Safecharge\Safecharge\Model\AbstractRequest;
 use Safecharge\Safecharge\Model\Config as ModuleConfig;
 use Safecharge\Safecharge\Model\Logger as SafechargeLogger;
 use Safecharge\Safecharge\Model\Payment;
@@ -137,7 +136,7 @@ class DmnOld extends Action
         $this->checkoutSession			= $checkoutSession;
         $this->onepageCheckout			= $onepageCheckout;
         $this->jsonResultFactory		= $jsonResultFactory;
-		$this->transaction				= $transaction;
+        $this->transaction				= $transaction;
         $this->invoiceService			= $invoiceService;
         $this->invoiceRepository		= $invoiceRepository;
         $this->transObj					= $transObj;
@@ -158,10 +157,22 @@ class DmnOld extends Action
 				$this->getRequest()->getParams(),
 				$this->getRequest()->getPostValue()
 			);
+			
+			$status = !empty($params['Status']) ? strtolower($params['Status']) : null;
 
 			$this->moduleConfig->createLog($params, 'DMN params:');
 
 			$this->validateChecksum($params);
+			
+			if(empty($params['transactionType'])) {
+				echo 'DMN error - missing Transaction Type.';
+				return;
+			}
+			
+			if(empty($params['TransactionID'])) {
+				echo 'DMN error - missing Transaction ID.';
+				return;
+			}
 
 			if (!empty($params["order"])) {
 				$orderIncrementId = $params["order"];
@@ -194,24 +205,40 @@ class DmnOld extends Action
 			while ($tryouts <=10 && !($order && $order->getId()));
 
 			if (!($order && $order->getId())) {
-				echo 'Order '. $orderIncrementId .' not found!';
-				return;
+				# try to create the order
+				$this->moduleConfig->createLog('Order '. $orderIncrementId .' not found, try to create it!');
+				
+				$result = $this->placeOrder();
+				
+				if ($result->getSuccess() !== true) {
+					$this->moduleConfig->createLog($result->getErrorMessage(), 'DMN Callback error - place order error:');
+					echo 'DMN Callback error - place order error:' . $result->getErrorMessage();
+					return;
+				}
+				
+				$order = $this->orderFactory->create()->loadByIncrementId($orderIncrementId);
+				
+				$this->moduleConfig->createLog('An Order with ID '. $orderIncrementId .' was created in the DMN page.');
+				# try to create the order END
 			}
 			
 			$this->moduleConfig->createLog('DMN try ' . $tryouts . ', there IS order.');
+			$this->moduleConfig->createLog($status, 'DMN with status:');
 
 			/** @var OrderPayment $payment */
 			$orderPayment	= $order->getPayment();
 			$order_status	= $orderPayment->getAdditionalInformation(Payment::TRANSACTION_STATUS);
 			$order_tr_type	= $orderPayment->getAdditionalInformation(Payment::TRANSACTION_TYPE);
 			
+			$tr_type_param	= strtolower($params['transactionType']);
+			
 			if(
-				$order_tr_type === @$params['transactionType']
+				strtolower($order_tr_type) == $tr_type_param
 				&& strtolower($order_status) == 'approved'
-				&& $order_status != $params['Status']
+				&& $order_status != $status
 			) {
-				$msg = 'Current Order status is APPROVED, but incoming DMN status is '
-					. $params['Status'] . ', for Transaction type '. $order_tr_type
+				$msg = 'Current Order status is "'. $order_status .'", but incoming DMN status is "'
+					. $params['Status'] . '", for Transaction type '. $order_tr_type
 					.'. Do not apply DMN data on the Order!';
 				
 				$this->moduleConfig->createLog($msg);
@@ -220,13 +247,10 @@ class DmnOld extends Action
 				return;
 			}
 
-			$transactionId = @$params['TransactionID'];
-			if ($transactionId) {
-				$orderPayment->setAdditionalInformation(
-					Payment::TRANSACTION_ID,
-					$transactionId
-				);
-			}
+			$orderPayment->setAdditionalInformation(
+				Payment::TRANSACTION_ID,
+				$params['TransactionID']
+			);
 
 			if (!empty($params['AuthCode'])) {
 				$orderPayment->setAdditionalInformation(
@@ -249,83 +273,89 @@ class DmnOld extends Action
 				);
 			}
 			
-			if (!empty($params['transactionType'])) {
-				$orderPayment->setAdditionalInformation(
-					Payment::TRANSACTION_TYPE,
-					$params['transactionType']
-				);
-			}
+			$orderPayment->setAdditionalInformation(
+				Payment::TRANSACTION_TYPE,
+				$params['transactionType']
+			);
 			
 			$orderPayment->setTransactionAdditionalInfo(
 				Transaction::RAW_DETAILS,
 				$params
 			);
 
-			$status = !empty($params['Status']) ? strtolower($params['Status']) : null;
-
-			if (in_array($status, ['declined', 'error'])) {
-				$params['ErrCode']		= (isset($params['ErrCode'])) ? $params['ErrCode'] : "Unknown";
-				$params['ExErrCode']	= (isset($params['ExErrCode'])) ? $params['ExErrCode'] : "Unknown";
-				
-				$order->addStatusHistoryComment("The {$params['transactionType']} request returned '{$params['Status']}' status "
-					. "(Code: {$params['ErrCode']}, Reason: {$params['ExErrCode']}).");
-			}
-			elseif ($status) {
-				$order->addStatusHistoryComment("The {$params['transactionType']} request returned '" 
-					. $params['Status'] . "' status.");
-			}
-
 			if ($status === "pending") {
-				$order->setState(Order::STATE_NEW)->setStatus('pending');
+				$order
+					->setState(Order::STATE_NEW)
+					->setStatus('pending');
 			}
+			
+			/* TODO - recognize CPanel actions, for them we must create manual transactions */
 
 			if (in_array($status, ['approved', 'success'])) {
-				$transactionType		= Transaction::TYPE_AUTH;
-				$sc_transaction_type	= Payment::SC_AUTH;
-				$isSettled				= false;
 				$message				= $this->captureCommand->execute($orderPayment, $order->getBaseGrandTotal(), $order);
+				$sc_transaction_type	= Payment::SC_PROCESSING;
+				$is_closed				= false;
+				$refund_msg				= '';
+				
+				if ($tr_type_param == 'auth') {
+					$transactionType		= Transaction::TYPE_AUTH;
+					$sc_transaction_type	= Payment::SC_AUTH;
+					
+					$orderPayment
+						->setIsTransactionPending(false)
+						->setIsTransactionClosed(false)
+						->setParentTransactionId(!empty($params['relatedTransactionId']) ? $params['relatedTransactionId'] : null);
 
-				if(in_array(strtolower($params['transactionType']), ['sale', 'settle'])) {
+					// set transaction
+					$transaction = $this->transObj->setPayment($orderPayment)
+						->setOrder($order)
+						->setTransactionId($params['TransactionID'])
+						->setFailSafe(true)
+						->build($transactionType);
+
+					$transaction->save();
+
+					$tr_type	= $orderPayment->addTransaction($transactionType);
+					$msg		= $orderPayment->prependMessage($message);
+
+					$orderPayment->addTransactionCommentsToOrder($tr_type, $msg);
+				}
+				elseif (in_array($tr_type_param, ['sale', 'settle'])) {
 					$transactionType		= Transaction::TYPE_CAPTURE;
 					$sc_transaction_type	= Payment::SC_SETTLED;
-					$isSettled				= true;
-					
-//					$order->setState(Invoice::STATE_PAID);
-				}
-				elseif (strtolower($params['transactionType']) == 'void') {
-					$transactionType		= Transaction::TYPE_VOID;
-					$sc_transaction_type	= Payment::TYPE_VOID;
-					$isSettled				= false;
-				}
-				
-				$orderPayment
-					->setIsTransactionPending($status === "pending" ? true: false)
-					->setIsTransactionClosed($isSettled ? 1 : 0);
-
-				if ($transactionType === Transaction::TYPE_CAPTURE) {
-					$invCollection = $order->getInvoiceCollection();
+					$invCollection			= $order->getInvoiceCollection();
 					
 					if(count($invCollection) > 0) {
 						$this->moduleConfig->createLog('There is/are invoice/s');
 						
 						foreach ($order->getInvoiceCollection() as $invoice) {
 							$invoice
-								->setTransactionId($transactionId)
+								->setTransactionId($params['TransactionID'])
 								->pay()
 								->save();
 						}
 					}
-					// do this only for CPanel Settle
+					// create Invoicees and Transactions for non-Magento actions
 					elseif(
-						@$params["order"] != @$params["merchant_unique_id"]
-						&& $order->canInvoice()
+						$order->canInvoice()
+						&& (
+							'sale' == $tr_type_param // Sale flow
+							|| (
+								@$params["order"] == @$params["merchant_unique_id"]
+								&& $params["payment_method"] != 'cc_card'
+							) // APMs flow
+							|| (
+								!empty($params["merchant_unique_id"])
+								&& $params["merchant_unique_id"] != @$params["order"]
+							) // CPanel Settle
+						)
 					) {
-						$this->moduleConfig->createLog('We can create invoice.');
+						$this->moduleConfig->createLog('DMN - we can create invoice.');
 						
 						// Prepare the invoice
 						$invoice = $this->invoiceService->prepareInvoice($order);
 						$invoice->setRequestedCaptureCase(Invoice::CAPTURE_ONLINE)
-							->setTransactionId(@$params['TransactionID'])
+							->setTransactionId($params['TransactionID'])
 							->setState(Invoice::STATE_PAID)
 							->setBaseGrandTotal($order->getBaseGrandTotal());
 
@@ -339,46 +369,105 @@ class DmnOld extends Action
 							->addObject($invoice->getOrder());
 						$transactionSave->save(); 
 
-//						$formatedPrice = $order->getBaseCurrency()->formatTxt($order->getGrandTotal());
-//						$orderPayment->addTransactionCommentsToOrder($transaction, __('The authorized amount is %1.', $formatedPrice));
-						$orderPayment->setParentTransactionId(null);
-
 						// Update the order
 						$order->setTotalPaid($order->getTotalPaid());
 						$order->setBaseTotalPaid($order->getBaseTotalPaid());
 
 						// Save the invoice
 						$this->invoiceRepository->save($invoice);
+						
+						// create fake Auth before the Settle for sale ONLY
+						if('sale' == $tr_type_param) {
+							$this->moduleConfig->createLog('Sale - create an Auth transaction');
+
+							$orderPayment
+								->setIsTransactionPending(false)
+								->setIsTransactionClosed(false)
+								->setParentTransactionId(null);
+
+							$transaction = $this->transObj->setPayment($orderPayment)
+								->setOrder($order)
+								->setTransactionId(!empty($params['relatedTransactionId']) ? $params['relatedTransactionId'] : uniqid())
+								->setFailSafe(true)
+								->build(Transaction::TYPE_AUTH);
+
+							$transaction->save();
+
+							$tr_type	= $orderPayment->addTransaction(Transaction::TYPE_AUTH);
+							$msg		= $orderPayment->prependMessage($message);
+
+							$orderPayment->addTransactionCommentsToOrder($tr_type, $msg);
+							$orderPayment->save();
+						}
+						
+						$orderPayment
+							->setIsTransactionPending($status === "pending" ? true: false)
+							->setIsTransactionClosed(false)
+							->setParentTransactionId(!empty($params['relatedTransactionId']) ? $params['relatedTransactionId'] : null);
+						
+						// set transaction
+						$transaction = $this->transObj->setPayment($orderPayment)
+							->setOrder($order)
+							->setTransactionId($params['TransactionID'])
+							->setFailSafe(true)
+							->build($transactionType);
+		
+						$transaction->save();
+						
+						$tr_type	= $orderPayment->addTransaction($transactionType);
+						$msg		= $orderPayment->prependMessage($message);
+						
+						$orderPayment->addTransactionCommentsToOrder($tr_type, $msg);
+					}
+					elseif(!$order->canInvoice()) {
+						$this->moduleConfig->createLog('We can NOT create invoice.');
+					}
+				}
+				elseif (in_array($tr_type_param, ['void', 'voidcredit'])) {
+					$transactionType		= Transaction::TYPE_VOID;
+					$sc_transaction_type	= Payment::SC_VOIDED;
+					$is_closed				= true;
+					
+					$order->setData('state', Order::STATE_CLOSED);
+				}
+				elseif (in_array($tr_type_param, ['credit', 'refund'])) {
+					$transactionType		= Transaction::TYPE_REFUND;
+					$sc_transaction_type	= Payment::SC_REFUNDED;
+					
+					if(!empty($params['totalAmount'])) {
+						$refund_msg = '<br/>The Refunded amount is <b>'
+							. $params['totalAmount'] . ' ' . $params['currency'] . '</b>.';
 					}
 					
-					$order->setStatus($sc_transaction_type);
+					$order->setData('state', Order::STATE_PROCESSING);
 				}
 				
-				// set transaction for Auth and Settle or Void button will miss
-				$transaction = $this->transObj->setPayment($orderPayment)
-					->setOrder($order)
-					->setTransactionId(@$params['TransactionID'])
-					->setFailSafe(true)
-					->build($transactionType);
-
-				$transaction->save();
+				$order->setStatus($sc_transaction_type);
 				
-				$ord_transaction	= $orderPayment->addTransaction($transactionType);
-				$message			= $orderPayment->prependMessage($message);
-				
-				$orderPayment->addTransactionCommentsToOrder(
-					$ord_transaction,
-					$message
+				$order->addStatusHistoryComment(
+					__("The <b>{$params['transactionType']}</b> request returned <b>" . $params['Status'] . "</b> status."
+						. '<br/>Transaction ID: ' . $params['TransactionID'] .', Related Transaction ID: ')
+						. $params['relatedTransactionId'] . $refund_msg,
+					$sc_transaction_type
 				);
 			}
-
+			elseif (in_array($status, ['declined', 'error'])) {
+				$params['ErrCode']		= (isset($params['ErrCode'])) ? $params['ErrCode'] : "Unknown";
+				$params['ExErrCode']	= (isset($params['ExErrCode'])) ? $params['ExErrCode'] : "Unknown";
+				
+				$order->addStatusHistoryComment(
+					__("The {$params['transactionType']} request returned '{$params['Status']}' status "
+					. "(Code: {$params['ErrCode']}, Reason: {$params['ExErrCode']}).")
+				);
+			}
+			
 			$orderPayment->save();
 			$order->save();
 		}
 		catch (\Exception $e) {
 			$msg = $e->getMessage();
 
-			$this->moduleConfig->createLog($e->getMessage(), 'DMN Excception:');
+			$this->moduleConfig->createLog($e->getMessage() . "\n\r" . $e->getTraceAsString(), 'DMN Excception:');
 
 			echo 'Error: ' . $e->getMessage();
 			return;
@@ -386,10 +475,60 @@ class DmnOld extends Action
 
 		$this->moduleConfig->createLog('DMN process end for order #' . $orderIncrementId);
 
-		echo 'DMN process completed.';
+		echo 'DMN with status '. $status .' process completed.';
 		return;
     }
+	
+	/**
+     * Place order.
+     *
+     * @return DataObject
+     */
+    private function placeOrder()
+    {
+        $result = $this->dataObjectFactory->create();
+		$params = array_merge(
+				$this->getRequest()->getParams(),
+				$this->getRequest()->getPostValue()
+			);
 
+        try {
+            /**
+             * Current workaround depends on Onepage checkout model defect
+             * Method Onepage::getCheckoutMethod performs setCheckoutMethod
+             */
+            $this->onepageCheckout->getCheckoutMethod();
+
+            $orderId = $this->cartManagement->placeOrder((int) @$params['quote']);
+
+            $result
+                ->setData('success', true)
+                ->setData('order_id', $orderId);
+
+            $this->_eventManager->dispatch(
+                'safecharge_place_order',
+                [
+                    'result' => $result,
+                    'action' => $this,
+                ]
+            );
+        }
+        catch (\Exception $exception) {
+			$this->moduleConfig->createLog($exception->getMessage(), 'DMN placeOrder Exception: ');
+            
+            $result
+                ->setData('error', true)
+                ->setData(
+                    'error_message',
+                    __('An error occurred on the server. Please try to place the order again.')
+                );
+        }
+		
+		$this->moduleConfig->createLog($result, 'DMN placeOrder result: ');
+
+        return $result;
+    }
+	
     private function validateChecksum($params)
     {
         if (!isset($params["advanceResponseChecksum"])) {

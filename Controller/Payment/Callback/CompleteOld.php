@@ -25,7 +25,6 @@ use Safecharge\Safecharge\Model\Request\Payment\Factory as PaymentRequestFactory
  * @category Safecharge
  * @package  Safecharge_Safecharge
  */
-//class Success extends Action
 class CompleteOld extends Action
 {
     /**
@@ -108,16 +107,16 @@ class CompleteOld extends Action
     ) {
         parent::__construct($context);
 
-        $this->orderFactory = $orderFactory;
-        $this->moduleConfig = $moduleConfig;
-        $this->authorizeCommand = $authorizeCommand;
-        $this->captureCommand = $captureCommand;
-        $this->safechargeLogger = $safechargeLogger;
-        $this->paymentRequestFactory = $paymentRequestFactory;
-        $this->dataObjectFactory = $dataObjectFactory;
-        $this->cartManagement = $cartManagement;
-        $this->checkoutSession = $checkoutSession;
-        $this->onepageCheckout = $onepageCheckout;
+        $this->orderFactory				= $orderFactory;
+        $this->moduleConfig				= $moduleConfig;
+        $this->authorizeCommand			= $authorizeCommand;
+        $this->captureCommand			= $captureCommand;
+        $this->safechargeLogger			= $safechargeLogger;
+        $this->paymentRequestFactory	= $paymentRequestFactory;
+        $this->dataObjectFactory		= $dataObjectFactory;
+        $this->cartManagement			= $cartManagement;
+        $this->checkoutSession			= $checkoutSession;
+        $this->onepageCheckout			= $onepageCheckout;
     }
 	
     /**
@@ -129,24 +128,41 @@ class CompleteOld extends Action
     {
 		$params = $this->getRequest()->getParams();
 		$this->moduleConfig->createLog($params, 'Success params:');
+		
+		$resultRedirect = $this->resultFactory->create(ResultFactory::TYPE_REDIRECT);
 
         try {
-            $result = $this->placeOrder();
+			// the Order was not saved in the Redirect class
+			if (empty($params['order_db_id'])) {
+				// if the option for save the order in the Redirect is ON, skip placeOrder !!!
+				$result = $this->placeOrder();
+
+				if ($result->getSuccess() !== true) {
+					$this->moduleConfig->createLog($result->getErrorMessage(), 'Complete Callback error - place order error');
+
+					throw new PaymentException(__($result->getErrorMessage()));
+				}
+			}
 			
-            if ($result->getSuccess() !== true) {
-				$this->moduleConfig->createLog($result->getErrorMessage(), 'Success Callback error - place order error');
-				
-                throw new PaymentException(__($result->getErrorMessage()));
+            if (
+                isset($params['Status'])
+                && !in_array(strtolower($params['Status']), ['approved', 'success'])
+            ) {
+                throw new PaymentException(__('Your payment failed.'));
             }
         }
         catch (PaymentException $e) {
 			$this->moduleConfig->createLog($e->getMessage(), 'Complete Callback Process Error:');
             $this->messageManager->addErrorMessage($e->getMessage());
 			
+			$resultRedirect->setUrl(
+				$this->_url->getUrl('checkout/cart')
+				. (!empty($_GET['form_key']) ? '?form_key=' . $_GET['form_key'] : '')
+			);
+			
 			return $resultRedirect;
         }
 
-		$resultRedirect = $this->resultFactory->create(ResultFactory::TYPE_REDIRECT);
 		$resultRedirect->setUrl(
 			$this->_url->getUrl('checkout/onepage/success/')
 			. (!empty($_GET['form_key']) ? '?form_key=' . $_GET['form_key'] : '')
@@ -192,7 +208,7 @@ class CompleteOld extends Action
                 ->setData('error', true)
                 ->setData(
                     'error_message',
-                    __('An error occurred on the server. Please try to place the order again.')
+                    __('An error occurred on the server. Please check your Order History and if the Order is not there, try to place it again!')
                 );
         }
 

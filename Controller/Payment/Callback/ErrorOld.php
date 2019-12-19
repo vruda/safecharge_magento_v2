@@ -11,8 +11,6 @@ use Safecharge\Safecharge\Model\Logger as SafechargeLogger;
 
 /**
  * Safecharge Safecharge payment place controller.
- * 
- * The old version is for Magento 2 < v2.2 - it is no support Csrf Validation
  *
  * @category Safecharge
  * @package  Safecharge_Safecharge
@@ -47,6 +45,23 @@ class ErrorOld extends Action
         $this->moduleConfig = $moduleConfig;
     }
 	
+	/** 
+     * @inheritDoc
+     */
+    public function createCsrfValidationException(
+        RequestInterface $request 
+    ): ?InvalidRequestException {
+        return null;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function validateForCsrf(RequestInterface $request): ?bool
+    {
+        return true;
+    }
+
     /**
      * @return ResultInterface
      * @throws \InvalidArgumentException
@@ -68,7 +83,10 @@ class ErrorOld extends Action
         );
 
         $resultRedirect = $this->resultFactory->create(ResultFactory::TYPE_REDIRECT);
-        $resultRedirect->setUrl($this->_url->getUrl('checkout/cart'));
+        $resultRedirect->setUrl(
+			$this->_url->getUrl('checkout/cart')
+			. (!empty($_GET['form_key']) ? '?form_key=' . $_GET['form_key'] : '')
+		);
 
         return $resultRedirect;
     }
