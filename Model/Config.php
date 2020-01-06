@@ -413,7 +413,7 @@ class Config
 
     public function getSourcePlatformField()
     {
-        return "{$this->productMetadata->getName()} {$this->productMetadata->getEdition()} {$this->productMetadata->getVersion()}, " . self::MODULE_NAME . "-{$this->moduleList->getOne(self::MODULE_NAME)['setup_version']}";
+        return "{$this->productMetadata->getName()} {$this->productMetadata->getEdition()} {$this->productMetadata->getVersion()}, Safecharge-{$this->moduleList->getOne(self::MODULE_NAME)['setup_version']}";
     }
 
     /**
