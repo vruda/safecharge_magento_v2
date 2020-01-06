@@ -413,7 +413,7 @@ class Config
 
     public function getSourcePlatformField()
     {
-        return "{$this->productMetadata->getName()} {$this->productMetadata->getEdition()} {$this->productMetadata->getVersion()}, Safecharge-{$this->moduleList->getOne(self::MODULE_NAME)['setup_version']}";
+        return "Magento Plugin {$this->moduleList->getOne(self::MODULE_NAME)['setup_version']}";
     }
 
     /**
