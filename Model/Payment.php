@@ -71,6 +71,7 @@ class Payment extends Cc implements TransparentInterface
     const TRANSACTION_EXTERNAL_PAYMENT_METHOD   = 'external_payment_method';
     const TRANSACTION_STATUS					= 'sc_status';
     const TRANSACTION_TYPE						= 'sc_transaction_type';
+    const REFUND_TRANSACTION_AMOUNT				= 'sc_refund_amount';
 
     /**
      * Order statuses.
@@ -442,29 +443,16 @@ class Payment extends Cc implements TransparentInterface
     public function void(InfoInterface $payment)
     {
         parent::void($payment);
-
+		
         /** @var RequestInterface $request */
         $request = $this->paymentRequestFactory->create(
             AbstractRequest::PAYMENT_VOID_METHOD,
             $payment
         );
+		
         $request->process();
-
         return $this;
     }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @return array
-     */
-//    public function getDebugReplacePrivateDataKeys()
-//    {
-//        return array_merge_recursive(
-//            parent::getDebugReplacePrivateDataKeys(),
-//            $this->privateDataKeysProvider->getConfig()
-//        );
-//    }
 
     /**
      * {inheritdoc}

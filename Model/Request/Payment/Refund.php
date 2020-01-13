@@ -99,14 +99,10 @@ class Refund extends AbstractPayment implements RequestInterface
      */
     protected function getParams()
     {
-        /** @var OrderPayment $orderPayment */
-        $orderPayment = $this->orderPayment;
-
-        /** @var Order $order */
-        $order = $orderPayment->getOrder();
-
-        /** @var int|null $transactionId */
-        $transactionId = $orderPayment->getRefundTransactionId();
+        $orderPayment	= $this->orderPayment;
+        $order			= $orderPayment->getOrder();
+        $transactionId	= $orderPayment->getRefundTransactionId();
+		
         if ($transactionId === null) {
 			$msg = __('Invoice transaction id has been not provided.');
 			$this->config->createLog($msg);
@@ -120,20 +116,20 @@ class Refund extends AbstractPayment implements RequestInterface
             $order->getId()
         );
 
-        $authCode = null;
-        if ($transaction === false) {
-            $authCode = $orderPayment->getAdditionalInformation(Payment::TRANSACTION_AUTH_CODE_KEY);
-        }
-		else {
-            $transactionDetails = $transaction->getAdditionalInformation(OrderTransaction::RAW_DETAILS);
-
-            if (empty($transactionDetails['authCode'])) {
-                $authCode = $orderPayment->getAdditionalInformation(Payment::TRANSACTION_AUTH_CODE_KEY);
+        $authCode			= null;
+		$transactionDetails	= $transaction->getAdditionalInformation(OrderTransaction::RAW_DETAILS);
+		
+		if($transactionDetails) {
+			if(!empty($transactionDetails['authCode'])) {
+				$authCode = $transactionDetails['authCode'];
+			}
+			elseif(!empty($transactionDetails['AuthCode'])) {
+                $authCode = $transactionDetails['AuthCode'];
             }
 			else {
-                $authCode = $transactionDetails['authCode'];
+                $authCode = $orderPayment->getAdditionalInformation(Payment::TRANSACTION_AUTH_CODE_KEY);
             }
-        }
+		}
 		
 		$payment_method = $orderPayment->getAdditionalInformation(Payment::TRANSACTION_EXTERNAL_PAYMENT_METHOD);
 

@@ -42,8 +42,6 @@ class Url
         $this->moduleConfig     = $moduleConfig;
         $this->checkoutSession  = $checkoutSession;
         $this->request          = $request;
-		
-		$this->moduleConfig->createLog('call to Url class');
     }
 	
     /**

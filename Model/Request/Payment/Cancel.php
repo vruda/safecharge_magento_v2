@@ -48,16 +48,20 @@ class Cancel extends AbstractPayment implements RequestInterface
      */
     protected function getParams()
     {
-        /** @var OrderPayment $orderPayment */
-        $orderPayment = $this->orderPayment;
-
-        /** @var Order $order */
-        $order = $orderPayment->getOrder();
+        $orderPayment	= $this->orderPayment;
+        $order			= $orderPayment->getOrder();
+		$transaction_id = $orderPayment->getAdditionalInformation(Payment::TRANSACTION_ID);
+		
+		if(!$transaction_id) {
+			throw new PaymentException(
+                __('Transaction does not contain Transaction ID code.')
+            );
+		}
 
         /** @var OrderTransaction $transaction */
         $transaction		= $orderPayment->getAuthorizationTransaction();
         $transactionDetails	= $transaction->getAdditionalInformation(OrderTransaction::RAW_DETAILS);
-
+		
         $authCode = null;
         if (empty($transactionDetails['authCode'])) {
             $authCode = $orderPayment->getAdditionalInformation(Payment::TRANSACTION_AUTH_CODE_KEY);
@@ -72,17 +76,19 @@ class Cancel extends AbstractPayment implements RequestInterface
             );
         }
 		
-		$transaction_id = $orderPayment->getAdditionalInformation(Payment::TRANSACTION_ID);
-		if(!$transaction_id) {
-			throw new PaymentException(
-                __('Transaction does not contain Transaction ID code.')
-            );
+		$ref_amount = $orderPayment->getAdditionalInformation(Payment::REFUND_TRANSACTION_AMOUNT);
+		
+		if($ref_amount) {
+			$amount = $ref_amount;
+		}
+		else {
+			$amount = (float)$order->getBaseGrandTotal();
 		}
 		
         $params = [
             'clientUniqueId'		=> $order->getIncrementId(),
             'currency'				=> $order->getBaseCurrencyCode(),
-            'amount'				=> (float)$order->getBaseGrandTotal(),
+            'amount'				=> $amount,
             'relatedTransactionId'	=> $transaction_id,
             'authCode'				=> $authCode,
             'comment'				=> '',

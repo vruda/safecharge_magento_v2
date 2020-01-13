@@ -225,8 +225,8 @@ class Dmn extends Action implements CsrfAwareActionInterface
 			}
 			while ($tryouts <=10 && !($order && $order->getId()));
 
+			# try to create the order
 			if (!($order && $order->getId())) {
-				# try to create the order
 				$this->moduleConfig->createLog('Order '. $orderIncrementId .' not found, try to create it!');
 				
 				$result = $this->placeOrder();
@@ -240,11 +240,8 @@ class Dmn extends Action implements CsrfAwareActionInterface
 				$order = $this->orderFactory->create()->loadByIncrementId($orderIncrementId);
 				
 				$this->moduleConfig->createLog('An Order with ID '. $orderIncrementId .' was created in the DMN page.');
-				# try to create the order END
-				
-//				echo 'Order '. $orderIncrementId .' not found!';
-//				return;
 			}
+			# try to create the order END
 			
 			$this->moduleConfig->createLog('DMN try ' . $tryouts . ', there IS order.');
 			$this->moduleConfig->createLog($status, 'DMN with status:');
@@ -313,8 +310,6 @@ class Dmn extends Action implements CsrfAwareActionInterface
 					->setStatus('pending');
 			}
 			
-			/* TODO - recognize CPanel actions, for them we must create manual transactions */
-
 			if (in_array($status, ['approved', 'success'])) {
 				$message				= $this->captureCommand->execute($orderPayment, $order->getBaseGrandTotal(), $order);
 				$sc_transaction_type	= Payment::SC_PROCESSING;
@@ -455,6 +450,11 @@ class Dmn extends Action implements CsrfAwareActionInterface
 					$order->setData('state', Order::STATE_CLOSED);
 				}
 				elseif (in_array($tr_type_param, ['credit', 'refund'])) {
+					$orderPayment->setAdditionalInformation(
+						Payment::REFUND_TRANSACTION_AMOUNT,
+						$params['totalAmount']
+					);
+					
 					$transactionType		= Transaction::TYPE_REFUND;
 					$sc_transaction_type	= Payment::SC_REFUNDED;
 					
