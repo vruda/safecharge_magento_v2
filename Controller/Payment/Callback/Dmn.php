@@ -492,9 +492,10 @@ class Dmn extends Action implements CsrfAwareActionInterface
 				
 				if($is_partial_settle) {
 					$order->addStatusHistoryComment(
-						__("The <b>Partial Settle</b> request for amount of <b>"
-							. number_format($inv_amount, 2, '.', '') ."</b>, returned <b>" . $params['Status'] . "</b> status."
-							. '<br/>Transaction ID: ' . $params['TransactionID'] .', Related Transaction ID: ')
+						__("The <b>Partial Settle</b> request for amount of "
+							. "<b>" . number_format($inv_amount, 2, '.', '') . ' ' . $params['currency'] . "</b>, "
+							. "returned <b>" . $params['Status'] . "</b> status.<br/>"
+							. 'Transaction ID: ' . $params['TransactionID'] .', Related Transaction ID: ')
 							. $params['relatedTransactionId'] . $refund_msg,
 						$sc_transaction_type
 					);
