@@ -204,8 +204,8 @@ class DmnOld extends Action
 			}
 			while ($tryouts <=10 && !($order && $order->getId()));
 
+			# try to create the order
 			if (!($order && $order->getId())) {
-				# try to create the order
 				$this->moduleConfig->createLog('Order '. $orderIncrementId .' not found, try to create it!');
 				
 				$result = $this->placeOrder();
@@ -219,8 +219,8 @@ class DmnOld extends Action
 				$order = $this->orderFactory->create()->loadByIncrementId($orderIncrementId);
 				
 				$this->moduleConfig->createLog('An Order with ID '. $orderIncrementId .' was created in the DMN page.');
-				# try to create the order END
 			}
+			# try to create the order END
 			
 			$this->moduleConfig->createLog('DMN try ' . $tryouts . ', there IS order.');
 			$this->moduleConfig->createLog($status, 'DMN with status:');
@@ -235,7 +235,7 @@ class DmnOld extends Action
 			if(
 				strtolower($order_tr_type) == $tr_type_param
 				&& strtolower($order_status) == 'approved'
-				&& $order_status != $status
+				&& $order_status != $params['Status']
 			) {
 				$msg = 'Current Order status is "'. $order_status .'", but incoming DMN status is "'
 					. $params['Status'] . '", for Transaction type '. $order_tr_type
@@ -289,8 +289,6 @@ class DmnOld extends Action
 					->setStatus('pending');
 			}
 			
-			/* TODO - recognize CPanel actions, for them we must create manual transactions */
-
 			if (in_array($status, ['approved', 'success'])) {
 				$message				= $this->captureCommand->execute($orderPayment, $order->getBaseGrandTotal(), $order);
 				$sc_transaction_type	= Payment::SC_PROCESSING;
@@ -300,6 +298,14 @@ class DmnOld extends Action
 				if ($tr_type_param == 'auth') {
 					$transactionType		= Transaction::TYPE_AUTH;
 					$sc_transaction_type	= Payment::SC_AUTH;
+					
+					$orderPayment->setAdditionalInformation(
+						Payment::AUTH_PARAMS,
+						[
+							'TransactionID'	=> $params['TransactionID'],
+							'AuthCode'		=> $params['AuthCode'],
+						]
+					);
 					
 					$orderPayment
 						->setIsTransactionPending(false)
@@ -422,6 +428,10 @@ class DmnOld extends Action
 					elseif(!$order->canInvoice()) {
 						$this->moduleConfig->createLog('We can NOT create invoice.');
 					}
+					
+					if ((float) $order->getBaseTotalDue() > 0.0) {
+						$sc_transaction_type = Payment::SC_PARTIALLY_SETTLED;
+					}
 				}
 				elseif (in_array($tr_type_param, ['void', 'voidcredit'])) {
 					$transactionType		= Transaction::TYPE_VOID;
@@ -431,6 +441,11 @@ class DmnOld extends Action
 					$order->setData('state', Order::STATE_CLOSED);
 				}
 				elseif (in_array($tr_type_param, ['credit', 'refund'])) {
+					$orderPayment->setAdditionalInformation(
+						Payment::REFUND_TRANSACTION_AMOUNT,
+						$params['totalAmount']
+					);
+					
 					$transactionType		= Transaction::TYPE_REFUND;
 					$sc_transaction_type	= Payment::SC_REFUNDED;
 					

@@ -48,19 +48,14 @@ class Settle extends AbstractPayment implements RequestInterface
      */
     protected function getParams()
     {
-        /** @var OrderPayment $orderPayment */
-        $orderPayment = $this->orderPayment;
-
-        /** @var Order $order */
-        $order = $orderPayment->getOrder();
-
-        $authCode = $orderPayment
-            ->getAdditionalInformation(Payment::TRANSACTION_AUTH_CODE_KEY);
-        $relatedTransactionId = $orderPayment
-            ->getAdditionalInformation(Payment::TRANSACTION_ID);
-
-        if (!$authCode) {
-            throw new PaymentException(__('Authorization code is missing.'));
+        $orderPayment		= $this->orderPayment;
+        $order				= $orderPayment->getOrder();
+		$auth_data			= $orderPayment->getAdditionalInformation(Payment::AUTH_PARAMS);
+		
+        if (empty($auth_data['AuthCode']) or empty($auth_data['TransactionID'])) {
+			$this->config->createLog($auth_data, 'Missing Auth paramters!');
+			
+            throw new PaymentException(__('Missing Auth parameters.'));
         }
 		
 		$getIncrementId = $order->getIncrementId();
@@ -69,8 +64,8 @@ class Settle extends AbstractPayment implements RequestInterface
             'clientUniqueId'			=> $getIncrementId,
 			'amount'					=> (float)$this->amount,
             'currency'					=> $order->getBaseCurrencyCode(),
-            'relatedTransactionId'		=> $relatedTransactionId,
-			'authCode'					=> $authCode,
+            'relatedTransactionId'		=> $auth_data['TransactionID'],
+			'authCode'					=> $auth_data['AuthCode'],
 			'urlDetails'				=> [
                 'notificationUrl' => $this->config->getCallbackDmnUrl($getIncrementId),
             ],

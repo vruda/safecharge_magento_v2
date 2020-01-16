@@ -256,7 +256,7 @@ class Dmn extends Action implements CsrfAwareActionInterface
 			if(
 				strtolower($order_tr_type) == $tr_type_param
 				&& strtolower($order_status) == 'approved'
-				&& $order_status != $status
+				&& $order_status != $params['Status']
 			) {
 				$msg = 'Current Order status is "'. $order_status .'", but incoming DMN status is "'
 					. $params['Status'] . '", for Transaction type '. $order_tr_type
@@ -315,10 +315,19 @@ class Dmn extends Action implements CsrfAwareActionInterface
 				$sc_transaction_type	= Payment::SC_PROCESSING;
 				$is_closed				= false;
 				$refund_msg				= '';
+				$is_partial_settle		= false;
 				
 				if ($tr_type_param == 'auth') {
 					$transactionType		= Transaction::TYPE_AUTH;
 					$sc_transaction_type	= Payment::SC_AUTH;
+					
+					$orderPayment->setAdditionalInformation(
+						Payment::AUTH_PARAMS,
+						[
+							'TransactionID'	=> $params['TransactionID'],
+							'AuthCode'		=> $params['AuthCode'],
+						]
+					);
 					
 					$orderPayment
 						->setIsTransactionPending(false)
@@ -343,6 +352,17 @@ class Dmn extends Action implements CsrfAwareActionInterface
 					$transactionType		= Transaction::TYPE_CAPTURE;
 					$sc_transaction_type	= Payment::SC_SETTLED;
 					$invCollection			= $order->getInvoiceCollection();
+					$inv_amount				= $order->getBaseGrandTotal();
+						
+					if(
+						'settle' == $tr_type_param
+						&& round(floatval($params['item_amount_1']), 2)
+							- round(floatval($params['totalAmount']), 2) > 0.00
+					) {
+						$sc_transaction_type	= Payment::SC_PARTIALLY_SETTLED;
+						$inv_amount				= round(floatval($params['totalAmount']), 2);
+						$is_partial_settle		= true;
+					}
 					
 					if(count($invCollection) > 0) {
 						$this->moduleConfig->createLog('There is/are invoice/s');
@@ -376,7 +396,7 @@ class Dmn extends Action implements CsrfAwareActionInterface
 						$invoice->setRequestedCaptureCase(Invoice::CAPTURE_ONLINE)
 							->setTransactionId($params['TransactionID'])
 							->setState(Invoice::STATE_PAID)
-							->setBaseGrandTotal($order->getBaseGrandTotal());
+							->setBaseGrandTotal($inv_amount);
 
 						$invoice->register();
 						$invoice->getOrder()->setIsInProcess(true);
@@ -389,8 +409,8 @@ class Dmn extends Action implements CsrfAwareActionInterface
 						$transactionSave->save(); 
 
 						// Update the order
-						$order->setTotalPaid($order->getTotalPaid());
-						$order->setBaseTotalPaid($order->getBaseTotalPaid());
+						$order->setTotalPaid($inv_amount);
+						$order->setBaseTotalPaid($inv_amount);
 
 						// Save the invoice
 						$this->invoiceRepository->save($invoice);
@@ -406,7 +426,8 @@ class Dmn extends Action implements CsrfAwareActionInterface
 
 							$transaction = $this->transObj->setPayment($orderPayment)
 								->setOrder($order)
-								->setTransactionId(!empty($params['relatedTransactionId']) ? $params['relatedTransactionId'] : uniqid())
+								->setTransactionId(!empty($params['relatedTransactionId'])
+									? $params['relatedTransactionId'] : uniqid())
 								->setFailSafe(true)
 								->build(Transaction::TYPE_AUTH);
 
@@ -422,7 +443,8 @@ class Dmn extends Action implements CsrfAwareActionInterface
 						$orderPayment
 							->setIsTransactionPending($status === "pending" ? true: false)
 							->setIsTransactionClosed(false)
-							->setParentTransactionId(!empty($params['relatedTransactionId']) ? $params['relatedTransactionId'] : null);
+							->setParentTransactionId(!empty($params['relatedTransactionId'])
+								? $params['relatedTransactionId'] : null);
 						
 						// set transaction
 						$transaction = $this->transObj->setPayment($orderPayment)
@@ -468,12 +490,23 @@ class Dmn extends Action implements CsrfAwareActionInterface
 				
 				$order->setStatus($sc_transaction_type);
 				
-				$order->addStatusHistoryComment(
-					__("The <b>{$params['transactionType']}</b> request returned <b>" . $params['Status'] . "</b> status."
-						. '<br/>Transaction ID: ' . $params['TransactionID'] .', Related Transaction ID: ')
-						. $params['relatedTransactionId'] . $refund_msg,
-					$sc_transaction_type
-				);
+				if($is_partial_settle) {
+					$order->addStatusHistoryComment(
+						__("The <b>Partial Settle</b> request for amount of <b>"
+							. number_format($inv_amount, 2, '.', '') ."</b>, returned <b>" . $params['Status'] . "</b> status."
+							. '<br/>Transaction ID: ' . $params['TransactionID'] .', Related Transaction ID: ')
+							. $params['relatedTransactionId'] . $refund_msg,
+						$sc_transaction_type
+					);
+				}
+				else {
+					$order->addStatusHistoryComment(
+						__("The <b>{$params['transactionType']}</b> request returned <b>" . $params['Status'] . "</b> status."
+							. '<br/>Transaction ID: ' . $params['TransactionID'] .', Related Transaction ID: ')
+							. $params['relatedTransactionId'] . $refund_msg,
+						$sc_transaction_type
+					);
+				}
 			}
 			elseif (in_array($status, ['declined', 'error'])) {
 				$params['ErrCode']		= (isset($params['ErrCode'])) ? $params['ErrCode'] : "Unknown";
