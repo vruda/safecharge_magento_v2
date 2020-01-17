@@ -92,13 +92,13 @@ abstract class AbstractResponse extends AbstractApi
 		
 		$this->config->createLog($resp_data['Body'], 'Response data:');
 
-        $this->safechargeLogger->updateRequest(
-            $this->requestId,
-            [
-                'response'	=> $resp_data,
-                'status'	=> $requestStatus === true ? self::STATUS_SUCCESS : self::STATUS_FAILED,
-            ]
-        );
+//        $this->safechargeLogger->updateRequest(
+//            $this->requestId,
+//            [
+//                'response'	=> $resp_data,
+//                'status'	=> $requestStatus === true ? self::STATUS_SUCCESS : self::STATUS_FAILED,
+//            ]
+//        );
 
         if ($requestStatus === false) {
 			throw new PaymentException($this->getErrorMessage(
@@ -107,6 +107,25 @@ abstract class AbstractResponse extends AbstractApi
         }
 
         $this->validateResponseData();
+		
+		// try to set orders status SC_PROCESSING
+//		if(
+//			!empty($resp_data['Body']['transactionType'])
+//			and in_array(strtolower($resp_data['Body']['transactionType']), ['credit'])
+//			and !empty($resp_data['Body']['clientUniqueId']) // order id
+//			and is_numeric($resp_data['Body']['clientUniqueId'])
+//			and strtolower($resp_data['Body']['status']) == 'success'
+//			and !empty($resp_data['Body']['transactionStatus'])
+//			and strtolower($resp_data['Body']['transactionStatus']) == 'approved'
+//		) {
+//			$objectManager	= \Magento\Framework\App\ObjectManager::getInstance();
+//			$orderFactory	= $objectManager->create('Magento\Sales\Model\OrderFactory');
+//			$order			= $orderFactory->create()->loadByIncrementId($resp_data['Body']['clientUniqueId']);
+//			$orderPayment	= $order->getPayment();
+////			$sc_payment		= $objectManager->create('Safecharge\Safecharge\Model\Payment');
+//			
+//			$order->setStatus(\Safecharge\Safecharge\Model\Payment::SC_PROCESSING);
+//		}
 
         return $this;
     }
@@ -157,19 +176,17 @@ abstract class AbstractResponse extends AbstractApi
         $responseStatus				= strtolower(!empty($body['status']) ? $body['status'] : '');
         $responseTransactionStatus	= strtolower(!empty($body['transactionStatus']) ? $body['transactionStatus'] : '');
         $responseTransactionType	= strtolower(!empty($body['transactionType']) ? $body['transactionType'] : '');
-    //    $responsetThreeDFlow		= (int)(!empty($body['threeDFlow']) ? $body['threeDFlow'] : '');
 
         if (
             !(
                 (
-					!(
-						in_array($responseTransactionType, ['auth', 'sale'])
-					//	|| ($responseTransactionType === 'sale3d' && $responsetThreeDFlow === 0)
-					) 
+					!in_array($responseTransactionType, ['auth', 'sale'])
 					&& $responseStatus === 'success' && $responseTransactionType !== 'error'
 				)
-			//	|| ($responseTransactionType === 'sale3d' && $responsetThreeDFlow === 0 && $responseTransactionStatus === 'approved')
-				|| (in_array($responseTransactionType, ['auth', 'sale']) && $responseTransactionStatus === 'approved')
+				|| (
+					in_array($responseTransactionType, ['auth', 'sale']) 
+					&& $responseTransactionStatus === 'approved'
+				)
             )
         ) {
             return false;

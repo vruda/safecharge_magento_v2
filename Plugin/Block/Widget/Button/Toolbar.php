@@ -62,7 +62,7 @@ class Toolbar
 			
 			if(
 				!in_array($payment_method, ['cc_card', 'apmgw_expresscheckout'])
-				|| Payment::SC_VOIDED == $ord_status
+				|| in_array($ord_status, [Payment::SC_VOIDED, Payment::SC_PROCESSING])
 			) {
 				$buttonList->remove('order_creditmemo');
 			}
@@ -73,7 +73,7 @@ class Toolbar
 			
 			if(
 				'apmgw_expresscheckout' == $payment_method
-				&& in_array($ord_status, [Payment::SC_REFUNDED, 'closed'])
+				|| in_array($ord_status, [Payment::SC_REFUNDED, Payment::SC_PROCESSING, 'closed'])
 			) {
 				$buttonList->remove('void_payment');
 			}
