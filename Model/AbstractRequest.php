@@ -246,19 +246,6 @@ abstract class AbstractRequest extends AbstractApi
 		$this->config->createLog($endpoint,	'Request Endpoint:');
 		$this->config->createLog($params,	'Request params:');
 		
-//        $this->safechargeLogger->updateRequest(
-//            $this->getRequestId(),
-//            [
-//                'method' => $this->getRequestMethod(),
-//                'request' => [
-//                    'Endpoint' => $endpoint,
-//                    'Type' => 'POST',
-//                    'Headers' => $headers,
-//                    'Body' => $params,
-//                ],
-//            ]
-//        );
-
         $this->curl->post($endpoint, $params);
 
         return $this;

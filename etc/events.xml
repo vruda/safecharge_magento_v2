@@ -23,4 +23,9 @@
         <observer name="safecharge_void_order_status_update"
                   instance="Safecharge\Safecharge\Observer\Sales\Order\Void\Register"/>
     </event>
+	
+    <event name="sales_order_creditmemo_refund">
+        <observer name="safecharge_refund_order_status_update"
+                  instance="Safecharge\Safecharge\Observer\Sales\Order\Refund\Register"/>
+    </event>
 </config>
