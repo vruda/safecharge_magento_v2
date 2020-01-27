@@ -27,7 +27,7 @@ class GetMerchantPaymentMethods extends AbstractResponse implements ResponseInte
     /**
      * @var array
      */
-    protected $paymentMethods = [];
+    protected $scPaymentMethods = [];
     
     /**
      *
@@ -70,14 +70,14 @@ class GetMerchantPaymentMethods extends AbstractResponse implements ResponseInte
         parent::process();
 
         $body					= $this->getBody();
-        $this->paymentMethods   = (array) $body['paymentMethods'];
+        $this->scPaymentMethods   = (array) $body['paymentMethods'];
         $this->sessionToken     = (string) $body['sessionToken'];
         $langCode				= $this->getStoreLocale(true);
         $countryCode			= $countryCode ?: $this->config->getQuoteCountryCode();
         
-		foreach ($this->paymentMethods as $k => &$method) {
+		foreach ($this->scPaymentMethods as $k => &$method) {
             if (!$countryCode && isset($method["paymentMethod"]) && $method["paymentMethod"] !== 'cc_card') {
-                unset($this->paymentMethods[$k]);
+                unset($this->scPaymentMethods[$k]);
                 continue;
             }
             
@@ -90,7 +90,7 @@ class GetMerchantPaymentMethods extends AbstractResponse implements ResponseInte
                 }
 				
                 if (!isset($method["paymentMethodDisplayName"]["language"])) {
-                    unset($this->paymentMethods[$k]);
+                    unset($this->scPaymentMethods[$k]);
                 }
             }
 			
@@ -99,7 +99,7 @@ class GetMerchantPaymentMethods extends AbstractResponse implements ResponseInte
             }
         }
 		
-        $this->scPaymentMethods = array_values($this->paymentMethods);
+        $this->scPaymentMethods = array_values($this->scPaymentMethods);
 		
         return $this;
     }
