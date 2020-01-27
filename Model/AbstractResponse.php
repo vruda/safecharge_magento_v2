@@ -108,25 +108,6 @@ abstract class AbstractResponse extends AbstractApi
 
         $this->validateResponseData();
 		
-		// try to set orders status SC_PROCESSING
-//		if(
-//			!empty($resp_data['Body']['transactionType'])
-//			and in_array(strtolower($resp_data['Body']['transactionType']), ['credit'])
-//			and !empty($resp_data['Body']['clientUniqueId']) // order id
-//			and is_numeric($resp_data['Body']['clientUniqueId'])
-//			and strtolower($resp_data['Body']['status']) == 'success'
-//			and !empty($resp_data['Body']['transactionStatus'])
-//			and strtolower($resp_data['Body']['transactionStatus']) == 'approved'
-//		) {
-//			$objectManager	= \Magento\Framework\App\ObjectManager::getInstance();
-//			$orderFactory	= $objectManager->create('Magento\Sales\Model\OrderFactory');
-//			$order			= $orderFactory->create()->loadByIncrementId($resp_data['Body']['clientUniqueId']);
-//			$orderPayment	= $order->getPayment();
-////			$sc_payment		= $objectManager->create('Safecharge\Safecharge\Model\Payment');
-//			
-//			$order->setStatus(\Safecharge\Safecharge\Model\Payment::SC_PROCESSING);
-//		}
-
         return $this;
     }
 

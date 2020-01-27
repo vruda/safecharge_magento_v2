@@ -129,9 +129,9 @@ class GetMerchantPaymentMethods extends Action
 		catch (PaymentException $e) {
             return [];
         }
-
+		
         return [
-			'apmMethods'	=> $apmMethods->getPaymentMethods(),
+			'apmMethods'	=> $apmMethods->getScPaymentMethods(),
 			'sessionToken'	=> $apmMethods->getSessionToken(),
 		];
     }

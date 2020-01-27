@@ -99,7 +99,7 @@ class GetMerchantPaymentMethods extends AbstractResponse implements ResponseInte
             }
         }
 		
-        $this->paymentMethods = array_values($this->paymentMethods);
+        $this->scPaymentMethods = array_values($this->paymentMethods);
 		
         return $this;
     }
@@ -107,9 +107,9 @@ class GetMerchantPaymentMethods extends AbstractResponse implements ResponseInte
     /**
      * @return string
      */
-    public function getPaymentMethods()
+    public function getScPaymentMethods()
     {
-        return $this->paymentMethods;
+        return $this->scPaymentMethods;
     }
     
     /**

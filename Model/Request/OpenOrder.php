@@ -103,8 +103,13 @@ class OpenOrder extends AbstractRequest implements RequestInterface
             throw new PaymentException(__('There is no Cart data.'));
         }
 		
-		$billingAddress = $this->cart->getQuote()->getBillingAddress()->getData();
+//		$billingAddress = $this->cart->getQuote()->getBillingAddress()->getData();
 
+		$billing_country = $this->config->getQuoteCountryCode();
+		if(is_null($billing_country)) {
+			$billing_country = $this->config->getDefaultCountry();
+		}
+		
         $params = array_merge_recursive(
 			[
 				'amount'            => (string) number_format($this->cart->getQuote()->getGrandTotal(), 2, '.', ''),
@@ -120,7 +125,8 @@ class OpenOrder extends AbstractRequest implements RequestInterface
 				'deviceDetails'     => $this->config->getDeviceDetails(),
 				'userTokenId'       => $this->cart->getQuote()->getCustomerEmail(),
 				'billingAddress'    => array(
-					'country' => $billingAddress['country_id'],
+//					'country' => $billingAddress['country_id'],
+					'country' => $billing_country,
 				),
 				'paymentOption'			=> ['card' => ['threeD' => ['isDynamic3D' => 1]]],
 				'transactionType'		=> $this->config->getPaymentAction(),
