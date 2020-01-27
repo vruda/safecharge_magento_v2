@@ -130,6 +130,8 @@ class GetMerchantPaymentMethods extends Action
             return [];
         }
 		
+		$this->moduleConfig->createLog($apmMethods->getScPaymentMethods(), 'getScPaymentMethods:');
+		
         return [
 			'apmMethods'	=> $apmMethods->getScPaymentMethods(),
 			'sessionToken'	=> $apmMethods->getSessionToken(),
