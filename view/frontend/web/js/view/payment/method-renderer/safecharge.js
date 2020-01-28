@@ -159,13 +159,18 @@ define(
 								}
 							}
                         }
+						else {
+							self.isPlaceOrderActionAllowed(false);
+						}
                     }
                     else {
                         console.error(res);
+						self.isPlaceOrderActionAllowed(false);
                     }
                 })
                 .fail(function(e) {
                     console.error(e);
+				self.isPlaceOrderActionAllowed(false);
                 });
             },
 

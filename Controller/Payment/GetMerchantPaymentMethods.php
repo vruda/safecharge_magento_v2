@@ -89,6 +89,8 @@ class GetMerchantPaymentMethods extends Action
 			$grandTotal		= $this->getRequest()->getParam('grandTotal');
 			
             $apmMethodsData = $this->getApmMethods($countryCode, $grandTotal);
+			
+			$this->moduleConfig->createLog($apmMethodsData, 'execute $apmMethodsData: ');
         }
 		catch (PaymentException $e) {
 			$this->moduleConfig->createLog('GetMerchantPaymentMethods Controller - Error: ' . $e->getMessage());
