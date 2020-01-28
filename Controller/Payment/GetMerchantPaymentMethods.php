@@ -90,7 +90,7 @@ class GetMerchantPaymentMethods extends Action
 			
             $apmMethodsData = $this->getApmMethods($countryCode, $grandTotal);
 			
-			$this->moduleConfig->createLog($apmMethodsData, 'execute $apmMethodsData: ');
+//			$this->moduleConfig->createLog($apmMethodsData, 'execute $apmMethodsData: ');
         }
 		catch (PaymentException $e) {
 			$this->moduleConfig->createLog('GetMerchantPaymentMethods Controller - Error: ' . $e->getMessage());
@@ -132,7 +132,7 @@ class GetMerchantPaymentMethods extends Action
             return [];
         }
 		
-		$this->moduleConfig->createLog($apmMethods->getScPaymentMethods(), 'getScPaymentMethods:');
+//		$this->moduleConfig->createLog($apmMethods->getScPaymentMethods(), 'getScPaymentMethods:');
 		
         return [
 			'apmMethods'	=> $apmMethods->getScPaymentMethods(),

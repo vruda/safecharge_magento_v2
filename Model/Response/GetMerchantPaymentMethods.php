@@ -70,38 +70,66 @@ class GetMerchantPaymentMethods extends AbstractResponse implements ResponseInte
         parent::process();
 
         $body					= $this->getBody();
-        $this->scPaymentMethods	= (array) $body['paymentMethods'];
+//        $this->scPaymentMethods	= (array) $body['paymentMethods'];
         $this->sessionToken     = (string) $body['sessionToken'];
         $langCode				= $this->getStoreLocale(true);
         $countryCode			= $countryCode ?: $this->config->getQuoteCountryCode();
 		
 		$this->config->createLog($body['paymentMethods'], 'process() paymentMethods:');
         
-		foreach ($this->scPaymentMethods as $k => &$method) {
+//		foreach ($this->scPaymentMethods as $k => &$method) {
+		foreach ((array) $body['paymentMethods'] as $k => $method) {
             if (!$countryCode && isset($method["paymentMethod"]) && $method["paymentMethod"] !== 'cc_card') {
-                unset($this->scPaymentMethods[$k]);
+//                unset($this->scPaymentMethods[$k]);
                 continue;
             }
-            
+			
+			$pm			= $method;
+			$language	= '';
+			$message	= '';
+			
 			if (isset($method["paymentMethodDisplayName"]) && is_array($method["paymentMethodDisplayName"])) {
                 foreach ($method["paymentMethodDisplayName"] as $kk => $dname) {
                     if ($dname["language"] === $langCode) {
-                        $method["paymentMethodDisplayName"] = $dname;
+//                        $method["paymentMethodDisplayName"] = $dname;
+						
+						$language	= $langCode;
+						$message	= $dname["message"];
+						
                         break;
                     }
                 }
 				
-                if (!isset($method["paymentMethodDisplayName"]["language"])) {
-                    unset($this->scPaymentMethods[$k]);
-                }
+//                if (!isset($method["paymentMethodDisplayName"]["language"])) {
+//                if (empty($language)) {
+//                    unset($this->scPaymentMethods[$k]);
+//                }
+//				else {
+//					$method["paymentMethodDisplayName"] = [
+//						'language'	=> $language,
+//						'message'	=> $message,
+//					];
+//				}
+				
+				if (empty($language)) {
+					continue;
+				}
             }
 			
+			$pm['paymentMethodDisplayName'] = [
+				'language'	=> $language,
+				'message'	=> $message,
+			];
+			
             if (isset($method["logoURL"]) && $method["logoURL"]) {
-                $method["logoURL"] = preg_replace('/\.svg\.svg$/', '.svg', $method["logoURL"]);
+//                $method["logoURL"] = preg_replace('/\.svg\.svg$/', '.svg', $method["logoURL"]);
+                $pm["logoURL"] = preg_replace('/\.svg\.svg$/', '.svg', $method["logoURL"]);
             }
+			
+			$this->scPaymentMethods[] = $pm;
         }
 		
-        $this->scPaymentMethods = array_values($this->scPaymentMethods);
+//        $this->scPaymentMethods = array_values($this->scPaymentMethods);
 		
 		$this->config->createLog($this->scPaymentMethods, 'process() paymentMethods 2:');
 		
@@ -113,7 +141,7 @@ class GetMerchantPaymentMethods extends AbstractResponse implements ResponseInte
      */
     public function getScPaymentMethods()
     {
-		$this->config->createLog($this->scPaymentMethods, 'getScPaymentMethods() paymentMethods:');
+//		$this->config->createLog($this->scPaymentMethods, 'getScPaymentMethods() paymentMethods:');
 		
         return $this->scPaymentMethods;
     }
