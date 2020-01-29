@@ -69,13 +69,10 @@ class GetMerchantPaymentMethods extends AbstractResponse implements ResponseInte
     {
         parent::process();
 
-        $body					= $this->getBody();
-//        $this->scPaymentMethods	= (array) $body['paymentMethods'];
-        $this->sessionToken     = (string) $body['sessionToken'];
-        $langCode				= $this->getStoreLocale(true);
-        $countryCode			= $countryCode ?: $this->config->getQuoteCountryCode();
-		
-		############## new code
+        $body				= $this->getBody();
+        $this->sessionToken	= (string) $body['sessionToken'];
+        $langCode			= $this->getStoreLocale(true);
+        $countryCode		= $countryCode ?: $this->config->getQuoteCountryCode();
 		
 		foreach ((array) $body['paymentMethods'] as $k => $method) {
 			if (!$countryCode && isset($method["paymentMethod"]) && $method["paymentMethod"] !== 'cc_card') {
@@ -113,62 +110,7 @@ class GetMerchantPaymentMethods extends AbstractResponse implements ResponseInte
 			}
 		}
 		
-		$this->config->createLog($body['paymentMethods'], 'process() paymentMethods 2:');
-		
 		return $this;
-		
-		############# old code
-		
-//		$this->config->createLog($body['paymentMethods'], 'process() paymentMethods:');
-        /*
-		foreach ($this->scPaymentMethods as $k => &$method) {
-            if (!$countryCode && isset($method["paymentMethod"]) && $method["paymentMethod"] !== 'cc_card') {
-                unset($this->scPaymentMethods[$k]);
-                continue;
-            }
-            
-			if (isset($method["paymentMethodDisplayName"]) && is_array($method["paymentMethodDisplayName"])) {
-//				$default_dnames = array();
-//				$locale_dnames	= array();
-				
-                foreach ($method["paymentMethodDisplayName"] as $kk => $dname) {
-                    if ($dname["language"] === $langCode) {
-                        $method["paymentMethodDisplayName"] = $dname;
-                        break;
-						
-//						$locale_dnames = $dname;
-//						break;
-                    }
-					// default language
-					elseif($dname["language"] == 'en') {
-						$default_dnames = $dname;
-					}
-                }
-				
-                if (!isset($method["paymentMethodDisplayName"]["language"])) {
-//                if (empty($locale_dnames) and empty($default_dnames)) {
-                    unset($this->scPaymentMethods[$k]);
-                }
-				
-//				if(!empty($locale_dnames)) {
-//					$method["paymentMethodDisplayName"] = $locale_dnames;
-//				}
-//				elseif(!empty($default_dnames)) {
-//					$method["paymentMethodDisplayName"] = $default_dnames;
-//				}
-            }
-			
-            if (isset($method["logoURL"]) && $method["logoURL"]) {
-                $method["logoURL"] = preg_replace('/\.svg\.svg$/', '.svg', $method["logoURL"]);
-            }
-        }
-		
-		$this->config->createLog($body['paymentMethods'], 'process() paymentMethods 2:');
-		
-        $this->scPaymentMethods = array_values($this->scPaymentMethods);
-		
-        return $this;
-		 */
     }
 
     /**

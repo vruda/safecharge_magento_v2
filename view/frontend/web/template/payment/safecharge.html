@@ -8,34 +8,49 @@
 -->
 
 <style type="text/css">
+	input[type="radio"] {
+		-webkit-appearance: radio !important;
+		height: 1px;
+	}
+	
     input#safecharge_cc_owner::placeholder {
-        color: grey;
-        font-size: 15px;
+        color: grey !important;
+        font-size: 15px !important;
     }
     
     .sc_fields {
-        padding: 0px;
-        max-width: 225px;
+        padding: 0px !important;
+		width: 100%;
+        max-width: 330px !important;
     }
     
-    span.sc_fields { display: inline-block; }
+    /*span.sc_fields { display: inline-block !important; }*/
     
     .SfcField {
-        padding: 7px 9px;
-        border: 1px solid #c2c2c2;
-        height: 18px;
+        /*padding: 7px 9px !important;*/
+        border: 1px solid #c2c2c2 !important;
+        /*height: 18px !important;*/
     }
+	
+	#card-field-placeholder {
+		padding-top: 10px;
+		padding-bottom: 4px;
+		padding-left: 9px;
+		padding-right: 9px;
+	}
     
     .SfcField iframe {
-        height: 18px !important;
+        /*height: 18px !important;*/
+		/*width: 330px !important;*/
+		height: 24px !important;
     }
     
-    .SfcField.focus { box-shadow: 0px 0 3px 1px #00699d; }
+    .SfcField.focus { box-shadow: 0px 0 3px 1px #00699d !important; }
     
     .sfcModal-dialog {
-        width: 50%;
-        margin: 0 auto;
-        margin-top: 10%;
+        width: 50% !important;
+        margin: 0 auto !important;
+        margin-top: 10% !important;
     }
     
     .is-in {
@@ -140,7 +155,7 @@
 					<!-- /ko -->
 
 					<br/>
-					<div class="field number sc_fields" style="max-width: 330px; min-height: 30px;">
+					<div class="field number sc_fields">
 						<div id="card-field-placeholder" data-bind="afterRender: $parent.attachFields()"></div>
 					</div>
 
