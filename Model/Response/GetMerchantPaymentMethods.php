@@ -75,65 +75,100 @@ class GetMerchantPaymentMethods extends AbstractResponse implements ResponseInte
         $langCode				= $this->getStoreLocale(true);
         $countryCode			= $countryCode ?: $this->config->getQuoteCountryCode();
 		
-		$this->config->createLog($body['paymentMethods'], 'process() paymentMethods:');
-        
-//		foreach ($this->scPaymentMethods as $k => &$method) {
+		############## new code
+		
 		foreach ((array) $body['paymentMethods'] as $k => $method) {
-            if (!$countryCode && isset($method["paymentMethod"]) && $method["paymentMethod"] !== 'cc_card') {
-//                unset($this->scPaymentMethods[$k]);
+			if (!$countryCode && isset($method["paymentMethod"]) && $method["paymentMethod"] !== 'cc_card') {
                 continue;
             }
 			
-			$pm			= $method;
-			$language	= '';
-			$message	= '';
+			$default_dnames = array();
+			$locale_dnames	= array();
+			$pm				= $method;
 			
 			if (isset($method["paymentMethodDisplayName"]) && is_array($method["paymentMethodDisplayName"])) {
-                foreach ($method["paymentMethodDisplayName"] as $kk => $dname) {
-                    if ($dname["language"] === $langCode) {
-//                        $method["paymentMethodDisplayName"] = $dname;
-						
-						$language	= $langCode;
-						$message	= $dname["message"];
-						
-                        break;
+				foreach ($method["paymentMethodDisplayName"] as $kk => $dname) {
+					 if ($dname["language"] === $langCode) {
+						$locale_dnames = $dname;
+						break;
                     }
-                }
-				
-//                if (!isset($method["paymentMethodDisplayName"]["language"])) {
-//                if (empty($language)) {
-//                    unset($this->scPaymentMethods[$k]);
-//                }
-//				else {
-//					$method["paymentMethodDisplayName"] = [
-//						'language'	=> $language,
-//						'message'	=> $message,
-//					];
-//				}
-				
-				if (empty($language)) {
-					continue;
+					// default language
+					elseif($dname["language"] == 'en') {
+						$default_dnames = $dname;
+					}
 				}
-            }
+			}
 			
-			$pm['paymentMethodDisplayName'] = [
-				'language'	=> $language,
-				'message'	=> $message,
-			];
-			
-            if (isset($method["logoURL"]) && $method["logoURL"]) {
-//                $method["logoURL"] = preg_replace('/\.svg\.svg$/', '.svg', $method["logoURL"]);
+			if (!empty($method["logoURL"])) {
                 $pm["logoURL"] = preg_replace('/\.svg\.svg$/', '.svg', $method["logoURL"]);
             }
 			
-			$this->scPaymentMethods[] = $pm;
+			if(!empty($locale_dnames)) {
+				$pm["paymentMethodDisplayName"]	= $locale_dnames;
+				$this->scPaymentMethods[]		= $pm;
+			}
+			elseif(!empty($default_dnames)) {
+				$pm["paymentMethodDisplayName"] = $default_dnames;
+				$this->scPaymentMethods[]		= $pm;
+			}
+		}
+		
+		$this->config->createLog($body['paymentMethods'], 'process() paymentMethods 2:');
+		
+		return $this;
+		
+		############# old code
+		
+//		$this->config->createLog($body['paymentMethods'], 'process() paymentMethods:');
+        /*
+		foreach ($this->scPaymentMethods as $k => &$method) {
+            if (!$countryCode && isset($method["paymentMethod"]) && $method["paymentMethod"] !== 'cc_card') {
+                unset($this->scPaymentMethods[$k]);
+                continue;
+            }
+            
+			if (isset($method["paymentMethodDisplayName"]) && is_array($method["paymentMethodDisplayName"])) {
+//				$default_dnames = array();
+//				$locale_dnames	= array();
+				
+                foreach ($method["paymentMethodDisplayName"] as $kk => $dname) {
+                    if ($dname["language"] === $langCode) {
+                        $method["paymentMethodDisplayName"] = $dname;
+                        break;
+						
+//						$locale_dnames = $dname;
+//						break;
+                    }
+					// default language
+					elseif($dname["language"] == 'en') {
+						$default_dnames = $dname;
+					}
+                }
+				
+                if (!isset($method["paymentMethodDisplayName"]["language"])) {
+//                if (empty($locale_dnames) and empty($default_dnames)) {
+                    unset($this->scPaymentMethods[$k]);
+                }
+				
+//				if(!empty($locale_dnames)) {
+//					$method["paymentMethodDisplayName"] = $locale_dnames;
+//				}
+//				elseif(!empty($default_dnames)) {
+//					$method["paymentMethodDisplayName"] = $default_dnames;
+//				}
+            }
+			
+            if (isset($method["logoURL"]) && $method["logoURL"]) {
+                $method["logoURL"] = preg_replace('/\.svg\.svg$/', '.svg', $method["logoURL"]);
+            }
         }
 		
-//        $this->scPaymentMethods = array_values($this->scPaymentMethods);
+		$this->config->createLog($body['paymentMethods'], 'process() paymentMethods 2:');
 		
-		$this->config->createLog($this->scPaymentMethods, 'process() paymentMethods 2:');
+        $this->scPaymentMethods = array_values($this->scPaymentMethods);
 		
         return $this;
+		 */
     }
 
     /**
@@ -141,8 +176,6 @@ class GetMerchantPaymentMethods extends AbstractResponse implements ResponseInte
      */
     public function getScPaymentMethods()
     {
-//		$this->config->createLog($this->scPaymentMethods, 'getScPaymentMethods() paymentMethods:');
-		
         return $this->scPaymentMethods;
     }
     
