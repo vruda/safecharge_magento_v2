@@ -103,11 +103,19 @@ class OpenOrder extends AbstractRequest implements RequestInterface
             throw new PaymentException(__('There is no Cart data.'));
         }
 		
-//		$billingAddress = $this->cart->getQuote()->getBillingAddress()->getData();
+		$this->config->createLog(@$_COOKIE, '$_COOKIE:');
 
 		$billing_country = $this->config->getQuoteCountryCode();
 		if(is_null($billing_country)) {
 			$billing_country = $this->config->getDefaultCountry();
+		}
+		
+		$email = $this->cart->getQuote()->getCustomerEmail();
+		if(empty($email) and !empty($_COOKIE['guestSippingMail'])) {
+			$email = filter_input(INPUT_COOKIE, 'guestSippingMail', FILTER_VALIDATE_EMAIL);
+		}
+		else {
+			$email = 'quoteID_' . @$this->config->getCheckoutSession()->getQuoteId() . '@magentoMerchant.com';
 		}
 		
         $params = array_merge_recursive(
@@ -123,10 +131,10 @@ class OpenOrder extends AbstractRequest implements RequestInterface
 					'notificationUrl'   => $this->config->getCallbackDmnUrl(),
 				),
 				'deviceDetails'     => $this->config->getDeviceDetails(),
-				'userTokenId'       => $this->cart->getQuote()->getCustomerEmail(),
+				'userTokenId'       => $email,
 				'billingAddress'    => array(
-//					'country' => $billingAddress['country_id'],
-					'country' => $billing_country,
+					'country'	=> $billing_country,
+					'email'		=> $email,
 				),
 				'paymentOption'			=> ['card' => ['threeD' => ['isDynamic3D' => 1]]],
 				'transactionType'		=> $this->config->getPaymentAction(),

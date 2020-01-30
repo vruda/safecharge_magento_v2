@@ -8,40 +8,82 @@
 -->
 
 <style type="text/css">
-	input[type="radio"] {
-		-webkit-appearance: radio !important;
-		height: 1px;
+	/* try to clean all styles */
+	#sc_apms * {
+		margin: 0 !important;
+		padding: 0 !important;
+		font-family: inherit;
+		border: 0 !important;
 	}
 	
-    input#safecharge_cc_owner::placeholder {
+	input[type="radio"] {
+		-webkit-appearance: radio !important;
+		/*height: 1px;*/
+	}
+	/* try to clean all styles END */
+	
+	#sc_apms .safecharge-apm-method-container {
+		position: relative !important;
+		border-top: 1px solid #cccccc !important;
+		padding: 15px 0 !important;
+	}
+	
+	#sc_apms fieldset {
+		margin-top: 20px !important;
+		padding-left: 20px !important;
+		padding-right: 20px !important;
+	}
+	
+	#sc_apms .sc_fields, #sc_apms .field {
+		max-width: 330px !important;
+		width: 100%;
+		border: 1px solid #cccccc !important;
+		display: block !important;
+	}
+	
+	#sc_apms .field {
+		margin-bottom: 10px !important;
+	}
+	
+	#sc_apms .field input {
+		width: 100% !important;
+		height: 32px;
+		padding-left: 10px !important;
+		background-color: transparent !important;
+	}
+	
+	input#safecharge_cc_owner::placeholder {
         color: grey !important;
         font-size: 15px !important;
+		margin-left: 10px !important;
     }
-    
-    .sc_fields {
-        padding: 0px !important;
-		width: 100%;
-        max-width: 330px !important;
-    }
-    
-    /*span.sc_fields { display: inline-block !important; }*/
-    
+	
     .SfcField {
-        /*padding: 7px 9px !important;*/
         border: 1px solid #c2c2c2 !important;
-        /*height: 18px !important;*/
     }
 	
 	#card-field-placeholder {
-		padding-top: 10px;
-		padding-bottom: 4px;
-		padding-left: 9px;
-		padding-right: 9px;
+		padding-top: 7px !important;
+		padding-bottom: 1px !important;
+		padding-left: 9px !important;
+		padding-right: 9px !important;
+	}
+	
+	#sc_apms label {
+		width: 90% !important;
+	}
+	
+	#sc_apms label img {
+		max-height: 25px !important;
+	}
+	
+	#sc_apms .safecharge-apm-method-note {
+		font-style: italic !important;
+		margin-left: 10px !important;
+		margin-top: 10px !important;
 	}
     
     .SfcField iframe {
-        /*height: 18px !important;*/
-		/*width: 330px !important;*/
 		height: 24px !important;
     }
     
@@ -87,7 +129,7 @@
             <!--/ko-->
         </div>
 
-        <div data-bind="foreach: apmMethods">
+        <div id="sc_apms" data-bind="foreach: apmMethods">
             <div class="safecharge-apm-method-container">
                 <input type="radio" 
 					   data-bind="
@@ -100,8 +142,14 @@
                 
 				<label class="label safecharge-apm-method-label" 
 					   data-bind="attr: {'for': $parent.getCode() + '_' + $data.paymentMethod}">
-                    
-					<span class="safecharge-apm-method-icon" data-bind="if: $data.logoURL, style: { backgroundImage: $data.logoURL ? 'url(\'' + $data.logoURL + '\')' : 'none' }"></span>
+					
+					<span class="safecharge-apm-method-icon">
+						<img onerror="this.style.display='none'" data-bind="
+							attr: {
+								'src': $data.logoURL,
+								'alt' : $data.paymentMethodDisplayName.message
+							}" />
+					</span>
                     
 					<span class="label safecharge-apm-method-label-title" data-bind="text: $t($data.paymentMethodDisplayName.message)"></span>
                 </label>
@@ -110,8 +158,6 @@
 				<!-- ko if: ($parent.chosenApmMethod() === $data.paymentMethod)-->
 				
 				<!-- ko if: ($data.fields.length > 0) -->
-				<br/>
-				<br/>
 				<fieldset data-bind="
 					attr: {class: 'fieldset payment items ccard fields-' + $data.paymentMethod},
 					foreach: $data.fields"
@@ -154,11 +200,6 @@
 					</legend><br />
 					<!-- /ko -->
 
-					<br/>
-					<div class="field number sc_fields">
-						<div id="card-field-placeholder" data-bind="afterRender: $parent.attachFields()"></div>
-					</div>
-
 					<div class="field number">
 						<div class="control">
 							<input type="text" name="payment[cc_owner]" class="input-text" value="" data-bind="
@@ -175,6 +216,10 @@
 								valueUpdate: 'keyup'
 						   " />
 						</div>
+					</div>
+					
+					<div class="field number sc_fields">
+						<div id="card-field-placeholder" data-bind="afterRender: $parent.attachFields()"></div>
 					</div>
 
 					<input type="hidden" name="payment[cc_token]" data-bind="

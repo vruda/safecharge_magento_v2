@@ -39,7 +39,6 @@ define(
 		var	codeName		= 'safecharge';
 		
         return Component.extend({
-
             defaults: {
                 template: 'Safecharge_Safecharge/payment/safecharge',
                 isCcFormShown			: true,
@@ -55,7 +54,7 @@ define(
 			
             initObservable: function() {
                 self = this;
-
+				
                 self._super()
                     .observe([
                         'creditCardToken',
