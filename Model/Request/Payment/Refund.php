@@ -150,6 +150,7 @@ class Refund extends AbstractPayment implements RequestInterface
             'urlDetails'			=> [
                 'notificationUrl' => $this->config->getCallbackDmnUrl($order->getIncrementId(), $order->getStoreId()),
             ],
+			'sourceApplication'		=> $this->config->getSourceApplication(),
         ];
 
         $params = array_merge_recursive($params, parent::getParams());

@@ -179,6 +179,16 @@ class Config
 	}
 	
 	/**
+	 * Function getSourceApplication
+	 * Get the value of one more parameter for the REST API
+	 * 
+	 * @return string
+	 */
+	public function getSourceApplication() {
+		return 'MAGENTO_2_PLUGIN';
+	}
+
+	/**
 	 * Function get_device_details
 	 * Get browser and device based on HTTP_USER_AGENT.
 	 * The method is based on D3D payment needs.

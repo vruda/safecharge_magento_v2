@@ -128,6 +128,7 @@ class ConfigProvider extends CcGenericConfigProvider
                     'total'							=> (string) number_format($this->cart->getQuote()->getGrandTotal(), 2, '.', ''),
                     'currency'						=> trim($this->storeManager->getStore()->getCurrentCurrencyCode()),
                     'webMasterId'					=> $this->moduleConfig->getSourcePlatformField(),
+                    'sourceApplication'				=> $this->moduleConfig->getSourceApplication(),
                 ],
             ],
         ];

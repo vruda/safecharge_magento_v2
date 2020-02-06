@@ -183,16 +183,14 @@ define(
 					
 					// we use variable just for debug
 					var payParams = {
-                        sessionToken    : scData.sessionToken,
-                        currency        : window.checkoutConfig.payment[self.getCode()].currency,
-                        amount          : quote.totals().grand_total.toFixed(2),
-                        cardHolderName  : document.getElementById('safecharge_cc_owner').value,
-                        paymentOption   : card,
-						webMasterId		: window.checkoutConfig.payment[self.getCode()].webMasterId
+                        sessionToken		: scData.sessionToken,
+                        currency			: window.checkoutConfig.payment[self.getCode()].currency,
+                        amount				: quote.totals().grand_total.toFixed(2),
+                        cardHolderName		: document.getElementById('safecharge_cc_owner').value,
+                        paymentOption		: card,
+						webMasterId			: window.checkoutConfig.payment[self.getCode()].webMasterId,
                     };
 					
-//					console.log('placeOrder', payParams)
-                    
                     // create payment with WebSDK
                     sfc.createPayment(payParams, function(resp){
                         if(typeof resp.result != 'undefined') {
@@ -319,8 +317,9 @@ define(
             
             initFields: function() {
                 // for the Fields
-				scData.merchantSiteId	= window.checkoutConfig.payment[self.getCode()].merchantSiteId;
-				scData.merchantId		= window.checkoutConfig.payment[self.getCode()].merchantId;
+				scData.merchantSiteId		= window.checkoutConfig.payment[self.getCode()].merchantSiteId;
+				scData.merchantId			= window.checkoutConfig.payment[self.getCode()].merchantId;
+				scData.sourceApplication	= window.checkoutConfig.payment[self.getCode()].sourceApplication;
 				
                 if(window.checkoutConfig.payment[self.getCode()].isTestMode == true) {
                     scData.env = 'test';

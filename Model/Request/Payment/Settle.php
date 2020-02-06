@@ -69,6 +69,7 @@ class Settle extends AbstractPayment implements RequestInterface
 			'urlDetails'				=> [
                 'notificationUrl' => $this->config->getCallbackDmnUrl($getIncrementId),
             ],
+			'sourceApplication'			=> $this->config->getSourceApplication(),
         ];
 
         $params = array_merge_recursive(parent::getParams(), $params);
