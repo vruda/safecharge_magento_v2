@@ -1,5 +1,5 @@
 {
-    "name": "safecharge/magento2-module-safecharge",
+    "name": "safecharge/module-safecharge",
     "description": "Safecharge Payments For Magento 2",
 	"minimum-stability": "beta",
 	"prefer-stable": true,
