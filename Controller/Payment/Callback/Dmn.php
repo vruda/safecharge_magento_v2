@@ -457,7 +457,7 @@ class Dmn extends Action implements CsrfAwareActionInterface
                     $transactionType        = Transaction::TYPE_REFUND;
                     $sc_transaction_type    = Payment::SC_REFUNDED;
                     
-                    if (!empty($params['totalAmount'])) {
+                    if (!empty($params['totalAmount']) && 'cc_card' != $params["payment_method"]) {
                         $refund_msg = '<br/>The Refunded amount is <b>'
                             . $params['totalAmount'] . ' ' . $params['currency'] . '</b>.';
                     }
