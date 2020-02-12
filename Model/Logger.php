@@ -5,16 +5,13 @@ namespace Safecharge\Safecharge\Model;
 use Safecharge\Safecharge\Api\Data\RequestLogInterface;
 use Safecharge\Safecharge\Api\RequestLogRepositoryInterface;
 use Safecharge\Safecharge\Model\Data\RequestLogFactory;
-use Magento\Customer\Model\Session\Proxy as CustomerSession;
+use Magento\Customer\Model\Session as CustomerSession;
 use Magento\Framework\Api\DataObjectHelper;
 use Magento\Store\Model\StoreManagerInterface;
 use Magento\Framework\Registry as CoreRegistry;
 
 /**
  * Safecharge Safecharge logger model.
- *
- * @category Safecharge
- * @package  Safecharge_Safecharge
  */
 class Logger extends \Monolog\Logger
 {

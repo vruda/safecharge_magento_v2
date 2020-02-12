@@ -2,7 +2,7 @@
 
 namespace Safecharge\Safecharge\Model\Redirect;
 
-use Magento\Checkout\Model\Session\Proxy as CheckoutSession;
+use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Quote\Model\Quote;
 use Safecharge\Safecharge\Model\Config as ModuleConfig;
 use Safecharge\Safecharge\Model\Payment;
@@ -10,9 +10,6 @@ use Magento\Framework\App\Request\Http as Http;
 
 /**
  * Safecharge Safecharge config provider model.
- *
- * @category Safecharge
- * @package  Safecharge_Safecharge
  */
 class Url
 {
@@ -43,7 +40,7 @@ class Url
         $this->checkoutSession  = $checkoutSession;
         $this->request          = $request;
     }
-	
+    
     /**
      * @return string
      */
@@ -58,13 +55,13 @@ class Url
     public function getPostData()
     {
         // in case we use WebSDK just go to Success page
-        if($this->request->getParam('method') === 'cc_card' && $this->request->getParam('transactionId')) {
+        if ($this->request->getParam('method') === 'cc_card' && $this->request->getParam('transactionId')) {
             return [
-				'url' => $this->moduleConfig->getCallbackSuccessUrl(),
+                'url' => $this->moduleConfig->getCallbackSuccessUrl(),
             ];
         }
         
-		// non active case
+        // non active case
         return [
             "url" => $this->moduleConfig->getEndpoint(),
         ];

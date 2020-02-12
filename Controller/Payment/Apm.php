@@ -14,9 +14,6 @@ use Safecharge\Safecharge\Model\Request\Factory as RequestFactory;
 
 /**
  * Safecharge Safecharge paymentApm controller.
- *
- * @category Safecharge
- * @package  Safecharge_Safecharge
  */
 class Apm extends Action
 {
@@ -65,11 +62,11 @@ class Apm extends Action
     ) {
         parent::__construct($context);
 
-        $this->redirectUrlBuilder	= $redirectUrlBuilder;
-        $this->safechargeLogger		= $safechargeLogger;
-        $this->moduleConfig			= $moduleConfig;
-        $this->jsonResultFactory	= $jsonResultFactory;
-        $this->requestFactory		= $requestFactory;
+        $this->redirectUrlBuilder    = $redirectUrlBuilder;
+        $this->safechargeLogger        = $safechargeLogger;
+        $this->moduleConfig            = $moduleConfig;
+        $this->jsonResultFactory    = $jsonResultFactory;
+        $this->requestFactory        = $requestFactory;
     }
 
     /**
@@ -89,34 +86,33 @@ class Apm extends Action
             $this->getRequest()->getPostValue()
         );
 
-		$this->moduleConfig->createLog($params, 'Apm Controller - Request:');
+        $this->moduleConfig->createLog($params, 'Apm Controller - Request:');
 
         try {
             $request = $this->requestFactory->create(AbstractRequest::PAYMENT_APM_METHOD);
-			$request->setPaymentMethod($params["chosen_apm_method"]);
-			
-			if(!empty($params["apm_method_fields"])) {
-				$request->setPaymentMethodFields($params["apm_method_fields"]);
-			}
-			
-			$response = $request->process();
-			
-			$redirectUrl	= $response->getRedirectUrl();
-            $status			= $response->getResponseStatus();
+            $request->setPaymentMethod($params["chosen_apm_method"]);
+            
+            if (!empty($params["apm_method_fields"])) {
+                $request->setPaymentMethodFields($params["apm_method_fields"]);
+            }
+            
+            $response = $request->process();
+            
+            $redirectUrl    = $response->getRedirectUrl();
+            $status            = $response->getResponseStatus();
+        } catch (PaymentException $e) {
+            $this->moduleConfig->createLog(
+                $e->getMessage() . "\n" . $e->getTraceAsString(),
+                'Apm Controller - Error:'
+            );
+            
+                  return $result->setData([
+                      "error" => 1,
+                      "redirectUrl" => null,
+                      "message" => $e->getMessage()
+                  ]);
         }
-		catch (PaymentException $e) {
-			$this->moduleConfig->createLog(
-				$e->getMessage() . "\n" . $e->getTraceAsString(),
-				'Apm Controller - Error:'
-			);
-			
-            return $result->setData([
-                "error" => 1,
-                "redirectUrl" => null,
-                "message" => $e->getMessage()
-            ]);
-        }
-		
+        
         return $result->setData([
             "error" => 0,
             "redirectUrl" => $redirectUrl,

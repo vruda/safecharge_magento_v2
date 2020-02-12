@@ -2,7 +2,7 @@
 
 namespace Safecharge\Safecharge\Model;
 
-use Magento\Checkout\Model\Session\Proxy as CheckoutSession;
+use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\ProductMetadataInterface;
 use Magento\Framework\Module\ModuleListInterface;
@@ -12,13 +12,10 @@ use Magento\Store\Model\StoreManagerInterface;
 
 /**
  * Safecharge Safecharge config model.
- *
- * @category Safecharge
- * @package  Safecharge_Safecharge
  */
 class Config
 {
-    const MODULE_NAME	= 'Safecharge_Safecharge';
+    const MODULE_NAME = 'Safecharge_Safecharge';
 
     /**
      * Scope config object.
@@ -67,22 +64,22 @@ class Config
      * @var array
      */
     private $config = [];
-	
-	/**
+    
+    /**
      * Magento version like integer.
      *
      * @var int
      */
-	private $versionNum = '';
-	
-	/**
-	 * Use it to validate the redirect
-	 * 
-	 * @var FormKey
-	 */
-	private $formKey;
-	
-	private $directory;
+    private $versionNum = '';
+    
+    /**
+     * Use it to validate the redirect
+     *
+     * @var FormKey
+     */
+    private $formKey;
+    
+    private $directory;
 
     /**
      * Object initialization.
@@ -101,8 +98,8 @@ class Config
         ModuleListInterface $moduleList,
         CheckoutSession $checkoutSession,
         UrlInterface $urlBuilder,
-		\Magento\Framework\Data\Form\FormKey $formKey,
-		\Magento\Framework\Filesystem\DirectoryList $directory
+        \Magento\Framework\Data\Form\FormKey $formKey,
+        \Magento\Framework\Filesystem\DirectoryList $directory
     ) {
         $this->scopeConfig = $scopeConfig;
         $this->storeManager = $storeManager;
@@ -111,10 +108,10 @@ class Config
         $this->checkoutSession = $checkoutSession;
         $this->urlBuilder = $urlBuilder;
 
-        $this->storeId		= $this->getStoreId();
-		$this->versionNum	= intval(str_replace('.', '', $this->productMetadata->getVersion()));
-		$this->formKey		= $formKey;
-		$this->directory	= $directory;
+        $this->storeId        = $this->getStoreId();
+        $this->versionNum    = intval(str_replace('.', '', $this->productMetadata->getVersion()));
+        $this->formKey        = $formKey;
+        $this->directory    = $directory;
     }
 
     /**
@@ -126,148 +123,148 @@ class Config
     {
         return sprintf('payment/%s/', Payment::METHOD_CODE);
     }
-	
-	public function createLog($data, $title = '')
-	{
-		if(! $this->isDebugEnabled()) {
-			return;
-		}
-		
-		$string = date('Y-m-d H:i:s') . "\r\n";
-		
-		if(!empty($title)) {
-			$string .= $title . "\r\n";
-		}
-		
-		if (!empty($data)) {
-			if(is_array($data) or is_object($data)) {
-				if(is_array($data) && !empty($data['paymentMethods'])) {
-					$data['paymentMethods'] = json_encode($data['paymentMethods']);
-				}
-				
-				if(is_array($data) && !empty($data['userAccountDetails'])) {
-					$data['userAccountDetails'] = [];
-				}
-				
-				$string .= print_r($data, true);
-			}
-			elseif (is_bool($data)) {
-				$string .= $data ? 'true' : 'false';
-			}
-			else {
-				$string .= $data;
-			}
-		}
-		else {
-			$string .= 'Data is Empty.';
-		}
-		
-		$string .= "\r\n" . "\r\n";
-		
-		try {
-			$logsPath = $this->directory->getPath('log');
+    
+    public function createLog($data, $title = '')
+    {
+        if (! $this->isDebugEnabled()) {
+            return;
+        }
+        
+        $string = date('Y-m-d H:i:s') . "\r\n";
+        
+        if (!empty($title)) {
+            $string .= $title . "\r\n";
+        }
+        
+        if (!empty($data)) {
+            if (is_array($data) or is_object($data)) {
+                if (is_array($data) && !empty($data['paymentMethods'])) {
+                    $data['paymentMethods'] = json_encode($data['paymentMethods']);
+                }
+                
+                if (is_array($data) && !empty($data['userAccountDetails'])) {
+                    $data['userAccountDetails'] = [];
+                }
+                
+                $string .= print_r($data, true);
+            } elseif (is_bool($data)) {
+                $string .= $data ? 'true' : 'false';
+            } else {
+                $string .= $data;
+            }
+        } else {
+            $string .= 'Data is Empty.';
+        }
+        
+        $string .= "\r\n" . "\r\n";
+        
+        try {
+            $logsPath = $this->directory->getPath('log');
 
-			if(is_dir($logsPath)) {
-				file_put_contents(
-					$logsPath . DIRECTORY_SEPARATOR . 'SafeCharge-' . date('Y-m-d') . '.txt',
-					$string,
-					FILE_APPEND
-				);
-			}
-		}
-		catch(exception $e) {}
-	}
-	
-	/**
-	 * Function getSourceApplication
-	 * Get the value of one more parameter for the REST API
-	 * 
-	 * @return string
-	 */
-	public function getSourceApplication() {
-		return 'MAGENTO_2_PLUGIN';
-	}
+            if (is_dir($logsPath)) {
+                file_put_contents(
+                    $logsPath . DIRECTORY_SEPARATOR . 'SafeCharge-' . date('Y-m-d') . '.txt',
+                    $string,
+                    FILE_APPEND
+                );
+            }
+        } catch (exception $e) {
 
-	/**
-	 * Function get_device_details
-	 * Get browser and device based on HTTP_USER_AGENT.
-	 * The method is based on D3D payment needs.
-	 *
-	 * @return array $device_details
-	 */
-	public function getDeviceDetails() {
-		$server = filter_input_array(INPUT_SERVER, $_SERVER);
-		
-		$SC_DEVICES			= array('iphone', 'ipad', 'android', 'silk', 'blackberry', 'touch', 'linux', 'windows', 'mac');
-		$SC_BROWSERS		= array('ucbrowser', 'firefox', 'chrome', 'opera', 'msie', 'edge', 'safari', 'blackberry', 'trident');
-		$SC_DEVICES_TYPES	= array('tablet', 'mobile', 'tv', 'windows', 'linux');
-		$SC_DEVICES_OS		= array('android', 'windows', 'linux', 'mac os');
-		
-		$device_details = array(
-			'deviceType'    => 'UNKNOWN', // DESKTOP, SMARTPHONE, TABLET, TV, and UNKNOWN
-			'deviceName'    => '',
-			'deviceOS'      => '',
-			'browser'       => '',
-			'ipAddress'     => '',
-		);
-		
-		if (empty($server['HTTP_USER_AGENT'])) {
-			return $device_details;
-		}
-		
-		$user_agent = strtolower($server['HTTP_USER_AGENT']);
-		
-		$device_details['deviceName'] = $server['HTTP_USER_AGENT'];
+        }
+    }
+    
+    /**
+     * Function getSourceApplication
+     * Get the value of one more parameter for the REST API
+     *
+     * @return string
+     */
+    public function getSourceApplication()
+    {
+        return 'MAGENTO_2_PLUGIN';
+    }
 
-		if (!empty($SC_DEVICES_TYPES) && is_array($SC_DEVICES_TYPES)) {
-			foreach ($SC_DEVICES_TYPES as $d) {
-				if (strstr($user_agent, $d) !== false) {
-					if ('linux' === $d || 'windows' === $d) {
-						$device_details['deviceType'] = 'DESKTOP';
-					} else {
-						$device_details['deviceType'] = $d;
-					}
+    /**
+     * Function get_device_details
+     * Get browser and device based on HTTP_USER_AGENT.
+     * The method is based on D3D payment needs.
+     *
+     * @return array $device_details
+     */
+    public function getDeviceDetails()
+    {
+        $server = filter_input_array(INPUT_SERVER, $_SERVER);
+        
+        $SC_DEVICES            = ['iphone', 'ipad', 'android', 'silk', 'blackberry', 'touch', 'linux', 'windows', 'mac'];
+        $SC_BROWSERS        = ['ucbrowser', 'firefox', 'chrome', 'opera', 'msie', 'edge', 'safari', 'blackberry', 'trident'];
+        $SC_DEVICES_TYPES    = ['tablet', 'mobile', 'tv', 'windows', 'linux'];
+        $SC_DEVICES_OS        = ['android', 'windows', 'linux', 'mac os'];
+        
+        $device_details = [
+            'deviceType'    => 'UNKNOWN', // DESKTOP, SMARTPHONE, TABLET, TV, and UNKNOWN
+            'deviceName'    => '',
+            'deviceOS'      => '',
+            'browser'       => '',
+            'ipAddress'     => '',
+        ];
+        
+        if (empty($server['HTTP_USER_AGENT'])) {
+            return $device_details;
+        }
+        
+        $user_agent = strtolower($server['HTTP_USER_AGENT']);
+        
+        $device_details['deviceName'] = $server['HTTP_USER_AGENT'];
 
-					break;
-				}
-			}
-		}
+        if (!empty($SC_DEVICES_TYPES) && is_array($SC_DEVICES_TYPES)) {
+            foreach ($SC_DEVICES_TYPES as $d) {
+                if (strstr($user_agent, $d) !== false) {
+                    if ('linux' === $d || 'windows' === $d) {
+                        $device_details['deviceType'] = 'DESKTOP';
+                    } else {
+                        $device_details['deviceType'] = $d;
+                    }
 
-		if (!empty($SC_DEVICES) && is_array($SC_DEVICES)) {
-			foreach ($SC_DEVICES as $d) {
-				if (strstr($user_agent, $d) !== false) {
-					$device_details['deviceOS'] = $d;
-					break;
-				}
-			}
-		}
+                    break;
+                }
+            }
+        }
 
-		if (!empty($SC_BROWSERS) && is_array($SC_BROWSERS)) {
-			foreach ($SC_BROWSERS as $b) {
-				if (strstr($user_agent, $b) !== false) {
-					$device_details['browser'] = $b;
-					break;
-				}
-			}
-		}
+        if (!empty($SC_DEVICES) && is_array($SC_DEVICES)) {
+            foreach ($SC_DEVICES as $d) {
+                if (strstr($user_agent, $d) !== false) {
+                    $device_details['deviceOS'] = $d;
+                    break;
+                }
+            }
+        }
 
-		// get ip
-		$ip_address = '';
+        if (!empty($SC_BROWSERS) && is_array($SC_BROWSERS)) {
+            foreach ($SC_BROWSERS as $b) {
+                if (strstr($user_agent, $b) !== false) {
+                    $device_details['browser'] = $b;
+                    break;
+                }
+            }
+        }
 
-		if (isset($server['REMOTE_ADDR'])) {
-			$ip_address = $server['REMOTE_ADDR'];
-		} elseif (isset($server['HTTP_X_FORWARDED_FOR'])) {
-			$ip_address = $server['HTTP_X_FORWARDED_FOR'];
-		} elseif (isset($server['HTTP_CLIENT_IP'])) {
-			$ip_address = $server['HTTP_CLIENT_IP'];
-		}
+        // get ip
+        $ip_address = '';
 
-		$device_details['ipAddress'] = (string) $ip_address;
-			
-		return $device_details;
-	}
-	
-	/**
+        if (isset($server['REMOTE_ADDR'])) {
+            $ip_address = $server['REMOTE_ADDR'];
+        } elseif (isset($server['HTTP_X_FORWARDED_FOR'])) {
+            $ip_address = $server['HTTP_X_FORWARDED_FOR'];
+        } elseif (isset($server['HTTP_CLIENT_IP'])) {
+            $ip_address = $server['HTTP_CLIENT_IP'];
+        }
+
+        $device_details['ipAddress'] = (string) $ip_address;
+            
+        return $device_details;
+    }
+    
+    /**
      * Return store manager.
      * @return StoreManagerInterface
      */
@@ -387,7 +384,7 @@ class Config
         return $this->getConfigValue('hash');
     }
     
-	/**
+    /**
      * @return bool
      */
     public function doSaveOrderBeforeSuccess()
@@ -447,26 +444,26 @@ class Config
     public function getCallbackSuccessUrl()
     {
         $quoteId = $this->checkoutSession->getQuoteId();
-		
-//		$this->createLog(
-//			$this->urlBuilder->getUrl(
-//					'safecharge/payment/callback_complete',
-//					['quote' => $quoteId]
-//				)
-//				. '?form_key=' . $this->formKey->getFormKey(),
-//			'success url:');
-//		
-//		return 'https://srv-aws-magento.sccdev-qa.com/magentover2';
-		
-		if($this->versionNum >= 220) {
-			return $this->urlBuilder->getUrl(
-					'safecharge/payment/callback_complete',
-					['quote' => $quoteId]
-				)
-				. '?form_key=' . $this->formKey->getFormKey();
-		}
-		
-		return $this->urlBuilder->getUrl(
+        
+//        $this->createLog(
+//            $this->urlBuilder->getUrl(
+//                    'safecharge/payment/callback_complete',
+//                    ['quote' => $quoteId]
+//                )
+//                . '?form_key=' . $this->formKey->getFormKey(),
+//            'success url:');
+//
+//        return 'https://srv-aws-magento.sccdev-qa.com/magentover2';
+        
+        if ($this->versionNum >= 220) {
+            return $this->urlBuilder->getUrl(
+                'safecharge/payment/callback_complete',
+                ['quote' => $quoteId]
+            )
+                . '?form_key=' . $this->formKey->getFormKey();
+        }
+        
+        return $this->urlBuilder->getUrl(
             'safecharge/payment/callback_completeold',
             ['quote' => $quoteId]
         );
@@ -478,19 +475,19 @@ class Config
     public function getCallbackPendingUrl()
     {
         $quoteId = $this->checkoutSession->getQuoteId();
-		
-		if($this->versionNum >= 220) {
-			return $this->urlBuilder->getUrl(
-					'safecharge/payment/callback_complete',
-					['quote' => $quoteId]
-				)
-				. '?form_key=' . $this->formKey->getFormKey();
-		}
-		
-		return $this->urlBuilder->getUrl(
-			'safecharge/payment/callback_completeold',
-			['quote' => $quoteId]
-		);
+        
+        if ($this->versionNum >= 220) {
+            return $this->urlBuilder->getUrl(
+                'safecharge/payment/callback_complete',
+                ['quote' => $quoteId]
+            )
+                . '?form_key=' . $this->formKey->getFormKey();
+        }
+        
+        return $this->urlBuilder->getUrl(
+            'safecharge/payment/callback_completeold',
+            ['quote' => $quoteId]
+        );
     }
 
     /**
@@ -500,18 +497,18 @@ class Config
     {
         $quoteId = $this->checkoutSession->getQuoteId();
 
-		if($this->versionNum >= 220) {
-			 return $this->urlBuilder->getUrl(
-					'safecharge/payment/callback_error',
-					['quote' => $quoteId]
-				)
-				. '?form_key=' . $this->formKey->getFormKey();
-		}
-		
-		return $this->urlBuilder->getUrl(
-			'safecharge/payment/callback_errorold',
-			['quote' => $quoteId]
-		);
+        if ($this->versionNum >= 220) {
+             return $this->urlBuilder->getUrl(
+                 'safecharge/payment/callback_error',
+                 ['quote' => $quoteId]
+             )
+                . '?form_key=' . $this->formKey->getFormKey();
+        }
+        
+        return $this->urlBuilder->getUrl(
+            'safecharge/payment/callback_errorold',
+            ['quote' => $quoteId]
+        );
     }
 
     /**
@@ -519,23 +516,23 @@ class Config
      */
     public function getCallbackDmnUrl($incrementId = null, $storeId = null)
     {
-		$quoteId	= $this->checkoutSession->getQuoteId();
-        $url		=  $this->getStoreManager()
+        $quoteId    = $this->checkoutSession->getQuoteId();
+        $url        =  $this->getStoreManager()
             ->getStore((is_null($incrementId)) ? $this->storeId : $storeId)
             ->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_WEB);
-		
-		if($this->versionNum >= 220) {
-			return $url
-				. 'safecharge/payment/callback_dmn/order/'
-				. (is_null($incrementId) ? $this->getReservedOrderId() : $incrementId)
-				. '?form_key=' . $this->formKey->getFormKey()
-				. '&quote=' . $quoteId;
-		}
-		
-		return $url
-			. 'safecharge/payment/callback_dmnold/order/'
-			. (is_null($incrementId) ? $this->getReservedOrderId() : $incrementId)
-			. '?quote=' . $quoteId;
+        
+        if ($this->versionNum >= 220) {
+            return $url
+                . 'safecharge/payment/callback_dmn/order/'
+                . (is_null($incrementId) ? $this->getReservedOrderId() : $incrementId)
+                . '?form_key=' . $this->formKey->getFormKey()
+                . '&quote=' . $quoteId;
+        }
+        
+        return $url
+            . 'safecharge/payment/callback_dmnold/order/'
+            . (is_null($incrementId) ? $this->getReservedOrderId() : $incrementId)
+            . '?quote=' . $quoteId;
     }
 
     /**
@@ -550,7 +547,7 @@ class Config
     {
         return $this->getConfigValue('payment_action');
     }
-	
+    
     public function getQuoteId()
     {
         return (($quote = $this->checkoutSession->getQuote())) ? $quote->getId() : null;

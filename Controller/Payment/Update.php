@@ -18,9 +18,6 @@ use Magento\Sales\Model\OrderFactory;
 
 /**
  * Safecharge Safecharge payment place controller.
- *
- * @category Safecharge
- * @package  Safecharge_Safecharge
  */
 class Update extends Action
 {
@@ -110,8 +107,7 @@ class Update extends Action
                 ->setCardCvv($cardCvv)
                 ->setPaResponse(!empty($params['PaRes']) ? $params['PaRes'] : null)
                 ->process();
-        }
-        catch (PaymentException $e) {
+        } catch (PaymentException $e) {
             $this->messageManager->addErrorMessage(
                 __(
                     'Order has been placed but unfortunately payment has been not '

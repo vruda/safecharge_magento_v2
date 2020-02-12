@@ -11,9 +11,6 @@ use Magento\Sales\Model\Order\Payment\Transaction as OrderTransaction;
 
 /**
  * Safecharge Safecharge abstract payment response model.
- *
- * @category Safecharge
- * @package  Safecharge_Safecharge
  */
 abstract class AbstractPayment extends AbstractResponse
 {

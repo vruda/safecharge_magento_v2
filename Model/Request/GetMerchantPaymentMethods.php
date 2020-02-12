@@ -13,9 +13,6 @@ use Safecharge\Safecharge\Model\Response\Factory as ResponseFactory;
 
 /**
  * Safecharge Safecharge get merchant payment methods request model.
- *
- * @category Safecharge
- * @package  Safecharge_Safecharge
  */
 class GetMerchantPaymentMethods extends AbstractRequest implements RequestInterface
 {
@@ -28,10 +25,10 @@ class GetMerchantPaymentMethods extends AbstractRequest implements RequestInterf
      * @var string
      */
     protected $countryCode;
-	
+    
     protected $cart;
     protected $store;
-	
+    
     /**
      * OpenOrder constructor.
      *
@@ -47,8 +44,8 @@ class GetMerchantPaymentMethods extends AbstractRequest implements RequestInterf
         Curl $curl,
         ResponseFactory $responseFactory,
         RequestFactory $requestFactory,
-		\Magento\Checkout\Model\Cart $cart,
-		\Magento\Store\Api\Data\StoreInterface $store
+        \Magento\Checkout\Model\Cart $cart,
+        \Magento\Store\Api\Data\StoreInterface $store
     ) {
         parent::__construct(
             $safechargeLogger,
@@ -57,9 +54,9 @@ class GetMerchantPaymentMethods extends AbstractRequest implements RequestInterf
             $responseFactory
         );
 
-        $this->requestFactory	= $requestFactory;
-        $this->cart				= $cart;
-        $this->store			= $store;
+        $this->requestFactory    = $requestFactory;
+        $this->cart                = $cart;
+        $this->store            = $store;
     }
 
     /**
@@ -91,7 +88,7 @@ class GetMerchantPaymentMethods extends AbstractRequest implements RequestInterf
         $this->countryCode = (string)$countryCode;
         return $this;
     }
-	
+    
     /**
      * @return string
      */
@@ -99,7 +96,7 @@ class GetMerchantPaymentMethods extends AbstractRequest implements RequestInterf
     {
         return $this->countryCode;
     }
-	
+    
     /**
      * @return AbstractResponse
      * @throws \Magento\Framework\Exception\LocalizedException
@@ -121,50 +118,48 @@ class GetMerchantPaymentMethods extends AbstractRequest implements RequestInterf
      */
     protected function getParams()
     {
-		$country_code	= $this->getCountryCode() ?: $this->config->getQuoteCountryCode();
-		$tokenRequest	= $this->requestFactory->create(AbstractRequest::OPEN_ORDER_METHOD);
-		$tokenResponse	= $tokenRequest->process();
-		
-		if (empty($country_code)) {
-			try {
-				
-				$billingAddress = $this->cart->getQuote()->getBillingAddress()->getData();
-				
-				if (!empty($billingAddress)) {
-					$country_code = $country_code;
-				}
-			}
-			catch (Exception $e) {
-				$this->config->createLog(
-					$e->getMessage(), 
-					__FILE__ . ' ' . __FUNCTION__ . '() Exception:'
-				);
-			}
-		}
-		
-		$languageCode = 'en';
-		if ($this->store && $this->store->getLocaleCode()) {
-			$languageCode = $this->store->getLocaleCode();
-		}
-		
-		$currencyCode = $this->config->getQuoteBaseCurrency();
-		if (
-			(empty($currencyCode) || is_null($currencyCode))
-			&& $this->cart
-		) {
-			$currencyCode = empty($this->cart->getQuote()->getOrderCurrencyCode())
-				? $this->cart->getQuote()->getStoreCurrencyCode() : $this->cart->getQuote()->getOrderCurrencyCode();
-		}
-		
+        $country_code    = $this->getCountryCode() ?: $this->config->getQuoteCountryCode();
+        $tokenRequest    = $this->requestFactory->create(AbstractRequest::OPEN_ORDER_METHOD);
+        $tokenResponse    = $tokenRequest->process();
+        
+        if (empty($country_code)) {
+            try {
+                
+                $billingAddress = $this->cart->getQuote()->getBillingAddress()->getData();
+                
+                if (!empty($billingAddress)) {
+                    $country_code = $country_code;
+                }
+            } catch (Exception $e) {
+                $this->config->createLog(
+                    $e->getMessage(),
+                    __FILE__ . ' ' . __FUNCTION__ . '() Exception:'
+                );
+            }
+        }
+        
+        $languageCode = 'en';
+        if ($this->store && $this->store->getLocaleCode()) {
+            $languageCode = $this->store->getLocaleCode();
+        }
+        
+        $currencyCode = $this->config->getQuoteBaseCurrency();
+        if ((empty($currencyCode) || is_null($currencyCode))
+            && $this->cart
+        ) {
+            $currencyCode = empty($this->cart->getQuote()->getOrderCurrencyCode())
+                ? $this->cart->getQuote()->getStoreCurrencyCode() : $this->cart->getQuote()->getOrderCurrencyCode();
+        }
+        
         $params = [
-            'sessionToken'	=> $tokenResponse->getSessionToken(),
-            "currencyCode"	=> $currencyCode,
-            "countryCode"	=> $country_code,
-            "languageCode"	=> $languageCode,
+            'sessionToken'    => $tokenResponse->getSessionToken(),
+            "currencyCode"    => $currencyCode,
+            "countryCode"    => $country_code,
+            "languageCode"    => $languageCode,
         ];
 
         $params = array_merge_recursive(parent::getParams(), $params);
-		
+        
         return $params;
     }
 

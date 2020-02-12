@@ -7,9 +7,6 @@ use Safecharge\Safecharge\Model\ResponseInterface;
 
 /**
  * Safecharge Safecharge open order response model.
- *
- * @category Safecharge
- * @package  Safecharge_Safecharge
  */
 class OpenOrder extends AbstractResponse implements ResponseInterface
 {
@@ -17,8 +14,8 @@ class OpenOrder extends AbstractResponse implements ResponseInterface
      * @var string
      */
     protected $orderId;
-	
-	/**
+    
+    /**
      * @var string
      */
     protected $sessionToken;
@@ -31,8 +28,8 @@ class OpenOrder extends AbstractResponse implements ResponseInterface
     {
         parent::process();
 
-        $body				= $this->getBody();
-        $this->orderId		= $body['orderId'];
+        $body                = $this->getBody();
+        $this->orderId        = $body['orderId'];
         $this->sessionToken = $body['sessionToken'];
 
         return $this;
@@ -45,7 +42,7 @@ class OpenOrder extends AbstractResponse implements ResponseInterface
     {
         return $this->orderId;
     }
-	
+    
     /**
      * @return string
      */
@@ -61,7 +58,7 @@ class OpenOrder extends AbstractResponse implements ResponseInterface
     {
         return [
             'orderId',
-			'sessionToken'
+            'sessionToken'
         ];
     }
 }

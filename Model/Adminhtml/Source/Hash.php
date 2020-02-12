@@ -6,9 +6,6 @@ use Magento\Framework\Option\ArrayInterface;
 
 /**
  * Safecharge Safecharge payment action source model.
- *
- * @category Safecharge
- * @package  Safecharge_Safecharge
  */
 class Hash implements ArrayInterface
 {
@@ -20,8 +17,8 @@ class Hash implements ArrayInterface
     public function toOptionArray()
     {
         return [
-			'sha256'	=> 'SHA 256',
-			'md5'		=> 'MD 5',
+            'sha256'    => 'SHA 256',
+            'md5'       => 'MD 5',
         ];
     }
 }

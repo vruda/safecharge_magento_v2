@@ -7,9 +7,6 @@ use Safecharge\Safecharge\Model\ResponseInterface;
 
 /**
  * Safecharge Safecharge get user details response model.
- *
- * @category Safecharge
- * @package  Safecharge_Safecharge
  */
 class GetUserDetails extends AbstractResponse implements ResponseInterface
 {

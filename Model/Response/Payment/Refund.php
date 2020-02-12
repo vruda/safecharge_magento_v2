@@ -7,9 +7,6 @@ use Safecharge\Safecharge\Model\ResponseInterface;
 
 /**
  * Safecharge Safecharge payment refund response model.
- *
- * @category Safecharge
- * @package  Safecharge_Safecharge
  */
 class Refund extends AbstractPayment implements ResponseInterface
 {

@@ -10,9 +10,6 @@ use Magento\Framework\Exception\PaymentException;
 
 /**
  * Safecharge Safecharge create user request model.
- *
- * @category Safecharge
- * @package  Safecharge_Safecharge
  */
 class CreateUser extends AbstractRequest implements RequestInterface
 {

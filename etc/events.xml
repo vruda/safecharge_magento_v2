@@ -21,7 +21,7 @@
     
     <event name="sales_order_payment_void">
         <observer name="safecharge_void_order_status_update"
-                  instance="Safecharge\Safecharge\Observer\Sales\Order\Void\Register"/>
+                  instance="Safecharge\Safecharge\Observer\Sales\Order\Cancel\Register"/>
     </event>
 	
     <event name="sales_order_creditmemo_refund">

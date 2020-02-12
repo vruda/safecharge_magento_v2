@@ -14,9 +14,6 @@ use Safecharge\Safecharge\Model\Request\Factory as RequestFactory;
 
 /**
  * Safecharge Safecharge open order request model.
- *
- * @category Safecharge
- * @package  Safecharge_Safecharge
  */
 class OpenOrder extends AbstractRequest implements RequestInterface
 {
@@ -29,7 +26,7 @@ class OpenOrder extends AbstractRequest implements RequestInterface
      * @var array
      */
     protected $orderData;
-	
+    
     protected $cart;
 
     /**
@@ -47,7 +44,7 @@ class OpenOrder extends AbstractRequest implements RequestInterface
         Curl $curl,
         ResponseFactory $responseFactory,
         RequestFactory $requestFactory,
-		\Magento\Checkout\Model\Cart $cart
+        \Magento\Checkout\Model\Cart $cart
     ) {
         parent::__construct(
             $safechargeLogger,
@@ -56,8 +53,8 @@ class OpenOrder extends AbstractRequest implements RequestInterface
             $responseFactory
         );
 
-        $this->requestFactory	= $requestFactory;
-        $this->cart				= $cart;
+        $this->requestFactory    = $requestFactory;
+        $this->cart                = $cart;
     }
 
     /**
@@ -102,46 +99,45 @@ class OpenOrder extends AbstractRequest implements RequestInterface
         if (null === $this->cart || empty($this->cart)) {
             throw new PaymentException(__('There is no Cart data.'));
         }
-		
-		$this->config->createLog(@$_COOKIE, '$_COOKIE:');
+        
+        $this->config->createLog(isset($_COOKIE) ? $_COOKIE : [], '$_COOKIE:');
 
-		$billing_country = $this->config->getQuoteCountryCode();
-		if(is_null($billing_country)) {
-			$billing_country = $this->config->getDefaultCountry();
-		}
-		
-		$email = $this->cart->getQuote()->getCustomerEmail();
-		if(empty($email) and !empty($_COOKIE['guestSippingMail'])) {
-			$email = filter_input(INPUT_COOKIE, 'guestSippingMail', FILTER_VALIDATE_EMAIL);
-		}
-		else {
-			$email = 'quoteID_' . @$this->config->getCheckoutSession()->getQuoteId() . '@magentoMerchant.com';
-		}
-		
+        $billing_country = $this->config->getQuoteCountryCode();
+        if (is_null($billing_country)) {
+            $billing_country = $this->config->getDefaultCountry();
+        }
+        
+        $email = $this->cart->getQuote()->getCustomerEmail();
+        if (empty($email) and !empty($_COOKIE['guestSippingMail'])) {
+            $email = filter_input(INPUT_COOKIE, 'guestSippingMail', FILTER_VALIDATE_EMAIL);
+        } else {
+            $email = 'quoteID_' . $this->config->getCheckoutSession()->getQuoteId() . '@magentoMerchant.com';
+        }
+        
         $params = array_merge_recursive(
-			[
-				'amount'            => (string) number_format($this->cart->getQuote()->getGrandTotal(), 2, '.', ''),
-				'currency'          => empty($this->cart->getQuote()->getOrderCurrencyCode())
-					? $this->cart->getQuote()->getStoreCurrencyCode() : $this->cart->getQuote()->getOrderCurrencyCode(),
-				'urlDetails'        => array(
-					'successUrl'        => $this->config->getCallbackSuccessUrl(),
-					'failureUrl'        => $this->config->getCallbackErrorUrl(),
-					'pendingUrl'        => $this->config->getCallbackPendingUrl(),
-					'backUrl'			=> $this->config->getBackUrl(),
-					'notificationUrl'   => $this->config->getCallbackDmnUrl(),
-				),
-				'deviceDetails'     => $this->config->getDeviceDetails(),
-				'userTokenId'       => $email,
-				'billingAddress'    => array(
-					'country'	=> $billing_country,
-					'email'		=> $email,
-				),
-				'paymentOption'			=> ['card' => ['threeD' => ['isDynamic3D' => 1]]],
-				'transactionType'		=> $this->config->getPaymentAction(),
-			],
+            [
+                'amount'            => (string) number_format($this->cart->getQuote()->getGrandTotal(), 2, '.', ''),
+                'currency'          => empty($this->cart->getQuote()->getOrderCurrencyCode())
+                    ? $this->cart->getQuote()->getStoreCurrencyCode() : $this->cart->getQuote()->getOrderCurrencyCode(),
+                'urlDetails'        => [
+                    'successUrl'        => $this->config->getCallbackSuccessUrl(),
+                    'failureUrl'        => $this->config->getCallbackErrorUrl(),
+                    'pendingUrl'        => $this->config->getCallbackPendingUrl(),
+                    'backUrl'            => $this->config->getBackUrl(),
+                    'notificationUrl'   => $this->config->getCallbackDmnUrl(),
+                ],
+                'deviceDetails'     => $this->config->getDeviceDetails(),
+                'userTokenId'       => $email,
+                'billingAddress'    => [
+                    'country'    => $billing_country,
+                    'email'        => $email,
+                ],
+                'paymentOption'            => ['card' => ['threeD' => ['isDynamic3D' => 1]]],
+                'transactionType'        => $this->config->getPaymentAction(),
+            ],
             parent::getParams()
         );
-		
+        
         return $params;
     }
 

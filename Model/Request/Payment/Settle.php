@@ -13,9 +13,6 @@ use Safecharge\Safecharge\Model\RequestInterface;
 
 /**
  * Safecharge Safecharge settle payment request model.
- *
- * @category Safecharge
- * @package  Safecharge_Safecharge
  */
 class Settle extends AbstractPayment implements RequestInterface
 {
@@ -48,28 +45,28 @@ class Settle extends AbstractPayment implements RequestInterface
      */
     protected function getParams()
     {
-        $orderPayment		= $this->orderPayment;
-        $order				= $orderPayment->getOrder();
-		$auth_data			= $orderPayment->getAdditionalInformation(Payment::AUTH_PARAMS);
-		
+        $orderPayment        = $this->orderPayment;
+        $order                = $orderPayment->getOrder();
+        $auth_data            = $orderPayment->getAdditionalInformation(Payment::AUTH_PARAMS);
+        
         if (empty($auth_data['AuthCode']) or empty($auth_data['TransactionID'])) {
-			$this->config->createLog($auth_data, 'Missing Auth paramters!');
-			
+            $this->config->createLog($auth_data, 'Missing Auth paramters!');
+            
             throw new PaymentException(__('Missing Auth parameters.'));
         }
-		
-		$getIncrementId = $order->getIncrementId();
+        
+        $getIncrementId = $order->getIncrementId();
 
         $params = [
-            'clientUniqueId'			=> $getIncrementId,
-			'amount'					=> (float)$this->amount,
-            'currency'					=> $order->getBaseCurrencyCode(),
-            'relatedTransactionId'		=> $auth_data['TransactionID'],
-			'authCode'					=> $auth_data['AuthCode'],
-			'urlDetails'				=> [
+            'clientUniqueId'            => $getIncrementId,
+            'amount'                    => (float)$this->amount,
+            'currency'                    => $order->getBaseCurrencyCode(),
+            'relatedTransactionId'        => $auth_data['TransactionID'],
+            'authCode'                    => $auth_data['AuthCode'],
+            'urlDetails'                => [
                 'notificationUrl' => $this->config->getCallbackDmnUrl($getIncrementId),
             ],
-			'sourceApplication'			=> $this->config->getSourceApplication(),
+            'sourceApplication'            => $this->config->getSourceApplication(),
         ];
 
         $params = array_merge_recursive(parent::getParams(), $params);

@@ -2,8 +2,8 @@
 
 namespace Safecharge\Safecharge\Model;
 
-use Magento\Checkout\Model\Session\Proxy as CheckoutSession;
-use Magento\Customer\Model\Session\Proxy as CustomerSession;
+use Magento\Checkout\Model\Session as CheckoutSession;
+use Magento\Customer\Model\Session as CustomerSession;
 use Magento\Framework\Api\AttributeValueFactory;
 use Magento\Framework\Api\ExtensionAttributesFactory;
 use Magento\Framework\App\Config\ScopeConfigInterface;
@@ -27,9 +27,6 @@ use Safecharge\Safecharge\Model\Request\Payment\Factory as PaymentRequestFactory
 
 /**
  * Safecharge Safecharge payment model.
- *
- * @category Safecharge
- * @package  Safecharge_Safecharge
  */
 class Payment extends Cc implements TransparentInterface
 {
@@ -40,12 +37,12 @@ class Payment extends Cc implements TransparentInterface
 
     /**
      * Method modes.
-	 * 
-	 * @deprecated since 2.0.0
+     *
+     * @deprecated since 2.0.0
      */
     const MODE_LIVE     = 'live';
-	/**
-	 * @deprecated since 2.0.0
+    /**
+     * @deprecated since 2.0.0
      */
     const MODE_SANDBOX  = 'sandbox';
 
@@ -69,10 +66,10 @@ class Payment extends Cc implements TransparentInterface
     const TRANSACTION_SESSION_TOKEN             = 'session_token';
     const TRANSACTION_PAYMENT_SOLUTION          = 'payment_solution';
     const TRANSACTION_EXTERNAL_PAYMENT_METHOD   = 'external_payment_method';
-    const TRANSACTION_STATUS					= 'sc_status';
-    const TRANSACTION_TYPE						= 'sc_transaction_type';
-    const REFUND_TRANSACTION_AMOUNT				= 'sc_refund_amount';
-    const AUTH_PARAMS							= 'sc_auth_params';
+    const TRANSACTION_STATUS                    = 'sc_status';
+    const TRANSACTION_TYPE                        = 'sc_transaction_type';
+    const REFUND_TRANSACTION_AMOUNT                = 'sc_refund_amount';
+    const AUTH_PARAMS                            = 'sc_auth_params';
 
     /**
      * Order statuses.
@@ -84,9 +81,9 @@ class Payment extends Cc implements TransparentInterface
     const SC_REFUNDED           = 'sc_refunded';
     const SC_PROCESSING         = 'sc_processing';
 
-    const SOLUTION_INTERNAL		= 'internal';
-    const SOLUTION_EXTERNAL		= 'external';
-    const APM_METHOD_CC			= 'cc_card';
+    const SOLUTION_INTERNAL        = 'internal';
+    const SOLUTION_EXTERNAL        = 'external';
+    const APM_METHOD_CC            = 'cc_card';
 
     /**
      * @var string
@@ -444,13 +441,13 @@ class Payment extends Cc implements TransparentInterface
     public function void(InfoInterface $payment)
     {
         parent::void($payment);
-		
+        
         /** @var RequestInterface $request */
         $request = $this->paymentRequestFactory->create(
             AbstractRequest::PAYMENT_VOID_METHOD,
             $payment
         );
-		
+        
         $request->process();
         return $this;
     }

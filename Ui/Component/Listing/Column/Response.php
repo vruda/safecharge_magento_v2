@@ -9,9 +9,6 @@ use Magento\Ui\Component\Listing\Columns\Column;
 
 /**
  * Safecharge Safecharge response column handler.
- *
- * @category Safecharge
- * @package  Safecharge_Safecharge
  */
 class Response extends Column
 {

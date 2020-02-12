@@ -2,7 +2,7 @@
 
 namespace Safecharge\Safecharge\Model;
 
-use Magento\Customer\Model\Session\Proxy as CustomerSession;
+use Magento\Customer\Model\Session as CustomerSession;
 use Magento\Framework\Exception\PaymentException;
 use Magento\Framework\UrlInterface;
 use Magento\Payment\Helper\Data as PaymentHelper;
@@ -14,9 +14,6 @@ use Safecharge\Safecharge\Model\Request\Factory as RequestFactory;
 
 /**
  * Safecharge Safecharge config provider model.
- *
- * @category Safecharge
- * @package  Safecharge_Safecharge
  */
 class ConfigProvider extends CcGenericConfigProvider
 {
@@ -71,18 +68,18 @@ class ConfigProvider extends CcGenericConfigProvider
         UrlInterface $urlBuilder,
         RequestFactory $requestFactory,
         array $methodCodes,
-		\Magento\Store\Model\StoreManagerInterface $storeManager,
-		\Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
-		\Magento\Checkout\Model\Cart $cart
+        \Magento\Store\Model\StoreManagerInterface $storeManager,
+        \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
+        \Magento\Checkout\Model\Cart $cart
     ) {
-        $this->moduleConfig				= $moduleConfig;
-        $this->customerSession			= $customerSession;
-        $this->paymentTokenManagement	= $paymentTokenManagement;
-        $this->urlBuilder				= $urlBuilder;
-        $this->requestFactory			= $requestFactory;
-        $this->storeManager				= $storeManager;
-        $this->scopeConfig				= $scopeConfig;
-        $this->cart						= $cart;
+        $this->moduleConfig                = $moduleConfig;
+        $this->customerSession            = $customerSession;
+        $this->paymentTokenManagement    = $paymentTokenManagement;
+        $this->urlBuilder                = $urlBuilder;
+        $this->requestFactory            = $requestFactory;
+        $this->storeManager                = $storeManager;
+        $this->scopeConfig                = $scopeConfig;
+        $this->cart                        = $cart;
 
         $methodCodes = array_merge_recursive(
             $methodCodes,
@@ -106,29 +103,29 @@ class ConfigProvider extends CcGenericConfigProvider
         if (!$this->moduleConfig->isActive()) {
             return [];
         }
-		
+        
         $objectManager  = \Magento\Framework\App\ObjectManager::getInstance();
-        $locale			= $this->scopeConfig->getValue(
-			'general/locale/code',
-			\Magento\Store\Model\ScopeInterface::SCOPE_STORE
-		);
+        $locale            = $this->scopeConfig->getValue(
+            'general/locale/code',
+            \Magento\Store\Model\ScopeInterface::SCOPE_STORE
+        );
         
         $config = [
             'payment' => [
                 Payment::METHOD_CODE => [
-                    'countryId'						=> $this->moduleConfig->getQuoteCountryCode(),
-                    'redirectUrl'					=> $this->urlBuilder->getUrl('safecharge/payment/redirect'),
-                    'paymentApmUrl'					=> $this->urlBuilder->getUrl('safecharge/payment/apm'),
-                    'getMerchantPaymentMethodsUrl'	=> $this->urlBuilder->getUrl('safecharge/payment/GetMerchantPaymentMethods'),
+                    'countryId'                        => $this->moduleConfig->getQuoteCountryCode(),
+                    'redirectUrl'                    => $this->urlBuilder->getUrl('safecharge/payment/redirect'),
+                    'paymentApmUrl'                    => $this->urlBuilder->getUrl('safecharge/payment/apm'),
+                    'getMerchantPaymentMethodsUrl'    => $this->urlBuilder->getUrl('safecharge/payment/GetMerchantPaymentMethods'),
                     // we need this for the WebSDK
-                    'merchantSiteId'				=> $this->moduleConfig->getMerchantSiteId(),
-                    'merchantId'					=> $this->moduleConfig->getMerchantId(),
-                    'isTestMode'					=> $this->moduleConfig->isTestModeEnabled(),
-                    'locale'						=> substr($locale, 0, 2),
-                    'total'							=> (string) number_format($this->cart->getQuote()->getGrandTotal(), 2, '.', ''),
-                    'currency'						=> trim($this->storeManager->getStore()->getCurrentCurrencyCode()),
-                    'webMasterId'					=> $this->moduleConfig->getSourcePlatformField(),
-                    'sourceApplication'				=> $this->moduleConfig->getSourceApplication(),
+                    'merchantSiteId'                => $this->moduleConfig->getMerchantSiteId(),
+                    'merchantId'                    => $this->moduleConfig->getMerchantId(),
+                    'isTestMode'                    => $this->moduleConfig->isTestModeEnabled(),
+                    'locale'                        => substr($locale, 0, 2),
+                    'total'                            => (string) number_format($this->cart->getQuote()->getGrandTotal(), 2, '.', ''),
+                    'currency'                        => trim($this->storeManager->getStore()->getCurrentCurrencyCode()),
+                    'webMasterId'                    => $this->moduleConfig->getSourcePlatformField(),
+                    'sourceApplication'                => $this->moduleConfig->getSourceApplication(),
                 ],
             ],
         ];

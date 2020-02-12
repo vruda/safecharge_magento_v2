@@ -6,9 +6,6 @@ use Safecharge\Safecharge\Model\Logger as SafechargeLogger;
 
 /**
  * Safecharge Safecharge abstract api model.
- *
- * @category Safecharge
- * @package  Safecharge_Safecharge
  */
 abstract class AbstractApi
 {

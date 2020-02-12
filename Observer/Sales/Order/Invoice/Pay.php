@@ -11,9 +11,6 @@ use Safecharge\Safecharge\Model\Payment;
 
 /**
  * Safecharge Safecharge sales order invoice pay observer.
- *
- * @category Safecharge
- * @package  Safecharge_Safecharge
  */
 class Pay implements ObserverInterface
 {
@@ -40,15 +37,6 @@ class Pay implements ObserverInterface
         if ($invoice->getState() !== Invoice::STATE_PAID) {
             return $this;
         }
-
-//        $status = Payment::SC_SETTLED;
-//
-//        $totalDue = $order->getBaseTotalDue();
-//        if ((float)$totalDue > 0.0) {
-//            $status = Payment::SC_PARTIALLY_SETTLED;
-//        }
-
-//        $order->setStatus($status);
 
         return $this;
     }

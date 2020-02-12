@@ -7,9 +7,6 @@ use Safecharge\Safecharge\Model\ResponseInterface;
 
 /**
  * Safecharge Safecharge paymentAPM response model.
- *
- * @category Safecharge
- * @package  Safecharge_Safecharge
  */
 class PaymentApm extends AbstractResponse implements ResponseInterface
 {
@@ -32,28 +29,32 @@ class PaymentApm extends AbstractResponse implements ResponseInterface
         parent::process();
 
         $body = $this->getBody();
-		
-		if (!empty($body['redirectURL'])) {
-			$this->redirectUrl = (string) $body['redirectURL'];
-		}
-		else {
-			switch ((string) @$body['transactionStatus']) {
-				case 'APPROVED':
-					$this->redirectUrl = $this->config->getCallbackSuccessUrl();
-					break;
-				
-				case 'PENDING':
-					$this->redirectUrl = $this->config->getCallbackPendingUrl();
-					break;
-				
-				case 'DECLINED':
-				case 'ERROR':
-				default:
-					$this->redirectUrl = $this->config->getCallbackErrorUrl();
-					break;
-			}
-		}
-		
+        
+        $transactionStatus = '';
+        if (!empty($body['transactionStatus'])) {
+            $transactionStatus = (string) $body['transactionStatus'];
+        }
+        
+        if (!empty($body['redirectURL'])) {
+            $this->redirectUrl = (string) $body['redirectURL'];
+        } else {
+            switch ($transactionStatus) {
+                case 'APPROVED':
+                    $this->redirectUrl = $this->config->getCallbackSuccessUrl();
+                    break;
+                
+                case 'PENDING':
+                    $this->redirectUrl = $this->config->getCallbackPendingUrl();
+                    break;
+                
+                case 'DECLINED':
+                case 'ERROR':
+                default:
+                    $this->redirectUrl = $this->config->getCallbackErrorUrl();
+                    break;
+            }
+        }
+        
         $this->responseStatus = (string) $body['status'];
         return $this;
     }

@@ -8,9 +8,6 @@ use Safecharge\Safecharge\Model\ResponseInterface;
 
 /**
  * Safecharge Safecharge payment settle response model.
- *
- * @category Safecharge
- * @package  Safecharge_Safecharge
  */
 class Settle extends AbstractPayment implements ResponseInterface
 {
@@ -80,22 +77,23 @@ class Settle extends AbstractPayment implements ResponseInterface
     {
         parent::updateTransaction();
 
-		try {
-			if(!empty($this->getAuthCode())) {
-				$this->orderPayment->setAdditionalInformation(
-					Payment::TRANSACTION_AUTH_CODE_KEY,
-					$this->getAuthCode()
-				);
+        try {
+            if (!empty($this->getAuthCode())) {
+                $this->orderPayment->setAdditionalInformation(
+                    Payment::TRANSACTION_AUTH_CODE_KEY,
+                    $this->getAuthCode()
+                );
             }
-			
-			if(!empty($this->getTransactionId())) {
-				$this->orderPayment->setAdditionalInformation(
-					Payment::TRANSACTION_ID,
-					$this->getTransactionId()
-				);
-			}
-		}
-		catch (Exception $ex) {}
+            
+            if (!empty($this->getTransactionId())) {
+                $this->orderPayment->setAdditionalInformation(
+                    Payment::TRANSACTION_ID,
+                    $this->getTransactionId()
+                );
+            }
+        } catch (Exception $ex) {
+            $this->config->createLog($ex->getMessage(), 'updateTransaction exception:');
+        }
 
         $this->orderPayment
             ->setParentTransactionId($this->orderPayment->getTransactionId())

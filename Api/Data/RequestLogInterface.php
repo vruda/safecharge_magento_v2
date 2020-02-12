@@ -4,9 +4,6 @@ namespace Safecharge\Safecharge\Api\Data;
 
 /**
  * Safecharge Safecharge request log entity interface.
- *
- * @category Safecharge
- * @package  Safecharge_Safecharge
  */
 interface RequestLogInterface
 {

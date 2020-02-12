@@ -8,9 +8,6 @@ use Magento\Framework\View\Result\PageFactory;
 
 /**
  * Safecharge Safecharge admin request index controller.
- *
- * @category Safecharge
- * @package  Safecharge_Safecharge
  */
 class Index extends Action
 {

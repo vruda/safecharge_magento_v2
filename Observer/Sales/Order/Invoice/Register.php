@@ -11,9 +11,6 @@ use Magento\Sales\Model\Order\Payment as OrderPayment;
 
 /**
  * Safecharge Safecharge sales order invoice register observer.
- *
- * @category Safecharge
- * @package  Safecharge_Safecharge
  */
 class Register implements ObserverInterface
 {

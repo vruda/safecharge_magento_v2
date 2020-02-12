@@ -11,9 +11,6 @@ use Safecharge\Safecharge\Model\Redirect\Url as RedirectUrlBuilder;
 
 /**
  * Safecharge Safecharge payment redirect controller.
- *
- * @category Safecharge
- * @package  Safecharge_Safecharge
  */
 class Redirect extends Action
 {
@@ -26,12 +23,12 @@ class Redirect extends Action
      * @var JsonFactory
      */
     private $jsonResultFactory;
-	
+    
     private $request;
     private $dataObjectFactory;
-	private $cartManagement;
-	private $onepageCheckout;
-	private $checkoutSession;
+    private $cartManagement;
+    private $onepageCheckout;
+    private $checkoutSession;
 
     /**
      * Redirect constructor.
@@ -45,21 +42,21 @@ class Redirect extends Action
         Context $context,
         ModuleConfig $moduleConfig,
         JsonFactory $jsonResultFactory,
-		\Magento\Framework\App\Request\Http $request,
-		\Magento\Framework\DataObjectFactory $dataObjectFactory,
-		\Magento\Quote\Api\CartManagementInterface $cartManagement,
-		\Magento\Checkout\Model\Type\Onepage $onepageCheckout,
-		\Magento\Checkout\Model\Session\Proxy $checkoutSession
+        \Magento\Framework\App\Request\Http $request,
+        \Magento\Framework\DataObjectFactory $dataObjectFactory,
+        \Magento\Quote\Api\CartManagementInterface $cartManagement,
+        \Magento\Checkout\Model\Type\Onepage $onepageCheckout,
+        \Magento\Checkout\Model\Session $checkoutSession
     ) {
         parent::__construct($context);
 
-        $this->moduleConfig			= $moduleConfig;
-        $this->jsonResultFactory	= $jsonResultFactory;
-        $this->request				= $request;
-		$this->dataObjectFactory	= $dataObjectFactory;
-		$this->cartManagement		= $cartManagement;
-		$this->onepageCheckout		= $onepageCheckout;
-		$this->checkoutSession		= $checkoutSession;
+        $this->moduleConfig            = $moduleConfig;
+        $this->jsonResultFactory    = $jsonResultFactory;
+        $this->request                = $request;
+        $this->dataObjectFactory    = $dataObjectFactory;
+        $this->cartManagement        = $cartManagement;
+        $this->onepageCheckout        = $onepageCheckout;
+        $this->checkoutSession        = $checkoutSession;
     }
 
     /**
@@ -71,72 +68,70 @@ class Redirect extends Action
             ->setHttpResponseCode(\Magento\Framework\Webapi\Response::HTTP_OK);
 
         if (!$this->moduleConfig->isActive()) {
-			$msg = 'Redirect Controller: Safecharge payments module is not active at the moment!';
-			
-			$this->moduleConfig->createLog($msg);
+            $msg = 'Redirect Controller: Safecharge payments module is not active at the moment!';
+            
+            $this->moduleConfig->createLog($msg);
             return $result->setData(['error_message' => __($msg)]);
         }
-		
-		$this->moduleConfig->createLog($this->request->getParams(), 'Redirect class params:');
-		
-		$postData['url'] = $this->moduleConfig->getCallbackErrorUrl();
-		
-		// for the WebSDK
-		if($this->request->getParam('method') === 'cc_card' && $this->request->getParam('transactionId')) {
+        
+        $this->moduleConfig->createLog($this->request->getParams(), 'Redirect class params:');
+        
+        $postData['url'] = $this->moduleConfig->getCallbackErrorUrl();
+        
+        // for the WebSDK
+        if ($this->request->getParam('method') === 'cc_card' && $this->request->getParam('transactionId')) {
             $postData['url'] = $this->moduleConfig->getCallbackSuccessUrl();
-			
-			// try to place an order
-			if(
-				$this->moduleConfig->doSaveOrderBeforeSuccess()
-				&& strpos($postData['url'], 'callback_complete') !== false
-			) {
-				$this->moduleConfig->createLog('Try to save the Order in Redirect class');
-				
-				$order_id = $this->saveOrder();
-				
-				$postData['url'] .= '&order_db_id=' . $order_id;
-			}
+            
+            // try to place an order
+            if ($this->moduleConfig->doSaveOrderBeforeSuccess()
+                && strpos($postData['url'], 'callback_complete') !== false
+            ) {
+                $this->moduleConfig->createLog('Try to save the Order in Redirect class');
+                
+                $order_id = $this->saveOrder();
+                
+                $postData['url'] .= '&order_db_id=' . $order_id;
+            }
         }
-		
+        
         return $result->setData($postData);
     }
-	
-	/**
-	 * @return int $orderId - the new Order ID
-	 */
-	private function saveOrder()
-	{
-		$orderId = '';
-		
+    
+    /**
+     * @return int $orderId - the new Order ID
+     */
+    private function saveOrder()
+    {
+        $orderId = '';
+        
         try {
-			$result = $this->dataObjectFactory->create();
+            $result = $this->dataObjectFactory->create();
 
-			/**
-			 * Current workaround depends on Onepage checkout model defect
-			 * Method Onepage::getCheckoutMethod performs setCheckoutMethod
-			 */
-			$this->onepageCheckout->getCheckoutMethod();
-			
-			$orderId = $this->cartManagement->placeOrder((int)$this->checkoutSession->getQuoteId());
-			
-			$this->_eventManager->dispatch(
-				'safecharge_place_order',
-				[
-					'result' => $result,
-					'action' => $this,
-				]
-			);
-			
-			$this->moduleConfig->createLog('Place order in Redirect success');
+            /**
+             * Current workaround depends on Onepage checkout model defect
+             * Method Onepage::getCheckoutMethod performs setCheckoutMethod
+             */
+            $this->onepageCheckout->getCheckoutMethod();
+            
+            $orderId = $this->cartManagement->placeOrder((int)$this->checkoutSession->getQuoteId());
+            
+            $this->_eventManager->dispatch(
+                'safecharge_place_order',
+                [
+                    'result' => $result,
+                    'action' => $this,
+                ]
+            );
+            
+            $this->moduleConfig->createLog('Place order in Redirect success');
+        } catch (PaymentException $e) {
+            $this->moduleConfig->createLog($e->getMessage(), 'Place order in Redirect Exception:');
         }
-        catch (PaymentException $e) {
-			$this->moduleConfig->createLog($e->getMessage(), 'Place order in Redirect Exception:');
-        }
-		
-		return $orderId;
-	}
-	
-	/**
+        
+        return $orderId;
+    }
+    
+    /**
      * Place order.
      *
      * @return DataObject
@@ -165,9 +160,8 @@ class Redirect extends Action
                     'action' => $this,
                 ]
             );
-        }
-        catch (\Exception $exception) {
-			$this->moduleConfig->createLog($exception->getMessage(), 'Redirect Exception: ');
+        } catch (\Exception $exception) {
+            $this->moduleConfig->createLog($exception->getMessage(), 'Redirect Exception: ');
             
             $result
                 ->setData('error', true)
@@ -179,5 +173,4 @@ class Redirect extends Action
 
         return $result;
     }
-	
 }

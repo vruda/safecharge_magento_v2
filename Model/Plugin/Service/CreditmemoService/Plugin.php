@@ -12,9 +12,6 @@ use Magento\Sales\Model\Service\CreditmemoService;
 
 /**
  * Safecharge Safecharge credit memo service plugin model.
- *
- * @category Safecharge
- * @package  Safecharge_Safecharge
  */
 class Plugin
 {

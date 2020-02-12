@@ -9,9 +9,6 @@ use Safecharge\Safecharge\Model\RequestInterface;
 
 /**
  * Safecharge Safecharge request factory model.
- *
- * @category Safecharge
- * @package  Safecharge_Safecharge
  */
 class Factory
 {
@@ -21,12 +18,12 @@ class Factory
      * @var array
      */
     private $invokableClasses = [
-        AbstractRequest::GET_SESSION_TOKEN_METHOD				=> \Safecharge\Safecharge\Model\Request\Token::class,
-        AbstractRequest::CREATE_USER_METHOD						=> \Safecharge\Safecharge\Model\Request\CreateUser::class,
-        AbstractRequest::GET_USER_DETAILS_METHOD				=> \Safecharge\Safecharge\Model\Request\GetUserDetails::class,
-        AbstractRequest::OPEN_ORDER_METHOD						=> \Safecharge\Safecharge\Model\Request\OpenOrder::class,
-        AbstractRequest::PAYMENT_APM_METHOD						=> \Safecharge\Safecharge\Model\Request\PaymentApm::class,
-        AbstractRequest::GET_MERCHANT_PAYMENT_METHODS_METHOD	=> \Safecharge\Safecharge\Model\Request\GetMerchantPaymentMethods::class
+        AbstractRequest::GET_SESSION_TOKEN_METHOD               => \Safecharge\Safecharge\Model\Request\Token::class,
+        AbstractRequest::CREATE_USER_METHOD                     => \Safecharge\Safecharge\Model\Request\CreateUser::class,
+        AbstractRequest::GET_USER_DETAILS_METHOD                => \Safecharge\Safecharge\Model\Request\GetUserDetails::class,
+        AbstractRequest::OPEN_ORDER_METHOD                      => \Safecharge\Safecharge\Model\Request\OpenOrder::class,
+        AbstractRequest::PAYMENT_APM_METHOD                     => \Safecharge\Safecharge\Model\Request\PaymentApm::class,
+        AbstractRequest::GET_MERCHANT_PAYMENT_METHODS_METHOD    => \Safecharge\Safecharge\Model\Request\GetMerchantPaymentMethods::class
     ];
 
     /**
@@ -69,7 +66,7 @@ class Factory
 
         $model = $this->objectManager->create($className, $args);
         
-		if (!$model instanceof RequestInterface) {
+        if (!$model instanceof RequestInterface) {
             throw new LocalizedException(
                 __(
                     '%1 doesn\'t implement \Safecharge\Safecharge\Model\RequestInterface',

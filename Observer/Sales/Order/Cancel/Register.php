@@ -1,16 +1,15 @@
 <?php
 
-namespace Safecharge\Safecharge\Observer\Sales\Order\Refund;
+namespace Safecharge\Safecharge\Observer\Sales\Order\Cancel;
 
 use Safecharge\Safecharge\Model\Payment;
 use Magento\Framework\Event\ObserverInterface;
 use Magento\Framework\Event\Observer;
 use Magento\Sales\Model\Order;
-use Magento\Sales\Model\Order\Invoice;
 use Magento\Sales\Model\Order\Payment as OrderPayment;
 
 /**
- * Safecharge Safecharge sales order refund register observer.
+ * Safecharge Safecharge sales order void observer.
  */
 class Register implements ObserverInterface
 {
@@ -21,15 +20,17 @@ class Register implements ObserverInterface
      */
     public function execute(Observer $observer)
     {
-        $creditmemo    = $observer->getEvent()->getCreditmemo();
-        $order        = $creditmemo->getOrder();
-        $payment    = $order->getPayment();
+        /** @var OrderPayment $payment */
+        $payment = $observer->getPayment();
 
         if ($payment->getMethod() !== Payment::METHOD_CODE) {
             return $this;
         }
-        
-        $order->setStatus(Payment::SC_PROCESSING);
+
+        /** @var Order $order */
+        $order = $payment->getOrder();
+
+        $order->setStatus(Payment::SC_VOIDED);
 
         return $this;
     }

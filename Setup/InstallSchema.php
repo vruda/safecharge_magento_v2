@@ -10,9 +10,6 @@ use Magento\Framework\Setup\SchemaSetupInterface;
 
 /**
  * Safecharge Safecharge install schema.
- *
- * @category Safecharge
- * @package  Safecharge_Safecharge
  */
 class InstallSchema implements InstallSchemaInterface
 {

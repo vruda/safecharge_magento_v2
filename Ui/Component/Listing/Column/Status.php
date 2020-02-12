@@ -7,9 +7,6 @@ use Magento\Ui\Component\Listing\Columns\Column;
 
 /**
  * Safecharge Safecharge status column handler.
- *
- * @category Safecharge
- * @package  Safecharge_Safecharge
  */
 class Status extends Column
 {

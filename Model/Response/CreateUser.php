@@ -7,9 +7,6 @@ use Safecharge\Safecharge\Model\ResponseInterface;
 
 /**
  * Safecharge Safecharge create user response model.
- *
- * @category Safecharge
- * @package  Safecharge_Safecharge
  */
 class CreateUser extends AbstractResponse implements ResponseInterface
 {

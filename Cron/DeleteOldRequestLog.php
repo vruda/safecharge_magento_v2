@@ -7,9 +7,6 @@ use Safecharge\Safecharge\Model\ResourceModel\RequestLog\CollectionFactory;
 
 /**
  * Safecharge Safecharge delete old request log entries cron job.
- *
- * @category Safecharge
- * @package  Safecharge_Safecharge
  */
 class DeleteOldRequestLog
 {

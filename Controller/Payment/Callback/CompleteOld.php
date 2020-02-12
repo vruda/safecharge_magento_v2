@@ -2,7 +2,7 @@
 
 namespace Safecharge\Safecharge\Controller\Payment\Callback;
 
-use Magento\Checkout\Model\Session\Proxy as CheckoutSession;
+use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Checkout\Model\Type\Onepage;
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
@@ -21,9 +21,6 @@ use Safecharge\Safecharge\Model\Request\Payment\Factory as PaymentRequestFactory
 
 /**
  * Safecharge Safecharge redirect success controller.
- *
- * @category Safecharge
- * @package  Safecharge_Safecharge
  */
 class CompleteOld extends Action
 {
@@ -107,18 +104,18 @@ class CompleteOld extends Action
     ) {
         parent::__construct($context);
 
-        $this->orderFactory				= $orderFactory;
-        $this->moduleConfig				= $moduleConfig;
-        $this->authorizeCommand			= $authorizeCommand;
-        $this->captureCommand			= $captureCommand;
-        $this->safechargeLogger			= $safechargeLogger;
-        $this->paymentRequestFactory	= $paymentRequestFactory;
-        $this->dataObjectFactory		= $dataObjectFactory;
-        $this->cartManagement			= $cartManagement;
-        $this->checkoutSession			= $checkoutSession;
-        $this->onepageCheckout			= $onepageCheckout;
+        $this->orderFactory                = $orderFactory;
+        $this->moduleConfig                = $moduleConfig;
+        $this->authorizeCommand            = $authorizeCommand;
+        $this->captureCommand            = $captureCommand;
+        $this->safechargeLogger            = $safechargeLogger;
+        $this->paymentRequestFactory    = $paymentRequestFactory;
+        $this->dataObjectFactory        = $dataObjectFactory;
+        $this->cartManagement            = $cartManagement;
+        $this->checkoutSession            = $checkoutSession;
+        $this->onepageCheckout            = $onepageCheckout;
     }
-	
+    
     /**
      * @return ResultInterface
      * @throws \InvalidArgumentException
@@ -126,48 +123,47 @@ class CompleteOld extends Action
      */
     public function execute()
     {
-		$params = $this->getRequest()->getParams();
-		$this->moduleConfig->createLog($params, 'Success params:');
-		
-		$resultRedirect = $this->resultFactory->create(ResultFactory::TYPE_REDIRECT);
-
+        $params = $this->getRequest()->getParams();
+        $this->moduleConfig->createLog($params, 'Success params:');
+        
+        $resultRedirect    = $this->resultFactory->create(ResultFactory::TYPE_REDIRECT);
+        $form_key        = filter_input(INPUT_GET, 'form_key');
+        
         try {
-			// the Order was not saved in the Redirect class
-			if (empty($params['order_db_id'])) {
-				// if the option for save the order in the Redirect is ON, skip placeOrder !!!
-				$result = $this->placeOrder();
+            // the Order was not saved in the Redirect class
+            if (empty($params['order_db_id'])) {
+                // if the option for save the order in the Redirect is ON, skip placeOrder !!!
+                $result = $this->placeOrder();
 
-				if ($result->getSuccess() !== true) {
-					$this->moduleConfig->createLog($result->getErrorMessage(), 'Complete Callback error - place order error');
+                if ($result->getSuccess() !== true) {
+                    $this->moduleConfig->createLog($result->getErrorMessage(), 'Complete Callback error - place order error');
 
-					throw new PaymentException(__($result->getErrorMessage()));
-				}
-			}
-			
-            if (
-                isset($params['Status'])
+                    throw new PaymentException(__($result->getErrorMessage()));
+                }
+            }
+            
+            if (isset($params['Status'])
                 && !in_array(strtolower($params['Status']), ['approved', 'success'])
             ) {
                 throw new PaymentException(__('Your payment failed.'));
             }
-        }
-        catch (PaymentException $e) {
-			$this->moduleConfig->createLog($e->getMessage(), 'Complete Callback Process Error:');
+        } catch (PaymentException $e) {
+            $this->moduleConfig->createLog($e->getMessage(), 'Complete Callback Process Error:');
             $this->messageManager->addErrorMessage($e->getMessage());
-			
-			$resultRedirect->setUrl(
-				$this->_url->getUrl('checkout/cart')
-				. (!empty($_GET['form_key']) ? '?form_key=' . $_GET['form_key'] : '')
-			);
-			
-			return $resultRedirect;
+            
+            $resultRedirect->setUrl(
+                $this->_url->getUrl('checkout/cart')
+                . (!empty($form_key) ? '?form_key=' . $form_key : '')
+            );
+            
+            return $resultRedirect;
         }
 
-		$resultRedirect->setUrl(
-			$this->_url->getUrl('checkout/onepage/success/')
-			. (!empty($_GET['form_key']) ? '?form_key=' . $_GET['form_key'] : '')
-		);
-		
+        $resultRedirect->setUrl(
+            $this->_url->getUrl('checkout/onepage/success/')
+            . (!empty($form_key) ? '?form_key=' . $form_key : '')
+        );
+        
         return $resultRedirect;
     }
 
@@ -200,9 +196,8 @@ class CompleteOld extends Action
                     'action' => $this,
                 ]
             );
-        }
-        catch (\Exception $exception) {
-			$this->moduleConfig->createLog($exception->getMessage(), 'Success Callback Response Exception: ');
+        } catch (\Exception $exception) {
+            $this->moduleConfig->createLog($exception->getMessage(), 'Success Callback Response Exception: ');
             
             $result
                 ->setData('error', true)
@@ -226,8 +221,8 @@ class CompleteOld extends Action
         if ((int)$this->checkoutSession->getQuoteId() === $quoteId) {
             return $quoteId;
         }
-		
-		$this->moduleConfig->createLog('Success error: Session has expired, order has been not placed.');
+        
+        $this->moduleConfig->createLog('Success error: Session has expired, order has been not placed.');
 
         throw new PaymentException(
             __('Session has expired, order has been not placed.')

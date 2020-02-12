@@ -4,9 +4,6 @@ namespace Safecharge\Safecharge\Lib\Http\Client;
 
 /**
  * Safecharge Safecharge curl http client library.
- *
- * @category Safecharge
- * @package  Safecharge_Safecharge
  */
 class Curl extends \Magento\Framework\HTTP\Client\Curl
 {

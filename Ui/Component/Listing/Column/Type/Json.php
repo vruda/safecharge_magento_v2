@@ -4,9 +4,6 @@ namespace Safecharge\Safecharge\Ui\Component\Listing\Column\Type;
 
 /**
  * Safecharge Safecharge column type data formatter.
- *
- * @category Safecharge
- * @package  Safecharge_Safecharge
  */
 class Json
 {

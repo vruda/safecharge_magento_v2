@@ -6,9 +6,6 @@ use Magento\Framework\Logger\Handler\Base;
 
 /**
  * Safecharge Safecharge logger handler model.
- *
- * @category Safecharge
- * @package  Safecharge_Safecharge
  */
 class Handler extends Base
 {

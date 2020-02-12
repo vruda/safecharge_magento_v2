@@ -11,9 +11,6 @@ use Magento\Framework\Api\Filter;
 
 /**
  * Safecharge Safecharge request log ui data provider.
- *
- * @category Safecharge
- * @package  Safecharge_Safecharge
  */
 class RequestLogDataProvider extends AbstractDataProvider
 {

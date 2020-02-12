@@ -11,9 +11,6 @@ use Safecharge\Safecharge\Model\ResponseInterface;
 
 /**
  * Safecharge Safecharge response factory model.
- *
- * @category Safecharge
- * @package  Safecharge_Safecharge
  */
 class Factory
 {
@@ -23,15 +20,24 @@ class Factory
      * @var array
      */
     private $invokableClasses = [
-        AbstractResponse::TOKEN_HANDLER => \Safecharge\Safecharge\Model\Response\Token::class,
-        AbstractResponse::PAYMENT_SETTLE_HANDLER => \Safecharge\Safecharge\Model\Response\Payment\Settle::class,
-        AbstractResponse::CREATE_USER_HANDLER => \Safecharge\Safecharge\Model\Response\CreateUser::class,
-        AbstractResponse::GET_USER_DETAILS_HANDLER => \Safecharge\Safecharge\Model\Response\GetUserDetails::class,
-        AbstractResponse::PAYMENT_REFUND_HANDLER => \Safecharge\Safecharge\Model\Response\Payment\Refund::class,
-        AbstractResponse::PAYMENT_VOID_HANDLER => \Safecharge\Safecharge\Model\Response\Payment\Cancel::class,
-        AbstractResponse::OPEN_ORDER_HANDLER => \Safecharge\Safecharge\Model\Response\OpenOrder::class,
-        AbstractResponse::PAYMENT_APM_HANDLER => \Safecharge\Safecharge\Model\Response\PaymentApm::class,
-        AbstractResponse::GET_MERCHANT_PAYMENT_METHODS_HANDLER => \Safecharge\Safecharge\Model\Response\GetMerchantPaymentMethods::class,
+        AbstractResponse::TOKEN_HANDLER
+            => \Safecharge\Safecharge\Model\Response\Token::class,
+        AbstractResponse::PAYMENT_SETTLE_HANDLER
+            => \Safecharge\Safecharge\Model\Response\Payment\Settle::class,
+        AbstractResponse::CREATE_USER_HANDLER
+            => \Safecharge\Safecharge\Model\Response\CreateUser::class,
+        AbstractResponse::GET_USER_DETAILS_HANDLER
+            => \Safecharge\Safecharge\Model\Response\GetUserDetails::class,
+        AbstractResponse::PAYMENT_REFUND_HANDLER
+            => \Safecharge\Safecharge\Model\Response\Payment\Refund::class,
+        AbstractResponse::PAYMENT_VOID_HANDLER
+            => \Safecharge\Safecharge\Model\Response\Payment\Cancel::class,
+        AbstractResponse::OPEN_ORDER_HANDLER
+            => \Safecharge\Safecharge\Model\Response\OpenOrder::class,
+        AbstractResponse::PAYMENT_APM_HANDLER
+            => \Safecharge\Safecharge\Model\Response\PaymentApm::class,
+        AbstractResponse::GET_MERCHANT_PAYMENT_METHODS_HANDLER
+            => \Safecharge\Safecharge\Model\Response\GetMerchantPaymentMethods::class,
     ];
 
     /**

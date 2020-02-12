@@ -7,9 +7,6 @@ use Magento\Framework\Exception\LocalizedException;
 
 /**
  * Safecharge Safecharge request log repository interface.
- *
- * @category Safecharge
- * @package  Safecharge_Safecharge
  */
 interface RequestLogRepositoryInterface
 {

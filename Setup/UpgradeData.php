@@ -10,9 +10,6 @@ use Magento\Sales\Model\Order;
 
 /**
  * Safecharge Safecharge upgrade data.
- *
- * @category Safecharge
- * @package  Safecharge_Safecharge
  */
 class UpgradeData implements UpgradeDataInterface
 {
@@ -71,13 +68,13 @@ class UpgradeData implements UpgradeDataInterface
                 ->setData('label', 'SC Auth')
                 ->save();
             $scAuth->assignState(Order::STATE_PROCESSING, true, true);
-			
+            
             $scProcessing = $this->orderStatusFactory->create()
                 ->setData('status', 'sc_processing')
                 ->setData('label', 'SC Processing')
                 ->save();
             $scProcessing->assignState(Order::STATE_PROCESSING, true, true);
-			
+            
             $scRefunded = $this->orderStatusFactory->create()
                 ->setData('status', 'sc_refunded')
                 ->setData('label', 'SC Refunded')

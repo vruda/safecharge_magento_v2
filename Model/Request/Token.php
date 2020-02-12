@@ -9,9 +9,6 @@ use Magento\Framework\Exception\PaymentException;
 
 /**
  * Safecharge Safecharge token request model.
- *
- * @category Safecharge
- * @package  Safecharge_Safecharge
  */
 class Token extends AbstractRequest implements RequestInterface
 {

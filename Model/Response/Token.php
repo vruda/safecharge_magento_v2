@@ -7,9 +7,6 @@ use Safecharge\Safecharge\Model\ResponseInterface;
 
 /**
  * Safecharge Safecharge token response model.
- *
- * @category Safecharge
- * @package  Safecharge_Safecharge
  */
 class Token extends AbstractResponse implements ResponseInterface
 {

@@ -15,9 +15,6 @@ use Magento\Framework\Stdlib\DateTime\DateTime;
 
 /**
  * Safecharge Safecharge request log model.
- *
- * @category Safecharge
- * @package  Safecharge_Safecharge
  */
 class RequestLog extends AbstractModel
 {

@@ -6,9 +6,6 @@ use Magento\Framework\Option\ArrayInterface;
 
 /**
  * Safecharge Safecharge mode source model.
- *
- * @category Safecharge
- * @package  Safecharge_Safecharge
  */
 class Mode implements ArrayInterface
 {
@@ -20,8 +17,8 @@ class Mode implements ArrayInterface
     public function toOptionArray()
     {
         return [
-            'live'		=> __('Live'),
-            'sandbox'	=> __('Sandbox'),
+            'live'      => __('Live'),
+            'sandbox'    => __('Sandbox'),
         ];
     }
 }

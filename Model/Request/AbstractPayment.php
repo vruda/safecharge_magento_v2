@@ -16,9 +16,6 @@ use Safecharge\Safecharge\Model\ResponseInterface;
 
 /**
  * Safecharge Safecharge abstract payment request model.
- *
- * @category Safecharge
- * @package  Safecharge_Safecharge
  */
 abstract class AbstractPayment extends AbstractRequest
 {
@@ -71,10 +68,10 @@ abstract class AbstractPayment extends AbstractRequest
             $responseFactory
         );
 
-        $this->requestFactory			= $requestFactory;
-        $this->paymentRequestFactory	= $paymentRequestFactory;
-        $this->orderPayment				= $orderPayment;
-        $this->amount					= $amount;
+        $this->requestFactory            = $requestFactory;
+        $this->paymentRequestFactory    = $paymentRequestFactory;
+        $this->orderPayment                = $orderPayment;
+        $this->amount                    = $amount;
     }
 
     /**

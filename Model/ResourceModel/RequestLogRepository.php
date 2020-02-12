@@ -9,9 +9,6 @@ use Magento\Framework\Event\ManagerInterface;
 
 /**
  * Safecharge Safecharge request log repository model.
- *
- * @category Safecharge
- * @package  Safecharge_Safecharge
  */
 class RequestLogRepository implements RequestLogRepositoryInterface
 {

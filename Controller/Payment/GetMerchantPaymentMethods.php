@@ -14,9 +14,6 @@ use Safecharge\Safecharge\Model\Request\Factory as RequestFactory;
 
 /**
  * Safecharge Safecharge GetMerchantPaymentMethods controller.
- *
- * @category Safecharge
- * @package  Safecharge_Safecharge
  */
 class GetMerchantPaymentMethods extends Action
 {
@@ -65,11 +62,11 @@ class GetMerchantPaymentMethods extends Action
     ) {
         parent::__construct($context);
 
-        $this->redirectUrlBuilder	= $redirectUrlBuilder;
-        $this->safechargeLogger		= $safechargeLogger;
-        $this->moduleConfig			= $moduleConfig;
-        $this->jsonResultFactory	= $jsonResultFactory;
-        $this->requestFactory		= $requestFactory;
+        $this->redirectUrlBuilder    = $redirectUrlBuilder;
+        $this->safechargeLogger        = $safechargeLogger;
+        $this->moduleConfig            = $moduleConfig;
+        $this->jsonResultFactory    = $jsonResultFactory;
+        $this->requestFactory        = $requestFactory;
     }
 
     /**
@@ -80,43 +77,42 @@ class GetMerchantPaymentMethods extends Action
         $result = $this->jsonResultFactory->create()->setHttpResponseCode(\Magento\Framework\Webapi\Response::HTTP_OK);
 
         if (!$this->moduleConfig->isActive()) {
-			$this->moduleConfig->createLog('Safecharge payments module is not active at the moment!');
+            $this->moduleConfig->createLog('Safecharge payments module is not active at the moment!');
             return $result->setData(['error_message' => __('Safecharge payments module is not active at the moment!')]);
         }
 
         try {
-			$countryCode	= $this->getRequest()->getParam('countryCode');
-			$grandTotal		= $this->getRequest()->getParam('grandTotal');
-			
+            $countryCode    = $this->getRequest()->getParam('countryCode');
+            $grandTotal        = $this->getRequest()->getParam('grandTotal');
+            
             $apmMethodsData = $this->getApmMethods($countryCode, $grandTotal);
-			
-//			$this->moduleConfig->createLog($apmMethodsData, 'execute $apmMethodsData: ');
-        }
-		catch (PaymentException $e) {
-			$this->moduleConfig->createLog('GetMerchantPaymentMethods Controller - Error: ' . $e->getMessage());
-			
-			return $result->setData([
-                "error"			=> 1,
-                "apmMethods"	=> [],
-                "message"		=> $e->getMessage()
+            
+//            $this->moduleConfig->createLog($apmMethodsData, 'execute $apmMethodsData: ');
+        } catch (PaymentException $e) {
+            $this->moduleConfig->createLog('GetMerchantPaymentMethods Controller - Error: ' . $e->getMessage());
+            
+            return $result->setData([
+                "error"            => 1,
+                "apmMethods"    => [],
+                "message"        => $e->getMessage()
             ]);
         }
 
         return $result->setData([
-            "error"			=> 0,
-            "apmMethods"	=> $apmMethodsData['apmMethods'],
-            "sessionToken"	=> $apmMethodsData['sessionToken'],
-            "message"		=> "Success"
+            "error"            => 0,
+            "apmMethods"    => $apmMethodsData['apmMethods'],
+            "sessionToken"    => $apmMethodsData['sessionToken'],
+            "message"        => "Success"
         ]);
     }
 
     /**
      * Return AMP Methods.
      * We pass both parameters from JS via Ajax request
-	 * 
-	 * @param string $countryCode
-	 * @param string $grandTotal
-	 * 
+     *
+     * @param string $countryCode
+     * @param string $grandTotal
+     *
      * @return array
      */
     private function getApmMethods($countryCode = null, $grandTotal = null)
@@ -125,18 +121,17 @@ class GetMerchantPaymentMethods extends Action
 
         try {
             $apmMethods = $request
-				->setCountryCode($countryCode)
-				->process();
-        }
-		catch (PaymentException $e) {
+                ->setCountryCode($countryCode)
+                ->process();
+        } catch (PaymentException $e) {
             return [];
         }
-		
-//		$this->moduleConfig->createLog($apmMethods->getScPaymentMethods(), 'getScPaymentMethods:');
-		
+        
+//        $this->moduleConfig->createLog($apmMethods->getScPaymentMethods(), 'getScPaymentMethods:');
+        
         return [
-			'apmMethods'	=> $apmMethods->getScPaymentMethods(),
-			'sessionToken'	=> $apmMethods->getSessionToken(),
-		];
+            'apmMethods'    => $apmMethods->getScPaymentMethods(),
+            'sessionToken'    => $apmMethods->getSessionToken(),
+        ];
     }
 }

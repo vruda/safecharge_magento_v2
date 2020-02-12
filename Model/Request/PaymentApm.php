@@ -2,7 +2,7 @@
 
 namespace Safecharge\Safecharge\Model\Request;
 
-use Magento\Checkout\Model\Session\Proxy as CheckoutSession;
+use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Quote\Model\Quote;
 use Safecharge\Safecharge\Lib\Http\Client\Curl;
 use Safecharge\Safecharge\Model\AbstractRequest;
@@ -16,9 +16,6 @@ use Safecharge\Safecharge\Model\Response\Factory as ResponseFactory;
 
 /**
  * Safecharge Safecharge paymentAPM request model.
- *
- * @category Safecharge
- * @package  Safecharge_Safecharge
  */
 class PaymentApm extends AbstractRequest implements RequestInterface
 {
@@ -27,7 +24,7 @@ class PaymentApm extends AbstractRequest implements RequestInterface
      * @var string|null
      */
     protected $paymentMethod;
-	
+    
     /**
      * @var array|null
      */
@@ -68,23 +65,23 @@ class PaymentApm extends AbstractRequest implements RequestInterface
             $responseFactory
         );
 
-        $this->requestFactory	= $requestFactory;
-        $this->checkoutSession	= $checkoutSession;
+        $this->requestFactory    = $requestFactory;
+        $this->checkoutSession    = $checkoutSession;
     }
 
     /**
      * @param string $paymentMethod
-	 * @return $this
+     * @return $this
      */
     public function setPaymentMethod($paymentMethod)
     {
         $this->paymentMethod = trim((string)$paymentMethod);
         return $this;
     }
-	
+    
     /**
      * @param array $paymentMethodFields
-	 * @return $this
+     * @return $this
      */
     public function setPaymentMethodFields($paymentMethodFields)
     {
@@ -99,7 +96,7 @@ class PaymentApm extends AbstractRequest implements RequestInterface
     {
         return $this->paymentMethod;
     }
-	
+    
     /**
      * @return string
      */
@@ -141,9 +138,9 @@ class PaymentApm extends AbstractRequest implements RequestInterface
 
         $quotePayment = $quote->getPayment();
 
-		$this->config->createLog('requestFactory GET_SESSION_TOKEN_METHOD - PaymentApm.php');
+        $this->config->createLog('requestFactory GET_SESSION_TOKEN_METHOD - PaymentApm.php');
         
-		$tokenRequest = $this->requestFactory
+        $tokenRequest = $this->requestFactory
             ->create(AbstractRequest::GET_SESSION_TOKEN_METHOD);
         $tokenResponse = $tokenRequest->process();
 
@@ -153,28 +150,31 @@ class PaymentApm extends AbstractRequest implements RequestInterface
             $tokenResponse->getToken()
         );
 
-        $reservedOrderId = $quotePayment->getAdditionalInformation(Payment::TRANSACTION_ORDER_ID) ?: $this->config->getReservedOrderId();
+        $reservedOrderId = $quotePayment->getAdditionalInformation(Payment::TRANSACTION_ORDER_ID)
+            ?: $this->config->getReservedOrderId();
 
         $params = array_merge_recursive(
             $this->getQuoteData($quote),
             [
-                'sessionToken'			=> $tokenResponse->getToken(),
-                'amount'				=> (float)$quote->getGrandTotal(),
-                'merchant_unique_id'	=> $reservedOrderId,
-                'urlDetails'			=> [
-                    'successUrl'		=> $this->config->getCallbackSuccessUrl(),
-                    'failureUrl'		=> $this->config->getCallbackErrorUrl(),
-                    'pendingUrl'		=> $this->config->getCallbackPendingUrl(),
-                    'backUrl'			=> $this->config->getBackUrl(),
-                    'notificationUrl'	=> $this->config->getCallbackDmnUrl($reservedOrderId),
+                'sessionToken'            => $tokenResponse->getToken(),
+                'amount'                => (float)$quote->getGrandTotal(),
+                'merchant_unique_id'    => $reservedOrderId,
+                'urlDetails'            => [
+                    'successUrl'        => $this->config->getCallbackSuccessUrl(),
+                    'failureUrl'        => $this->config->getCallbackErrorUrl(),
+                    'pendingUrl'        => $this->config->getCallbackPendingUrl(),
+                    'backUrl'            => $this->config->getBackUrl(),
+                    'notificationUrl'    => $this->config->getCallbackDmnUrl($reservedOrderId),
                 ],
-                'paymentMethod'			=> $this->getPaymentMethod(),
+                'paymentMethod'            => $this->getPaymentMethod(),
             ]
         );
-		
-		if( !is_null($pmFields = $this->getPaymentMethodFields()) ) {
-			$params['userAccountDetails'] = $pmFields;
-		}
+        
+        $pmFields = $this->getPaymentMethodFields();
+        
+        if (null !== $pmFields) {
+            $params['userAccountDetails'] = $pmFields;
+        }
 
         $params = array_merge_recursive($params, parent::getParams());
 

@@ -6,9 +6,6 @@ use Magento\Framework\Model\ResourceModel\Db\AbstractDb;
 
 /**
  * Safecharge Safecharge request log resource model.
- *
- * @category Safecharge
- * @package  Safecharge_Safecharge
  */
 class RequestLog extends AbstractDb
 {

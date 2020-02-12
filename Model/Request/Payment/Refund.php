@@ -21,9 +21,6 @@ use Safecharge\Safecharge\Model\Response\Factory as ResponseFactory;
 
 /**
  * Safecharge Safecharge refund payment request model.
- *
- * @category Safecharge
- * @package  Safecharge_Safecharge
  */
 class Refund extends AbstractPayment implements RequestInterface
 {
@@ -99,13 +96,13 @@ class Refund extends AbstractPayment implements RequestInterface
      */
     protected function getParams()
     {
-        $orderPayment	= $this->orderPayment;
-        $order			= $orderPayment->getOrder();
-        $transactionId	= $orderPayment->getRefundTransactionId();
-		
+        $orderPayment    = $this->orderPayment;
+        $order            = $orderPayment->getOrder();
+        $transactionId    = $orderPayment->getRefundTransactionId();
+        
         if ($transactionId === null) {
-			$msg = __('Invoice transaction id has been not provided.');
-			$this->config->createLog($msg);
+            $msg = __('Invoice transaction id has been not provided.');
+            $this->config->createLog($msg);
             throw new PaymentException($msg);
         }
 
@@ -116,41 +113,39 @@ class Refund extends AbstractPayment implements RequestInterface
             $order->getId()
         );
 
-        $authCode			= null;
-		$transactionDetails	= $transaction->getAdditionalInformation(OrderTransaction::RAW_DETAILS);
-		
-		if($transactionDetails) {
-			if(!empty($transactionDetails['authCode'])) {
-				$authCode = $transactionDetails['authCode'];
-			}
-			elseif(!empty($transactionDetails['AuthCode'])) {
+        $authCode            = null;
+        $transactionDetails    = $transaction->getAdditionalInformation(OrderTransaction::RAW_DETAILS);
+        
+        if ($transactionDetails) {
+            if (!empty($transactionDetails['authCode'])) {
+                $authCode = $transactionDetails['authCode'];
+            } elseif (!empty($transactionDetails['AuthCode'])) {
                 $authCode = $transactionDetails['AuthCode'];
-            }
-			else {
+            } else {
                 $authCode = $orderPayment->getAdditionalInformation(Payment::TRANSACTION_AUTH_CODE_KEY);
             }
-		}
-		
-		$payment_method = $orderPayment->getAdditionalInformation(Payment::TRANSACTION_EXTERNAL_PAYMENT_METHOD);
+        }
+        
+        $payment_method = $orderPayment->getAdditionalInformation(Payment::TRANSACTION_EXTERNAL_PAYMENT_METHOD);
 
         if ($authCode === null && Payment::APM_METHOD_CC == $payment_method) {
-			$msg = __('Transaction does not contain authorization code.');
-			$this->config->createLog($msg);
+            $msg = __('Transaction does not contain authorization code.');
+            $this->config->createLog($msg);
             throw new PaymentException($msg);
         }
 
         $params = [
-            'clientUniqueId'		=> $order->getIncrementId(),
-            'currency'				=> $order->getBaseCurrencyCode(),
-            'amount'				=> (float)$this->amount,
-            'relatedTransactionId'	=> $transactionId,
-            'authCode'				=> is_null($authCode) ? '' : $authCode,
-            'comment'				=> '',
-            'merchant_unique_id'	=> $order->getIncrementId(),
-            'urlDetails'			=> [
+            'clientUniqueId'        => $order->getIncrementId(),
+            'currency'              => $order->getBaseCurrencyCode(),
+            'amount'                => (float)$this->amount,
+            'relatedTransactionId'    => $transactionId,
+            'authCode'              => is_null($authCode) ? '' : $authCode,
+            'comment'               => '',
+            'merchant_unique_id'    => $order->getIncrementId(),
+            'urlDetails'            => [
                 'notificationUrl' => $this->config->getCallbackDmnUrl($order->getIncrementId(), $order->getStoreId()),
             ],
-			'sourceApplication'		=> $this->config->getSourceApplication(),
+            'sourceApplication'        => $this->config->getSourceApplication(),
         ];
 
         $params = array_merge_recursive($params, parent::getParams());

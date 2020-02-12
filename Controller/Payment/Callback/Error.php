@@ -15,9 +15,6 @@ use Magento\Framework\App\RequestInterface;
 
 /**
  * Safecharge Safecharge payment place controller.
- *
- * @category Safecharge
- * @package  Safecharge_Safecharge
  */
 class Error extends Action implements CsrfAwareActionInterface
 {
@@ -48,12 +45,12 @@ class Error extends Action implements CsrfAwareActionInterface
         $this->safechargeLogger = $safechargeLogger;
         $this->moduleConfig = $moduleConfig;
     }
-	
-	/** 
+    
+    /**
      * @inheritDoc
      */
     public function createCsrfValidationException(
-        RequestInterface $request 
+        RequestInterface $request
     ): ?InvalidRequestException {
         return null;
     }
@@ -85,12 +82,14 @@ class Error extends Action implements CsrfAwareActionInterface
         $this->messageManager->addErrorMessage(
             __('Your payment failed.')
         );
-
-        $resultRedirect = $this->resultFactory->create(ResultFactory::TYPE_REDIRECT);
+        
+        $form_key        = filter_input(INPUT_GET, 'form_key');
+        $resultRedirect    = $this->resultFactory->create(ResultFactory::TYPE_REDIRECT);
+        
         $resultRedirect->setUrl(
-			$this->_url->getUrl('checkout/cart')
-			. (!empty($_GET['form_key']) ? '?form_key=' . $_GET['form_key'] : '')
-		);
+            $this->_url->getUrl('checkout/cart')
+            . (!empty($form_key) ? '?form_key=' . $form_key : '')
+        );
 
         return $resultRedirect;
     }

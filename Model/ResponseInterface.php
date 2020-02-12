@@ -4,9 +4,6 @@ namespace Safecharge\Safecharge\Model;
 
 /**
  * Safecharge Safecharge response interface.
- *
- * @category Safecharge
- * @package  Safecharge_Safecharge
  */
 interface ResponseInterface
 {

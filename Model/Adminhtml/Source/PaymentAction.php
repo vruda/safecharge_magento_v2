@@ -7,9 +7,6 @@ use Magento\Framework\Option\ArrayInterface;
 
 /**
  * Safecharge Safecharge payment action source model.
- *
- * @category Safecharge
- * @package  Safecharge_Safecharge
  */
 class PaymentAction implements ArrayInterface
 {
@@ -21,8 +18,8 @@ class PaymentAction implements ArrayInterface
     public function toOptionArray()
     {
         return [
-			'Sale' => __('Authorize and Capture'),
-			'Auth' => __('Authorize')
+            'Sale' => __('Authorize and Capture'),
+            'Auth' => __('Authorize')
         ];
     }
 }

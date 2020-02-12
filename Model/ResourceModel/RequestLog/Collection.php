@@ -6,9 +6,6 @@ use Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection;
 
 /**
  * Safecharge Safecharge request log collection model.
- *
- * @category Safecharge
- * @package  Safecharge_Safecharge
  */
 class Collection extends AbstractCollection
 {

@@ -12,9 +12,6 @@ use Safecharge\Safecharge\Model\Response\Factory as ResponseFactory;
 
 /**
  * Safecharge Safecharge abstract request model.
- *
- * @category Safecharge
- * @package  Safecharge_Safecharge
  */
 abstract class AbstractRequest extends AbstractApi
 {
@@ -164,12 +161,12 @@ abstract class AbstractRequest extends AbstractApi
         $this->initRequest();
 
         $params = [
-            'merchantId'		=> $this->config->getMerchantId(),
-            'merchantSiteId'	=> $this->config->getMerchantSiteId(),
-            'clientRequestId'	=> (string)$this->getRequestId(),
-            'timeStamp'			=> date('YmdHis'),
-			'webMasterId'		=> $this->config->getSourcePlatformField(),
-            'encoding'			=> 'UTF-8',
+            'merchantId'        => $this->config->getMerchantId(),
+            'merchantSiteId'    => $this->config->getMerchantSiteId(),
+            'clientRequestId'    => (string)$this->getRequestId(),
+            'timeStamp'            => date('YmdHis'),
+            'webMasterId'        => $this->config->getSourcePlatformField(),
+            'encoding'            => 'UTF-8',
         ];
 
         return $params;
@@ -237,15 +234,15 @@ abstract class AbstractRequest extends AbstractApi
      */
     protected function sendRequest()
     {
-        $endpoint	= $this->getEndpoint();
-        $headers	= $this->getHeaders();
-        $params		= $this->prepareParams();
+        $endpoint    = $this->getEndpoint();
+        $headers    = $this->getHeaders();
+        $params        = $this->prepareParams();
 
         $this->curl->setHeaders($headers);
 
-		$this->config->createLog($endpoint,	'Request Endpoint:');
-		$this->config->createLog($params,	'Request params:');
-		
+        $this->config->createLog($endpoint, 'Request Endpoint:');
+        $this->config->createLog($params, 'Request params:');
+        
         $this->curl->post($endpoint, $params);
 
         return $this;
@@ -304,23 +301,23 @@ abstract class AbstractRequest extends AbstractApi
         ];
 
         if ($billing !== null) {
-			$state = $billing->getRegionCode();
-			if(strlen($state) > 5) {
-				$state = substr($state, 0, 2);
-			}
-			
+            $state = $billing->getRegionCode();
+            if (strlen($state) > 5) {
+                $state = substr($state, 0, 2);
+            }
+            
             $orderData['billingAddress'] = [
                 'firstName' => $billing->getFirstname(),
-                'lastName'	=> $billing->getLastname(),
-                'address'	=> is_array($billing->getStreet())
+                'lastName'    => $billing->getLastname(),
+                'address'    => is_array($billing->getStreet())
                     ? implode(' ', $billing->getStreet()) : '',
-                'cell'		=> '',
-                'phone'		=> $billing->getTelephone(),
-                'zip'		=> $billing->getPostcode(),
-                'city'		=> $billing->getCity(),
-                'country'	=> $billing->getCountryId(),
-                'state'		=> $state,
-                'email'		=> $billing->getEmail(),
+                'cell'        => '',
+                'phone'        => $billing->getTelephone(),
+                'zip'        => $billing->getPostcode(),
+                'city'        => $billing->getCity(),
+                'country'    => $billing->getCountryId(),
+                'state'        => $state,
+                'email'        => $billing->getEmail(),
             ];
             $orderData = array_merge($orderData, $orderData['billingAddress']);
         }
@@ -380,23 +377,23 @@ abstract class AbstractRequest extends AbstractApi
         ];
 
         if ($billing !== null) {
-			$state = $billing->getRegionCode();
-			if(strlen($state) > 5) {
-				$state = substr($state, 0, 2);
-			}
-			
+            $state = $billing->getRegionCode();
+            if (strlen($state) > 5) {
+                $state = substr($state, 0, 2);
+            }
+            
             $quoteData['billingAddress'] = [
                 'firstName' => $billing->getFirstname(),
-                'lastName'	=> $billing->getLastname(),
-                'address'	=> is_array($billing->getStreet())
+                'lastName'    => $billing->getLastname(),
+                'address'    => is_array($billing->getStreet())
                     ? implode(' ', $billing->getStreet()) : '',
-                'cell'		=> '',
-                'phone'		=> $billing->getTelephone(),
-                'zip'		=> $billing->getPostcode(),
-                'city'		=> $billing->getCity(),
-                'country'	=> $billing->getCountryId(),
-                'state'		=> $state,
-                'email'		=> $billing->getEmail(),
+                'cell'        => '',
+                'phone'        => $billing->getTelephone(),
+                'zip'        => $billing->getPostcode(),
+                'city'        => $billing->getCity(),
+                'country'    => $billing->getCountryId(),
+                'state'        => $state,
+                'email'        => $billing->getEmail(),
             ];
             $quoteData = array_merge($quoteData, $quoteData['billingAddress']);
         }

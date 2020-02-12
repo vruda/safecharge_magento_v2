@@ -7,9 +7,6 @@ use Safecharge\Safecharge\Model\ResponseInterface;
 
 /**
  * Safecharge Safecharge payment void response model.
- *
- * @category Safecharge
- * @package  Safecharge_Safecharge
  */
 class Cancel extends AbstractPayment implements ResponseInterface
 {
