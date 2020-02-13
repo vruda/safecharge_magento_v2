@@ -442,7 +442,9 @@ class DmnOld extends Action
                     $transactionType        = Transaction::TYPE_REFUND;
                     $sc_transaction_type    = Payment::SC_REFUNDED;
                     
-                    if (!empty($params['totalAmount'])  && 'cc_card' != $params["payment_method"]) {
+                    if ((!empty($params['totalAmount']) && 'cc_card' == $params["payment_method"])
+                        || false !== strpos($params["merchant_unique_id"], 'gwp')
+                    ) {
                         $refund_msg = '<br/>The Refunded amount is <b>'
                             . $params['totalAmount'] . ' ' . $params['currency'] . '</b>.';
                     }
