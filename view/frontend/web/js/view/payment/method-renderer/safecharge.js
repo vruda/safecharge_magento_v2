@@ -114,6 +114,23 @@ define(
                 return window.checkoutConfig.payment[self.getCode()].getMerchantPaymentMethodsUrl;
             },
 
+			/*
+			openOrder: function() {
+				console.log('new OpenOrder')
+				
+				$.ajax({
+                    dataType: "json",
+                    url: window.checkoutConfig.payment[self.getCode()].scOpenOrderUrl,
+                    data: {},
+                    cache: false,
+                    showLoader: true
+                })
+				.done(function(resp) {
+					console.log(resp);
+				});
+			},
+			 */
+
             getApmMethods: function() {
                 if (quote.billingAddress() && self.countryId() === quote.billingAddress().countryId) {
                     return;
@@ -201,22 +218,32 @@ define(
                             }
                             else if(resp.result == 'DECLINED') {
                                 $('.loading-mask').css('display', 'none');
-                                alert($.mage.__('Your Payment was DECLINED. Please try another payment method!'));
+                                
+								if(!alert($.mage.__('Your Payment was DECLINED. Please try another payment method!'))) {
+									window.location.reload();
+								}
                             }
                             else {
                                 $('.loading-mask').css('display', 'none');
                                 
                                 if('undefined' != resp.errorDescription && '' != resp.errorDescription) {
-                                    alert($.mage.__(resp.errorDescription));
+                                    if(!alert($.mage.__(resp.errorDescription))) {
+										window.location.reload();
+									}
                                 }
                                 else {
-                                    alert($.mage.__('Error with your Payment. Please try again later!'));
+                                    if(!alert($.mage.__('Error with your Payment. Please try again later!'))) {
+										window.location.reload();
+									}
                                 }
                             }
                         }
                         else {
                             $('.loading-mask').css('display', 'none');
-                            alert($.mage.__('Unexpected error, please try again later!'));
+                            
+							if(!alert($.mage.__('Unexpected error, please try again later!'))) {
+								window.location.reload();
+							}
                         }
                     });
                 }

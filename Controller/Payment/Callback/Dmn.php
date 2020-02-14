@@ -167,6 +167,7 @@ class Dmn extends Action implements CsrfAwareActionInterface
     {
         if (!$this->moduleConfig->isActive()) {
             $this->echo_result('DMN Error - SafeCharge payment module is not active!');
+            return;
         }
         
         try {
@@ -182,10 +183,12 @@ class Dmn extends Action implements CsrfAwareActionInterface
             
             if (empty($params['transactionType'])) {
                 $this->echo_result('DMN error - missing Transaction Type.');
+                return;
             }
             
             if (empty($params['TransactionID'])) {
                 $this->echo_result('DMN error - missing Transaction ID.');
+                return;
             }
 
             if (!empty($params["order"])) {
@@ -197,6 +200,7 @@ class Dmn extends Action implements CsrfAwareActionInterface
             } else {
                 $this->moduleConfig->createLog('DMN error - no order id parameter.');
                 $this->echo_result('DMN error - no order id parameter.');
+                return;
             }
 
             $tryouts = 0;
@@ -219,8 +223,8 @@ class Dmn extends Action implements CsrfAwareActionInterface
                 $result = $this->placeOrder();
                 
                 if ($result->getSuccess() !== true) {
-                    $this->moduleConfig->createLog($result->getErrorMessage(), 'DMN Callback error - place order error:');
                     $this->echo_result('DMN Callback error - place order error:' . $result->getErrorMessage());
+                    return;
                 }
                 
                 $order = $this->orderFactory->create()->loadByIncrementId($orderIncrementId);
@@ -228,6 +232,11 @@ class Dmn extends Action implements CsrfAwareActionInterface
                 $this->moduleConfig->createLog('An Order with ID '. $orderIncrementId .' was created in the DMN page.');
             }
             # try to create the order END
+            
+            if (empty($order)) {
+                $this->echo_result('DMN Callback error - there is no Order and the code did not success to made it.');
+                return;
+            }
             
             $this->moduleConfig->createLog('DMN try ' . $tryouts . ', there IS order.');
             $this->moduleConfig->createLog($status, 'DMN with status:');
@@ -249,6 +258,7 @@ class Dmn extends Action implements CsrfAwareActionInterface
                 
                 $this->moduleConfig->createLog($msg);
                 $this->echo_result($msg);
+                return;
             }
 
             $orderPayment->setAdditionalInformation(
@@ -503,10 +513,12 @@ class Dmn extends Action implements CsrfAwareActionInterface
 
             $this->moduleConfig->createLog($e->getMessage() . "\n\r" . $e->getTraceAsString(), 'DMN Excception:');
             $this->echo_result('Error: ' . $e->getMessage());
+            return;
         }
 
         $this->moduleConfig->createLog('DMN process end for order #' . $orderIncrementId);
         $this->echo_result('DMN with status '. $status .' process completed.');
+        return;
     }
     
     /**
@@ -557,17 +569,9 @@ class Dmn extends Action implements CsrfAwareActionInterface
             );
         } catch (\Exception $exception) {
             $this->moduleConfig->createLog($exception->getMessage(), 'DMN placeOrder Exception: ');
-            
-            $result
-                ->setData('error', true)
-                ->setData(
-                    'error_message',
-                    __('An error occurred on the server. Please try to place the order again.')
-                );
+            $result->setData('error', true);
         }
         
-        $this->moduleConfig->createLog($result, 'DMN placeOrder result: ');
-
         return $result;
     }
     

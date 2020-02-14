@@ -68,16 +68,6 @@ class OpenOrder extends AbstractRequest implements RequestInterface
     }
 
     /**
-     * {@inheritdoc}
-     *
-     * @return string
-     */
-    protected function getResponseHandlerType()
-    {
-        return AbstractResponse::OPEN_ORDER_HANDLER;
-    }
-
-    /**
      * @param array $orderData
      *
      * @return OpenOrder
@@ -86,6 +76,30 @@ class OpenOrder extends AbstractRequest implements RequestInterface
     {
         $this->orderData = $orderData;
         return $this;
+    }
+    
+    /**
+     * @return AbstractResponse
+     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws PaymentException
+     */
+    public function process()
+    {
+        $this->sendRequest();
+
+        return $this
+            ->getResponseHandler()
+            ->process();
+    }
+    
+    /**
+     * {@inheritdoc}
+     *
+     * @return string
+     */
+    protected function getResponseHandlerType()
+    {
+        return AbstractResponse::OPEN_ORDER_HANDLER;
     }
 
     /**
@@ -100,8 +114,6 @@ class OpenOrder extends AbstractRequest implements RequestInterface
             throw new PaymentException(__('There is no Cart data.'));
         }
         
-        $this->config->createLog(isset($_COOKIE) ? $_COOKIE : [], '$_COOKIE:');
-
         $billing_country = $this->config->getQuoteCountryCode();
         if (is_null($billing_country)) {
             $billing_country = $this->config->getDefaultCountry();
