@@ -14,7 +14,7 @@ define(
         'jquery.redirect',
         'ko',
         'Magento_Checkout/js/model/quote',
-        'mage/translate',
+        'mage/translate'
     ],
     function(
         $,
@@ -25,7 +25,7 @@ define(
         jqueryRedirect,
         ko,
         quote,
-        mage,
+        mage
     ) {
         'use strict';
 
@@ -36,7 +36,7 @@ define(
         var card			= null;
 		var scData			= {};
 		var isCardAttached	= false;
-		var	codeName		= 'safecharge';
+		var scGetAPMsAgain	= false;
 		
         return Component.extend({
             defaults: {
@@ -114,41 +114,30 @@ define(
                 return window.checkoutConfig.payment[self.getCode()].getMerchantPaymentMethodsUrl;
             },
 
-			/*
-			openOrder: function() {
-				console.log('new OpenOrder')
-				
-				$.ajax({
-                    dataType: "json",
-                    url: window.checkoutConfig.payment[self.getCode()].scOpenOrderUrl,
-                    data: {},
-                    cache: false,
-                    showLoader: true
-                })
-				.done(function(resp) {
-					console.log(resp);
-				});
-			},
-			 */
-
             getApmMethods: function() {
-                if (quote.billingAddress() && self.countryId() === quote.billingAddress().countryId) {
-                    return;
-                }
-                else if (quote.billingAddress()) {
-                    self.countryId(quote.billingAddress().countryId);
-                }
-                else if ($('input[name="billing-address-same-as-shipping"]:checked').length && quote.shippingAddress()) {
-                    if (self.countryId() === quote.shippingAddress().countryId) {
-                        return;
-                    }
-                    else {
-                        self.countryId(quote.shippingAddress().countryId);
-                    }
-                }
-                else {
-                    return;
-                }
+				if(!scGetAPMsAgain) {
+					if (quote.billingAddress() && self.countryId() === quote.billingAddress().countryId) {
+						return;
+					}
+					else if (quote.billingAddress()) {
+						self.countryId(quote.billingAddress().countryId);
+					}
+					else if ($('input[name="billing-address-same-as-shipping"]:checked').length && quote.shippingAddress()) {
+						if (self.countryId() === quote.shippingAddress().countryId) {
+							return;
+						}
+						else {
+							self.countryId(quote.shippingAddress().countryId);
+						}
+					}
+					else {
+						return;
+					}
+				}
+				else { // clean card and container
+					card = null;
+					$('#card-field-placeholder').html('');
+				}
                 
                 $.ajax({
                     dataType: "json",
@@ -183,11 +172,15 @@ define(
                         console.error(res);
 						self.isPlaceOrderActionAllowed(false);
                     }
+					
+					$('.loading-mask').css('display', 'none');
                 })
                 .fail(function(e) {
-                    console.error(e);
-				self.isPlaceOrderActionAllowed(false);
+                    console.error(e.responseText);
+					self.isPlaceOrderActionAllowed(false);
                 });
+				
+				scGetAPMsAgain = false;
             },
 
             placeOrder: function(data, event) {
@@ -217,32 +210,30 @@ define(
                                 self.continueWithOrder(resp.transactionId);
                             }
                             else if(resp.result == 'DECLINED') {
-                                $('.loading-mask').css('display', 'none');
-                                
 								if(!alert($.mage.__('Your Payment was DECLINED. Please try another payment method!'))) {
-									window.location.reload();
+									scGetAPMsAgain = true;
+									self.getApmMethods();
 								}
                             }
                             else {
-                                $('.loading-mask').css('display', 'none');
-                                
                                 if('undefined' != resp.errorDescription && '' != resp.errorDescription) {
                                     if(!alert($.mage.__(resp.errorDescription))) {
-										window.location.reload();
+										scGetAPMsAgain = true;
+										self.getApmMethods();
 									}
                                 }
                                 else {
                                     if(!alert($.mage.__('Error with your Payment. Please try again later!'))) {
-										window.location.reload();
+										scGetAPMsAgain = true;
+										self.getApmMethods();
 									}
                                 }
                             }
                         }
                         else {
-                            $('.loading-mask').css('display', 'none');
-                            
 							if(!alert($.mage.__('Unexpected error, please try again later!'))) {
-								window.location.reload();
+								scGetAPMsAgain = true;
+								self.getApmMethods();
 							}
                         }
                     });

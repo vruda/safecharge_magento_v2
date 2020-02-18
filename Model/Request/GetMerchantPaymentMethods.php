@@ -118,9 +118,9 @@ class GetMerchantPaymentMethods extends AbstractRequest implements RequestInterf
      */
     protected function getParams()
     {
-        $country_code    = $this->getCountryCode() ?: $this->config->getQuoteCountryCode();
-        $tokenRequest    = $this->requestFactory->create(AbstractRequest::OPEN_ORDER_METHOD);
-        $tokenResponse    = $tokenRequest->process();
+        $country_code   = $this->getCountryCode() ?: $this->config->getQuoteCountryCode();
+        $tokenRequest   = $this->requestFactory->create(AbstractRequest::OPEN_ORDER_METHOD);
+        $tokenResponse	= $tokenRequest->process();
         
         if (empty($country_code)) {
             try {
