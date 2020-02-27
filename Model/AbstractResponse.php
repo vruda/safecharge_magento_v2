@@ -89,14 +89,6 @@ abstract class AbstractResponse extends AbstractApi
         
         $this->config->createLog($resp_data['Body'], 'Response data:');
 
-//        $this->safechargeLogger->updateRequest(
-//            $this->requestId,
-//            [
-//                'response'    => $resp_data,
-//                'status'    => $requestStatus === true ? self::STATUS_SUCCESS : self::STATUS_FAILED,
-//            ]
-//        );
-
         if ($requestStatus === false) {
             throw new PaymentException($this->getErrorMessage(
                 !empty($resp_data['Body']['reason']) ? $resp_data['Body']['reason'] : ''

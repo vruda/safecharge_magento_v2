@@ -43,23 +43,6 @@ class ErrorOld extends Action
     }
     
     /**
-     * @inheritDoc
-     */
-    public function createCsrfValidationException(
-        RequestInterface $request
-    ): ?InvalidRequestException {
-        return null;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function validateForCsrf(RequestInterface $request): ?bool
-    {
-        return true;
-    }
-
-    /**
      * @return ResultInterface
      * @throws \InvalidArgumentException
      * @throws \Exception
@@ -68,13 +51,7 @@ class ErrorOld extends Action
     {
         $params = $this->getRequest()->getParams();
 
-        if ($this->moduleConfig->isDebugEnabled() === true) {
-            $this->safechargeLogger->debug(
-                'Error Callback Response: '
-                . var_export($params, true)
-            );
-        }
-
+		$this->moduleConfig->createLog($params,  'Error Callback Response: ');
         $this->messageManager->addErrorMessage(
             __('Your payment failed.')
         );

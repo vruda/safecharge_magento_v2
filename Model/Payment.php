@@ -34,17 +34,7 @@ class Payment extends Cc implements TransparentInterface
      * Method code const.
      */
     const METHOD_CODE = 'safecharge';
-
-    /**
-     * Method modes.
-     *
-     * @deprecated since 2.0.0
-     */
     const MODE_LIVE     = 'live';
-    /**
-     * @deprecated since 2.0.0
-     */
-    const MODE_SANDBOX  = 'sandbox';
 
     /**
      * Additional information const.
@@ -258,7 +248,6 @@ class Payment extends Cc implements TransparentInterface
         $this->paymentTokenManagement = $paymentTokenManagement;
         $this->customerSession = $customerSession;
         $this->moduleConfig = $moduleConfig;
-//        $this->privateDataKeysProvider = $privateDataKeysProvider;
         $this->checkoutSession = $checkoutSession;
     }
 

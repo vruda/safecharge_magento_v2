@@ -75,13 +75,8 @@ class Update extends Action
     {
         $params = $this->getRequest()->getParams();
 
-        if ($this->moduleConfig->isDebugEnabled() === true) {
-            $this->safechargeLogger->debug(
-                'Redirect Update Response: '
-                . json_encode($params)
-            );
-        }
-
+		$this->moduleConfig->createLog($params, 'Redirect Update Response: ');
+		
         $orderId = $this->getRequest()->getParam('order');
 
         /** @var Order $order */
@@ -110,8 +105,7 @@ class Update extends Action
         } catch (PaymentException $e) {
             $this->messageManager->addErrorMessage(
                 __(
-                    'Order has been placed but unfortunately payment has been not '
-                    . 'authenticated properly. Details: "%1".',
+                    'Order has been placed but unfortunately payment has been not authenticated properly. Details: "%1".',
                     $e->getMessage()
                 )
             );

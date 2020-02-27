@@ -445,16 +445,6 @@ class Config
     {
         $quoteId = $this->checkoutSession->getQuoteId();
         
-//        $this->createLog(
-//            $this->urlBuilder->getUrl(
-//                    'safecharge/payment/callback_complete',
-//                    ['quote' => $quoteId]
-//                )
-//                . '?form_key=' . $this->formKey->getFormKey(),
-//            'success url:');
-//
-//        return 'https://srv-aws-magento.sccdev-qa.com/magentover2';
-        
         if ($this->versionNum >= 220) {
             return $this->urlBuilder->getUrl(
                 'safecharge/payment/callback_complete',

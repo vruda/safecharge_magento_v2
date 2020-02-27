@@ -74,7 +74,7 @@ class Factory
         if (!$model instanceof RequestInterface) {
             throw new LocalizedException(
                 __(
-                    '%1 doesn\'t implement \Safecharge\Safecharge\Mode\RequestInterface',
+                    "%1 doesn't implement \Safecharge\Safecharge\Mode\RequestInterface",
                     $className
                 )
             );

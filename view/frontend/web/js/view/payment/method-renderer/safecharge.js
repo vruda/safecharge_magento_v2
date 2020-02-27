@@ -347,7 +347,10 @@ define(
 
                 // prepare fields
                 var fields = sfc.fields({
-                    locale: checkoutConfig.payment[self.getCode()].locale
+                    locale: checkoutConfig.payment[self.getCode()].locale,
+					fonts : [{
+						cssUrl: 'https://fonts.googleapis.com/css?family=Nunito+Sans:500&display=swap'
+					}]
                 });
 
                 card = fields.create('card', {
@@ -357,7 +360,7 @@ define(
                             iconColor: "#c4f0ff",
                             color: "#000",
                             fontWeight: 500,
-                            fontFamily: "Roboto, Open Sans, Segoe UI, sans-serif",
+                            fontFamily: "Nunito Sans",
                             fontSize: '15px',
                             fontSmoothing: "antialiased",
                             ":-webkit-autofill": {

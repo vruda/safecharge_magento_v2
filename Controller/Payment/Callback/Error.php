@@ -72,13 +72,7 @@ class Error extends Action implements CsrfAwareActionInterface
     {
         $params = $this->getRequest()->getParams();
 
-        if ($this->moduleConfig->isDebugEnabled() === true) {
-            $this->safechargeLogger->debug(
-                'Error Callback Response: '
-                . var_export($params, true)
-            );
-        }
-
+		$this->moduleConfig->createLog($params,  'Error Callback Response: ');
         $this->messageManager->addErrorMessage(
             __('Your payment failed.')
         );

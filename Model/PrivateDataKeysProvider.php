@@ -4,6 +4,8 @@ namespace Safecharge\Safecharge\Model;
 
 /**
  * Safecharge Safecharge private data keys provider model.
+ * 
+ * @deprecated - must be removed
  */
 class PrivateDataKeysProvider
 {
@@ -12,9 +14,6 @@ class PrivateDataKeysProvider
      */
     public function getConfig()
     {
-        return [
-//            'cardNumber',
-//            'CVV',
-        ];
+        return [];
     }
 }

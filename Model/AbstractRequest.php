@@ -25,7 +25,6 @@ abstract class AbstractRequest extends AbstractApi
      * Payment gateway methods.
      */
     const GET_SESSION_TOKEN_METHOD              = 'getSessionToken';
-//    const PAYMENT_CC_METHOD                     = 'paymentCC';
     const PAYMENT_SETTLE_METHOD                 = 'settleTransaction';
     const CREATE_USER_METHOD                    = 'createUser';
     const GET_USER_DETAILS_METHOD               = 'getUserDetails';
