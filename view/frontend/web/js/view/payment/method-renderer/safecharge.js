@@ -349,7 +349,7 @@ define(
                 var fields = sfc.fields({
                     locale: checkoutConfig.payment[self.getCode()].locale,
 					fonts : [{
-						cssUrl: 'https://fonts.googleapis.com/css?family=Nunito+Sans:500&display=swap'
+						cssUrl: 'https://fonts.googleapis.com/css?family=Nunito+Sans:400&display=swap'
 					}]
                 });
 
@@ -359,7 +359,7 @@ define(
                         base: {
                             iconColor: "#c4f0ff",
                             color: "#000",
-                            fontWeight: 500,
+                            fontWeight: 400,
                             fontFamily: "Nunito Sans",
                             fontSize: '15px',
                             fontSmoothing: "antialiased",
@@ -367,7 +367,8 @@ define(
                                 color: "#fce883"
                             },
                             "::placeholder": {
-                                color: "grey" 
+                                color: "grey",
+								fontFamily: "Nunito Sans"
                             }
                         },
                         invalid: {
@@ -378,7 +379,7 @@ define(
                     classes: {
 						focus: 'focus',
 						empty: 'empty',
-						invalid: 'invalid',
+						invalid: 'invalid'
 					}
                 });
                     
