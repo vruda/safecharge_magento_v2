@@ -360,7 +360,7 @@ define(
                             iconColor: "#c4f0ff",
                             color: "#000",
                             fontWeight: 400,
-                            fontFamily: "Nunito Sans",
+                            fontFamily: "arial",
                             fontSize: '15px',
                             fontSmoothing: "antialiased",
                             ":-webkit-autofill": {
@@ -368,7 +368,7 @@ define(
                             },
                             "::placeholder": {
                                 color: "grey",
-								fontFamily: "Nunito Sans"
+								fontFamily: "arial"
                             }
                         },
                         invalid: {
