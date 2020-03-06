@@ -117,8 +117,6 @@
 		height: 24px !important;
     }
     
-    .SfcField.focus { box-shadow: 0px 0 3px 1px #00699d !important; }
-    
     .sfcModal-dialog {
         width: 50% !important;
         margin: 0 auto !important;
@@ -128,6 +126,12 @@
     .is-in {
         z-index: 9999 !important;
     }
+	
+	#cc_error_msg {
+		padding: 8px 12px 8px 45px !important;
+		font-size: 15px !important;
+		display: none;
+	}
 </style>
 
 <div class="payment-method" data-bind="css: {'_active': (getCode() == isChecked())}">
@@ -248,7 +252,7 @@
 						</div>
 					</div>
 					
-					<div class="field number sc_fields">
+					<div class="field number sc_fields" tabindex="1">
 						<div id="card-field-placeholder" data-bind="afterRender: $parent.attachFields()"></div>
 					</div>
 
@@ -260,6 +264,12 @@
 						value: $parent.creditCardToken,
 						valueUpdate: 'change'
 					" />
+					
+					<div class="field">
+						<div id="cc_error_msg" class="message error">
+							<div data-bind="text: $t('Wrong Card number, date or CVC, please check them again!')"></div>
+						</div>
+					</div>
 				</fieldset>
                 <!--/ko-->
             </div>

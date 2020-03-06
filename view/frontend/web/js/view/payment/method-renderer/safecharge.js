@@ -92,10 +92,10 @@ define(
 				var pmData = {
 					method			: self.item.method,
                     additional_data	: {
-                        cc_token					: self.creditCardToken(),
-                        cc_number					: self.ccNumber(),
-                        cc_owner					: self.creditCardOwner(),
-                        chosen_apm_method			: self.chosenApmMethod(),
+                        cc_token			: self.creditCardToken(),
+                        cc_number			: self.ccNumber(),
+                        cc_owner			: self.creditCardOwner(),
+                        chosen_apm_method	: self.chosenApmMethod(),
                     },
 				};
 				
@@ -357,31 +357,62 @@ define(
                     iconStyle: 'solid',
                     style: {
                         base: {
-                            iconColor: "#c4f0ff",
-                            color: "#000",
-                            fontWeight: 400,
-                            fontFamily: "arial",
-                            fontSize: '15px',
-                            fontSmoothing: "antialiased",
-                            ":-webkit-autofill": {
+                            iconColor			: "#c4f0ff",
+                            color				: "#000",
+                            fontWeight			: 400,
+                            fontFamily			: "arial",
+                            fontSize			: '15px',
+                            fontSmoothing		: "antialiased",
+                            ":-webkit-autofill"	: {
                                 color: "#fce883"
                             },
-                            "::placeholder": {
-                                color: "grey",
-								fontFamily: "arial"
+                            "::placeholder"		: {
+                                color		: "grey",
+								fontFamily	: "arial"
                             }
                         },
                         invalid: {
-                            iconColor: "#FFC7EE",
-                            color: "#FFC7EE"
+                            iconColor	: "#ff0000",
+                            color		: "#ff0000"
                         }
                     },
                     classes: {
-						focus: 'focus',
-						empty: 'empty',
-						invalid: 'invalid'
+						focus	: 'focus',
+						empty	: 'empty',
+						invalid	: 'invalid'
 					}
                 });
+				
+//				card.on('ready', function (evt) {
+//					console.log('on scard ready2', evt);
+//				});
+//				
+//				card.on('blur', function (e) {
+//					console.log('on blur', e)
+//				});
+				
+				card.on('focus', function (e) {
+					console.log('on focus', e);
+					
+					$('#card-field-placeholder').css('box-shadow', '0px 0 3px 1px #00699d');
+					$('#cc_error_msg').hide();
+				});
+				
+				card.on('change', function (event) {
+					console.log('on change', event);
+					
+					if(event.hasOwnProperty('empty') && event.hasOwnProperty('complete')) {
+						if(!event.empty && !event.complete && event.hasOwnProperty('error')) {
+							$('#card-field-placeholder').css('box-shadow', '0px 0 3px 1px #ff !important');
+							$('#cc_error_msg').show();
+						}
+						
+						if(!event.empty && event.complete) {
+							$('#card-field-placeholder').css('box-shadow', '0px 0 3px 1px #00699d');
+							$('#cc_error_msg').hide();
+						}
+					}
+				});
                     
 				if(!isCardAttached && $('#card-field-placeholder').length > 0) {
 					card.attach('#card-field-placeholder');
