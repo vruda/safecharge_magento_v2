@@ -75,8 +75,8 @@ class Update extends Action
     {
         $params = $this->getRequest()->getParams();
 
-		$this->moduleConfig->createLog($params, 'Redirect Update Response: ');
-		
+        $this->moduleConfig->createLog($params, 'Redirect Update Response: ');
+        
         $orderId = $this->getRequest()->getParam('order');
 
         /** @var Order $order */

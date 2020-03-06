@@ -120,7 +120,7 @@ class GetMerchantPaymentMethods extends AbstractRequest implements RequestInterf
     {
         $country_code   = $this->getCountryCode() ?: $this->config->getQuoteCountryCode();
         $tokenRequest   = $this->requestFactory->create(AbstractRequest::OPEN_ORDER_METHOD);
-        $tokenResponse	= $tokenRequest->process();
+        $tokenResponse    = $tokenRequest->process();
         
         if (empty($country_code)) {
             try {
