@@ -128,9 +128,14 @@
     }
 	
 	#cc_error_msg {
+		display: none;
+		width: 370px;
+		border: 1px solid #cccccc !important;
+	}
+	
+	#cc_error_msg .message.error {
 		padding: 8px 12px 8px 45px !important;
 		font-size: 15px !important;
-		display: none;
 	}
 </style>
 
@@ -265,8 +270,8 @@
 						valueUpdate: 'change'
 					" />
 					
-					<div class="field">
-						<div id="cc_error_msg" class="message error">
+					<div id="cc_error_msg">
+						<div class="message error">
 							<div data-bind="text: $t('Wrong Card number, date or CVC, please check them again!')"></div>
 						</div>
 					</div>
