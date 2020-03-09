@@ -407,7 +407,10 @@ define(
 							$('#cc_error_msg').show();
 						}
 						
-						if(!event.empty && event.complete) {
+						if(
+							(!event.empty && event.complete)
+							|| event.empty
+						) {
 							$('#card-field-placeholder').css('box-shadow', '0px 0 3px 1px #00699d');
 							$('#cc_error_msg').hide();
 						}
