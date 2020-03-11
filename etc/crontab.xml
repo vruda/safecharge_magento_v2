@@ -13,7 +13,13 @@
         <job name="safecharge_delete_old_request_log"
              instance="Safecharge\Safecharge\Cron\DeleteOldRequestLog"
              method="execute">
-            <schedule>* * * * *</schedule>
+            <schedule>0 1 * * *</schedule>
         </job>
+		
+<!--		<job name="safecharge_do_rebill" 
+			 instance="Safecharge\Safecharge\Cron\DoRebill"
+             method="execute">
+			<schedule>0 1 * * * *</schedule>
+		</job>-->
     </group>
 </config>

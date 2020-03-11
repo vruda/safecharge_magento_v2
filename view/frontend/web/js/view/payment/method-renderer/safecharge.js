@@ -37,6 +37,8 @@ define(
 		var scData			= {};
 		var isCardAttached	= false;
 		var scGetAPMsAgain	= false;
+		var scCCEmpty		= true;
+		var scCCCompleted	= false;
 		
         return Component.extend({
             defaults: {
@@ -184,12 +186,23 @@ define(
             },
 
             placeOrder: function(data, event) {
+				console.log('placeOrder');
+				
                 if (event) {
                     event.preventDefault();
                 }
 				
                 if(self.chosenApmMethod() === 'cc_card') {
                     $('.loading-mask').css('display', 'block');
+					
+					if( (!scCCEmpty && !scCCCompleted) || scCCEmpty ) {
+						$('#card-field-placeholder').css('box-shadow', 'red 0px 0px 3px 1px');
+						$('#cc_error_msg').show();
+						
+						$('.loading-mask').css('display', 'none');
+						
+						return;
+					}
 					
 					// we use variable just for debug
 					var payParams = {
@@ -203,6 +216,8 @@ define(
 					
                     // create payment with WebSDK
                     sfc.createPayment(payParams, function(resp){
+						console.log('create payment');
+						
                         if(typeof resp.result != 'undefined') {
                             if(resp.result == 'APPROVED' && resp.transactionId != 'undefined') {
                                 self.ccNumber(resp.ccCardNumber);
@@ -223,6 +238,8 @@ define(
 									}
                                 }
                                 else {
+									console.log(resp);
+									
                                     if(!alert($.mage.__('Error with your Payment. Please try again later!'))) {
 										scGetAPMsAgain = true;
 										self.getApmMethods();
@@ -383,14 +400,6 @@ define(
 					}
                 });
 				
-//				card.on('ready', function (evt) {
-//					console.log('on scard ready2', evt);
-//				});
-//				
-//				card.on('blur', function (e) {
-//					console.log('on blur', e)
-//				});
-				
 				card.on('focus', function (e) {
 					console.log('on focus', e);
 					
@@ -399,21 +408,15 @@ define(
 				});
 				
 				card.on('change', function (event) {
-					console.log('on change', event);
+					$('#card-field-placeholder').css('box-shadow', '0px 0 3px 1px #00699d');
+					$('#cc_error_msg').hide();
 					
-					if(event.hasOwnProperty('empty') && event.hasOwnProperty('complete')) {
-						if(!event.empty && !event.complete && event.hasOwnProperty('error')) {
-							$('#card-field-placeholder').css('box-shadow', '0px 0 3px 1px #ff !important');
-							$('#cc_error_msg').show();
-						}
-						
-						if(
-							(!event.empty && event.complete)
-							|| event.empty
-						) {
-							$('#card-field-placeholder').css('box-shadow', '0px 0 3px 1px #00699d');
-							$('#cc_error_msg').hide();
-						}
+					if(event.hasOwnProperty('empty')) {
+						scCCEmpty = event.empty;
+					}
+					
+					if(event.hasOwnProperty('complete')) {
+						scCCCompleted = event.complete;
 					}
 				});
                     
