@@ -40,6 +40,11 @@ define(
 		var scCCEmpty		= true;
 		var scCCCompleted	= false;
 		
+		$('body').on('change', '#safecharge_cc_owner', function(){
+			$('#safecharge_cc_owner').css('box-shadow', 'inherit');
+			$('#cc_name_error_msg').hide();
+		});
+		
         return Component.extend({
             defaults: {
                 template: 'Safecharge_Safecharge/payment/safecharge',
@@ -193,16 +198,19 @@ define(
                 }
 				
                 if(self.chosenApmMethod() === 'cc_card') {
-                    $('.loading-mask').css('display', 'block');
+					if($('#safecharge_cc_owner').val() == '') {
+						$('#safecharge_cc_owner').css('box-shadow', 'red 0px 0px 3px 1px');
+						$('#cc_name_error_msg').show();
+						return;
+					}
 					
 					if( (!scCCEmpty && !scCCCompleted) || scCCEmpty ) {
 						$('#card-field-placeholder').css('box-shadow', 'red 0px 0px 3px 1px');
 						$('#cc_error_msg').show();
-						
-						$('.loading-mask').css('display', 'none');
-						
 						return;
 					}
+					
+					$('.loading-mask').css('display', 'block');
 					
 					// we use variable just for debug
 					var payParams = {

@@ -127,16 +127,20 @@
         z-index: 9999 !important;
     }
 	
-	#cc_error_msg {
+	#cc_error_msg, #cc_name_error_msg {
 		display: none;
 		width: 370px;
 		border: 1px solid #cccccc !important;
 	}
 	
-	#cc_error_msg .message.error {
+	#cc_error_msg .message.error, #cc_name_error_msg .message.error {
 		padding: 8px 12px 8px 45px !important;
 		font-size: 15px !important;
 	}
+	
+	#cc_name_error_msg { margin-bottom: 10px !important; }
+	#cc_name_error_msg .message.error { padding-bottom: 11px !important; }
+	#cc_name_error_msg .message.error div { padding-top: 2px !important; }
 </style>
 
 <div class="payment-method" data-bind="css: {'_active': (getCode() == isChecked())}">
@@ -254,6 +258,12 @@
 								value: $parent.creditCardOwner,
 								valueUpdate: 'keyup'
 						   " />
+						</div>
+					</div>
+					
+					<div id="cc_name_error_msg">
+						<div class="message error">
+							<div data-bind="text: $t('Cardholder name is required!')"></div>
 						</div>
 					</div>
 					
