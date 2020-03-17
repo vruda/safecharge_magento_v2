@@ -114,87 +114,87 @@ class OpenOrder extends AbstractRequest implements RequestInterface
             throw new PaymentException(__('There is no Cart data.'));
         }
         
-		$billing_country = $this->cart->getQuote()->getBillingAddress()->getCountry();
-		if(empty($billing_country)) {
-			$billing_country = $this->config->getQuoteCountryCode();
-		}
-        if(empty($billing_country)) {
+        $billing_country = $this->cart->getQuote()->getBillingAddress()->getCountry();
+        if (empty($billing_country)) {
+            $billing_country = $this->config->getQuoteCountryCode();
+        }
+        if (empty($billing_country)) {
             $billing_country = $this->config->getDefaultCountry();
         }
-		
+        
         $email = $this->cart->getQuote()->getBillingAddress()->getEmail();
-		if(empty($email)) {
-			$email = $this->cart->getQuote()->getCustomerEmail();
-		}
-		if(empty($email)) {
-			$email = filter_input(INPUT_COOKIE, 'guestSippingMail', FILTER_VALIDATE_EMAIL);
-		}
-		if(empty($email)) {
-			$email = 'quoteID_' . $this->config->getCheckoutSession()->getQuoteId() . '@magentoMerchant.com';
-		}
-		
-		$shipping_email = $this->cart->getQuote()->getShippingAddress()->getEmail();
-		if(empty($shipping_email)) {
-			$shipping_email = $email;
-		}
-		
-		$b_f_name = $this->cart->getQuote()->getBillingAddress()->getFirstname();
-		if(empty($b_f_name)) {
-			$b_f_name = $this->cart->getQuote()->getCustomerFirstname();
-		}
-		
-		$b_l_name = $this->cart->getQuote()->getBillingAddress()->getLastname();
-		if(empty($b_l_name)) {
-			$b_l_name = $this->cart->getQuote()->getCustomerLastname();
-		}
-		
-		$params = array_merge_recursive(
+        if (empty($email)) {
+            $email = $this->cart->getQuote()->getCustomerEmail();
+        }
+        if (empty($email)) {
+            $email = filter_input(INPUT_COOKIE, 'guestSippingMail', FILTER_VALIDATE_EMAIL);
+        }
+        if (empty($email)) {
+            $email = 'quoteID_' . $this->config->getCheckoutSession()->getQuoteId() . '@magentoMerchant.com';
+        }
+        
+        $shipping_email = $this->cart->getQuote()->getShippingAddress()->getEmail();
+        if (empty($shipping_email)) {
+            $shipping_email = $email;
+        }
+        
+        $b_f_name = $this->cart->getQuote()->getBillingAddress()->getFirstname();
+        if (empty($b_f_name)) {
+            $b_f_name = $this->cart->getQuote()->getCustomerFirstname();
+        }
+        
+        $b_l_name = $this->cart->getQuote()->getBillingAddress()->getLastname();
+        if (empty($b_l_name)) {
+            $b_l_name = $this->cart->getQuote()->getCustomerLastname();
+        }
+        
+        $params = array_merge_recursive(
             [
-				'userTokenId'		=> $email,
-				'clientUniqueId'	=> $this->config->getCheckoutSession()->getQuoteId(),
-				
-				'currency'          => empty($this->cart->getQuote()->getOrderCurrencyCode())
+                'userTokenId'        => $email,
+                'clientUniqueId'    => $this->config->getCheckoutSession()->getQuoteId(),
+                
+                'currency'          => empty($this->cart->getQuote()->getOrderCurrencyCode())
                     ? $this->cart->getQuote()->getStoreCurrencyCode() : $this->cart->getQuote()->getOrderCurrencyCode(),
                 
-				'amount'            => (string) number_format($this->cart->getQuote()->getGrandTotal(), 2, '.', ''),
-				'deviceDetails'     => $this->config->getDeviceDetails(),
-				
-				'shippingAddress'	=> [
-					"firstName"	=> $this->cart->getQuote()->getShippingAddress()->getFirstname(),
-					"lastName"	=> $this->cart->getQuote()->getShippingAddress()->getLastname(),
-					"address"	=> $this->cart->getQuote()->getShippingAddress()->getStreetFull(),
-					"phone"		=> $this->cart->getQuote()->getShippingAddress()->getTelephone(),
-					"zip"		=> $this->cart->getQuote()->getShippingAddress()->getPostcode(),
-					"city"		=> $this->cart->getQuote()->getShippingAddress()->getCity(),
-					"city"		=> $this->cart->getQuote()->getShippingAddress()->getCity(),
-					'country'   => $this->cart->getQuote()->getShippingAddress()->getCountry(),
-					'email'		=> $shipping_email,
+                'amount'            => (string) number_format($this->cart->getQuote()->getGrandTotal(), 2, '.', ''),
+                'deviceDetails'     => $this->config->getDeviceDetails(),
+                
+                'shippingAddress'    => [
+                    "firstName"    => $this->cart->getQuote()->getShippingAddress()->getFirstname(),
+                    "lastName"    => $this->cart->getQuote()->getShippingAddress()->getLastname(),
+                    "address"    => $this->cart->getQuote()->getShippingAddress()->getStreetFull(),
+                    "phone"        => $this->cart->getQuote()->getShippingAddress()->getTelephone(),
+                    "zip"        => $this->cart->getQuote()->getShippingAddress()->getPostcode(),
+                    "city"        => $this->cart->getQuote()->getShippingAddress()->getCity(),
+                    "city"        => $this->cart->getQuote()->getShippingAddress()->getCity(),
+                    'country'   => $this->cart->getQuote()->getShippingAddress()->getCountry(),
+                    'email'        => $shipping_email,
                 ],
-				
-				'billingAddress'    => [
-					"firstName"	=> $b_f_name,
-					"lastName"	=> $b_l_name,
-					"address"	=> $this->cart->getQuote()->getBillingAddress()->getStreetFull(),
-					"phone"		=> $this->cart->getQuote()->getBillingAddress()->getTelephone(),
-					"zip"		=> $this->cart->getQuote()->getBillingAddress()->getPostcode(),
-					"city"		=> $this->cart->getQuote()->getBillingAddress()->getCity(),
-					"city"		=> $this->cart->getQuote()->getBillingAddress()->getCity(),
-                    'country'	=> $billing_country,
+                
+                'billingAddress'    => [
+                    "firstName"    => $b_f_name,
+                    "lastName"    => $b_l_name,
+                    "address"    => $this->cart->getQuote()->getBillingAddress()->getStreetFull(),
+                    "phone"        => $this->cart->getQuote()->getBillingAddress()->getTelephone(),
+                    "zip"        => $this->cart->getQuote()->getBillingAddress()->getPostcode(),
+                    "city"        => $this->cart->getQuote()->getBillingAddress()->getCity(),
+                    "city"        => $this->cart->getQuote()->getBillingAddress()->getCity(),
+                    'country'    => $billing_country,
                     'email'     => $email,
                 ],
-                'urlDetails'		=> [
+                'urlDetails'        => [
                     'successUrl'        => $this->config->getCallbackSuccessUrl(),
                     'failureUrl'        => $this->config->getCallbackErrorUrl(),
                     'pendingUrl'        => $this->config->getCallbackPendingUrl(),
                     'backUrl'           => $this->config->getBackUrl(),
-                    'notificationUrl'	=> $this->config->getCallbackDmnUrl(),
+                    'notificationUrl'    => $this->config->getCallbackDmnUrl(),
                 ],
-                'paymentOption'		=> ['card' => ['threeD' => ['isDynamic3D' => 1]]],
-                'transactionType'	=> $this->config->getPaymentAction(),
+                'paymentOption'        => ['card' => ['threeD' => ['isDynamic3D' => 1]]],
+                'transactionType'    => $this->config->getPaymentAction(),
             ],
             parent::getParams()
         );
-		
+        
         return $params;
     }
 
