@@ -14,7 +14,8 @@ define(
         'jquery.redirect',
         'ko',
         'Magento_Checkout/js/model/quote',
-        'mage/translate'
+        'mage/translate',
+		'mage/validation'
     ],
     function(
         $,
@@ -44,6 +45,10 @@ define(
 			$('#safecharge_cc_owner').css('box-shadow', 'inherit');
 			$('#cc_name_error_msg').hide();
 		});
+		
+		var checkoutConfig = window.checkoutConfig,
+			agreementsConfig = checkoutConfig ? checkoutConfig.checkoutAgreements : {},
+			agreementsInputPath = '.payment-method._active div.checkout-agreements input';
 		
         return Component.extend({
             defaults: {
@@ -191,8 +196,6 @@ define(
             },
 
             placeOrder: function(data, event) {
-				console.log('placeOrder');
-				
                 if (event) {
                     event.preventDefault();
                 }
@@ -207,6 +210,10 @@ define(
 					if( (!scCCEmpty && !scCCCompleted) || scCCEmpty ) {
 						$('#card-field-placeholder').css('box-shadow', 'red 0px 0px 3px 1px');
 						$('#cc_error_msg').show();
+						return;
+					}
+					
+					if(! self.validate()) {
 						return;
 					}
 					
@@ -441,7 +448,31 @@ define(
 				else {
 					console.log('card is null')
 				}
-			}
+			},
+			
+			/**
+			  * Validate checkout agreements
+			 *
+			 * @returns {Boolean}
+			*/
+		   validate: function (hideError) {
+			   var isValid = true;
+
+			   if (!agreementsConfig.isEnabled || $(agreementsInputPath).length === 0) {
+				   return true;
+			   }
+
+			   $(agreementsInputPath).each(function (index, element) {
+				   if (!$.validator.validateSingleElement(element, {
+					   errorElement: 'div',
+					   hideError: hideError || false
+				   })) {
+					   isValid = false;
+				   }
+			   });
+
+			   return isValid;
+		   }
         });
     }
 );

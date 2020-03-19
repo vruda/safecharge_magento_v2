@@ -80,6 +80,8 @@ class Config
     private $formKey;
     
     private $directory;
+    private $httpHeader;
+    private $remoteIp;
 
     /**
      * Object initialization.
@@ -99,7 +101,9 @@ class Config
         CheckoutSession $checkoutSession,
         UrlInterface $urlBuilder,
         \Magento\Framework\Data\Form\FormKey $formKey,
-        \Magento\Framework\Filesystem\DirectoryList $directory
+        \Magento\Framework\Filesystem\DirectoryList $directory,
+		\Magento\Framework\HTTP\Header $httpHeader,
+		\Magento\Framework\HTTP\PhpEnvironment\RemoteAddress $remoteIp
     ) {
         $this->scopeConfig = $scopeConfig;
         $this->storeManager = $storeManager;
@@ -107,6 +111,8 @@ class Config
         $this->moduleList = $moduleList;
         $this->checkoutSession = $checkoutSession;
         $this->urlBuilder = $urlBuilder;
+		$this->httpHeader = $httpHeader;
+		$this->remoteIp = $remoteIp;
 
         $this->storeId        = $this->getStoreId();
         $this->versionNum    = intval(str_replace('.', '', $this->productMetadata->getVersion()));
@@ -193,8 +199,6 @@ class Config
      */
     public function getDeviceDetails()
     {
-        $server = filter_input_array(INPUT_SERVER, $_SERVER);
-        
         $SC_DEVICES            = ['iphone', 'ipad', 'android', 'silk', 'blackberry', 'touch', 'linux', 'windows', 'mac'];
         $SC_BROWSERS        = ['ucbrowser', 'firefox', 'chrome', 'opera', 'msie', 'edge', 'safari', 'blackberry', 'trident'];
         $SC_DEVICES_TYPES    = ['tablet', 'mobile', 'tv', 'windows', 'linux'];
@@ -207,60 +211,50 @@ class Config
             'browser'       => '',
             'ipAddress'     => '',
         ];
+		
+		// get ip
+		try {
+			$device_details['ipAddress']	= (string) $this->remoteIp->getRemoteAddress();
+			$ua								= $this->httpHeader->getHttpUserAgent();
+		}
+		catch (Exception $ex) {
+			$this->createLog($e->getMessage(), 'getDeviceDetails Exception');
+			return $device_details;
+		}
         
-        if (empty($server['HTTP_USER_AGENT'])) {
+        if (empty($ua)) {
             return $device_details;
         }
         
-        $user_agent = strtolower($server['HTTP_USER_AGENT']);
-        
-        $device_details['deviceName'] = $server['HTTP_USER_AGENT'];
+        $user_agent = strtolower($ua);
+        $device_details['deviceName'] = $ua;
 
-        if (!empty($SC_DEVICES_TYPES) && is_array($SC_DEVICES_TYPES)) {
-            foreach ($SC_DEVICES_TYPES as $d) {
-                if (strstr($user_agent, $d) !== false) {
-                    if ('linux' === $d || 'windows' === $d) {
-                        $device_details['deviceType'] = 'DESKTOP';
-                    } else {
-                        $device_details['deviceType'] = $d;
-                    }
+		foreach ($SC_DEVICES_TYPES as $d) {
+			if (strstr($user_agent, $d) !== false) {
+				if ('linux' === $d || 'windows' === $d) {
+					$device_details['deviceType'] = 'DESKTOP';
+				} else {
+					$device_details['deviceType'] = $d;
+				}
 
-                    break;
-                }
-            }
-        }
+				break;
+			}
+		}
 
-        if (!empty($SC_DEVICES) && is_array($SC_DEVICES)) {
-            foreach ($SC_DEVICES as $d) {
-                if (strstr($user_agent, $d) !== false) {
-                    $device_details['deviceOS'] = $d;
-                    break;
-                }
-            }
-        }
+		foreach ($SC_DEVICES as $d) {
+			if (strstr($user_agent, $d) !== false) {
+				$device_details['deviceOS'] = $d;
+				break;
+			}
+		}
 
-        if (!empty($SC_BROWSERS) && is_array($SC_BROWSERS)) {
-            foreach ($SC_BROWSERS as $b) {
-                if (strstr($user_agent, $b) !== false) {
-                    $device_details['browser'] = $b;
-                    break;
-                }
-            }
-        }
+		foreach ($SC_BROWSERS as $b) {
+			if (strstr($user_agent, $b) !== false) {
+				$device_details['browser'] = $b;
+				break;
+			}
+		}
 
-        // get ip
-        $ip_address = '';
-
-        if (isset($server['REMOTE_ADDR'])) {
-            $ip_address = $server['REMOTE_ADDR'];
-        } elseif (isset($server['HTTP_X_FORWARDED_FOR'])) {
-            $ip_address = $server['HTTP_X_FORWARDED_FOR'];
-        } elseif (isset($server['HTTP_CLIENT_IP'])) {
-            $ip_address = $server['HTTP_CLIENT_IP'];
-        }
-
-        $device_details['ipAddress'] = (string) $ip_address;
-            
         return $device_details;
     }
     
