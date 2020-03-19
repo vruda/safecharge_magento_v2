@@ -102,8 +102,8 @@ class Config
         UrlInterface $urlBuilder,
         \Magento\Framework\Data\Form\FormKey $formKey,
         \Magento\Framework\Filesystem\DirectoryList $directory,
-		\Magento\Framework\HTTP\Header $httpHeader,
-		\Magento\Framework\HTTP\PhpEnvironment\RemoteAddress $remoteIp
+        \Magento\Framework\HTTP\Header $httpHeader,
+        \Magento\Framework\HTTP\PhpEnvironment\RemoteAddress $remoteIp
     ) {
         $this->scopeConfig = $scopeConfig;
         $this->storeManager = $storeManager;
@@ -111,8 +111,8 @@ class Config
         $this->moduleList = $moduleList;
         $this->checkoutSession = $checkoutSession;
         $this->urlBuilder = $urlBuilder;
-		$this->httpHeader = $httpHeader;
-		$this->remoteIp = $remoteIp;
+        $this->httpHeader = $httpHeader;
+        $this->remoteIp = $remoteIp;
 
         $this->storeId        = $this->getStoreId();
         $this->versionNum    = intval(str_replace('.', '', $this->productMetadata->getVersion()));
@@ -211,16 +211,15 @@ class Config
             'browser'       => '',
             'ipAddress'     => '',
         ];
-		
-		// get ip
-		try {
-			$device_details['ipAddress']	= (string) $this->remoteIp->getRemoteAddress();
-			$ua								= $this->httpHeader->getHttpUserAgent();
-		}
-		catch (Exception $ex) {
-			$this->createLog($e->getMessage(), 'getDeviceDetails Exception');
-			return $device_details;
-		}
+        
+        // get ip
+        try {
+            $device_details['ipAddress']    = (string) $this->remoteIp->getRemoteAddress();
+            $ua                                = $this->httpHeader->getHttpUserAgent();
+        } catch (Exception $ex) {
+            $this->createLog($e->getMessage(), 'getDeviceDetails Exception');
+            return $device_details;
+        }
         
         if (empty($ua)) {
             return $device_details;
@@ -229,31 +228,31 @@ class Config
         $user_agent = strtolower($ua);
         $device_details['deviceName'] = $ua;
 
-		foreach ($SC_DEVICES_TYPES as $d) {
-			if (strstr($user_agent, $d) !== false) {
-				if ('linux' === $d || 'windows' === $d) {
-					$device_details['deviceType'] = 'DESKTOP';
-				} else {
-					$device_details['deviceType'] = $d;
-				}
+        foreach ($SC_DEVICES_TYPES as $d) {
+            if (strstr($user_agent, $d) !== false) {
+                if ('linux' === $d || 'windows' === $d) {
+                    $device_details['deviceType'] = 'DESKTOP';
+                } else {
+                    $device_details['deviceType'] = $d;
+                }
 
-				break;
-			}
-		}
+                break;
+            }
+        }
 
-		foreach ($SC_DEVICES as $d) {
-			if (strstr($user_agent, $d) !== false) {
-				$device_details['deviceOS'] = $d;
-				break;
-			}
-		}
+        foreach ($SC_DEVICES as $d) {
+            if (strstr($user_agent, $d) !== false) {
+                $device_details['deviceOS'] = $d;
+                break;
+            }
+        }
 
-		foreach ($SC_BROWSERS as $b) {
-			if (strstr($user_agent, $b) !== false) {
-				$device_details['browser'] = $b;
-				break;
-			}
-		}
+        foreach ($SC_BROWSERS as $b) {
+            if (strstr($user_agent, $b) !== false) {
+                $device_details['browser'] = $b;
+                break;
+            }
+        }
 
         return $device_details;
     }
