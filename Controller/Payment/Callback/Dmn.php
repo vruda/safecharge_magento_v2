@@ -166,7 +166,7 @@ class Dmn extends Action implements CsrfAwareActionInterface
     public function execute()
     {
         if (!$this->moduleConfig->isActive()) {
-            $this->echo_result('DMN Error - SafeCharge payment module is not active!');
+            var_export('DMN Error - SafeCharge payment module is not active!');
             return;
         }
         
@@ -182,12 +182,12 @@ class Dmn extends Action implements CsrfAwareActionInterface
             $this->validateChecksum($params);
             
             if (empty($params['transactionType'])) {
-                $this->echo_result('DMN error - missing Transaction Type.');
+                var_export('DMN error - missing Transaction Type.');
                 return;
             }
             
             if (empty($params['TransactionID'])) {
-                $this->echo_result('DMN error - missing Transaction ID.');
+                var_export('DMN error - missing Transaction ID.');
                 return;
             }
 
@@ -199,7 +199,7 @@ class Dmn extends Action implements CsrfAwareActionInterface
                 $orderIncrementId = $params["orderId"];
             } else {
                 $this->moduleConfig->createLog('DMN error - no order id parameter.');
-                $this->echo_result('DMN error - no order id parameter.');
+                var_export('DMN error - no order id parameter.');
                 return;
             }
 
@@ -223,7 +223,7 @@ class Dmn extends Action implements CsrfAwareActionInterface
                 $result = $this->placeOrder();
                 
                 if ($result->getSuccess() !== true) {
-                    $this->echo_result('DMN Callback error - place order error:' . $result->getErrorMessage());
+                    var_export('DMN Callback error - place order error:' . $result->getErrorMessage());
                     return;
                 }
                 
@@ -234,12 +234,11 @@ class Dmn extends Action implements CsrfAwareActionInterface
             # try to create the order END
             
             if (empty($order)) {
-                $this->echo_result('DMN Callback error - there is no Order and the code did not success to made it.');
+                var_export('DMN Callback error - there is no Order and the code did not success to made it.');
                 return;
             }
             
             $this->moduleConfig->createLog('DMN try ' . $tryouts . ', there IS order.');
-            $this->moduleConfig->createLog($status, 'DMN with status:');
 
             /** @var OrderPayment $payment */
             $orderPayment    = $order->getPayment();
@@ -257,7 +256,7 @@ class Dmn extends Action implements CsrfAwareActionInterface
                     .'. Do not apply DMN data on the Order!';
                 
                 $this->moduleConfig->createLog($msg);
-                $this->echo_result($msg);
+                var_export($msg);
                 return;
             }
 
@@ -319,6 +318,7 @@ class Dmn extends Action implements CsrfAwareActionInterface
                         [
                             'TransactionID'    => $params['TransactionID'],
                             'AuthCode'        => $params['AuthCode'],
+                            'totalAmount'        => $params['totalAmount'],
                         ]
                     );
                     
@@ -512,26 +512,13 @@ class Dmn extends Action implements CsrfAwareActionInterface
             $msg = $e->getMessage();
 
             $this->moduleConfig->createLog($e->getMessage() . "\n\r" . $e->getTraceAsString(), 'DMN Excception:');
-            $this->echo_result('Error: ' . $e->getMessage());
+            var_export('Error: ' . $e->getMessage());
             return;
         }
 
         $this->moduleConfig->createLog('DMN process end for order #' . $orderIncrementId);
-        $this->echo_result('DMN with status '. $status .' process completed.');
+        var_export('DMN with status '. $status .' process completed.');
         return;
-    }
-    
-    /**
-     * Function echo_result
-     * Sent string to the output instead of echo php function
-     *
-     * @param type $string
-     */
-    private function echo_result($string)
-    {
-        $response = $this->resultFactory->create(\Magento\Framework\Controller\ResultFactory::TYPE_RAW);
-        $response->setContents($string);
-        return $response;
     }
     
     /**
@@ -578,15 +565,23 @@ class Dmn extends Action implements CsrfAwareActionInterface
     private function validateChecksum($params)
     {
         if (!isset($params["advanceResponseChecksum"])) {
-            throw new \Exception(
-                __('Required key advanceResponseChecksum for checksum calculation is missing.')
-            );
+			$msg = 'Required key advanceResponseChecksum for checksum calculation is missing.';
+			
+			var_export($msg);
+			$this->moduleConfig->createLog($msg);
+			
+            throw new \Exception(__($msg));
         }
         
         $concat = $this->moduleConfig->getMerchantSecretKey();
         
         foreach (['totalAmount', 'currency', 'responseTimeStamp', 'PPP_TransactionID', 'Status', 'productId'] as $checksumKey) {
             if (!isset($params[$checksumKey])) {
+				$msg = 'Required key '. $checksumKey .' for checksum calculation is missing.';
+				
+				var_export($msg);
+				$this->moduleConfig->createLog($msg);
+				
                 throw new \Exception(
                     __('Required key %1 for checksum calculation is missing.', $checksumKey)
                 );
@@ -604,9 +599,12 @@ class Dmn extends Action implements CsrfAwareActionInterface
         $checksum = hash($this->moduleConfig->getHash(), utf8_encode($concat));
         
         if ($params["advanceResponseChecksum"] !== $checksum) {
-            throw new \Exception(
-                __('Checksum validation failed!')
-            );
+			$msg = 'Checksum validation failed!';
+			
+			var_export('Checksum validation failed!');
+			$this->moduleConfig->createLog($msg);
+			
+            throw new \Exception(__($msg));
         }
 
         return true;

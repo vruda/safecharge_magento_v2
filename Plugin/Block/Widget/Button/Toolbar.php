@@ -40,17 +40,21 @@ class Toolbar
         if (!$context instanceof \Magento\Sales\Block\Adminhtml\Order\View) {
             return [$context, $buttonList];
         }
-        
+		
         try {
             $orderId            = $this->request->getParam('order_id');
             $order                = $this->orderRepository->get($orderId);
             $orderPayment        = $order->getPayment();
+			
+			if ($orderPayment->getMethod() !== Payment::METHOD_CODE) {
+				return [$context, $buttonList];
+			}
             
             $ord_status            = $order->getStatus();
             $payment_method        = $orderPayment->getAdditionalInformation(
                 Payment::TRANSACTION_EXTERNAL_PAYMENT_METHOD
             );
-
+			
             // Examples
     //        $buttonList->update('order_edit', 'class', 'edit');
     //
@@ -62,24 +66,22 @@ class Toolbar
     //            ]
     //        );
             
-            if (!in_array($payment_method, ['cc_card', 'apmgw_expresscheckout'])
+//			$this->config->createLog($buttonList->getItems(), 'buttonList');
+			
+            if (!in_array($payment_method, Payment::PAYMETNS_SUPPORT_REFUND)
                 || in_array($ord_status, [Payment::SC_VOIDED, Payment::SC_PROCESSING])
             ) {
                 $buttonList->remove('order_creditmemo');
+                $buttonList->remove('credit-memo');
             }
             
             if (Payment::SC_VOIDED == $ord_status) {
                 $buttonList->remove('order_invoice');
             }
             
-            if ('apmgw_expresscheckout' == $payment_method
-                || in_array($ord_status, [Payment::SC_REFUNDED, Payment::SC_PROCESSING, 'closed'])
+            if ('cc_card' !== $payment_method
+                || in_array($ord_status, [Payment::SC_REFUNDED, Payment::SC_PROCESSING, Payment::SC_VOIDED, 'closed'])
             ) {
-                $buttonList->remove('void_payment');
-            }
-            
-            // after Refund
-            if ('closed' == $ord_status) {
                 $buttonList->remove('void_payment');
             }
         } catch (Exception $e) {

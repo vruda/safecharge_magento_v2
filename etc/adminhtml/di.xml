@@ -26,4 +26,8 @@
 	<type name="Magento\Backend\Block\Widget\Button\Toolbar">
         <plugin name="orderFormToolbarButtons" type="Safecharge\Safecharge\Plugin\Block\Widget\Button\Toolbar" />
     </type>
+	
+	<type name="Magento\Sales\Block\Adminhtml\Order\Invoice\View">
+        <plugin name="orderInvoiceFormToolbarButtons" type="Safecharge\Safecharge\Plugin\Block\Adminhtml\Order\Invoice\View" />
+    </type>
 </config>
