@@ -3,9 +3,6 @@
 namespace Safecharge\Safecharge\Model\Request\Payment;
 
 use Magento\Framework\Exception\PaymentException;
-//use Magento\Sales\Model\Order;
-//use Magento\Sales\Model\Order\Payment as OrderPayment;
-//use Magento\Sales\Model\Order\Payment\Transaction as OrderTransaction;
 use Safecharge\Safecharge\Model\AbstractRequest;
 use Safecharge\Safecharge\Model\AbstractResponse;
 use Safecharge\Safecharge\Model\Payment;

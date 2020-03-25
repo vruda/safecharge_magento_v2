@@ -45,6 +45,12 @@ class View extends \Magento\Backend\Block\Widget\Form\Container
 				) {
 					$view->removeButton('credit-memo');
 				}
+				
+				if ('cc_card' !== $payment_method
+					|| in_array($ord_status, [Payment::SC_REFUNDED, Payment::SC_PROCESSING, Payment::SC_VOIDED, 'closed'])
+				) {
+					$view->removeButton('void');
+				}
 			}
 		} catch (Exception $ex) {}
 	}
