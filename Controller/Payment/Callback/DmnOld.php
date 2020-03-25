@@ -546,11 +546,11 @@ class DmnOld extends Action
     private function validateChecksum($params)
     {
         if (!isset($params["advanceResponseChecksum"])) {
-			$msg = 'Required key advanceResponseChecksum for checksum calculation is missing.';
-			
-			var_export($msg);
-			$this->moduleConfig->createLog($msg);
-			
+            $msg = 'Required key advanceResponseChecksum for checksum calculation is missing.';
+            
+            var_export($msg);
+            $this->moduleConfig->createLog($msg);
+            
             throw new \Exception(__($msg));
         }
         
@@ -558,11 +558,11 @@ class DmnOld extends Action
         
         foreach (['totalAmount', 'currency', 'responseTimeStamp', 'PPP_TransactionID', 'Status', 'productId'] as $checksumKey) {
             if (!isset($params[$checksumKey])) {
-				$msg = 'Required key '. $checksumKey .' for checksum calculation is missing.';
-				
-				var_export($msg);
-				$this->moduleConfig->createLog($msg);
-				
+                $msg = 'Required key '. $checksumKey .' for checksum calculation is missing.';
+                
+                var_export($msg);
+                $this->moduleConfig->createLog($msg);
+                
                 throw new \Exception(
                     __('Required key %1 for checksum calculation is missing.', $checksumKey)
                 );
@@ -580,11 +580,11 @@ class DmnOld extends Action
         $checksum = hash($this->moduleConfig->getHash(), utf8_encode($concat));
         
         if ($params["advanceResponseChecksum"] !== $checksum) {
-			$msg = 'Checksum validation failed!';
-			
-			var_export('Checksum validation failed!');
-			$this->moduleConfig->createLog($msg);
-			
+            $msg = 'Checksum validation failed!';
+            
+            var_export('Checksum validation failed!');
+            $this->moduleConfig->createLog($msg);
+            
             throw new \Exception(__($msg));
         }
 

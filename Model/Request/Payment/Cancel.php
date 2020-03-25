@@ -42,64 +42,64 @@ class Cancel extends AbstractPayment implements RequestInterface
      */
     protected function getParams()
     {
-		// we can create Void for Settle and Auth only!!!
-        $orderPayment		= $this->orderPayment;
-        $order				= $orderPayment->getOrder();
-		$order_auth_data	= $orderPayment->getAdditionalInformation(Payment::AUTH_PARAMS);
+        // we can create Void for Settle and Auth only!!!
+        $orderPayment        = $this->orderPayment;
+        $order                = $orderPayment->getOrder();
+        $order_auth_data    = $orderPayment->getAdditionalInformation(Payment::AUTH_PARAMS);
         $transaction_id    = $orderPayment->getAdditionalInformation(Payment::TRANSACTION_ID);
-		
-		$this->config->createLog($order_auth_data, '$order_auth_data');
-		$this->config->createLog($transaction_id, '$transaction_id');
-		
+        
+        $this->config->createLog($order_auth_data, '$order_auth_data');
+        $this->config->createLog($transaction_id, '$transaction_id');
+        
         if (!$transaction_id) {
-			$msg = 'Transaction does not contain Transaction ID code.';
-			$this->config->createLog('Void error: ' . $msg);
-			
+            $msg = 'Transaction does not contain Transaction ID code.';
+            $this->config->createLog('Void error: ' . $msg);
+            
             throw new PaymentException(
                 __($msg)
             );
         }
-		
-		// Settle
-		if($transaction_id !== $order_auth_data['TransactionID']) {
-			$transaction	= $orderPayment->getAuthorizationTransaction();
-			$authCode		= $orderPayment->getAdditionalInformation(Payment::TRANSACTION_ID);
-			$authCode		= null;
+        
+        // Settle
+        if ($transaction_id !== $order_auth_data['TransactionID']) {
+            $transaction    = $orderPayment->getAuthorizationTransaction();
+            $authCode        = $orderPayment->getAdditionalInformation(Payment::TRANSACTION_ID);
+            $authCode        = null;
 
-			if (empty($transactionDetails['authCode'])) {
-				$authCode = $orderPayment->getAdditionalInformation(Payment::TRANSACTION_AUTH_CODE_KEY);
-			} else {
-				$authCode = $transactionDetails['authCode'];
-			}
-			
-//			$ref_amount = $orderPayment->getAdditionalInformation(Payment::REFUND_TRANSACTION_AMOUNT);
-//        
-//			if ($ref_amount) {
-//				$amount = $ref_amount;
-//			} else {
-				$amount = (float) $order->getTotalPaid();
-//			}
-			
-		} else { // Auth
-			$authCode	= $order_auth_data['AuthCode'];
-			$amount		= $order_auth_data['totalAmount'];
-		}
+            if (empty($transactionDetails['authCode'])) {
+                $authCode = $orderPayment->getAdditionalInformation(Payment::TRANSACTION_AUTH_CODE_KEY);
+            } else {
+                $authCode = $transactionDetails['authCode'];
+            }
+            
+//            $ref_amount = $orderPayment->getAdditionalInformation(Payment::REFUND_TRANSACTION_AMOUNT);
+//
+//            if ($ref_amount) {
+//                $amount = $ref_amount;
+//            } else {
+                $amount = (float) $order->getTotalPaid();
+//            }
+            
+        } else { // Auth
+            $authCode    = $order_auth_data['AuthCode'];
+            $amount        = $order_auth_data['totalAmount'];
+        }
 
         if (empty($authCode)) {
-			$this->config->createLog('Void error: Transaction does not contain authorization code.');
-			
+            $this->config->createLog('Void error: Transaction does not contain authorization code.');
+            
             throw new PaymentException(
                 __('Transaction does not contain authorization code.')
             );
         }
         
-		if(empty($amount)) {
-			$this->config->createLog('Void error: totalAmount is empty.');
-			
+        if (empty($amount)) {
+            $this->config->createLog('Void error: totalAmount is empty.');
+            
             throw new PaymentException(
                 __('Transaction does not contain total amount.')
             );
-		}
+        }
         
         $params = [
             'clientUniqueId'        => $order->getIncrementId(),

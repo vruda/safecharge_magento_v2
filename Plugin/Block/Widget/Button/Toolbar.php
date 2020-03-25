@@ -40,21 +40,21 @@ class Toolbar
         if (!$context instanceof \Magento\Sales\Block\Adminhtml\Order\View) {
             return [$context, $buttonList];
         }
-		
+        
         try {
             $orderId            = $this->request->getParam('order_id');
             $order                = $this->orderRepository->get($orderId);
             $orderPayment        = $order->getPayment();
-			
-			if ($orderPayment->getMethod() !== Payment::METHOD_CODE) {
-				return [$context, $buttonList];
-			}
+            
+            if ($orderPayment->getMethod() !== Payment::METHOD_CODE) {
+                return [$context, $buttonList];
+            }
             
             $ord_status            = $order->getStatus();
             $payment_method        = $orderPayment->getAdditionalInformation(
                 Payment::TRANSACTION_EXTERNAL_PAYMENT_METHOD
             );
-			
+            
             // Examples
     //        $buttonList->update('order_edit', 'class', 'edit');
     //
@@ -66,8 +66,8 @@ class Toolbar
     //            ]
     //        );
             
-//			$this->config->createLog($buttonList->getItems(), 'buttonList');
-			
+//            $this->config->createLog($buttonList->getItems(), 'buttonList');
+            
             if (!in_array($payment_method, Payment::PAYMETNS_SUPPORT_REFUND)
                 || in_array($ord_status, [Payment::SC_VOIDED, Payment::SC_PROCESSING])
             ) {
