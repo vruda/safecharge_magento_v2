@@ -17,6 +17,8 @@ class UpgradeData implements UpgradeDataInterface
      * @var OrderStatusFactory
      */
     private $orderStatusFactory;
+	
+    private $resourceConnection;
 
     /**
      * Object constructor.
@@ -24,9 +26,11 @@ class UpgradeData implements UpgradeDataInterface
      * @param OrderStatusFactory $orderStatusFactory
      */
     public function __construct(
-        OrderStatusFactory $orderStatusFactory
+        OrderStatusFactory $orderStatusFactory,
+		\Magento\Framework\App\ResourceConnection $resourceConnection
     ) {
         $this->orderStatusFactory = $orderStatusFactory;
+        $this->resourceConnection = $resourceConnection;
     }
 
     /**
@@ -67,20 +71,26 @@ class UpgradeData implements UpgradeDataInterface
                 ->setData('status', 'sc_auth')
                 ->setData('label', 'SC Auth')
                 ->save();
-            $scAuth->assignState(Order::STATE_PROCESSING, true, true);
+            $scAuth->assignState(Order::STATE_PROCESSING, false, true);
             
             $scProcessing = $this->orderStatusFactory->create()
                 ->setData('status', 'sc_processing')
                 ->setData('label', 'SC Processing')
                 ->save();
-            $scProcessing->assignState(Order::STATE_PROCESSING, true, true);
+            $scProcessing->assignState(Order::STATE_PROCESSING, false, true);
             
             $scRefunded = $this->orderStatusFactory->create()
                 ->setData('status', 'sc_refunded')
                 ->setData('label', 'SC Refunded')
                 ->save();
-            $scRefunded->assignState(Order::STATE_PROCESSING, true, true);
+            $scRefunded->assignState(Order::STATE_PROCESSING, false, false);
         }
+		// a patch for last three statuses above
+		elseif (version_compare($context->getVersion(), '2.0.4', '<')) {
+			$this->resourceConnection->getConnection()->query("UPDATE sales_order_status_state SET is_default = 0 WHERE sales_order_status_state.status = 'sc_refunded';");
+			$this->resourceConnection->getConnection()->query("UPDATE sales_order_status_state SET is_default = 0 WHERE sales_order_status_state.status = 'sc_processing';");
+			$this->resourceConnection->getConnection()->query("UPDATE sales_order_status_state SET is_default = 0 WHERE sales_order_status_state.status = 'sc_auth';");
+		}
 
         $setup->endSetup();
     }
