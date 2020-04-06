@@ -86,7 +86,7 @@ class UpgradeData implements UpgradeDataInterface
             $scRefunded->assignState(Order::STATE_PROCESSING, false, false);
         }
 		// a patch for last three statuses above
-		elseif (version_compare($context->getVersion(), '2.0.4', '<')) {
+		elseif (version_compare($context->getVersion(), '2.0.3', '<')) {
 			$this->resourceConnection->getConnection()->query("UPDATE sales_order_status_state SET is_default = 0 WHERE sales_order_status_state.status = 'sc_refunded';");
 			$this->resourceConnection->getConnection()->query("UPDATE sales_order_status_state SET is_default = 0 WHERE sales_order_status_state.status = 'sc_processing';");
 			$this->resourceConnection->getConnection()->query("UPDATE sales_order_status_state SET is_default = 0 WHERE sales_order_status_state.status = 'sc_auth';");
