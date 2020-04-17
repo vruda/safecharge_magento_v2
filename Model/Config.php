@@ -201,7 +201,7 @@ class Config
     {
         $SC_DEVICES            = ['iphone', 'ipad', 'android', 'silk', 'blackberry', 'touch', 'linux', 'windows', 'mac'];
         $SC_BROWSERS        = ['ucbrowser', 'firefox', 'chrome', 'opera', 'msie', 'edge', 'safari', 'blackberry', 'trident'];
-        $SC_DEVICES_TYPES    = ['tablet', 'mobile', 'tv', 'windows', 'linux'];
+        $SC_DEVICES_TYPES    = ['macintosh', 'tablet', 'mobile', 'tv', 'windows', 'linux', 'tv', 'smarttv', 'googletv', 'appletv', 'hbbtv', 'pov_tv', 'netcast.tv', 'bluray'];
         $SC_DEVICES_OS        = ['android', 'windows', 'linux', 'mac os'];
         
         $device_details = [
@@ -226,14 +226,18 @@ class Config
         }
         
         $user_agent = strtolower($ua);
-        $device_details['deviceName'] = $ua;
+        $device_details['deviceName'] = substr($ua, 0, 250);
 
         foreach ($SC_DEVICES_TYPES as $d) {
             if (strstr($user_agent, $d) !== false) {
-                if ('linux' === $d || 'windows' === $d) {
+                if (in_array($d, array('linux', 'windows', 'macintosh'), true)) {
                     $device_details['deviceType'] = 'DESKTOP';
+                } else if('mobile' === $d) {
+					$device_details['deviceType'] = 'SMARTPHONE';
+                } else if('tablet' === $d) {
+					$device_details['deviceType'] = 'TABLET';
                 } else {
-                    $device_details['deviceType'] = $d;
+					$device_details['deviceType'] = 'TV';
                 }
 
                 break;
