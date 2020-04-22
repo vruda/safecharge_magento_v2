@@ -226,7 +226,7 @@ class Config
         }
         
         $user_agent = strtolower($ua);
-        $device_details['deviceName'] = substr($ua, 0, 250);
+        $device_details['deviceName'] = $ua;
 
         foreach ($SC_DEVICES_TYPES as $d) {
             if (strstr($user_agent, $d) !== false) {

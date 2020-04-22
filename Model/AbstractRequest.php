@@ -48,6 +48,113 @@ abstract class AbstractRequest extends AbstractApi
      * @var int
      */
     protected $requestId;
+	
+	// array details to validate request parameters
+	private $params_validation = array(
+		// deviceDetails
+		'deviceType' => array(
+			'length' => 10,
+			'flag'	=> FILTER_SANITIZE_STRING
+		),
+		'deviceName' => array(
+			'length' => 255,
+			'flag'	=> FILTER_DEFAULT
+		),
+		'deviceOS' => array(
+			'length' => 255,
+			'flag'	=> FILTER_DEFAULT
+		),
+		'browser' => array(
+			'length' => 255,
+			'flag'	=> FILTER_DEFAULT
+		),
+		'ipAddress' => array(
+			'length' => 15,
+			'flag'	=> FILTER_VALIDATE_IP
+		),
+		// deviceDetails END
+		
+		// userDetails, shippingAddress, billingAddress
+		'firstName' => array(
+			'length' => 30,
+			'flag'	=> FILTER_DEFAULT
+		),
+		'lastName' => array(
+			'length' => 40,
+			'flag'	=> FILTER_DEFAULT
+		),
+		'address' => array(
+			'length' => 60,
+			'flag'	=> FILTER_DEFAULT
+		),
+		'cell' => array(
+			'length' => 18,
+			'flag'	=> FILTER_DEFAULT
+		),
+		'phone' => array(
+			'length' => 18,
+			'flag'	=> FILTER_DEFAULT
+		),
+		'zip' => array(
+			'length' => 10,
+			'flag'	=> FILTER_DEFAULT
+		),
+		'city' => array(
+			'length' => 30,
+			'flag'	=> FILTER_DEFAULT
+		),
+		'country' => array(
+			'length' => 20,
+			'flag'	=> FILTER_SANITIZE_STRING
+		),
+		'state' => array(
+			'length' => 2,
+			'flag'	=> FILTER_SANITIZE_STRING
+		),
+		'email' => array(
+			'length' => 100,
+			'flag'	=> FILTER_VALIDATE_EMAIL
+		),
+		'county' => array(
+			'length' => 255,
+			'flag'	=> FILTER_DEFAULT
+		),
+		// userDetails, shippingAddress, billingAddress END
+		
+		// specific for shippingAddress
+		'shippingCounty' => array(
+			'length' => 255,
+			'flag'	=> FILTER_DEFAULT
+		),
+		'addressLine2' => array(
+			'length' => 50,
+			'flag'	=> FILTER_DEFAULT
+		),
+		'addressLine3' => array(
+			'length' => 50,
+			'flag'	=> FILTER_DEFAULT
+		),
+		// specific for shippingAddress END
+		
+		// urlDetails
+		'successUrl' => array(
+			'length' => 1000,
+			'flag'	=> FILTER_VALIDATE_URL
+		),
+		'failureUrl' => array(
+			'length' => 1000,
+			'flag'	=> FILTER_VALIDATE_URL
+		),
+		'pendingUrl' => array(
+			'length' => 1000,
+			'flag'	=> FILTER_VALIDATE_URL
+		),
+		'notificationUrl' => array(
+			'length' => 1000,
+			'flag'	=> FILTER_VALIDATE_URL
+		),
+		// urlDetails END
+	);
 
     /**
      * Object constructor.
@@ -178,7 +285,44 @@ abstract class AbstractRequest extends AbstractApi
     protected function prepareParams()
     {
         $params = $this->getParams();
+		
+		// validate params
+		$this->config->createLog('Try to validate request parameters.');
+		
+		foreach($params as $key1 => $val1) {
+			if(!is_array($val1) && !empty($val1) && array_key_exists($key1, $this->params_validation)) {
+				$new_val = $val1;
+				
+				if(mb_strlen($val1) > $this->params_validation[$key1]['length']) {
+					$new_val = mb_substr($val1, 0, $this->params_validation[$key1]['length']);
+					
+					$this->config->createLog($key1, 'Limit');
+				}
+				
+				$new_val = filter_var($new_val, $this->params_validation[$key1]['flag']);
+				
+				$params[$key1] = $new_val;
+			}
+			else if(is_array($val1) && !empty($val1)) {
+				foreach($val1 as $key2 => $val2) {
+					if(!is_array($val2) && !empty($val2) && array_key_exists($key2, $this->params_validation)) {
+						$new_val = $val2;
 
+						if(mb_strlen($val2) > $this->params_validation[$key2]['length']) {
+							$new_val = mb_substr($val2, 0, $this->params_validation[$key2]['length']);
+							
+							$this->config->createLog($key2, 'Limit');
+						}
+
+						$new_val = filter_var($new_val, $this->params_validation[$key2]['flag']);
+
+						$params[$key1][$key2] = $new_val;
+					}
+				}
+			}
+		}
+		// validate params END
+		
         $checksumKeys = $this->getChecksumKeys();
         if (empty($checksumKeys)) {
             return $params;
