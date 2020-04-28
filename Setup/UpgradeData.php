@@ -17,7 +17,7 @@ class UpgradeData implements UpgradeDataInterface
      * @var OrderStatusFactory
      */
     private $orderStatusFactory;
-	
+    
     private $resourceConnection;
 
     /**
@@ -27,7 +27,7 @@ class UpgradeData implements UpgradeDataInterface
      */
     public function __construct(
         OrderStatusFactory $orderStatusFactory,
-		\Magento\Framework\App\ResourceConnection $resourceConnection
+        \Magento\Framework\App\ResourceConnection $resourceConnection
     ) {
         $this->orderStatusFactory = $orderStatusFactory;
         $this->resourceConnection = $resourceConnection;
@@ -85,12 +85,12 @@ class UpgradeData implements UpgradeDataInterface
                 ->save();
             $scRefunded->assignState(Order::STATE_PROCESSING, false, false);
         }
-		// a patch for last three statuses above
-		elseif (version_compare($context->getVersion(), '2.0.3', '<')) {
-			$this->resourceConnection->getConnection()->query("UPDATE sales_order_status_state SET is_default = 0 WHERE sales_order_status_state.status = 'sc_refunded';");
-			$this->resourceConnection->getConnection()->query("UPDATE sales_order_status_state SET is_default = 0 WHERE sales_order_status_state.status = 'sc_processing';");
-			$this->resourceConnection->getConnection()->query("UPDATE sales_order_status_state SET is_default = 0 WHERE sales_order_status_state.status = 'sc_auth';");
-		}
+        // a patch for last three statuses above
+        elseif (version_compare($context->getVersion(), '2.0.3', '<')) {
+            $this->resourceConnection->getConnection()->query("UPDATE sales_order_status_state SET is_default = 0 WHERE sales_order_status_state.status = 'sc_refunded';");
+            $this->resourceConnection->getConnection()->query("UPDATE sales_order_status_state SET is_default = 0 WHERE sales_order_status_state.status = 'sc_processing';");
+            $this->resourceConnection->getConnection()->query("UPDATE sales_order_status_state SET is_default = 0 WHERE sales_order_status_state.status = 'sc_auth';");
+        }
 
         $setup->endSetup();
     }

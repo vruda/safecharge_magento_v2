@@ -230,14 +230,14 @@ class Config
 
         foreach ($SC_DEVICES_TYPES as $d) {
             if (strstr($user_agent, $d) !== false) {
-                if (in_array($d, array('linux', 'windows', 'macintosh'), true)) {
+                if (in_array($d, ['linux', 'windows', 'macintosh'], true)) {
                     $device_details['deviceType'] = 'DESKTOP';
-                } else if('mobile' === $d) {
-					$device_details['deviceType'] = 'SMARTPHONE';
-                } else if('tablet' === $d) {
-					$device_details['deviceType'] = 'TABLET';
+                } elseif ('mobile' === $d) {
+                    $device_details['deviceType'] = 'SMARTPHONE';
+                } elseif ('tablet' === $d) {
+                    $device_details['deviceType'] = 'TABLET';
                 } else {
-					$device_details['deviceType'] = 'TV';
+                    $device_details['deviceType'] = 'TV';
                 }
 
                 break;

@@ -339,24 +339,25 @@ define(
                             $('body').trigger('processStart');
 
                             $.ajax(ajaxData)
-                            .done(function(postData) {
-                                if (postData) {
-                                    if(
-                                        self.chosenApmMethod() === 'cc_card'
-                                        && transactionId != 'undefined'
-                                    ) {
-                                        window.location.href = postData.url;
-                                    }
+								.done(function(postData) {
+									if (postData) {
+										if(
+											self.chosenApmMethod() === 'cc_card'
+											&& typeof transactionId != 'undefined'
+											&& !isNaN(transactionId)
+										) {
+											window.location.href = postData.url;
+										}
 
-                                    $.redirect(postData.url, postData.params, "POST");
-                                }
-                                else {
-                                    window.location.reload();
-                                }
-                            })
-                            .fail(function() {
-                                window.location.reload();
-                            });
+										$.redirect(postData.url, postData.params, "POST");
+									}
+									else {
+										window.location.reload();
+									}
+								})
+								.fail(function() {
+									window.location.reload();
+								});
                         }.bind(self));
 
                     return true;

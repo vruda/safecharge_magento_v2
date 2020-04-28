@@ -127,7 +127,10 @@ class OpenOrder extends AbstractRequest implements RequestInterface
             $email = $this->cart->getQuote()->getCustomerEmail();
         }
         if (empty($email)) {
-            $email = filter_input(INPUT_COOKIE, 'guestSippingMail', FILTER_VALIDATE_EMAIL);
+            $email = $this->config->getCheckoutSession()->getQuote()->getCustomerEmail();
+        }
+        if (empty($email)) {
+            $email = filter_var($_COOKIE['guestSippingMail'], FILTER_VALIDATE_EMAIL);
         }
         if (empty($email)) {
             $email = 'quoteID_' . $this->config->getCheckoutSession()->getQuoteId() . '@magentoMerchant.com';
@@ -147,6 +150,9 @@ class OpenOrder extends AbstractRequest implements RequestInterface
         if (empty($b_l_name)) {
             $b_l_name = $this->cart->getQuote()->getCustomerLastname();
         }
+        
+        $this->config->createLog($email, 'OpenOrder mail');
+        $this->config->createLog($shipping_email, 'OpenOrder shipping email');
         
         $params = array_merge_recursive(
             [

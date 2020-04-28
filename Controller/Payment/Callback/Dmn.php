@@ -2,33 +2,17 @@
 
 namespace Safecharge\Safecharge\Controller\Payment\Callback;
 
-use Magento\Checkout\Model\Session as CheckoutSession;
-use Magento\Checkout\Model\Type\Onepage;
-use Magento\Framework\App\Action\Action;
-use Magento\Framework\App\Action\Context;
-use Magento\Framework\Controller\Result\JsonFactory;
-use Magento\Framework\DataObjectFactory;
-use Magento\Quote\Api\CartManagementInterface;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Invoice;
-use Magento\Sales\Model\Order\Payment as OrderPayment;
-use Magento\Sales\Model\Order\Payment\State\AuthorizeCommand;
-use Magento\Sales\Model\Order\Payment\State\CaptureCommand;
 use Magento\Sales\Model\Order\Payment\Transaction;
-use Magento\Sales\Model\OrderFactory;
-use Safecharge\Safecharge\Model\Config as ModuleConfig;
-use Safecharge\Safecharge\Model\Logger as SafechargeLogger;
 use Safecharge\Safecharge\Model\Payment;
-use Safecharge\Safecharge\Model\Request\Payment\Factory as PaymentRequestFactory;
-
-use Magento\Framework\App\CsrfAwareActionInterface;
 use Magento\Framework\App\Request\InvalidRequestException;
 use Magento\Framework\App\RequestInterface;
 
 /**
  * Safecharge Safecharge payment redirect controller.
  */
-class Dmn extends Action implements CsrfAwareActionInterface
+class Dmn implements \Magento\Framework\App\CsrfAwareActionInterface
 {
     /**
      * @var OrderFactory
@@ -41,24 +25,9 @@ class Dmn extends Action implements CsrfAwareActionInterface
     private $moduleConfig;
 
     /**
-     * @var AuthorizeCommand
-     */
-    private $authorizeCommand;
-
-    /**
      * @var CaptureCommand
      */
     private $captureCommand;
-
-    /**
-     * @var SafechargeLogger
-     */
-    private $safechargeLogger;
-
-    /**
-     * @var PaymentRequestFactory
-     */
-    private $paymentRequestFactory;
 
     /**
      * @var DataObjectFactory
@@ -71,16 +40,6 @@ class Dmn extends Action implements CsrfAwareActionInterface
     private $cartManagement;
 
     /**
-     * @var CheckoutSession
-     */
-    private $checkoutSession;
-
-    /**
-     * @var Onepage
-     */
-    private $onepageCheckout;
-
-    /**
      * @var JsonFactory
      */
     private $jsonResultFactory;
@@ -89,58 +48,40 @@ class Dmn extends Action implements CsrfAwareActionInterface
     private $invoiceService;
     private $invoiceRepository;
     private $transObj;
+    private $quoteFactory;
+    private $request;
 
     /**
      * Object constructor.
-     *
-     * @param Context                 $context
-     * @param PaymentRequestFactory   $paymentRequestFactory
-     * @param OrderFactory            $orderFactory
-     * @param ModuleConfig            $moduleConfig
-     * @param AuthorizeCommand        $authorizeCommand
-     * @param CaptureCommand          $captureCommand
-     * @param SafechargeLogger        $safechargeLogger
-     * @param DataObjectFactory       $dataObjectFactory
-     * @param CartManagementInterface $cartManagement
-     * @param CheckoutSession         $checkoutSession
-     * @param Onepage                 $onepageCheckout
-     * @param JsonFactory             $jsonResultFactory
      */
     public function __construct(
-        Context $context,
-        PaymentRequestFactory $paymentRequestFactory,
-        OrderFactory $orderFactory,
-        ModuleConfig $moduleConfig,
-        AuthorizeCommand $authorizeCommand,
-        CaptureCommand $captureCommand,
-        SafechargeLogger $safechargeLogger,
-        DataObjectFactory $dataObjectFactory,
-        CartManagementInterface $cartManagement,
-        CheckoutSession $checkoutSession,
-        Onepage $onepageCheckout,
-        JsonFactory $jsonResultFactory,
+        \Magento\Sales\Model\OrderFactory $orderFactory,
+        \Safecharge\Safecharge\Model\Config $moduleConfig,
+        \Magento\Sales\Model\Order\Payment\State\CaptureCommand $captureCommand,
+        \Magento\Framework\DataObjectFactory $dataObjectFactory,
+        \Magento\Quote\Api\CartManagementInterface $cartManagement,
+        \Magento\Framework\Controller\Result\JsonFactory $jsonResultFactory,
         \Magento\Framework\DB\Transaction $transaction,
         \Magento\Sales\Model\Service\InvoiceService $invoiceService,
         \Magento\Sales\Api\InvoiceRepositoryInterface $invoiceRepository,
         \Magento\Sales\Model\Order\Payment\Transaction\BuilderInterface $transObj
+		,\Magento\Quote\Model\QuoteFactory $quoteFactory
+		,\Magento\Framework\App\RequestInterface $request
+		,\Magento\Framework\Event\ManagerInterface $eventManager
     ) {
-        parent::__construct($context);
-
         $this->orderFactory                = $orderFactory;
         $this->moduleConfig                = $moduleConfig;
-        $this->authorizeCommand            = $authorizeCommand;
         $this->captureCommand            = $captureCommand;
-        $this->safechargeLogger            = $safechargeLogger;
-        $this->paymentRequestFactory    = $paymentRequestFactory;
         $this->dataObjectFactory        = $dataObjectFactory;
         $this->cartManagement            = $cartManagement;
-        $this->checkoutSession            = $checkoutSession;
-        $this->onepageCheckout            = $onepageCheckout;
         $this->jsonResultFactory        = $jsonResultFactory;
         $this->transaction                = $transaction;
         $this->invoiceService            = $invoiceService;
         $this->invoiceRepository        = $invoiceRepository;
         $this->transObj                    = $transObj;
+		$this->quoteFactory				= $quoteFactory;
+		$this->request = $request;
+		$this->_eventManager = $eventManager;
     }
     
     /**
@@ -165,15 +106,18 @@ class Dmn extends Action implements CsrfAwareActionInterface
      */
     public function execute()
     {
+		$jsonOutput = $this->jsonResultFactory->create();
+		$jsonOutput->setHttpResponseCode(200);
+		
         if (!$this->moduleConfig->isActive()) {
-            var_export('DMN Error - SafeCharge payment module is not active!');
-            return;
+			$jsonOutput->setData('DMN Error - SafeCharge payment module is not active!');
+			return $jsonOutput;
         }
         
         try {
             $params = array_merge(
-                $this->getRequest()->getParams(),
-                $this->getRequest()->getPostValue()
+                $this->request->getParams(),
+                $this->request->getPostValue()
             );
             
             $status = !empty($params['Status']) ? strtolower($params['Status']) : null;
@@ -182,15 +126,26 @@ class Dmn extends Action implements CsrfAwareActionInterface
             $this->validateChecksum($params);
             
             if (empty($params['transactionType'])) {
-                var_export('DMN error - missing Transaction Type.');
-                return;
+                $this->moduleConfig->createLog('DMN error - missing Transaction Type.');
+				
+				$jsonOutput->setData('DMN error - missing Transaction Type.');
+				return $jsonOutput;
+            }
+            
+            if (in_array($params['transactionType'], ['Auth', 'Sale']) && $status === 'declined') {
+                $this->moduleConfig->createLog('DMN message - Declined Order, process stops here.');
+				
+				$jsonOutput->setData('DMN error - Declined Order, process stops here.');
+				return $jsonOutput;
             }
             
             if (empty($params['TransactionID'])) {
-                var_export('DMN error - missing Transaction ID.');
-                return;
+                $this->moduleConfig->createLog('DMN error - missing Transaction ID.');
+				
+				$jsonOutput->setData('DMN error - missing Transaction ID.');
+				return $jsonOutput;
             }
-
+			
             if (!empty($params["order"])) {
                 $orderIncrementId = $params["order"];
             } elseif (!empty($params["merchant_unique_id"]) && intval($params["merchant_unique_id"]) != 0) {
@@ -198,9 +153,10 @@ class Dmn extends Action implements CsrfAwareActionInterface
             } elseif (!empty($params["orderId"])) {
                 $orderIncrementId = $params["orderId"];
             } else {
-                $this->moduleConfig->createLog('DMN error - no order id parameter.');
-                var_export('DMN error - no order id parameter.');
-                return;
+                $this->moduleConfig->createLog('DMN error - no Order ID parameter.');
+				
+				$jsonOutput->setData('DMN error - no Order ID parameter.');
+				return $jsonOutput;
             }
 
             $tryouts = 0;
@@ -211,20 +167,23 @@ class Dmn extends Action implements CsrfAwareActionInterface
                 $order = $this->orderFactory->create()->loadByIncrementId($orderIncrementId);
 
                 if (!($order && $order->getId())) {
-                    $this->moduleConfig->createLog('DMN try ' . $tryouts . ' there is NO order yet.');
+                    $this->moduleConfig->createLog('DMN try ' . $tryouts
+						. ' there is NO order for TransactionID ' . $params['TransactionID'] . ' yet.');
                     sleep(3);
                 }
-            } while ($tryouts <=10 && !($order && $order->getId()));
+            } while ($tryouts < 5 && !($order && $order->getId()));
 
             # try to create the order
             if (!($order && $order->getId())) {
                 $this->moduleConfig->createLog('Order '. $orderIncrementId .' not found, try to create it!');
                 
-                $result = $this->placeOrder();
+                $result = $this->placeOrder($params);
                 
                 if ($result->getSuccess() !== true) {
-                    var_export('DMN Callback error - place order error:' . $result->getErrorMessage());
-                    return;
+					$this->moduleConfig->createLog('DMN Callback error - place order error: ' . $result->getMessage());
+					
+					$jsonOutput->setData('DMN Callback error - place order error: ' . $result->getMessage());
+					return $jsonOutput;
                 }
                 
                 $order = $this->orderFactory->create()->loadByIncrementId($orderIncrementId);
@@ -234,12 +193,10 @@ class Dmn extends Action implements CsrfAwareActionInterface
             # try to create the order END
             
             if (empty($order)) {
-                var_export('DMN Callback error - there is no Order and the code did not success to made it.');
-                return;
+				$jsonOutput->setData('DMN Callback error - there is no Order and the code did not success to made it.');
+				return $jsonOutput;
             }
             
-            $this->moduleConfig->createLog('DMN try ' . $tryouts . ', there IS order.');
-
             /** @var OrderPayment $payment */
             $orderPayment    = $order->getPayment();
             $order_status    = $orderPayment->getAdditionalInformation(Payment::TRANSACTION_STATUS);
@@ -247,6 +204,7 @@ class Dmn extends Action implements CsrfAwareActionInterface
             
             $tr_type_param    = strtolower($params['transactionType']);
             
+			// do not overwrite Order status
             if (strtolower($order_tr_type) == $tr_type_param
                 && strtolower($order_status) == 'approved'
                 && $order_status != $params['Status']
@@ -256,9 +214,29 @@ class Dmn extends Action implements CsrfAwareActionInterface
                     .'. Do not apply DMN data on the Order!';
                 
                 $this->moduleConfig->createLog($msg);
-                var_export($msg);
-                return;
+				$jsonOutput->setData($msg);
+				return $jsonOutput;
             }
+			
+			if(
+				in_array(strtolower($order_tr_type), array('credit', 'refund', 'void'))
+				&& strtolower($order_status) == 'approved'
+			) {
+				$msg = 'No more actions are allowed for order #' . $order->getId();
+				
+				$this->moduleConfig->createLog($msg);
+				$jsonOutput->setData($msg);
+				return $jsonOutput;
+			}
+			
+			if($tr_type_param === 'auth' && strtolower($order_tr_type) === 'settle') {
+				$msg = 'Can not set Auth to Settled Order #' . $order->getId();
+				
+				$this->moduleConfig->createLog($msg);
+				$jsonOutput->setData($msg);
+				return $jsonOutput;
+			}
+			// do not overwrite Order status END
 
             $orderPayment->setAdditionalInformation(
                 Payment::TRANSACTION_ID,
@@ -512,13 +490,15 @@ class Dmn extends Action implements CsrfAwareActionInterface
             $msg = $e->getMessage();
 
             $this->moduleConfig->createLog($e->getMessage() . "\n\r" . $e->getTraceAsString(), 'DMN Excception:');
-            var_export('Error: ' . $e->getMessage());
-            return;
+			
+			$jsonOutput->setData('Error: ' . $e->getMessage());
+			return $jsonOutput;
         }
 
         $this->moduleConfig->createLog('DMN process end for order #' . $orderIncrementId);
-        var_export('DMN with status '. $status .' process completed.');
-        return;
+        
+		$jsonOutput->setData('DMN process end for order #' . $orderIncrementId);
+		return $jsonOutput;
     }
     
     /**
@@ -526,21 +506,38 @@ class Dmn extends Action implements CsrfAwareActionInterface
      *
      * @return DataObject
      */
-    private function placeOrder()
+    private function placeOrder($params)
     {
-        $result = $this->dataObjectFactory->create();
-        $params = array_merge(
-            $this->getRequest()->getParams(),
-            $this->getRequest()->getPostValue()
-        );
-
+		$this->moduleConfig->createLog('PlaceOrder()');
+		
+		$result	= $this->dataObjectFactory->create();
+		
         try {
-            /**
-             * Current workaround depends on Onepage checkout model defect
-             * Method Onepage::getCheckoutMethod performs setCheckoutMethod
-             */
-            $this->onepageCheckout->getCheckoutMethod();
+			$quote	= $this->quoteFactory->create()->loadByIdWithoutStore((int) $params['quote']);
 
+			if (intval($quote->getIsActive()) == 0) {
+				$this->moduleConfig->createLog($quote->getIsActive(), 'Quote is not active.');
+				$this->moduleConfig->createLog($quote->getQuoteId(), 'Quote ID');
+
+				return $result
+					->setData('error', true)
+					->setData('message', 'Quote is not active.');
+			}
+
+			if ($quote->getPayment()->getMethod() !== Payment::METHOD_CODE) {
+				$this->moduleConfig->createLog($quote->getPayment()->getMethod(), 'Quote payment method is');
+
+				return $result
+					->setData('error', true)
+					->setData('message', 'Quote payment method is "'
+						. $quote->getPayment()->getMethod() . '"');
+			}
+
+			$params = array_merge(
+				$this->request->getParams(),
+				$this->request->getPostValue()
+			);
+			
             $orderId = $this->cartManagement->placeOrder((int) $params['quote']);
 
             $result
@@ -556,7 +553,10 @@ class Dmn extends Action implements CsrfAwareActionInterface
             );
         } catch (\Exception $exception) {
             $this->moduleConfig->createLog($exception->getMessage(), 'DMN placeOrder Exception: ');
-            $result->setData('error', true);
+            
+            return $result
+                ->setData('error', true)
+                ->setData('message', $exception->getMessage());
         }
         
         return $result;
@@ -564,13 +564,16 @@ class Dmn extends Action implements CsrfAwareActionInterface
     
     private function validateChecksum($params)
     {
+		$result = $this->jsonResultFactory->create();
+		$result->setHttpResponseCode(200);
+		
         if (!isset($params["advanceResponseChecksum"])) {
             $msg = 'Required key advanceResponseChecksum for checksum calculation is missing.';
             
-            var_export($msg);
             $this->moduleConfig->createLog($msg);
-            
-            throw new \Exception(__($msg));
+			
+			$result->setData($msg);
+			return $result;
         }
         
         $concat = $this->moduleConfig->getMerchantSecretKey();
@@ -578,13 +581,10 @@ class Dmn extends Action implements CsrfAwareActionInterface
         foreach (['totalAmount', 'currency', 'responseTimeStamp', 'PPP_TransactionID', 'Status', 'productId'] as $checksumKey) {
             if (!isset($params[$checksumKey])) {
                 $msg = 'Required key '. $checksumKey .' for checksum calculation is missing.';
-                
-                var_export($msg);
                 $this->moduleConfig->createLog($msg);
-                
-                throw new \Exception(
-                    __('Required key %1 for checksum calculation is missing.', $checksumKey)
-                );
+				
+				$result->setData($msg);
+				return $result;
             }
 
             if (is_array($params[$checksumKey])) {
@@ -600,11 +600,11 @@ class Dmn extends Action implements CsrfAwareActionInterface
         
         if ($params["advanceResponseChecksum"] !== $checksum) {
             $msg = 'Checksum validation failed!';
+			
+			$this->moduleConfig->createLog($msg);
             
-            var_export('Checksum validation failed!');
-            $this->moduleConfig->createLog($msg);
-            
-            throw new \Exception(__($msg));
+			$result->setData($msg);
+			return $result;
         }
 
         return true;
