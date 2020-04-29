@@ -128,18 +128,24 @@ class CompleteOld extends Action
         
         $resultRedirect    = $this->resultFactory->create(ResultFactory::TYPE_REDIRECT);
         $form_key        = filter_input(INPUT_GET, 'form_key');
-        
+
         try {
-            // the Order was not saved in the Redirect class
-            if (empty($params['order_db_id'])) {
+//                $reservedOrderId = $this->checkoutSession->getQuote()->getReservedOrderId();
+//                $this->moduleConfig->createLog($reservedOrderId, '$reservedOrderId');
+                
+                $this->moduleConfig->createLog($this->checkoutSession->getQuote()->getIsActive(), 'IsActive');
+                
+            if (intval($this->checkoutSession->getQuote()->getIsActive()) === 1) {
                 // if the option for save the order in the Redirect is ON, skip placeOrder !!!
                 $result = $this->placeOrder();
 
                 if ($result->getSuccess() !== true) {
-                    $this->moduleConfig->createLog($result->getErrorMessage(), 'Complete Callback error - place order error');
+                    $this->moduleConfig->createLog($result->getMessage(), 'Complete Callback error - place order error');
 
                     throw new PaymentException(__($result->getErrorMessage()));
                 }
+            } else {
+                $this->moduleConfig->createLog('Attention - the Quote is not active! The Order was not placed.');
             }
             
             if (isset($params['Status'])
@@ -182,7 +188,7 @@ class CompleteOld extends Action
              * Method Onepage::getCheckoutMethod performs setCheckoutMethod
              */
             $this->onepageCheckout->getCheckoutMethod();
-
+            
             $orderId = $this->cartManagement->placeOrder($this->getQuoteId());
 
             $result
@@ -202,7 +208,7 @@ class CompleteOld extends Action
             $result
                 ->setData('error', true)
                 ->setData(
-                    'error_message',
+                    'message',
                     __('An error occurred on the server. Please check your Order History and if the Order is not there, try to place it again!')
                 );
         }
