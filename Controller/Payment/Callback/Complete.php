@@ -152,8 +152,6 @@ class Complete extends Action implements CsrfAwareActionInterface
         $form_key        = filter_input(INPUT_GET, 'form_key');
 
         try {
-            // the Order was not saved in the Redirect class
-//            if (empty($params['order_db_id'])) {
 //                $reservedOrderId = $this->checkoutSession->getQuote()->getReservedOrderId();
 //                $this->moduleConfig->createLog($reservedOrderId, '$reservedOrderId');
                 
@@ -171,7 +169,6 @@ class Complete extends Action implements CsrfAwareActionInterface
             } else {
                 $this->moduleConfig->createLog('Attention - the Quote is not active! The Order was not placed.');
             }
-//            }
             
             if (isset($params['Status'])
                 && !in_array(strtolower($params['Status']), ['approved', 'success'])
