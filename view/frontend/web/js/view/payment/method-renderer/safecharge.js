@@ -246,20 +246,21 @@ define(
 								}
                             }
                             else {
-                                if('undefined' != resp.errorDescription && '' != resp.errorDescription) {
-                                    if(!alert($.mage.__(resp.errorDescription))) {
-										scGetAPMsAgain = true;
-										self.getApmMethods();
-									}
-                                }
-                                else {
-									console.log(resp);
-									
-                                    if(!alert($.mage.__('Error with your Payment. Please try again later!'))) {
-										scGetAPMsAgain = true;
-										self.getApmMethods();
-									}
-                                }
+                                var respError = 'Error with your Payment. Please try again later!';
+								
+								if(resp.hasOwnProperty('errorDescription') && '' != resp.errorDescription) {
+									respError = resp.errorDescription;
+								}
+								else if(resp.hasOwnProperty('reason') && '' != resp.reason) {
+									respError = resp.reason;
+								}
+								
+								console.error(resp);
+								
+								if(!alert($.mage.__(respError))) {
+									scGetAPMsAgain = true;
+									self.getApmMethods();
+								}
                             }
                         }
                         else {
