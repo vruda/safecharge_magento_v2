@@ -1,5 +1,9 @@
-2.0.4.x
-=============
+# Magento 2 Safecharge Payments Module
+
+---
+
+## 2.0.4.x
+```
 	* Removed admin option Save Order before success.
 	* The DMN class no longer extends Action class.
 	* In the DMN class added check for Declined Order - Auth or Sale type.
