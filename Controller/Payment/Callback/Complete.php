@@ -2,24 +2,10 @@
 
 namespace Safecharge\Safecharge\Controller\Payment\Callback;
 
-use Magento\Checkout\Model\Session as CheckoutSession;
-use Magento\Checkout\Model\Type\Onepage;
-use Magento\Framework\App\Action\Action;
-use Magento\Framework\App\Action\Context;
 use Magento\Framework\Controller\ResultFactory;
-use Magento\Framework\Controller\ResultInterface;
-use Magento\Framework\DataObject;
-use Magento\Framework\DataObjectFactory;
+//use Magento\Framework\Controller\ResultInterface;
+//use Magento\Framework\DataObject;
 use Magento\Framework\Exception\PaymentException;
-use Magento\Quote\Api\CartManagementInterface;
-use Magento\Sales\Model\Order\Payment\State\AuthorizeCommand;
-use Magento\Sales\Model\Order\Payment\State\CaptureCommand;
-use Magento\Sales\Model\OrderFactory;
-use Safecharge\Safecharge\Model\Config as ModuleConfig;
-use Safecharge\Safecharge\Model\Logger as SafechargeLogger;
-use Safecharge\Safecharge\Model\Request\Payment\Factory as PaymentRequestFactory;
-
-use Magento\Framework\App\CsrfAwareActionInterface;
 use Magento\Framework\App\Request\InvalidRequestException;
 use Magento\Framework\App\RequestInterface;
 
@@ -27,32 +13,12 @@ use Magento\Framework\App\RequestInterface;
  * Safecharge Safecharge redirect success controller.
  */
 //class Success extends Action
-class Complete extends Action implements CsrfAwareActionInterface
+class Complete extends \Magento\Framework\App\Action\Action implements \Magento\Framework\App\CsrfAwareActionInterface
 {
-    /**
-     * @var OrderFactory
-     */
-    private $orderFactory;
-
     /**
      * @var ModuleConfig
      */
     private $moduleConfig;
-
-    /**
-     * @var AuthorizeCommand
-     */
-    private $authorizeCommand;
-
-    /**
-     * @var CaptureCommand
-     */
-    private $captureCommand;
-
-    /**
-     * @var SafechargeLogger
-     */
-    private $safechargeLogger;
 
     /**
      * @var PaymentRequestFactory
@@ -84,36 +50,24 @@ class Complete extends Action implements CsrfAwareActionInterface
      *
      * @param Context                 $context
      * @param PaymentRequestFactory   $paymentRequestFactory
-     * @param OrderFactory            $orderFactory
      * @param ModuleConfig            $moduleConfig
-     * @param AuthorizeCommand        $authorizeCommand
-     * @param CaptureCommand          $captureCommand
-     * @param SafechargeLogger        $safechargeLogger
      * @param DataObjectFactory       $dataObjectFactory
      * @param CartManagementInterface $cartManagement
      * @param CheckoutSession         $checkoutSession
      * @param Onepage                 $onepageCheckout
      */
     public function __construct(
-        Context $context,
-        PaymentRequestFactory $paymentRequestFactory,
-        OrderFactory $orderFactory,
-        ModuleConfig $moduleConfig,
-        AuthorizeCommand $authorizeCommand,
-        CaptureCommand $captureCommand,
-        SafechargeLogger $safechargeLogger,
-        DataObjectFactory $dataObjectFactory,
-        CartManagementInterface $cartManagement,
-        CheckoutSession $checkoutSession,
-        Onepage $onepageCheckout
+        \Magento\Framework\App\Action\Context $context,
+        \Safecharge\Safecharge\Model\Request\Payment\Factory $paymentRequestFactory,
+        \Safecharge\Safecharge\Model\Config $moduleConfig,
+        \Magento\Framework\DataObjectFactory $dataObjectFactory,
+        \Magento\Quote\Api\CartManagementInterface $cartManagement,
+        \Magento\Checkout\Model\Session $checkoutSession,
+        \Magento\Checkout\Model\Type\Onepage $onepageCheckout
     ) {
         parent::__construct($context);
 
-        $this->orderFactory                = $orderFactory;
         $this->moduleConfig                = $moduleConfig;
-        $this->authorizeCommand            = $authorizeCommand;
-        $this->captureCommand            = $captureCommand;
-        $this->safechargeLogger            = $safechargeLogger;
         $this->paymentRequestFactory    = $paymentRequestFactory;
         $this->dataObjectFactory        = $dataObjectFactory;
         $this->cartManagement            = $cartManagement;

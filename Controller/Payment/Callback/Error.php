@@ -2,27 +2,17 @@
 
 namespace Safecharge\Safecharge\Controller\Payment\Callback;
 
-use Magento\Framework\App\Action\Action;
-use Magento\Framework\App\Action\Context;
 use Magento\Framework\Controller\ResultFactory;
-use Magento\Framework\Controller\ResultInterface;
-use Safecharge\Safecharge\Model\Config as ModuleConfig;
-use Safecharge\Safecharge\Model\Logger as SafechargeLogger;
+//use Magento\Framework\Controller\ResultInterface;
 
-use Magento\Framework\App\CsrfAwareActionInterface;
 use Magento\Framework\App\Request\InvalidRequestException;
 use Magento\Framework\App\RequestInterface;
 
 /**
  * Safecharge Safecharge payment place controller.
  */
-class Error extends Action implements CsrfAwareActionInterface
+class Error extends \Magento\Framework\App\Action\Action implements \Magento\Framework\App\CsrfAwareActionInterface
 {
-    /**
-     * @var SafechargeLogger
-     */
-    private $safechargeLogger;
-
     /**
      * @var ModuleConfig
      */
@@ -32,17 +22,14 @@ class Error extends Action implements CsrfAwareActionInterface
      * Error constructor.
      *
      * @param Context          $context
-     * @param SafechargeLogger $safechargeLogger
      * @param ModuleConfig     $moduleConfig
      */
     public function __construct(
-        Context $context,
-        SafechargeLogger $safechargeLogger,
-        ModuleConfig $moduleConfig
+        \Magento\Framework\App\Action\Context $context,
+        \Safecharge\Safecharge\Model\Config $moduleConfig
     ) {
         parent::__construct($context);
 
-        $this->safechargeLogger = $safechargeLogger;
         $this->moduleConfig = $moduleConfig;
     }
     

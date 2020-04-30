@@ -12,7 +12,7 @@ use Magento\Framework\App\RequestInterface;
 /**
  * Safecharge Safecharge payment redirect controller.
  */
-class Dmn implements \Magento\Framework\App\CsrfAwareActionInterface
+class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Framework\App\CsrfAwareActionInterface
 {
     /**
      * @var OrderFactory
@@ -55,16 +55,17 @@ class Dmn implements \Magento\Framework\App\CsrfAwareActionInterface
      * Object constructor.
      */
     public function __construct(
-        \Magento\Sales\Model\OrderFactory $orderFactory,
-        \Safecharge\Safecharge\Model\Config $moduleConfig,
-        \Magento\Sales\Model\Order\Payment\State\CaptureCommand $captureCommand,
-        \Magento\Framework\DataObjectFactory $dataObjectFactory,
-        \Magento\Quote\Api\CartManagementInterface $cartManagement,
-        \Magento\Framework\Controller\Result\JsonFactory $jsonResultFactory,
-        \Magento\Framework\DB\Transaction $transaction,
-        \Magento\Sales\Model\Service\InvoiceService $invoiceService,
-        \Magento\Sales\Api\InvoiceRepositoryInterface $invoiceRepository,
-        \Magento\Sales\Model\Order\Payment\Transaction\BuilderInterface $transObj
+		\Magento\Framework\App\Action\Context $context
+        ,\Magento\Sales\Model\OrderFactory $orderFactory
+        ,\Safecharge\Safecharge\Model\Config $moduleConfig
+        ,\Magento\Sales\Model\Order\Payment\State\CaptureCommand $captureCommand
+        ,\Magento\Framework\DataObjectFactory $dataObjectFactory
+        ,\Magento\Quote\Api\CartManagementInterface $cartManagement
+        ,\Magento\Framework\Controller\Result\JsonFactory $jsonResultFactory
+        ,\Magento\Framework\DB\Transaction $transaction
+        ,\Magento\Sales\Model\Service\InvoiceService $invoiceService
+        ,\Magento\Sales\Api\InvoiceRepositoryInterface $invoiceRepository
+        ,\Magento\Sales\Model\Order\Payment\Transaction\BuilderInterface $transObj
 		,\Magento\Quote\Model\QuoteFactory $quoteFactory
 		,\Magento\Framework\App\RequestInterface $request
 		,\Magento\Framework\Event\ManagerInterface $eventManager
@@ -80,8 +81,10 @@ class Dmn implements \Magento\Framework\App\CsrfAwareActionInterface
         $this->invoiceRepository        = $invoiceRepository;
         $this->transObj                    = $transObj;
 		$this->quoteFactory				= $quoteFactory;
-		$this->request = $request;
-		$this->_eventManager = $eventManager;
+		$this->request					= $request;
+		$this->_eventManager			= $eventManager;
+		
+		parent::__construct($context);
     }
     
     /**
@@ -238,6 +241,15 @@ class Dmn implements \Magento\Framework\App\CsrfAwareActionInterface
 			}
 			// do not overwrite Order status END
 
+			// add data to the Payment
+			$parent_trans_id = empty($params['relatedTransactionId']) ? null : $params['relatedTransactionId'];
+			
+			$orderPayment
+				->setTransactionId($params['TransactionID'])
+                ->setParentTransactionId($parent_trans_id)
+                ->setAuthCode($params['AuthCode']);
+			
+			/* TODO old remove it */
             $orderPayment->setAdditionalInformation(
                 Payment::TRANSACTION_ID,
                 $params['TransactionID']
@@ -269,6 +281,7 @@ class Dmn implements \Magento\Framework\App\CsrfAwareActionInterface
                 $params['transactionType']
             );
             
+			/* TODO old search for use and remove it */
             $orderPayment->setTransactionAdditionalInfo(
                 Transaction::RAW_DETAILS,
                 $params
@@ -287,10 +300,12 @@ class Dmn implements \Magento\Framework\App\CsrfAwareActionInterface
                 $refund_msg                = '';
                 $is_partial_settle        = false;
                 
-                if ($tr_type_param == 'auth') {
+                if ($tr_type_param == 'auth')
+				{
                     $transactionType        = Transaction::TYPE_AUTH;
                     $sc_transaction_type    = Payment::SC_AUTH;
                     
+					/* TODO old - test and remov it */
                     $orderPayment->setAdditionalInformation(
                         Payment::AUTH_PARAMS,
                         [
@@ -301,9 +316,9 @@ class Dmn implements \Magento\Framework\App\CsrfAwareActionInterface
                     );
                     
                     $orderPayment
+                        ->setAuthAmount($params['totalAmount'])
                         ->setIsTransactionPending(false)
-                        ->setIsTransactionClosed(false)
-                        ->setParentTransactionId(!empty($params['relatedTransactionId']) ? $params['relatedTransactionId'] : null);
+                        ->setIsTransactionClosed(0);
 
                     // set transaction
                     $transaction = $this->transObj->setPayment($orderPayment)
@@ -318,11 +333,12 @@ class Dmn implements \Magento\Framework\App\CsrfAwareActionInterface
                     $msg        = $orderPayment->prependMessage($message);
 
                     $orderPayment->addTransactionCommentsToOrder($tr_type, $msg);
-                } elseif (in_array($tr_type_param, ['sale', 'settle'])) {
+                }
+				elseif (in_array($tr_type_param, ['sale', 'settle'])) {
                     $transactionType        = Transaction::TYPE_CAPTURE;
                     $sc_transaction_type    = Payment::SC_SETTLED;
                     $invCollection            = $order->getInvoiceCollection();
-                    $inv_amount                = $order->getBaseGrandTotal();
+                    $inv_amount                = round(floatval($order->getBaseGrandTotal()), 2);
                         
                     if ('settle' == $tr_type_param
                         && round(floatval($params['item_amount_1']), 2)
@@ -332,6 +348,8 @@ class Dmn implements \Magento\Framework\App\CsrfAwareActionInterface
                         $inv_amount                = round(floatval($params['totalAmount']), 2);
                         $is_partial_settle        = true;
                     }
+					
+					$orderPayment->setSaleSettleAmount($inv_amount);
                     
                     if (count($invCollection) > 0) {
                         $this->moduleConfig->createLog('There is/are invoice/s');
@@ -388,8 +406,8 @@ class Dmn implements \Magento\Framework\App\CsrfAwareActionInterface
                             $this->moduleConfig->createLog('Sale - create an Auth transaction');
 
                             $orderPayment
-                                ->setIsTransactionPending(false)
-                                ->setIsTransactionClosed(false)
+                                ->setIsTransactionPending(0)
+                                ->setIsTransactionClosed(0)
                                 ->setParentTransactionId(null);
 
                             $transaction = $this->transObj->setPayment($orderPayment)
@@ -409,10 +427,8 @@ class Dmn implements \Magento\Framework\App\CsrfAwareActionInterface
                         }
                         
                         $orderPayment
-                            ->setIsTransactionPending($status === "pending" ? true: false)
-                            ->setIsTransactionClosed(false)
-                            ->setParentTransactionId(!empty($params['relatedTransactionId'])
-                                ? $params['relatedTransactionId'] : null);
+                            ->setIsTransactionPending(0)
+                            ->setIsTransactionClosed(0);
                         
                         // set transaction
                         $transaction = $this->transObj->setPayment($orderPayment)
@@ -427,7 +443,8 @@ class Dmn implements \Magento\Framework\App\CsrfAwareActionInterface
                         $msg        = $orderPayment->prependMessage($message);
                         
                         $orderPayment->addTransactionCommentsToOrder($tr_type, $msg);
-                    } elseif (!$order->canInvoice()) {
+                    }
+					elseif (!$order->canInvoice()) {
                         $this->moduleConfig->createLog('We can NOT create invoice.');
                     }
                 } elseif (in_array($tr_type_param, ['void', 'voidcredit'])) {
@@ -460,7 +477,7 @@ class Dmn implements \Magento\Framework\App\CsrfAwareActionInterface
                 if ($is_partial_settle) {
                     $order->addStatusHistoryComment(
                         __("The <b>Partial Settle</b> request for amount of "
-                            . "<b>" . number_format($inv_amount, 2, '.', '') . ' ' . $params['currency'] . "</b>, "
+                            . "<b>" . $inv_amount . ' ' . $params['currency'] . "</b>, "
                             . "returned <b>" . $params['Status'] . "</b> status.<br/>"
                             . 'Transaction ID: ' . $params['TransactionID'] .', Related Transaction ID: ')
                             . $params['relatedTransactionId'] . $refund_msg,
