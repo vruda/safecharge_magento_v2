@@ -11,11 +11,8 @@ use Magento\Framework\App\RequestInterface;
 
 /**
  * Safecharge Safecharge payment redirect controller.
- *
- * @category Safecharge
- * @package  Safecharge_Safecharge
  */
-class DmnOld
+class DmnOld extends \Magento\Framework\App\Action\Action
 {
     /**
      * @var OrderFactory
@@ -58,6 +55,7 @@ class DmnOld
      * Object constructor.
      */
     public function __construct(
+        \Magento\Framework\App\Action\Context $context,
         \Magento\Sales\Model\OrderFactory $orderFactory,
         \Safecharge\Safecharge\Model\Config $moduleConfig,
         \Magento\Sales\Model\Order\Payment\State\CaptureCommand $captureCommand,
@@ -67,10 +65,10 @@ class DmnOld
         \Magento\Framework\DB\Transaction $transaction,
         \Magento\Sales\Model\Service\InvoiceService $invoiceService,
         \Magento\Sales\Api\InvoiceRepositoryInterface $invoiceRepository,
-        \Magento\Sales\Model\Order\Payment\Transaction\BuilderInterface $transObj
-		,\Magento\Quote\Model\QuoteFactory $quoteFactory
-		,\Magento\Framework\App\RequestInterface $request
-		,\Magento\Framework\Event\ManagerInterface $eventManager
+        \Magento\Sales\Model\Order\Payment\Transaction\BuilderInterface $transObj,
+        \Magento\Quote\Model\QuoteFactory $quoteFactory,
+        \Magento\Framework\App\RequestInterface $request,
+        \Magento\Framework\Event\ManagerInterface $eventManager
     ) {
         $this->orderFactory                = $orderFactory;
         $this->moduleConfig                = $moduleConfig;
@@ -82,9 +80,11 @@ class DmnOld
         $this->invoiceService            = $invoiceService;
         $this->invoiceRepository        = $invoiceRepository;
         $this->transObj                    = $transObj;
-		$this->quoteFactory				= $quoteFactory;
-		$this->request = $request;
-		$this->_eventManager = $eventManager;
+        $this->quoteFactory                = $quoteFactory;
+        $this->request                    = $request;
+        $this->_eventManager            = $eventManager;
+        
+        parent::__construct($context);
     }
     
     /**
@@ -92,12 +92,12 @@ class DmnOld
      */
     public function execute()
     {
-		$jsonOutput = $this->jsonResultFactory->create();
-		$jsonOutput->setHttpResponseCode(200);
-		
+        $jsonOutput = $this->jsonResultFactory->create();
+        $jsonOutput->setHttpResponseCode(200);
+        
         if (!$this->moduleConfig->isActive()) {
-			$jsonOutput->setData('DMN Error - SafeCharge payment module is not active!');
-			return $jsonOutput;
+            $jsonOutput->setData('DMN Error - SafeCharge payment module is not active!');
+            return $jsonOutput;
         }
         
         try {
@@ -113,25 +113,25 @@ class DmnOld
             
             if (empty($params['transactionType'])) {
                 $this->moduleConfig->createLog('DMN error - missing Transaction Type.');
-				
-				$jsonOutput->setData('DMN error - missing Transaction Type.');
-				return $jsonOutput;
+                
+                $jsonOutput->setData('DMN error - missing Transaction Type.');
+                return $jsonOutput;
             }
             
             if (in_array($params['transactionType'], ['Auth', 'Sale']) && $status === 'declined') {
                 $this->moduleConfig->createLog('DMN message - Declined Order, process stops here.');
-				
-				$jsonOutput->setData('DMN error - Declined Order, process stops here.');
-				return $jsonOutput;
+                
+                $jsonOutput->setData('DMN error - Declined Order, process stops here.');
+                return $jsonOutput;
             }
             
             if (empty($params['TransactionID'])) {
                 $this->moduleConfig->createLog('DMN error - missing Transaction ID.');
-				
-				$jsonOutput->setData('DMN error - missing Transaction ID.');
-				return $jsonOutput;
+                
+                $jsonOutput->setData('DMN error - missing Transaction ID.');
+                return $jsonOutput;
             }
-
+            
             if (!empty($params["order"])) {
                 $orderIncrementId = $params["order"];
             } elseif (!empty($params["merchant_unique_id"]) && intval($params["merchant_unique_id"]) != 0) {
@@ -140,9 +140,9 @@ class DmnOld
                 $orderIncrementId = $params["orderId"];
             } else {
                 $this->moduleConfig->createLog('DMN error - no Order ID parameter.');
-				
-				$jsonOutput->setData('DMN error - no Order ID parameter.');
-				return $jsonOutput;
+                
+                $jsonOutput->setData('DMN error - no Order ID parameter.');
+                return $jsonOutput;
             }
 
             $tryouts = 0;
@@ -154,7 +154,7 @@ class DmnOld
 
                 if (!($order && $order->getId())) {
                     $this->moduleConfig->createLog('DMN try ' . $tryouts
-						. ' there is NO order for TransactionID ' . $params['TransactionID'] . ' yet.');
+                        . ' there is NO order for TransactionID ' . $params['TransactionID'] . ' yet.');
                     sleep(3);
                 }
             } while ($tryouts < 5 && !($order && $order->getId()));
@@ -166,10 +166,10 @@ class DmnOld
                 $result = $this->placeOrder($params);
                 
                 if ($result->getSuccess() !== true) {
-					$this->moduleConfig->createLog('DMN Callback error - place order error: ' . $result->getMessage());
-					
-					$jsonOutput->setData('DMN Callback error - place order error: ' . $result->getMessage());
-					return $jsonOutput;
+                    $this->moduleConfig->createLog('DMN Callback error - place order error: ' . $result->getMessage());
+                    
+                    $jsonOutput->setData('DMN Callback error - place order error: ' . $result->getMessage());
+                    return $jsonOutput;
                 }
                 
                 $order = $this->orderFactory->create()->loadByIncrementId($orderIncrementId);
@@ -179,18 +179,29 @@ class DmnOld
             # try to create the order END
             
             if (empty($order)) {
-				$jsonOutput->setData('DMN Callback error - there is no Order and the code did not success to made it.');
-				return $jsonOutput;
+                $jsonOutput->setData('DMN Callback error - there is no Order and the code did not success to made it.');
+                return $jsonOutput;
             }
             
-            /** @var OrderPayment $payment */
             $orderPayment    = $order->getPayment();
             $order_status    = $orderPayment->getAdditionalInformation(Payment::TRANSACTION_STATUS);
             $order_tr_type    = $orderPayment->getAdditionalInformation(Payment::TRANSACTION_TYPE);
             
             $tr_type_param    = strtolower($params['transactionType']);
             
-			// do not overwrite Order status
+            // do not overwrite Order status
+            if ('auth' === $tr_type_param
+                && round(floatval($order->getBaseGrandTotal()), 2) != round(floatval($params['totalAmount']), 2)
+            ) {
+                $msg = 'The DMN total amount (' . round(floatval($params['totalAmount']), 2)
+                    .') is different than Order total amount (' . round(floatval($order->getBaseGrandTotal()), 2)
+                    . '). The process stops here!';
+                
+                $this->moduleConfig->createLog($msg);
+                $jsonOutput->setData($msg);
+                return $jsonOutput;
+            }
+            
             if (strtolower($order_tr_type) == $tr_type_param
                 && strtolower($order_status) == 'approved'
                 && $order_status != $params['Status']
@@ -200,30 +211,38 @@ class DmnOld
                     .'. Do not apply DMN data on the Order!';
                 
                 $this->moduleConfig->createLog($msg);
-				$jsonOutput->setData($msg);
-				return $jsonOutput;
+                $jsonOutput->setData($msg);
+                return $jsonOutput;
             }
-			
-			if(
-				in_array(strtolower($order_tr_type), array('credit', 'refund', 'void'))
-				&& strtolower($order_status) == 'approved'
-			) {
-				$msg = 'No more actions are allowed for order #' . $order->getId();
-				
-				$this->moduleConfig->createLog($msg);
-				$jsonOutput->setData($msg);
-				return $jsonOutput;
-			}
-			
-			if($tr_type_param === 'auth' && strtolower($order_tr_type) === 'settle') {
-				$msg = 'Can not set Auth to Settled Order #' . $order->getId();
-				
-				$this->moduleConfig->createLog($msg);
-				$jsonOutput->setData($msg);
-				return $jsonOutput;
-			}
-			// do not overwrite Order status END
+            
+            if (in_array(strtolower($order_tr_type), ['credit', 'refund', 'void'])
+                && strtolower($order_status) == 'approved'
+            ) {
+                $msg = 'No more actions are allowed for order #' . $order->getId();
+                
+                $this->moduleConfig->createLog($msg);
+                $jsonOutput->setData($msg);
+                return $jsonOutput;
+            }
+            
+            if ($tr_type_param === 'auth' && strtolower($order_tr_type) === 'settle') {
+                $msg = 'Can not set Auth to Settled Order #' . $order->getId();
+                
+                $this->moduleConfig->createLog($msg);
+                $jsonOutput->setData($msg);
+                return $jsonOutput;
+            }
+            // do not overwrite Order status END
 
+            // add data to the Payment
+            $parent_trans_id = empty($params['relatedTransactionId']) ? null : $params['relatedTransactionId'];
+            
+            $orderPayment
+                ->setTransactionId($params['TransactionID'])
+                ->setParentTransactionId($parent_trans_id)
+                ->setAuthCode($params['AuthCode']);
+            
+            /* TODO old remove it */
             $orderPayment->setAdditionalInformation(
                 Payment::TRANSACTION_ID,
                 $params['TransactionID']
@@ -255,6 +274,14 @@ class DmnOld
                 $params['transactionType']
             );
             
+            if (!empty($params['userPaymentOptionId'])) {
+                $orderPayment->setAdditionalInformation(
+                    'upoID',
+                    $params['userPaymentOptionId']
+                );
+            }
+            
+            /* TODO old search for use and remove it */
             $orderPayment->setTransactionAdditionalInfo(
                 Transaction::RAW_DETAILS,
                 $params
@@ -277,6 +304,7 @@ class DmnOld
                     $transactionType        = Transaction::TYPE_AUTH;
                     $sc_transaction_type    = Payment::SC_AUTH;
                     
+                    /* TODO old - test and remov it */
                     $orderPayment->setAdditionalInformation(
                         Payment::AUTH_PARAMS,
                         [
@@ -287,9 +315,9 @@ class DmnOld
                     );
                     
                     $orderPayment
+                        ->setAuthAmount($params['totalAmount'])
                         ->setIsTransactionPending(false)
-                        ->setIsTransactionClosed(false)
-                        ->setParentTransactionId(!empty($params['relatedTransactionId']) ? $params['relatedTransactionId'] : null);
+                        ->setIsTransactionClosed(0);
 
                     // set transaction
                     $transaction = $this->transObj->setPayment($orderPayment)
@@ -308,16 +336,17 @@ class DmnOld
                     $transactionType        = Transaction::TYPE_CAPTURE;
                     $sc_transaction_type    = Payment::SC_SETTLED;
                     $invCollection            = $order->getInvoiceCollection();
-                    $inv_amount                = $order->getBaseGrandTotal();
+                    $inv_amount                = round(floatval($order->getBaseGrandTotal()), 2);
                         
                     if ('settle' == $tr_type_param
-                        && round(floatval($params['item_amount_1']), 2)
-                            - round(floatval($params['totalAmount']), 2) > 0.00
+                        && ($inv_amount - round(floatval($params['totalAmount']), 2) > 0.00)
                     ) {
                         $sc_transaction_type    = Payment::SC_PARTIALLY_SETTLED;
                         $inv_amount                = round(floatval($params['totalAmount']), 2);
                         $is_partial_settle        = true;
                     }
+                    
+                    $orderPayment->setSaleSettleAmount($inv_amount);
                     
                     if (count($invCollection) > 0) {
                         $this->moduleConfig->createLog('There is/are invoice/s');
@@ -374,8 +403,8 @@ class DmnOld
                             $this->moduleConfig->createLog('Sale - create an Auth transaction');
 
                             $orderPayment
-                                ->setIsTransactionPending(false)
-                                ->setIsTransactionClosed(false)
+                                ->setIsTransactionPending(0)
+                                ->setIsTransactionClosed(0)
                                 ->setParentTransactionId(null);
 
                             $transaction = $this->transObj->setPayment($orderPayment)
@@ -395,10 +424,8 @@ class DmnOld
                         }
                         
                         $orderPayment
-                            ->setIsTransactionPending($status === "pending" ? true: false)
-                            ->setIsTransactionClosed(false)
-                            ->setParentTransactionId(!empty($params['relatedTransactionId'])
-                                ? $params['relatedTransactionId'] : null);
+                            ->setIsTransactionPending(0)
+                            ->setIsTransactionClosed(0);
                         
                         // set transaction
                         $transaction = $this->transObj->setPayment($orderPayment)
@@ -432,7 +459,7 @@ class DmnOld
                     $sc_transaction_type    = Payment::SC_REFUNDED;
                     
                     if ((!empty($params['totalAmount']) && 'cc_card' == $params["payment_method"])
-                        || false !== strpos($params["merchant_unique_id"], 'gwp')
+                    || false !== strpos($params["merchant_unique_id"], 'gwp')
                     ) {
                         $refund_msg = '<br/>The Refunded amount is <b>'
                             . $params['totalAmount'] . ' ' . $params['currency'] . '</b>.';
@@ -446,7 +473,7 @@ class DmnOld
                 if ($is_partial_settle) {
                     $order->addStatusHistoryComment(
                         __("The <b>Partial Settle</b> request for amount of "
-                            . "<b>" . number_format($inv_amount, 2, '.', '') . ' ' . $params['currency'] . "</b>, "
+                            . "<b>" . $inv_amount . ' ' . $params['currency'] . "</b>, "
                             . "returned <b>" . $params['Status'] . "</b> status.<br/>"
                             . 'Transaction ID: ' . $params['TransactionID'] .', Related Transaction ID: ')
                             . $params['relatedTransactionId'] . $refund_msg,
@@ -476,54 +503,55 @@ class DmnOld
             $msg = $e->getMessage();
 
             $this->moduleConfig->createLog($e->getMessage() . "\n\r" . $e->getTraceAsString(), 'DMN Excception:');
-			
-			$jsonOutput->setData('Error: ' . $e->getMessage());
-			return $jsonOutput;
+            
+            $jsonOutput->setData('Error: ' . $e->getMessage());
+            return $jsonOutput;
         }
 
         $this->moduleConfig->createLog('DMN process end for order #' . $orderIncrementId);
         
-		$jsonOutput->setData('DMN process end for order #' . $orderIncrementId);
-		return $jsonOutput;
+        $jsonOutput->setData('DMN process end for order #' . $orderIncrementId);
+        return $jsonOutput;
     }
     
     /**
      * Place order.
-     *
-     * @return DataObject
      */
     private function placeOrder($params)
     {
-		$this->moduleConfig->createLog('PlaceOrder()');
-		
-		$result	= $this->dataObjectFactory->create();
-		
+        $this->moduleConfig->createLog('PlaceOrder()');
+        
+        $result    = $this->dataObjectFactory->create();
+        
+        if (empty($params['quote'])) {
+            return $result
+                ->setData('error', true)
+                ->setData('message', 'Missing Quote parameter.');
+        }
+        
         try {
-			$quote	= $this->quoteFactory->create()->loadByIdWithoutStore((int) $params['quote']);
+            $quote    = $this->quoteFactory->create()->loadByIdWithoutStore((int) $params['quote']);
 
-			if (intval($quote->getIsActive()) == 0) {
-				$this->moduleConfig->createLog($quote->getIsActive(), 'Quote is not active.');
-				$this->moduleConfig->createLog($quote->getQuoteId(), 'Quote ID');
+            if (intval($quote->getIsActive()) == 0) {
+                $this->moduleConfig->createLog($quote->getQuoteId(), 'Quote ID');
 
-				return $result
-					->setData('error', true)
-					->setData('message', 'Quote is not active.');
-			}
+                return $result
+                    ->setData('error', true)
+                    ->setData('message', 'Quote is not active.');
+            }
 
-			if ($quote->getPayment()->getMethod() !== Payment::METHOD_CODE) {
-				$this->moduleConfig->createLog($quote->getPayment()->getMethod(), 'Quote payment method is');
+            if ($quote->getPayment()->getMethod() !== Payment::METHOD_CODE) {
+                return $result
+                    ->setData('error', true)
+                    ->setData('message', 'Quote payment method is "'
+                        . $quote->getPayment()->getMethod() . '"');
+            }
 
-				return $result
-					->setData('error', true)
-					->setData('message', 'Quote payment method is "'
-						. $quote->getPayment()->getMethod() . '"');
-			}
-
-			$params = array_merge(
-				$this->request->getParams(),
-				$this->request->getPostValue()
-			);
-			
+            $params = array_merge(
+                $this->request->getParams(),
+                $this->request->getPostValue()
+            );
+            
             $orderId = $this->cartManagement->placeOrder((int) $params['quote']);
 
             $result
@@ -550,16 +578,16 @@ class DmnOld
     
     private function validateChecksum($params)
     {
-		$result = $this->jsonResultFactory->create();
-		$result->setHttpResponseCode(200);
-		
+        $result = $this->jsonResultFactory->create();
+        $result->setHttpResponseCode(200);
+        
         if (!isset($params["advanceResponseChecksum"])) {
             $msg = 'Required key advanceResponseChecksum for checksum calculation is missing.';
             
             $this->moduleConfig->createLog($msg);
-			
-			$result->setData($msg);
-			return $result;
+            
+            $result->setData($msg);
+            return $result;
         }
         
         $concat = $this->moduleConfig->getMerchantSecretKey();
@@ -568,9 +596,9 @@ class DmnOld
             if (!isset($params[$checksumKey])) {
                 $msg = 'Required key '. $checksumKey .' for checksum calculation is missing.';
                 $this->moduleConfig->createLog($msg);
-				
-				$result->setData($msg);
-				return $result;
+                
+                $result->setData($msg);
+                return $result;
             }
 
             if (is_array($params[$checksumKey])) {
@@ -586,11 +614,11 @@ class DmnOld
         
         if ($params["advanceResponseChecksum"] !== $checksum) {
             $msg = 'Checksum validation failed!';
-			
-			$this->moduleConfig->createLog($msg);
             
-			$result->setData($msg);
-			return $result;
+            $this->moduleConfig->createLog($msg);
+            
+            $result->setData($msg);
+            return $result;
         }
 
         return true;
