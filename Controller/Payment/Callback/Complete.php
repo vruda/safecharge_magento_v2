@@ -3,8 +3,6 @@
 namespace Safecharge\Safecharge\Controller\Payment\Callback;
 
 use Magento\Framework\Controller\ResultFactory;
-//use Magento\Framework\Controller\ResultInterface;
-//use Magento\Framework\DataObject;
 use Magento\Framework\Exception\PaymentException;
 use Magento\Framework\App\Request\InvalidRequestException;
 use Magento\Framework\App\RequestInterface;
@@ -151,8 +149,6 @@ class Complete extends \Magento\Framework\App\Action\Action implements \Magento\
 
     /**
      * Place order.
-     *
-     * @return DataObject
      */
     private function placeOrder()
     {
