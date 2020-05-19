@@ -8,21 +8,17 @@ define(
     [
         'jquery',
         'Magento_Payment/js/view/payment/cc-form',
-        'Magento_Checkout/js/action/redirect-on-success',
         'Magento_Paypal/js/action/set-payment-method',
-        'Magento_Customer/js/customer-data',
         'jquery.redirect',
         'ko',
         'Magento_Checkout/js/model/quote',
         'mage/translate',
 		'mage/validation'
     ],
-    function(
+    function (
         $,
         Component,
-        redirectOnSuccessAction,
         setPaymentMethodAction,
-        customerData,
         jqueryRedirect,
         ko,
         quote,
@@ -40,6 +36,10 @@ define(
 		var scGetAPMsAgain	= false;
 		var scCCEmpty		= true;
 		var scCCCompleted	= false;
+		var scOOTotal		= 0;
+		
+		var discountSent	= false;
+		var discountElemId	= 'discount-code';
 		
 		$('body').on('change', '#safecharge_cc_owner', function(){
 			$('#safecharge_cc_owner').css('box-shadow', 'inherit');
@@ -125,7 +125,7 @@ define(
             getMerchantPaymentMethodsUrl: function() {
                 return window.checkoutConfig.payment[self.getCode()].getMerchantPaymentMethodsUrl;
             },
-
+			
             getApmMethods: function() {
 				if(!scGetAPMsAgain) {
 					if (quote.billingAddress() && self.countryId() === quote.billingAddress().countryId) {
@@ -169,9 +169,10 @@ define(
 							
 							for(var i in res.apmMethods) {
 								if('cc_card' == res.apmMethods[i].paymentMethod) {
-									scData.sessionToken = res.sessionToken;
-									self.initFields();
+									scData.sessionToken	= res.sessionToken;
+									scOOTotal			= res.ooAmount;
 									
+									self.initFields();
 									break;
 								}
 							}
@@ -440,6 +441,35 @@ define(
 				if(!isCardAttached && $('#card-field-placeholder').length > 0) {
 					card.attach('#card-field-placeholder');
 				}
+				
+				// detect adding a Coupon
+				if($('#' + discountElemId).length > 0) {
+					new MutationObserver(function(mutationsList, observer) {
+						for(let mutation of mutationsList) {
+							if (
+								mutation.type === 'attributes'
+								&& 'disabled' == mutation.attributeName
+								&& true === discountSent
+								&& quote.totals().base_grand_total.toFixed(2) != scOOTotal
+							) {
+								console.log('the total was changed, create new OpenOrder');
+								scGetAPMsAgain = true;
+								self.getApmMethods();
+							}
+
+							discountSent = false;
+						}
+					})
+						.observe(
+							document.getElementById(discountElemId),
+							{ attributes: true }
+						);
+				}
+
+				$('body').on('click', '#discount-form button.action', function(){
+					discountSent = true;
+				});
+				// detect adding a Coupon END
             },
 			
 			attachFields: function() {
