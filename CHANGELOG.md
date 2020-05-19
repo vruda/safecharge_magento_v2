@@ -2,6 +2,18 @@
 
 ---
 
+## 2.0.5.x
+```
+	* In OpenOrder request pass order amount into custom fields, to get it again in response and pass it to the front-end.
+	* A revert - DMN class again extends Action class.
+	* In DMN class added check for the Order total and DMN total parameter, for Auth transactions. If they are not same, we stop process.
+	* In DMN class, add userPaymentOptionId to the payment for future use.
+	* In DMN class, when check for Partial Settle we compare Order Base Grand Total with DMN parameter totalAmount.
+	* In DMN class, check for available request quote parameter in placeOrder method.
+	* In safecharge.js, removed some unused classes.
+	* In safecharge.js, observe for add/remove coupons, and compare the total with the total passed to the OpenOrder request. If there is difference, we call new OpenOrder with correct total amount.
+
+
 ## 2.0.4.x
 ```
 	* Removed admin option Save Order before success.
