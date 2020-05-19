@@ -10,15 +10,9 @@ use Safecharge\Safecharge\Model\ResponseInterface;
  */
 class OpenOrder extends AbstractResponse implements ResponseInterface
 {
-    /**
-     * @var string
-     */
     protected $orderId;
-    
-    /**
-     * @var string
-     */
     protected $sessionToken;
+    protected $amount;
 
     /**
      * @return AbstractResponse
@@ -28,9 +22,11 @@ class OpenOrder extends AbstractResponse implements ResponseInterface
     {
         parent::process();
 
-        $body                = $this->getBody();
-        $this->orderId        = $body['orderId'];
+        $body               = $this->getBody();
+        
+        $this->orderId      = $body['orderId'];
         $this->sessionToken = $body['sessionToken'];
+        $this->ooAmount        = $body['merchantDetails']['customField1'];
 
         return $this;
     }

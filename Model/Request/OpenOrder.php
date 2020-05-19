@@ -129,7 +129,7 @@ class OpenOrder extends AbstractRequest implements RequestInterface
         if (empty($email)) {
             $email = $this->config->getCheckoutSession()->getQuote()->getCustomerEmail();
         }
-        if (empty($email)) {
+        if (empty($email) && !empty($_COOKIE['guestSippingMail'])) {
             $email = filter_var($_COOKIE['guestSippingMail'], FILTER_VALIDATE_EMAIL);
         }
         if (empty($email)) {
@@ -195,6 +195,9 @@ class OpenOrder extends AbstractRequest implements RequestInterface
                 ],
                 'paymentOption'        => ['card' => ['threeD' => ['isDynamic3D' => 1]]],
                 'transactionType'    => $this->config->getPaymentAction(),
+                'merchantDetails'    => [
+                    'customField1' => (string) number_format($this->cart->getQuote()->getGrandTotal(), 2, '.', ''), // pass amount
+                ],
             ],
             parent::getParams()
         );
