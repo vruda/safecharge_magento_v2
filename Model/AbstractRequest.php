@@ -50,111 +50,112 @@ abstract class AbstractRequest extends AbstractApi
     protected $requestId;
     
     // array details to validate request parameters
-    private $params_validation = [
+    private $params_validation = array(
         // deviceDetails
-        'deviceType' => [
+        'deviceType' => array(
             'length' => 10,
             'flag'    => FILTER_SANITIZE_STRING
-        ],
-        'deviceName' => [
+        ),
+        'deviceName' => array(
             'length' => 255,
             'flag'    => FILTER_DEFAULT
-        ],
-        'deviceOS' => [
+        ),
+        'deviceOS' => array(
             'length' => 255,
             'flag'    => FILTER_DEFAULT
-        ],
-        'browser' => [
+        ),
+        'browser' => array(
             'length' => 255,
             'flag'    => FILTER_DEFAULT
-        ],
-        'ipAddress' => [
+        ),
+        'ipAddress' => array(
             'length' => 15,
             'flag'    => FILTER_VALIDATE_IP
-        ],
+        ),
         // deviceDetails END
         
         // userDetails, shippingAddress, billingAddress
-        'firstName' => [
+        'firstName' => array(
             'length' => 30,
             'flag'    => FILTER_DEFAULT
-        ],
-        'lastName' => [
+        ),
+        'lastName' => array(
             'length' => 40,
             'flag'    => FILTER_DEFAULT
-        ],
-        'address' => [
+        ),
+        'address' => array(
             'length' => 60,
             'flag'    => FILTER_DEFAULT
-        ],
-        'cell' => [
+        ),
+        'cell' => array(
             'length' => 18,
             'flag'    => FILTER_DEFAULT
-        ],
-        'phone' => [
+        ),
+        'phone' => array(
             'length' => 18,
             'flag'    => FILTER_DEFAULT
-        ],
-        'zip' => [
+        ),
+        'zip' => array(
             'length' => 10,
             'flag'    => FILTER_DEFAULT
-        ],
-        'city' => [
+        ),
+        'city' => array(
             'length' => 30,
             'flag'    => FILTER_DEFAULT
-        ],
-        'country' => [
+        ),
+        'country' => array(
             'length' => 20,
             'flag'    => FILTER_SANITIZE_STRING
-        ],
-        'state' => [
+        ),
+        'state' => array(
             'length' => 2,
             'flag'    => FILTER_SANITIZE_STRING
-        ],
-        'email' => [
-            'length' => 100,
-            'flag'    => FILTER_VALIDATE_EMAIL
-        ],
-        'county' => [
+        ),
+        'county' => array(
             'length' => 255,
             'flag'    => FILTER_DEFAULT
-        ],
+        ),
         // userDetails, shippingAddress, billingAddress END
         
         // specific for shippingAddress
-        'shippingCounty' => [
+        'shippingCounty' => array(
             'length' => 255,
             'flag'    => FILTER_DEFAULT
-        ],
-        'addressLine2' => [
+        ),
+        'addressLine2' => array(
             'length' => 50,
             'flag'    => FILTER_DEFAULT
-        ],
-        'addressLine3' => [
+        ),
+        'addressLine3' => array(
             'length' => 50,
             'flag'    => FILTER_DEFAULT
-        ],
+        ),
         // specific for shippingAddress END
         
         // urlDetails
-        'successUrl' => [
+        'successUrl' => array(
             'length' => 1000,
             'flag'    => FILTER_VALIDATE_URL
-        ],
-        'failureUrl' => [
+        ),
+        'failureUrl' => array(
             'length' => 1000,
             'flag'    => FILTER_VALIDATE_URL
-        ],
-        'pendingUrl' => [
+        ),
+        'pendingUrl' => array(
             'length' => 1000,
             'flag'    => FILTER_VALIDATE_URL
-        ],
-        'notificationUrl' => [
+        ),
+        'notificationUrl' => array(
             'length' => 1000,
             'flag'    => FILTER_VALIDATE_URL
-        ],
+        ),
         // urlDetails END
-    ];
+    );
+	
+	private $params_validation_email = array(
+		'length'	=> 79,
+		'flag'		=> FILTER_VALIDATE_EMAIL
+	);
 
     /**
      * Object constructor.
@@ -289,38 +290,81 @@ abstract class AbstractRequest extends AbstractApi
         // validate params
         $this->config->createLog('Try to validate request parameters.');
         
-        foreach ($params as $key1 => $val1) {
-            if (!is_array($val1) && !empty($val1) && array_key_exists($key1, $this->params_validation)) {
+        // directly check the mails
+		if(isset($params['billingAddress']['email'])) {
+			if(!filter_var($params['billingAddress']['email'], $this->params_validation_email['flag'])) {
+				$this->config->createLog('REST API ERROR: The parameter Billing Address Email is not valid.');
+				
+				return array(
+					'status' => 'ERROR',
+					'message' => 'The parameter Billing Address Email is not valid.'
+				);
+			}
+			
+			if(strlen($params['billingAddress']['email']) > $this->params_validation_email['length']) {
+				$this->config->createLog('REST API ERROR: The parameter Billing Address Email must be maximum '
+					. $this->params_validation_email['length'] . ' symbols.');
+				
+				return array(
+					'status' => 'ERROR',
+					'message' => 'The parameter Billing Address Email must be maximum '
+						. $this->params_validation_email['length'] . ' symbols.'
+				);
+			}
+		}
+		
+		if(isset($params['shippingAddress']['email'])) {
+			if(!filter_var($params['shippingAddress']['email'], $this->params_validation_email['flag'])) {
+				$this->config->createLog('REST API ERROR: The parameter Shipping Address Email is not valid.');
+				
+				return array(
+					'status' => 'ERROR',
+					'message' => 'The parameter Shipping Address Email is not valid.'
+				);
+			}
+			
+			if(strlen($params['shippingAddress']['email']) > $this->params_validation_email['length']) {
+				$this->config->createLog('REST API ERROR: The parameter Shipping Address Email must be maximum '
+					. $this->params_validation_email['length'] . ' symbols.');
+				
+				return array(
+					'status' => 'ERROR',
+					'message' => 'The parameter Shipping Address Email must be maximum '
+						. $this->params_validation_email['length'] . ' symbols.'
+				);
+			}
+		}
+		// directly check the mails END
+		
+		foreach ($params as $key1 => $val1) {
+            if (!is_array($val1) && !empty($val1) && array_key_exists($key1, self::$params_validation)) {
                 $new_val = $val1;
                 
-                if (mb_strlen($val1) > $this->params_validation[$key1]['length']) {
-                    $new_val = mb_substr($val1, 0, $this->params_validation[$key1]['length']);
+                if (mb_strlen($val1) > self::$params_validation[$key1]['length']) {
+                    $new_val = mb_substr($val1, 0, self::$params_validation[$key1]['length']);
                     
                     $this->config->createLog($key1, 'Limit');
                 }
                 
-                $new_val = filter_var($new_val, $this->params_validation[$key1]['flag']);
-                
-                $params[$key1] = $new_val;
-            } elseif (is_array($val1) && !empty($val1)) {
+                $params[$key1] = filter_var($new_val, self::$params_validation[$key1]['flag']);
+            }
+			elseif (is_array($val1) && !empty($val1)) {
                 foreach ($val1 as $key2 => $val2) {
-                    if (!is_array($val2) && !empty($val2) && array_key_exists($key2, $this->params_validation)) {
+                    if (!is_array($val2) && !empty($val2) && array_key_exists($key2, self::$params_validation)) {
                         $new_val = $val2;
 
-                        if (mb_strlen($val2) > $this->params_validation[$key2]['length']) {
-                            $new_val = mb_substr($val2, 0, $this->params_validation[$key2]['length']);
+                        if (mb_strlen($val2) > self::$params_validation[$key2]['length']) {
+                            $new_val = mb_substr($val2, 0, self::$params_validation[$key2]['length']);
                             
                             $this->config->createLog($key2, 'Limit');
                         }
 
-                        $new_val = filter_var($new_val, $this->params_validation[$key2]['flag']);
-
-                        $params[$key1][$key2] = $new_val;
+                        $params[$key1][$key2] = filter_var($new_val, self::$params_validation[$key2]['flag']);
                     }
                 }
             }
         }
-        // validate params END
+		# validate parameters END
         
         $checksumKeys = $this->getChecksumKeys();
         if (empty($checksumKeys)) {
