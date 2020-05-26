@@ -12,6 +12,7 @@
 	* In DMN class, check for available request quote parameter in placeOrder method.
 	* In safecharge.js, removed some unused classes.
 	* In safecharge.js, observe for add/remove coupons, and compare the total with the total passed to the OpenOrder request. If there is difference, we call new OpenOrder with correct total amount.
+	* Added validation for the emails first, they are restricted to 79 symbols;
 
 
 ## 2.0.4.x
