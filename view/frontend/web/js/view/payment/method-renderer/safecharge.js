@@ -15,7 +15,7 @@ define(
         'mage/translate',
 		'mage/validation'
     ],
-    function (
+    function(
         $,
         Component,
         setPaymentMethodAction,
@@ -29,14 +29,54 @@ define(
         var self = null;
         
         // for the WebSDK
-        var sfc				= null;
-        var card			= null;
-		var scData			= {};
-		var isCardAttached	= false;
-		var scGetAPMsAgain	= false;
-		var scCCEmpty		= true;
-		var scCCCompleted	= false;
-		var scOOTotal		= 0;
+        var sfc					= null;
+		var cardNumber			= null;
+		var cardExpiry			= null;
+		var cardCvc				= null;
+		var sfcFirstField		= null;
+		var scFields			= null;
+		var scData				= {};
+		var isCardAttached		= false;
+		
+		var isCCNumEmpty		= true;
+		var isCCNumComplete		= false;
+		
+		var isCVVEmpty			= true;
+		var isCVVComplete		= false;
+		
+		var isCCDateEmpty		= true;
+		var isCCDateComplete	= false;
+		
+		var scGetAPMsAgain		= false;
+		var scOOTotal			= 0;
+
+		var fieldsStyle	= {
+			base: {
+				iconColor			: "#c4f0ff",
+				color				: "#000",
+				fontWeight			: 400,
+				fontFamily			: "arial",
+				fontSize			: '15px',
+				fontSmoothing		: "antialiased",
+				":-webkit-autofill"	: {
+					color: "#fce883"
+				},
+				"::placeholder"		: {
+					color		: "grey",
+					fontFamily	: "arial"
+				}
+			},
+			invalid: {
+				iconColor	: "#ff0000",
+				color		: "#ff0000"
+			}
+		};
+		
+		var elementClasses = {
+			focus	: 'focus',
+			empty	: 'empty',
+			invalid	: 'invalid'
+		};
 		
 		var discountSent	= false;
 		var discountElemId	= 'discount-code';
@@ -147,8 +187,8 @@ define(
 					}
 				}
 				else { // clean card and container
-					card = null;
-					$('#card-field-placeholder').html('');
+					cardNumber = cardExpiry = cardCvc = null;
+					$('#sc_card_number, #sc_card_expiry, #sc_card_cvc').html('');
 				}
                 
                 $.ajax({
@@ -205,12 +245,32 @@ define(
 					if($('#safecharge_cc_owner').val() == '') {
 						$('#safecharge_cc_owner').css('box-shadow', 'red 0px 0px 3px 1px');
 						$('#cc_name_error_msg').show();
+						
+						document.getElementById("safecharge_cc_owner").scrollIntoView();
 						return;
 					}
 					
-					if( (!scCCEmpty && !scCCCompleted) || scCCEmpty ) {
-						$('#card-field-placeholder').css('box-shadow', 'red 0px 0px 3px 1px');
+					if( (!isCCNumEmpty && !isCCNumComplete) || isCCNumEmpty ) {
+						$('#sc_card_number').css('box-shadow', 'red 0px 0px 3px 1px');
+						$('#cc_num_error_msg').show();
+						
+						document.getElementById("safecharge_cc_owner").scrollIntoView();
+						return;
+					}
+					
+					if( (!isCVVEmpty && !isCVVComplete) || isCVVEmpty ) {
+						$('#sc_card_cvc').css('box-shadow', 'red 0px 0px 3px 1px');
 						$('#cc_error_msg').show();
+						
+						document.getElementById("safecharge_cc_owner").scrollIntoView();
+						return;
+					}
+					
+					if( (!isCCDateEmpty&& !isCCDateComplete) || isCCDateEmpty ) {
+						$('#sc_card_expiry').css('box-shadow', 'red 0px 0px 3px 1px');
+						$('#cc_error_msg').show();
+						
+						document.getElementById("safecharge_cc_owner").scrollIntoView();
 						return;
 					}
 					
@@ -226,7 +286,7 @@ define(
                         currency			: window.checkoutConfig.payment[self.getCode()].currency,
                         amount				: quote.totals().base_grand_total.toFixed(2),
                         cardHolderName		: document.getElementById('safecharge_cc_owner').value,
-                        paymentOption		: card,
+                        paymentOption		: sfcFirstField,
 						webMasterId			: window.checkoutConfig.payment[self.getCode()].webMasterId,
                     };
 					
@@ -381,65 +441,17 @@ define(
                 sfc = SafeCharge(scData);
 
                 // prepare fields
-                var fields = sfc.fields({
-                    locale: checkoutConfig.payment[self.getCode()].locale,
-					fonts : [{
-						cssUrl: 'https://fonts.googleapis.com/css?family=Nunito+Sans:400&display=swap'
-					}]
+                scFields = sfc.fields({
+                    locale: checkoutConfig.payment[self.getCode()].locale
                 });
 
-                card = fields.create('card', {
-                    iconStyle: 'solid',
-                    style: {
-                        base: {
-                            iconColor			: "#c4f0ff",
-                            color				: "#000",
-                            fontWeight			: 400,
-                            fontFamily			: "arial",
-                            fontSize			: '15px',
-                            fontSmoothing		: "antialiased",
-                            ":-webkit-autofill"	: {
-                                color: "#fce883"
-                            },
-                            "::placeholder"		: {
-                                color		: "grey",
-								fontFamily	: "arial"
-                            }
-                        },
-                        invalid: {
-                            iconColor	: "#ff0000",
-                            color		: "#ff0000"
-                        }
-                    },
-                    classes: {
-						focus	: 'focus',
-						empty	: 'empty',
-						invalid	: 'invalid'
-					}
-                });
-				
-				card.on('focus', function (e) {
-					console.log('on focus', e);
-					
-					$('#card-field-placeholder').css('box-shadow', '0px 0 3px 1px #00699d');
-					$('#cc_error_msg').hide();
-				});
-				
-				card.on('change', function (event) {
-					$('#card-field-placeholder').css('box-shadow', '0px 0 3px 1px #00699d');
-					$('#cc_error_msg').hide();
-					
-					if(event.hasOwnProperty('empty')) {
-						scCCEmpty = event.empty;
-					}
-					
-					if(event.hasOwnProperty('complete')) {
-						scCCCompleted = event.complete;
-					}
-				});
-                    
-				if(!isCardAttached && $('#card-field-placeholder').length > 0) {
-					card.attach('#card-field-placeholder');
+				if(
+					!isCardAttached
+					&& $('#sc_card_number').length > 0
+					&& $('#sc_card_expiry').length > 0
+					&& $('#sc_card_cvc').length > 0
+				) {
+					self.attachFields();
 				}
 				
 				// detect adding a Coupon
@@ -473,13 +485,97 @@ define(
             },
 			
 			attachFields: function() {
-				if(null !== card) {
-					card.attach('#card-field-placeholder');
-					isCardAttached = true;
+				if(null === scFields) {
+					console.log('scFields is null');
+					return;
 				}
-				else {
-					console.log('card is null')
+				
+				if(null === cardNumber) {
+					cardNumber = sfcFirstField = scFields.create('ccNumber', {
+						classes: elementClasses
+						,style: fieldsStyle
+					});
+					cardNumber.attach('#sc_card_number');
+					
+					// attach events listeners
+					cardNumber.on('focus', function (e) {
+						$('#sc_card_number').css('box-shadow', '0px 0 3px 1px #00699d');
+						$('#cc_num_error_msg').hide();
+					});
+
+					cardNumber.on('change', function (e) {
+						console.log('on focus', e);
+
+						$('#sc_card_number').css('box-shadow', '0px 0 3px 1px #00699d');
+						$('#cc_num_error_msg').hide();
+						
+						if(e.hasOwnProperty('empty')) {
+							isCCNumEmpty = e.empty;
+						}
+						
+						if(e.hasOwnProperty('complete')) {
+							isCCNumComplete = e.complete;
+						}
+					});
 				}
+				
+				if(null === cardExpiry) {
+					cardExpiry = scFields.create('ccExpiration', {
+						classes: elementClasses
+						,style: fieldsStyle
+					});
+					cardExpiry.attach('#sc_card_expiry');
+					
+					cardExpiry.on('focus', function (e) {
+						$('#sc_card_expiry').css('box-shadow', '0px 0 3px 1px #00699d');
+						$('#cc_error_msg').hide();
+					});
+
+					cardExpiry.on('change', function (e) {
+						console.log('on focus', e);
+
+						$('#sc_card_expiry').css('box-shadow', '0px 0 3px 1px #00699d');
+						$('#cc_error_msg').hide();
+						
+						if(e.hasOwnProperty('empty')) {
+							isCCDateEmpty = e.empty;
+						}
+						
+						if(e.hasOwnProperty('complete')) {
+							isCCDateComplete = e.complete;
+						}
+					});
+				}
+				
+				if(null === cardCvc) {
+					cardCvc = scFields.create('ccCvc', {
+						classes: elementClasses
+						,style: fieldsStyle
+					});
+					cardCvc.attach('#sc_card_cvc');
+					
+					cardCvc.on('focus', function (e) {
+						$('#sc_card_cvc').css('box-shadow', '0px 0 3px 1px #00699d');
+						$('#cc_error_msg').hide();
+					});
+
+					cardCvc.on('change', function (e) {
+						console.log('on focus', e);
+
+						$('#sc_card_cvc').css('box-shadow', '0px 0 3px 1px #00699d');
+						$('#cc_error_msg').hide();
+						
+						if(e.hasOwnProperty('empty')) {
+							isCVVEmpty = e.empty;
+						}
+						
+						if(e.hasOwnProperty('complete')) {
+							isCVVComplete = e.complete;
+						}
+					});
+				}
+				
+				isCardAttached = true;
 			},
 			
 			/**

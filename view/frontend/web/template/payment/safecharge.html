@@ -34,7 +34,6 @@
 	}
 	
 	#sc_apms .sc_fields, #sc_apms .field {
-		width: 370px;
 		border: 1px solid #cccccc !important;
 		display: block !important;
 	}
@@ -61,11 +60,41 @@
         border: 1px solid #c2c2c2 !important;
     }
 	
-	#card-field-placeholder {
+	#sc_cards_fields_holder { position: relative; }
+	
+	#sc_date_cvv_holder {
+		position: absolute;
+		right: 0px;
+		top: 0;
+	}
+	
+	#sc_card_number, #sc_card_expiry, #sc_card_cvc {
 		padding-top: 7px !important;
 		padding-bottom: 1px !important;
 		padding-left: 9px !important;
 		padding-right: 9px !important;
+	}
+	
+	#sc_apms #sc_card_number_holder {
+		width: 60% !important;
+		display: inline-block !important;
+	}
+	
+	#sc_date_cvv_holder {
+		width: 38% !important;
+		/*float: right;*/
+	}
+	
+	#sc_date_cvv_holder .sc_fields {
+		width: 46%;
+	}
+	
+	#sc_apms #sc_date_cvv_holder .sc_fields:first-child {
+		float: right;
+	}
+	
+	#sc_date_cvv_holder .sc_fields:last-child {
+		float: right;
 	}
 	
 	#sc_apms label {
@@ -99,20 +128,53 @@
         z-index: 9999 !important;
     }
 	
-	#cc_error_msg, #cc_name_error_msg {
+	#cc_error_msg, #sc_apms .sc_error {
 		display: none;
-		width: 370px;
 		border: 1px solid #cccccc !important;
 	}
 	
-	#cc_error_msg .message.error, #cc_name_error_msg .message.error {
+	#cc_error_msg .message.error, #sc_apms .sc_error .message.error {
 		padding: 8px 12px 8px 45px !important;
 		font-size: 15px !important;
 	}
 	
-	#cc_name_error_msg { margin-bottom: 10px !important; }
-	#cc_name_error_msg .message.error { padding-bottom: 11px !important; }
-	#cc_name_error_msg .message.error div { padding-top: 2px !important; }
+	#sc_apms .sc_error {
+		margin-bottom: 10px !important;
+		margin-right: 5px !important;
+	}
+	
+	#sc_apms .sc_error .message.error { padding-bottom: 11px !important; }
+	#sc_apms .sc_error .message.error div { padding-top: 2px !important; }
+	
+	@media screen and (max-width: 880px) {
+		#sc_apms #sc_card_number_holder {
+			width: auto !important;
+			display: block !important;
+			margin-right: 5px !important;
+		}
+		
+		#sc_date_cvv_holder {
+			/*float: none;*/
+			display: block !important;
+			width: 100% !important;
+			position: relative;
+		}
+		
+		#sc_apms #sc_date_cvv_holder .sc_fields:first-child {
+			float: none;
+			display: inline-block !important;
+		}
+		
+		#sc_date_cvv_holder .sc_fields {
+			width: 48%;
+		}
+	}
+	
+	@media screen and (max-width: 450px) {
+		#sc_date_cvv_holder .sc_fields {
+			width: 45%;
+		}
+	}
 </style>
 
 <div class="payment-method" data-bind="css: {'_active': (getCode() == isChecked())}">
@@ -233,16 +295,40 @@
 						</div>
 					</div>
 					
-					<div id="cc_name_error_msg">
+					<div id="cc_name_error_msg" class="sc_error">
 						<div class="message error">
 							<div data-bind="text: $t('Cardholder name is required')"></div>
 						</div>
 					</div>
 					
-					<div class="field number sc_fields" tabindex="1">
-						<div id="card-field-placeholder" data-bind="afterRender: $parent.attachFields()"></div>
-					</div>
+					<div class="" tabindex="1" id="sc_cards_fields_holder">
+						<div class="field number sc_fields" tabindex="1" id="sc_card_number_holder">
+							<div id="sc_card_number"></div>
+						</div>
+						
+						<div id="cc_num_error_msg" class="sc_error">
+							<div class="message error">
+								<div data-bind="text: $t('Wrong Card number, please check it again!')"></div>
+							</div>
+						</div>
 
+						<div class="" tabindex="1" id="sc_date_cvv_holder">
+							<div class="field number sc_fields" tabindex="1">
+								<div id="sc_card_expiry"></div>
+							</div>
+
+							<div class="field number sc_fields" tabindex="1">
+								<div id="sc_card_cvc" data-bind="afterRender: $parent.attachFields()"></div>
+							</div>
+						</div>
+						
+						<div id="cc_error_msg" class="sc_error">
+							<div class="message error">
+								<div data-bind="text: $t('Wrong date or CVC, please check them again!')"></div>
+							</div>
+						</div>
+					</div>
+					
 					<input type="hidden" name="payment[cc_token]" data-bind="
 						attr: {
 							id: $parent.getCode() + '_cc_token',
@@ -251,12 +337,6 @@
 						value: $parent.creditCardToken,
 						valueUpdate: 'change'
 					" />
-					
-					<div id="cc_error_msg">
-						<div class="message error">
-							<div data-bind="text: $t('Wrong Card number, date or CVC, please check them again!')"></div>
-						</div>
-					</div>
 				</fieldset>
                 <!--/ko-->
             </div>
