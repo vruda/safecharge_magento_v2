@@ -90,11 +90,13 @@
 	}
 	
 	#sc_apms #sc_date_cvv_holder .sc_fields:first-child {
-		float: right;
+		display: inline-block !important;
 	}
 	
 	#sc_date_cvv_holder .sc_fields:last-child {
-		float: right;
+		position: absolute;
+		top: 0;
+		right: 0;
 	}
 	
 	#sc_apms label {
@@ -158,11 +160,6 @@
 			display: block !important;
 			width: 100% !important;
 			position: relative;
-		}
-		
-		#sc_apms #sc_date_cvv_holder .sc_fields:first-child {
-			float: none;
-			display: inline-block !important;
 		}
 		
 		#sc_date_cvv_holder .sc_fields {
@@ -341,6 +338,7 @@
                 <!--/ko-->
             </div>
         </div>
+		<hr/>
 		
         <div class="payment-method-content">
             <div class="checkout-agreements-block">

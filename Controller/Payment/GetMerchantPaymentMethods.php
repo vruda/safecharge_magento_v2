@@ -83,9 +83,10 @@ class GetMerchantPaymentMethods extends Action
 
         try {
             $countryCode    = $this->getRequest()->getParam('countryCode');
-            $grandTotal        = $this->getRequest()->getParam('grandTotal');
+            $grandTotal     = $this->getRequest()->getParam('grandTotal');
+            $billingAddress    = $this->getRequest()->getParam('billingAddress');
             
-            $apmMethodsData = $this->getApmMethods($countryCode, $grandTotal);
+            $apmMethodsData = $this->getApmMethods($countryCode, $grandTotal, $billingAddress);
         } catch (PaymentException $e) {
             $this->moduleConfig->createLog('GetMerchantPaymentMethods Controller - Error: ' . $e->getMessage());
             
@@ -110,16 +111,18 @@ class GetMerchantPaymentMethods extends Action
      *
      * @param string $countryCode
      * @param string $grandTotal
+     * @param array $billingAddress parameters
      *
      * @return array
      */
-    private function getApmMethods($countryCode = null, $grandTotal = null)
+    private function getApmMethods($countryCode = null, $grandTotal = null, $billingAddress = [])
     {
         $request = $this->requestFactory->create(AbstractRequest::GET_MERCHANT_PAYMENT_METHODS_METHOD);
 
         try {
             $apmMethods = $request
                 ->setCountryCode($countryCode)
+                ->setBillingAddress($billingAddress)
                 ->process();
         } catch (PaymentException $e) {
             return [];

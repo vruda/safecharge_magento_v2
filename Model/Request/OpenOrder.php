@@ -28,6 +28,9 @@ class OpenOrder extends AbstractRequest implements RequestInterface
     protected $orderData;
     
     protected $cart;
+    
+    private $billingAddress; // array
+    private $countryCode; // string
 
     /**
      * OpenOrder constructor.
@@ -92,6 +95,17 @@ class OpenOrder extends AbstractRequest implements RequestInterface
             ->process();
     }
     
+    public function setBillingAddress($data = [])
+    {
+        $this->billingAddress = $data;
+    }
+    
+    public function setCountryCode($data = '')
+    {
+        $this->countryCode = $data;
+    }
+
+
     /**
      * {@inheritdoc}
      *
@@ -121,6 +135,9 @@ class OpenOrder extends AbstractRequest implements RequestInterface
         if (empty($billing_country)) {
             $billing_country = $this->config->getDefaultCountry();
         }
+        if (!empty($this->billingAddress) && !empty($this->countryCode)) {
+            $billing_country = $this->countryCode;
+        }
         
         $email = $this->cart->getQuote()->getBillingAddress()->getEmail();
         if (empty($email)) {
@@ -145,14 +162,37 @@ class OpenOrder extends AbstractRequest implements RequestInterface
         if (empty($b_f_name)) {
             $b_f_name = $this->cart->getQuote()->getCustomerFirstname();
         }
+        if (!empty($this->billingAddress)) {
+            $b_f_name = $this->billingAddress['firstName'];
+        }
         
         $b_l_name = $this->cart->getQuote()->getBillingAddress()->getLastname();
         if (empty($b_l_name)) {
             $b_l_name = $this->cart->getQuote()->getCustomerLastname();
         }
+        if (!empty($this->billingAddress)) {
+            $b_l_name = $this->billingAddress['lastName'];
+        }
         
-        $this->config->createLog($email, 'OpenOrder mail');
-        $this->config->createLog($shipping_email, 'OpenOrder shipping email');
+        $billing_address = $this->cart->getQuote()->getBillingAddress()->getStreetFull();
+        if (!empty($this->billingAddress)) {
+            $billing_address = $this->billingAddress['address'];
+        }
+        
+        $billing_phone = $this->cart->getQuote()->getBillingAddress()->getTelephone();
+        if (!empty($this->billingAddress)) {
+            $billing_phone = $this->billingAddress['phone'];
+        }
+        
+        $billing_zip = $this->cart->getQuote()->getBillingAddress()->getPostcode();
+        if (!empty($this->billingAddress)) {
+            $billing_zip = $this->billingAddress['zip'];
+        }
+        
+        $billing_city = $this->cart->getQuote()->getBillingAddress()->getCity();
+        if (!empty($this->billingAddress)) {
+            $billing_city = $this->billingAddress['city'];
+        }
         
         $params = array_merge_recursive(
             [
@@ -179,10 +219,10 @@ class OpenOrder extends AbstractRequest implements RequestInterface
                 'billingAddress'    => [
                     "firstName"    => $b_f_name,
                     "lastName"    => $b_l_name,
-                    "address"    => $this->cart->getQuote()->getBillingAddress()->getStreetFull(),
-                    "phone"        => $this->cart->getQuote()->getBillingAddress()->getTelephone(),
-                    "zip"        => $this->cart->getQuote()->getBillingAddress()->getPostcode(),
-                    "city"        => $this->cart->getQuote()->getBillingAddress()->getCity(),
+                    "address"    => $billing_address,
+                    "phone"        => $billing_phone,
+                    "zip"        => $billing_zip,
+                    "city"        => $billing_city,
                     'country'    => $billing_country,
                     'email'     => $email,
                 ],

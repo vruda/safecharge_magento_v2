@@ -167,8 +167,31 @@ define(
             },
 			
             getApmMethods: function() {
-				if(!scGetAPMsAgain) {
-					if (quote.billingAddress() && self.countryId() === quote.billingAddress().countryId) {
+				var billingAddress = {};
+				
+				if (
+					true === scGetAPMsAgain
+					|| (
+						null !== quote.billingAddress()
+						&& null !== self.countryId()
+						&& self.countryId() !== quote.billingAddress().countryId
+					)
+				) {
+					self.countryId(quote.billingAddress().countryId);
+					cardNumber = cardExpiry = cardCvc = null;
+					$('#sc_card_number, #sc_card_expiry, #sc_card_cvc').html('');
+					
+					billingAddress = {
+						firstName: quote.billingAddress().firstname,
+						lastName: quote.billingAddress().lastname,
+						address: quote.billingAddress().street[0],
+						phone: quote.billingAddress().telephone,
+						zip: quote.billingAddress().postcode,
+						city: quote.billingAddress().city
+					};
+				}
+				else {
+					if (null !== quote.billingAddress() && self.countryId() === quote.billingAddress().countryId) {
 						return;
 					}
 					else if (quote.billingAddress()) {
@@ -186,16 +209,13 @@ define(
 						return;
 					}
 				}
-				else { // clean card and container
-					cardNumber = cardExpiry = cardCvc = null;
-					$('#sc_card_number, #sc_card_expiry, #sc_card_cvc').html('');
-				}
-                
+				
                 $.ajax({
                     dataType: "json",
                     url: self.getMerchantPaymentMethodsUrl(),
                     data: {
                         countryCode: self.countryId()
+						,billingAddress: billingAddress
                     },
                     cache: false,
                     showLoader: true
@@ -582,8 +602,8 @@ define(
 			  * Validate checkout agreements
 			 *
 			 * @returns {Boolean}
-			*/
-		   validate: function (hideError) {
+			 */
+			validate: function (hideError) {
 			   var isValid = true;
 
 			   if (!agreementsConfig.isEnabled || $(agreementsInputPath).length === 0) {

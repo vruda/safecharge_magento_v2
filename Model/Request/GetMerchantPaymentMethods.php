@@ -26,6 +26,8 @@ class GetMerchantPaymentMethods extends AbstractRequest implements RequestInterf
      */
     protected $countryCode;
     
+    protected $billingAddress;
+    
     protected $cart;
     protected $store;
     
@@ -90,11 +92,29 @@ class GetMerchantPaymentMethods extends AbstractRequest implements RequestInterf
     }
     
     /**
+     * @param  array|null $setBillingAddress
+     * @return $this
+     */
+    public function setBillingAddress($setBillingAddress = [])
+    {
+        $this->billingAddress = $setBillingAddress;
+        return $this;
+    }
+    
+    /**
      * @return string
      */
     public function getCountryCode()
     {
         return $this->countryCode;
+    }
+    
+    /**
+     * @return array
+     */
+    public function getBillingAddress()
+    {
+        return $this->billingAddress;
     }
     
     /**
@@ -120,6 +140,11 @@ class GetMerchantPaymentMethods extends AbstractRequest implements RequestInterf
     {
         $country_code   = $this->getCountryCode() ?: $this->config->getQuoteCountryCode();
         $tokenRequest   = $this->requestFactory->create(AbstractRequest::OPEN_ORDER_METHOD);
+        
+        // pass new billing data
+        $tokenRequest->setBillingAddress($this->getBillingAddress());
+        $tokenRequest->setCountryCode($this->getCountryCode());
+        
         $tokenResponse    = $tokenRequest->process();
         
         if (empty($country_code)) {

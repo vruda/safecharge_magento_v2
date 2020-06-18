@@ -441,19 +441,25 @@ class Config
     public function getCallbackSuccessUrl()
     {
         $quoteId = $this->checkoutSession->getQuoteId();
-        
-        if ($this->versionNum >= 220) {
+		
+		$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+		$productMetadata = $objectManager->get('Magento\Framework\App\ProductMetadataInterface');
+		$version = $productMetadata->getVersion(); //will return the magento version
+		
+		$this->createLog($version, 'magento $version');
+		
+        if ($this->versionNum != 0 && $this->versionNum < 220) {
             return $this->urlBuilder->getUrl(
-                'safecharge/payment/callback_complete',
-                ['quote' => $quoteId]
-            )
-                . '?form_key=' . $this->formKey->getFormKey();
+				'safecharge/payment/callback_completeold',
+				['quote' => $quoteId]
+			);
         }
         
-        return $this->urlBuilder->getUrl(
-            'safecharge/payment/callback_completeold',
-            ['quote' => $quoteId]
-        );
+		return $this->urlBuilder->getUrl(
+			'safecharge/payment/callback_complete',
+			['quote' => $quoteId]
+		)
+			. '?form_key=' . $this->formKey->getFormKey();
     }
 
     /**
@@ -463,18 +469,18 @@ class Config
     {
         $quoteId = $this->checkoutSession->getQuoteId();
         
-        if ($this->versionNum >= 220) {
+        if ($this->versionNum != 0 && $this->versionNum < 220) {
             return $this->urlBuilder->getUrl(
-                'safecharge/payment/callback_complete',
-                ['quote' => $quoteId]
-            )
-                . '?form_key=' . $this->formKey->getFormKey();
+				'safecharge/payment/callback_completeold',
+				['quote' => $quoteId]
+			);
         }
-        
-        return $this->urlBuilder->getUrl(
-            'safecharge/payment/callback_completeold',
-            ['quote' => $quoteId]
-        );
+		
+		return $this->urlBuilder->getUrl(
+			'safecharge/payment/callback_complete',
+			['quote' => $quoteId]
+		)
+			. '?form_key=' . $this->formKey->getFormKey();
     }
 
     /**
@@ -484,18 +490,18 @@ class Config
     {
         $quoteId = $this->checkoutSession->getQuoteId();
 
-        if ($this->versionNum >= 220) {
-             return $this->urlBuilder->getUrl(
-                 'safecharge/payment/callback_error',
-                 ['quote' => $quoteId]
-             )
-                . '?form_key=' . $this->formKey->getFormKey();
+        if ($this->versionNum != 0 && $this->versionNum < 220) {
+				return $this->urlBuilder->getUrl(
+				'safecharge/payment/callback_errorold',
+				['quote' => $quoteId]
+			);
         }
         
-        return $this->urlBuilder->getUrl(
-            'safecharge/payment/callback_errorold',
-            ['quote' => $quoteId]
-        );
+		return $this->urlBuilder->getUrl(
+			'safecharge/payment/callback_error',
+			['quote' => $quoteId]
+		)
+		   . '?form_key=' . $this->formKey->getFormKey();
     }
 
     /**
@@ -508,18 +514,18 @@ class Config
             ->getStore((is_null($incrementId)) ? $this->storeId : $storeId)
             ->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_WEB);
         
-        if ($this->versionNum >= 220) {
+        if ($this->versionNum != 0 && $this->versionNum < 220) {
             return $url
-                . 'safecharge/payment/callback_dmn/order/'
-                . (is_null($incrementId) ? $this->getReservedOrderId() : $incrementId)
-                . '?form_key=' . $this->formKey->getFormKey()
-                . '&quote=' . $quoteId;
+				. 'safecharge/payment/callback_dmnold/order/'
+				. (is_null($incrementId) ? $this->getReservedOrderId() : $incrementId)
+				. '?quote=' . $quoteId;
         }
         
-        return $url
-            . 'safecharge/payment/callback_dmnold/order/'
-            . (is_null($incrementId) ? $this->getReservedOrderId() : $incrementId)
-            . '?quote=' . $quoteId;
+		return $url
+			. 'safecharge/payment/callback_dmn/order/'
+			. (is_null($incrementId) ? $this->getReservedOrderId() : $incrementId)
+			. '?form_key=' . $this->formKey->getFormKey()
+			. '&quote=' . $quoteId;
     }
 
     /**
