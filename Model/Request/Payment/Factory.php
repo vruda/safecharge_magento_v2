@@ -59,7 +59,7 @@ class Factory
 
         if ($className === null) {
             throw new LocalizedException(
-                __('%1 method is not supported.')
+                __('%1 method is not supported.', $method)
             );
         }
 

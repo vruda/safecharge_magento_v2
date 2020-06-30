@@ -178,6 +178,11 @@ class Config
 
         }
     }
+	
+	public function getTempPath()
+	{
+		return $this->directory->getPath('tmp');
+	}
     
     /**
      * Function getSourceApplication
@@ -535,7 +540,7 @@ class Config
     {
         return $this->urlBuilder->getUrl('checkout/cart');
     }
-
+	
     public function getPaymentAction()
     {
         return $this->getConfigValue('payment_action');

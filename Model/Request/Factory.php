@@ -23,7 +23,8 @@ class Factory
         AbstractRequest::GET_USER_DETAILS_METHOD                => \Safecharge\Safecharge\Model\Request\GetUserDetails::class,
         AbstractRequest::OPEN_ORDER_METHOD                      => \Safecharge\Safecharge\Model\Request\OpenOrder::class,
         AbstractRequest::PAYMENT_APM_METHOD                     => \Safecharge\Safecharge\Model\Request\PaymentApm::class,
-        AbstractRequest::GET_MERCHANT_PAYMENT_METHODS_METHOD    => \Safecharge\Safecharge\Model\Request\GetMerchantPaymentMethods::class
+        AbstractRequest::GET_MERCHANT_PAYMENT_METHODS_METHOD    => \Safecharge\Safecharge\Model\Request\GetMerchantPaymentMethods::class,
+        AbstractRequest::GET_MERCHANT_PAYMENT_PLANS_METHOD		=> \Safecharge\Safecharge\Model\Request\GetPlansList::class,
     ];
 
     /**
@@ -60,7 +61,7 @@ class Factory
 
         if ($className === null) {
             throw new LocalizedException(
-                __('%1 method is not supported.')
+                __('%1 method is not supported.', $method)
             );
         }
 

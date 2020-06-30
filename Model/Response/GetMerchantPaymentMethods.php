@@ -7,7 +7,7 @@ use Safecharge\Safecharge\Lib\Http\Client\Curl;
 use Safecharge\Safecharge\Model\AbstractResponse;
 use Safecharge\Safecharge\Model\Config;
 use Safecharge\Safecharge\Model\Logger as SafechargeLogger;
-use Safecharge\Safecharge\Model\Payment;
+//use Safecharge\Safecharge\Model\Payment;
 use Safecharge\Safecharge\Model\ResponseInterface;
 
 /**

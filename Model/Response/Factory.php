@@ -38,6 +38,8 @@ class Factory
             => \Safecharge\Safecharge\Model\Response\PaymentApm::class,
         AbstractResponse::GET_MERCHANT_PAYMENT_METHODS_HANDLER
             => \Safecharge\Safecharge\Model\Response\GetMerchantPaymentMethods::class,
+        AbstractResponse::GET_MERCHANT_PAYMENT_PLANS_HANDLER
+            => \Safecharge\Safecharge\Model\Response\GetPlansList::class,
     ];
 
     /**
@@ -80,7 +82,7 @@ class Factory
 
         if ($className === null) {
             throw new LocalizedException(
-                __('%1 type is not supported.')
+                __('%1 type is not supported.', $type)
             );
         }
 

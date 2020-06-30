@@ -240,6 +240,17 @@
 					<source_model>Magento\Directory\Model\Config\Source\Country</source_model>
 					<config_path>payment/safecharge/specificcountry</config_path>
 				</field>
+				
+				<field id="getPlans"
+					   translate="label"
+					   type="button"
+					   sortOrder="170"
+					   showInDefault="1"
+					   showInWebsite="1"
+					   showInStore="0" >
+					<label>Get Payment Plans</label>
+					<frontend_model>Safecharge\Safecharge\Block\System\Config\Button</frontend_model>
+				</field>
             </group>
         </section>
     </system>
