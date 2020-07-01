@@ -58,7 +58,8 @@ class UpgradeData implements UpgradeDataInterface
 			
 			$eavSetup->addAttribute(
 				\Magento\Catalog\Model\Product::ENTITY,
-				'sc_subscription_plans',
+//				'sc_subscription_plans',
+				\Safecharge\Safecharge\Model\Config::PAYMENT_PLANS_ATTR_NAME,
 				[
 					'type' => 'int',
 					'label' => 'SafeCharge Payment Plans',

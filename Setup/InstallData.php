@@ -21,7 +21,7 @@ class InstallData implements InstallDataInterface
 		
 		$eavSetup->addAttribute(
 			\Magento\Catalog\Model\Product::ENTITY,
-			'sc_subscription_plans',
+			\Safecharge\Safecharge\Model\Config::PAYMENT_PLANS_ATTR_NAME,
 			[
 				'type' => 'int',
 				'label' => 'SafeCharge Subscription Plans',
