@@ -37,12 +37,22 @@ class GetPlansList extends \Safecharge\Safecharge\Model\AbstractResponse impleme
     {
         parent::process();
 
-        $body		= $this->getBody();
-		$array_keys = $this->getRequiredResponseDataKeys();
-		$tempPath	= $this->config->getTempPath();
-		
 		// write the subscriptions to a file
 		try {
+			$body		= $this->getBody();
+			$array_keys = $this->getRequiredResponseDataKeys();
+			$tempPath	= $this->config->getTempPath();
+
+			if(
+				empty($body['status']) || $body['status'] != 'SUCCESS'
+				|| empty($body['total']) || intval($body['total']) < 1
+			) {
+				$this->config->createLog('GetPlansList error - status error or missing plans. Check the response above!');
+				return $this;
+			}
+
+			$this->config->createLog('response process');
+			
 			$fp = fopen($tempPath. DIRECTORY_SEPARATOR . 'sc_subscriptions.json', 'w');
 			fwrite($fp, json_encode($body));
 			fclose($fp);
