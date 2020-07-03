@@ -10,18 +10,18 @@ use Safecharge\Safecharge\Model\Config;
 
 class Button extends \Magento\Config\Block\System\Config\Form\Field
 {
-	protected $_template = 'Safecharge_Safecharge::system/config/getPlans.phtml';
+    protected $_template = 'Safecharge_Safecharge::system/config/getPlans.phtml';
  
-	private $config;
-	
+    private $config;
+    
     public function __construct(
-		Context $context,
-		array $data = [],
-		Config $config
-	) {
+        Context $context,
+        array $data = [],
+        Config $config
+    ) {
         parent::__construct($context, $data);
-		
-		$this->config = $config;
+        
+        $this->config = $config;
     }
  
     public function render(AbstractElement $element)
@@ -29,26 +29,26 @@ class Button extends \Magento\Config\Block\System\Config\Form\Field
         $element->unsScope()->unsCanUseWebsiteValue()->unsCanUseDefaultValue();
         return parent::render($element);
     }
-	
+    
     protected function _getElementHtml(AbstractElement $element)
     {
         return $this->_toHtml();
     }
-	
+    
     public function getAjaxUrl()
     {
         return $this->getUrl('safecharge/system_config/getPlans');
     }
-	
+    
     public function getButtonHtml()
     {
         $button = $this->getLayout()
-			->createBlock('Magento\Backend\Block\Widget\Button')
-			->setData([
+            ->createBlock('Magento\Backend\Block\Widget\Button')
+            ->setData([
                 'id' => 'get_plans_button',
-				'label' => __('Collect Plans'),
+                'label' => __('Collect Plans'),
             ]);
-		
+        
         return $button->toHtml();
     }
 }

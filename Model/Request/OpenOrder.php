@@ -226,7 +226,7 @@ class OpenOrder extends AbstractRequest implements RequestInterface
                     'country'    => $billing_country,
                     'email'     => $email,
                 ],
-				
+                
                 'urlDetails'        => [
                     'successUrl'        => $this->config->getCallbackSuccessUrl(),
                     'failureUrl'        => $this->config->getCallbackErrorUrl(),
@@ -234,18 +234,18 @@ class OpenOrder extends AbstractRequest implements RequestInterface
                     'backUrl'           => $this->config->getBackUrl(),
                     'notificationUrl'    => $this->config->getCallbackDmnUrl(),
                 ],
-				
+                
                 'paymentOption'        => ['card' => ['threeD' => ['isDynamic3D' => 1]]],
                 'transactionType'    => $this->config->getPaymentAction(),
-				
+                
                 'merchantDetails'    => [
                     'customField1' => (string) number_format($this->cart->getQuote()->getGrandTotal(), 2, '.', ''), // pass amount
                 ],
             ],
             parent::getParams()
         );
-		
-		$params['userDetails'] = $params['billingAddress'];
+        
+        $params['userDetails'] = $params['billingAddress'];
         
         return $params;
     }

@@ -28,11 +28,11 @@ class UpgradeData implements UpgradeDataInterface
     public function __construct(
         OrderStatusFactory $orderStatusFactory,
         \Magento\Framework\App\ResourceConnection $resourceConnection,
-		\Magento\Eav\Setup\EavSetupFactory $eavSetupFactory
+        \Magento\Eav\Setup\EavSetupFactory $eavSetupFactory
     ) {
-        $this->orderStatusFactory	= $orderStatusFactory;
-        $this->resourceConnection	= $resourceConnection;
-		$this->eavSetupFactory		= $eavSetupFactory;
+        $this->orderStatusFactory    = $orderStatusFactory;
+        $this->resourceConnection    = $resourceConnection;
+        $this->eavSetupFactory        = $eavSetupFactory;
     }
 
     /**
@@ -50,40 +50,40 @@ class UpgradeData implements UpgradeDataInterface
     ) {
         
 
-		// add custom Order Attribute
+        // add custom Order Attribute
         if (version_compare($context->getVersion(), '2.1.1', '<')) {
-			$eavSetup = $this->eavSetupFactory->create(['setup' => $setup]);
-			
-//			$eavSetup->removeAttribute(\Magento\Catalog\Model\Product::ENTITY, 'sc_subscription_plans');
-			
-			$eavSetup->addAttribute(
-				\Magento\Catalog\Model\Product::ENTITY,
-				\Safecharge\Safecharge\Model\Config::PAYMENT_PLANS_ATTR_NAME,
-				[
-					'type' => 'int',
-					'label' => 'SafeCharge Payment Plans',
-					'input' => 'select',
-					'source' => 'Safecharge\Safecharge\Model\Config\Source\ScSubsPlansOptions',
-					'global' => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
-					'visible' => true,
-					'required' => false,
-					'user_defined' => true,
-					'default' => '',
-					'searchable' => true,
-					'filterable' => true,
-					'visible_on_front' => true,
-					'used_in_product_listing' => true,
-					'group' => 'General',
-					'option' => [ 
-						'values' => [],
-					],
-				]
-			);
-		}
-		
-		$setup->startSetup();
-			
-		// add few new Order States
+            $eavSetup = $this->eavSetupFactory->create(['setup' => $setup]);
+            
+//            $eavSetup->removeAttribute(\Magento\Catalog\Model\Product::ENTITY, 'sc_subscription_plans');
+            
+            $eavSetup->addAttribute(
+                \Magento\Catalog\Model\Product::ENTITY,
+                \Safecharge\Safecharge\Model\Config::PAYMENT_PLANS_ATTR_NAME,
+                [
+                    'type' => 'int',
+                    'label' => 'SafeCharge Payment Plans',
+                    'input' => 'select',
+                    'source' => 'Safecharge\Safecharge\Model\Config\Source\ScSubsPlansOptions',
+                    'global' => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
+                    'visible' => true,
+                    'required' => false,
+                    'user_defined' => true,
+                    'default' => '',
+                    'searchable' => true,
+                    'filterable' => true,
+                    'visible_on_front' => true,
+                    'used_in_product_listing' => true,
+                    'group' => 'General',
+                    'option' => [
+                        'values' => [],
+                    ],
+                ]
+            );
+        }
+        
+        $setup->startSetup();
+            
+        // add few new Order States
         if (version_compare($context->getVersion(), '2.0.2', '<')) {
             $scVoided = $this->orderStatusFactory->create()
                 ->setData('status', 'sc_voided')

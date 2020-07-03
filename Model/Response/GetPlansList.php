@@ -11,9 +11,9 @@ use Safecharge\Safecharge\Lib\Http\Client\Curl;
  */
 class GetPlansList extends \Safecharge\Safecharge\Model\AbstractResponse implements \Safecharge\Safecharge\Model\ResponseInterface
 {
-	protected $config;
-	
-	public function __construct(
+    protected $config;
+    
+    public function __construct(
         SafechargeLogger $safechargeLogger,
         Config $config,
         $requestId,
@@ -25,10 +25,10 @@ class GetPlansList extends \Safecharge\Safecharge\Model\AbstractResponse impleme
             $requestId,
             $curl
         );
-		
-		$this->config = $config;
+        
+        $this->config = $config;
     }
-	
+    
     /**
      * @return AbstractResponse
      * @throws \Magento\Framework\Exception\LocalizedException
@@ -37,30 +37,28 @@ class GetPlansList extends \Safecharge\Safecharge\Model\AbstractResponse impleme
     {
         parent::process();
 
-		// write the subscriptions to a file
-		try {
-			$body		= $this->getBody();
-			$array_keys = $this->getRequiredResponseDataKeys();
-			$tempPath	= $this->config->getTempPath();
+        // write the subscriptions to a file
+        try {
+            $body        = $this->getBody();
+            $array_keys = $this->getRequiredResponseDataKeys();
+            $tempPath    = $this->config->getTempPath();
 
-			if(
-				empty($body['status']) || $body['status'] != 'SUCCESS'
-				|| empty($body['total']) || intval($body['total']) < 1
-			) {
-				$this->config->createLog('GetPlansList error - status error or missing plans. Check the response above!');
-				return $this;
-			}
+            if (empty($body['status']) || $body['status'] != 'SUCCESS'
+                || empty($body['total']) || intval($body['total']) < 1
+            ) {
+                $this->config->createLog('GetPlansList error - status error or missing plans. Check the response above!');
+                return $this;
+            }
 
-			$this->config->createLog('response process');
-			
-			$fp = fopen($tempPath. DIRECTORY_SEPARATOR . 'sc_subscriptions.json', 'w');
-			fwrite($fp, json_encode($body));
-			fclose($fp);
-		}
-		catch(Exception $e) {
-			$this->config->createLog($e->getMessage(), 'GetPlansList Exception');
-		}
-		
+            $this->config->createLog('response process');
+            
+            $fp = fopen($tempPath. DIRECTORY_SEPARATOR . 'sc_subscriptions.json', 'w');
+            fwrite($fp, json_encode($body));
+            fclose($fp);
+        } catch (Exception $e) {
+            $this->config->createLog($e->getMessage(), 'GetPlansList Exception');
+        }
+        
         return $this;
     }
 

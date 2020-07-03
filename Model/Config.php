@@ -15,8 +15,8 @@ use Magento\Store\Model\StoreManagerInterface;
  */
 class Config
 {
-    const MODULE_NAME				= 'Safecharge_Safecharge';
-	const PAYMENT_PLANS_ATTR_NAME	= 'sc_subscription_plans';
+    const MODULE_NAME                = 'Safecharge_Safecharge';
+    const PAYMENT_PLANS_ATTR_NAME    = 'sc_subscription_plans';
 
     /**
      * Scope config object.
@@ -179,11 +179,11 @@ class Config
 
         }
     }
-	
-	public function getTempPath()
-	{
-		return $this->directory->getPath('tmp');
-	}
+    
+    public function getTempPath()
+    {
+        return $this->directory->getPath('tmp');
+    }
     
     /**
      * Function getSourceApplication
@@ -447,25 +447,25 @@ class Config
     public function getCallbackSuccessUrl()
     {
         $quoteId = $this->checkoutSession->getQuoteId();
-		
-		$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
-		$productMetadata = $objectManager->get('Magento\Framework\App\ProductMetadataInterface');
-		$version = $productMetadata->getVersion(); //will return the magento version
-		
-		$this->createLog($version, 'magento $version');
-		
+        
+        $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+        $productMetadata = $objectManager->get('Magento\Framework\App\ProductMetadataInterface');
+        $version = $productMetadata->getVersion(); //will return the magento version
+        
+        $this->createLog($version, 'magento $version');
+        
         if ($this->versionNum != 0 && $this->versionNum < 220) {
             return $this->urlBuilder->getUrl(
-				'safecharge/payment/callback_completeold',
-				['quote' => $quoteId]
-			);
+                'safecharge/payment/callback_completeold',
+                ['quote' => $quoteId]
+            );
         }
         
-		return $this->urlBuilder->getUrl(
-			'safecharge/payment/callback_complete',
-			['quote' => $quoteId]
-		)
-			. '?form_key=' . $this->formKey->getFormKey();
+        return $this->urlBuilder->getUrl(
+            'safecharge/payment/callback_complete',
+            ['quote' => $quoteId]
+        )
+            . '?form_key=' . $this->formKey->getFormKey();
     }
 
     /**
@@ -477,16 +477,16 @@ class Config
         
         if ($this->versionNum != 0 && $this->versionNum < 220) {
             return $this->urlBuilder->getUrl(
-				'safecharge/payment/callback_completeold',
-				['quote' => $quoteId]
-			);
+                'safecharge/payment/callback_completeold',
+                ['quote' => $quoteId]
+            );
         }
-		
-		return $this->urlBuilder->getUrl(
-			'safecharge/payment/callback_complete',
-			['quote' => $quoteId]
-		)
-			. '?form_key=' . $this->formKey->getFormKey();
+        
+        return $this->urlBuilder->getUrl(
+            'safecharge/payment/callback_complete',
+            ['quote' => $quoteId]
+        )
+            . '?form_key=' . $this->formKey->getFormKey();
     }
 
     /**
@@ -497,17 +497,17 @@ class Config
         $quoteId = $this->checkoutSession->getQuoteId();
 
         if ($this->versionNum != 0 && $this->versionNum < 220) {
-				return $this->urlBuilder->getUrl(
-				'safecharge/payment/callback_errorold',
-				['quote' => $quoteId]
-			);
+                return $this->urlBuilder->getUrl(
+                    'safecharge/payment/callback_errorold',
+                    ['quote' => $quoteId]
+                );
         }
         
-		return $this->urlBuilder->getUrl(
-			'safecharge/payment/callback_error',
-			['quote' => $quoteId]
-		)
-		   . '?form_key=' . $this->formKey->getFormKey();
+        return $this->urlBuilder->getUrl(
+            'safecharge/payment/callback_error',
+            ['quote' => $quoteId]
+        )
+           . '?form_key=' . $this->formKey->getFormKey();
     }
 
     /**
@@ -522,16 +522,16 @@ class Config
         
         if ($this->versionNum != 0 && $this->versionNum < 220) {
             return $url
-				. 'safecharge/payment/callback_dmnold/order/'
-				. (is_null($incrementId) ? $this->getReservedOrderId() : $incrementId)
-				. '?quote=' . $quoteId;
+                . 'safecharge/payment/callback_dmnold/order/'
+                . (is_null($incrementId) ? $this->getReservedOrderId() : $incrementId)
+                . '?quote=' . $quoteId;
         }
         
-		return $url
-			. 'safecharge/payment/callback_dmn/order/'
-			. (is_null($incrementId) ? $this->getReservedOrderId() : $incrementId)
-			. '?form_key=' . $this->formKey->getFormKey()
-			. '&quote=' . $quoteId;
+        return $url
+            . 'safecharge/payment/callback_dmn/order/'
+            . (is_null($incrementId) ? $this->getReservedOrderId() : $incrementId)
+            . '?form_key=' . $this->formKey->getFormKey()
+            . '&quote=' . $quoteId;
     }
 
     /**
@@ -541,7 +541,7 @@ class Config
     {
         return $this->urlBuilder->getUrl('checkout/cart');
     }
-	
+    
     public function getPaymentAction()
     {
         return $this->getConfigValue('payment_action');
