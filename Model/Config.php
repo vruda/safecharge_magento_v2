@@ -15,8 +15,9 @@ use Magento\Store\Model\StoreManagerInterface;
  */
 class Config
 {
-    const MODULE_NAME                = 'Safecharge_Safecharge';
-    const PAYMENT_PLANS_ATTR_NAME    = 'sc_subscription_plans';
+    const MODULE_NAME               = 'Safecharge_Safecharge';
+    const PAYMENT_PLANS_ATTR_NAME   = 'sc_subscription_plans';
+    const PAYMENT_PLANS_ATTR_LABEL	= 'SafeCharge Payment Plans';
 
     /**
      * Scope config object.

@@ -12,13 +12,15 @@ use Safecharge\Safecharge\Lib\Http\Client\Curl;
 class GetPlansList extends AbstractRequest implements RequestInterface
 {
     protected $requestFactory;
+    protected $priceCurrency;
     
     public function __construct(
         SafechargeLogger $safechargeLogger,
         Config $config,
         Curl $curl,
         \Safecharge\Safecharge\Model\Response\Factory $responseFactory,
-        \Safecharge\Safecharge\Model\Request\Factory $requestFactory
+        \Safecharge\Safecharge\Model\Request\Factory $requestFactory,
+		\Magento\Framework\Pricing\PriceCurrencyInterface $priceCurrency
     ) {
         parent::__construct(
             $safechargeLogger,
@@ -28,6 +30,7 @@ class GetPlansList extends AbstractRequest implements RequestInterface
         );
 
         $this->requestFactory = $requestFactory;
+        $this->priceCurrency = $priceCurrency;
     }
     
     public function process()
@@ -52,8 +55,11 @@ class GetPlansList extends AbstractRequest implements RequestInterface
     protected function getParams()
     {
         $params = array_merge_recursive(
-//            ['subscriptionStatuses'    => 'CANCELLED',],
-            [],
+            [
+				'planStatuses'	=> 'ACTIVE',
+				'currency'		=> $this->priceCurrency->getCurrency()->getCurrencyCode(),
+			],
+//            [],
             parent::getParams()
         );
         

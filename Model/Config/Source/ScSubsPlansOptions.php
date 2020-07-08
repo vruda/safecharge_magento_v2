@@ -21,7 +21,7 @@ class ScSubsPlansOptions extends \Magento\Eav\Model\Entity\Attribute\Source\Abst
     {
         $this->_options[] = [
             'label' => __('No Plan'),
-            'value' => 0
+            'value' => 1 // need to be greater than 0
 
         ];
         

@@ -77,6 +77,10 @@
             </argument>
         </arguments>
     </type>
+	
+	<type name="Magento\Checkout\Model\Cart">
+        <plugin name="prevent_add_to" type="Safecharge\Safecharge\Plugin\PreventAddToCart"/>
+    </type>
 
     <!-- Interface preferences. -->
     <preference for="Safecharge\Safecharge\Api\RequestLogRepositoryInterface"
