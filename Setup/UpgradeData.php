@@ -63,7 +63,7 @@ class UpgradeData implements UpgradeDataInterface
                     'type' => 'int',
                     'label' => \Safecharge\Safecharge\Model\Config::PAYMENT_PLANS_ATTR_LABEL,
                     'input' => 'select',
-                    'source' => 'Safecharge\Safecharge\Model\Config\Source\ScSubsPlansOptions',
+                    'source' => 'Safecharge\Safecharge\Model\Config\Source\PaymentPlansOptions',
                     'global' => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
                     'visible' => true,
                     'required' => false,

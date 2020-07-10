@@ -7,8 +7,8 @@ use Safecharge\Safecharge\Lib\Http\Client\Curl;
 use Safecharge\Safecharge\Model\AbstractResponse;
 use Safecharge\Safecharge\Model\Config;
 use Safecharge\Safecharge\Model\Logger as SafechargeLogger;
-//use Safecharge\Safecharge\Model\Payment;
 use Safecharge\Safecharge\Model\ResponseInterface;
+use Magento\Checkout\Model\Cart;
 
 /**
  * Safecharge Safecharge get merchant payment methods response model.
@@ -31,6 +31,8 @@ class GetMerchantPaymentMethods extends AbstractResponse implements ResponseInte
      * @var string - the session token returned from APMs
      */
     protected $sessionToken = '';
+    
+//	protected $cart;
 
     /**
      * AbstractResponse constructor.
@@ -47,6 +49,7 @@ class GetMerchantPaymentMethods extends AbstractResponse implements ResponseInte
         $requestId,
         Curl $curl,
         Resolver $localeResolver
+//		,Cart $cart
     ) {
         parent::__construct(
             $safechargeLogger,
@@ -56,6 +59,9 @@ class GetMerchantPaymentMethods extends AbstractResponse implements ResponseInte
         );
 
         $this->localeResolver = $localeResolver;
+//        $this->cart = $cart;
+		
+//		var_dump(is_object($this->cart));
     }
 
     /**
@@ -75,6 +81,15 @@ class GetMerchantPaymentMethods extends AbstractResponse implements ResponseInte
             if (!$countryCode && isset($method["paymentMethod"]) && $method["paymentMethod"] !== 'cc_card') {
                 continue;
             }
+			
+			// when we have product with a Payment plan, skip all APMs
+			if(
+				$this->config->getNuveiUseCcOnly()
+				&& !empty($method["paymentMethod"])
+				&& $method["paymentMethod"] !== 'cc_card'
+			) {
+				continue;
+			}
             
             $default_dnames = [];
             $locale_dnames    = [];

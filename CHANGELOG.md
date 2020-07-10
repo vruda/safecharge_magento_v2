@@ -5,6 +5,7 @@
 ## 2.1.1.x
 ```
 	* Added possibility to append Safecharge Payment Plan to a product, when create new or edit existing one. Plugin get the payment plans from the pre-created plans of the merchant, by click on a button Get Payment Plans in plugin configuration.
+	* When user have a product with a Payment Plan, only CC is allowed.
 
 ## 2.1.0.x
 ```

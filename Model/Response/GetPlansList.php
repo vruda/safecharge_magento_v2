@@ -52,7 +52,12 @@ class GetPlansList extends \Safecharge\Safecharge\Model\AbstractResponse impleme
 
             $this->config->createLog('response process');
             
-            $fp = fopen($tempPath. DIRECTORY_SEPARATOR . 'sc_subscriptions.json', 'w');
+            $fp = fopen(
+				$tempPath. DIRECTORY_SEPARATOR
+					. \Safecharge\Safecharge\Model\Config::PAYMENT_PLANS_FILE_NAME,
+				'w'
+			);
+			
             fwrite($fp, json_encode($body));
             fclose($fp);
         } catch (Exception $e) {

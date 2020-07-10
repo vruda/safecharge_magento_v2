@@ -54,7 +54,8 @@ class OpenOrder extends AbstractResponse implements ResponseInterface
     {
         return [
             'orderId',
-            'sessionToken'
+            'sessionToken',
+			'merchantDetails',
         ];
     }
 }

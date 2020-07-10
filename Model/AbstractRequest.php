@@ -33,7 +33,7 @@ abstract class AbstractRequest extends AbstractApi
     const OPEN_ORDER_METHOD                     = 'openOrder';
     const PAYMENT_APM_METHOD                    = 'paymentAPM';
     const GET_MERCHANT_PAYMENT_METHODS_METHOD   = 'getMerchantPaymentMethods';
-    const GET_MERCHANT_PAYMENT_PLANS_METHOD        = 'getPlansList';
+    const GET_MERCHANT_PAYMENT_PLANS_METHOD     = 'getPlansList';
 
     /**
      * @var Curl

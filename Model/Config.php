@@ -16,8 +16,9 @@ use Magento\Store\Model\StoreManagerInterface;
 class Config
 {
     const MODULE_NAME               = 'Safecharge_Safecharge';
-    const PAYMENT_PLANS_ATTR_NAME   = 'sc_subscription_plans';
-    const PAYMENT_PLANS_ATTR_LABEL	= 'SafeCharge Payment Plans';
+    const PAYMENT_PLANS_ATTR_NAME   = 'nuvei_payment_plans';
+    const PAYMENT_PLANS_ATTR_LABEL	= 'Nuvei Payment Plans';
+    const PAYMENT_PLANS_FILE_NAME	= 'nuvei_payment_plans.json';
 
     /**
      * Scope config object.
@@ -447,12 +448,9 @@ class Config
      */
     public function getCallbackSuccessUrl()
     {
-        $quoteId = $this->checkoutSession->getQuoteId();
-        
-        $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
-        $productMetadata = $objectManager->get('Magento\Framework\App\ProductMetadataInterface');
-        $version = $productMetadata->getVersion(); //will return the magento version
-        
+        $quoteId	= $this->checkoutSession->getQuoteId();
+        $version	= $this->productMetadata->getVersion(); //will return the magento version
+		
         $this->createLog($version, 'magento $version');
         
         if ($this->versionNum != 0 && $this->versionNum < 220) {
@@ -552,7 +550,7 @@ class Config
     {
         return (($quote = $this->checkoutSession->getQuote())) ? $quote->getId() : null;
     }
-
+	
     public function getReservedOrderId()
     {
         $reservedOrderId = $this->checkoutSession->getQuote()->getReservedOrderId();
@@ -588,4 +586,14 @@ class Config
     {
         $quote = $this->checkoutSession->getQuote()->getBaseCurrencyCode();
     }
+	
+	public function getNuveiUseCcOnly()
+	{
+		return $this->checkoutSession->getNuveiUseCcOnly();
+	}
+	
+	public function setNuveiUseCcOnly($val)
+	{
+		$this->checkoutSession->setNuveiUseCcOnly($val);
+	}
 }

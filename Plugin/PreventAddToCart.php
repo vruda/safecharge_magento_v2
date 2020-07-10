@@ -12,6 +12,7 @@ class PreventAddToCart
 {
 	public function beforeAddProduct(\Magento\Checkout\Model\Cart $subject, $productInfo, $requestInfo = null)
     {
+		/*
 		try {
 			$cartItemsCount	= $subject->getQuote()->getItemsCount();
 			$error_msg_1	= 'You can not add product to product with a Payment Plan.';
@@ -110,5 +111,6 @@ class PreventAddToCart
 		}
 		
 //        return [$productInfo,$requestInfo];
+		 */
     }
 }

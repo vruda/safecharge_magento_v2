@@ -56,8 +56,8 @@ class OpenOrder extends AbstractRequest implements RequestInterface
             $responseFactory
         );
 
-        $this->requestFactory    = $requestFactory;
-        $this->cart                = $cart;
+        $this->requestFactory	= $requestFactory;
+        $this->cart             = $cart;
     }
 
     /**
@@ -193,6 +193,20 @@ class OpenOrder extends AbstractRequest implements RequestInterface
         if (!empty($this->billingAddress)) {
             $billing_city = $this->billingAddress['city'];
         }
+		
+		// check in the cart for Nuvei Payment Plan
+		$items		= $this->cart->getQuote()->getItems();
+		$plans_ids	= [];
+		
+		foreach($items as $item) {
+			$plan_id = $item->getProduct()->getData(\Safecharge\Safecharge\Model\Config::PAYMENT_PLANS_ATTR_NAME);
+			if(is_numeric($plan_id) && intval($plan_id) > 1) {
+				$plans_ids[] = $plan_id;
+			}
+		}
+
+		$this->config->setNuveiUseCcOnly(!empty($plans_ids) ? true : false);
+		// check in the cart for Nuvei Payment Plan END
         
         $params = array_merge_recursive(
             [
@@ -240,6 +254,7 @@ class OpenOrder extends AbstractRequest implements RequestInterface
                 
                 'merchantDetails'    => [
                     'customField1' => (string) number_format($this->cart->getQuote()->getGrandTotal(), 2, '.', ''), // pass amount
+                    'customField2' => json_encode($plans_ids), // payment plans IDs
                 ],
             ],
             parent::getParams()

@@ -175,7 +175,7 @@ class GetMerchantPaymentMethods extends AbstractRequest implements RequestInterf
             $currencyCode = empty($this->cart->getQuote()->getOrderCurrencyCode())
                 ? $this->cart->getQuote()->getStoreCurrencyCode() : $this->cart->getQuote()->getOrderCurrencyCode();
         }
-        
+		
         $params = [
             'sessionToken'    => $tokenResponse->getSessionToken(),
             "currencyCode"    => $currencyCode,
