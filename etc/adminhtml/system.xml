@@ -86,14 +86,14 @@
 				<field id="use_upos"
 					   translate="label"
 					   type="select"
-					   sortOrder="45"
+					   sortOrder="47"
 					   showInDefault="1"
 					   showInWebsite="1"
 					   showInStore="0" 
 					   canRestore="1">
 					<label>Use UPOs</label>
 					<source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-					<config_path>payment/safecharge/payment_action</config_path>
+					<config_path>payment/safecharge/use_upos</config_path>
 				</field>
 
 				<field id="merchant_id"
