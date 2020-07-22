@@ -76,8 +76,7 @@
 					   sortOrder="45"
 					   showInDefault="1"
 					   showInWebsite="1"
-					   showInStore="0" 
-					   canRestore="1">
+					   showInStore="0" >
 					<label>Payment Action</label>
 					<source_model>Safecharge\Safecharge\Model\Adminhtml\Source\PaymentAction</source_model>
 					<config_path>payment/safecharge/payment_action</config_path>

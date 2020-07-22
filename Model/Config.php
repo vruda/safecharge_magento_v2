@@ -390,14 +390,6 @@ class Config
     }
     
     /**
-     * @return bool
-     */
-    public function doSaveOrderBeforeSuccess()
-    {
-        return (bool)$this->getConfigValue('save_order_before_success');
-    }
-
-    /**
      * Return bool value depends of that if payment method sandbox mode
      * is enabled or not.
      *
@@ -422,6 +414,11 @@ class Config
     {
         return (bool)$this->getConfigValue('debug');
     }
+	
+	public function useUPOs()
+	{
+		return (bool)$this->getConfigValue('use_upos');
+	}
 
     public function getSourcePlatformField()
     {

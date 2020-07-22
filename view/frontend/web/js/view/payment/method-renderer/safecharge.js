@@ -98,6 +98,7 @@ define(
                 ccNumber				: '',
                 creditCardOwner			: '',
                 apmMethods				: [],
+                UPOs					: [],
                 chosenApmMethod			: '',
                 countryId				: null
             },
@@ -114,11 +115,13 @@ define(
                         'isCcFormShown',
                         'creditCardOwner',
                         'apmMethods',
+                        'UPOs',
                         'chosenApmMethod',
                         'countryId'
                     ]);
                     
                 self.getApmMethods();
+                self.getUPOs();
                 quote.billingAddress.subscribe(self.getApmMethods, this, 'change');
 				
                 return self;
@@ -162,9 +165,38 @@ define(
                 return window.checkoutConfig.payment[self.getCode()].paymentApmUrl;
             },
 
+            getUPOsUrl: function() {
+                return window.checkoutConfig.payment[self.getCode()].getUPOsUrl;
+            },
+			
             getMerchantPaymentMethodsUrl: function() {
                 return window.checkoutConfig.payment[self.getCode()].getMerchantPaymentMethodsUrl;
             },
+			
+			getUPOs: function() {
+				console.log('getUPOs()');
+				
+				if(
+					self.apmMethods.length == 0
+					|| window.checkoutConfig.payment[self.getCode()].useUPOs == 0
+				) {
+					return;
+				}
+				
+				$.ajax({
+                    dataType	: "json",
+                    url			: self.getUPOsUrl(),
+					cache		: false,
+                    showLoader	: true,
+                    data		: { apms: JSON.stringify(self.apmMethods) }
+                })
+					.done(function(resp) {
+						console.log(resp);
+					})
+					.fail(function(e) {
+						console.error(e.responseText);
+					});
+			},
 			
             getApmMethods: function() {
 				var billingAddress = {};
@@ -211,14 +243,14 @@ define(
 				}
 				
                 $.ajax({
-                    dataType: "json",
-                    url: self.getMerchantPaymentMethodsUrl(),
-                    data: {
+                    dataType	: "json",
+                    url			: self.getMerchantPaymentMethodsUrl(),
+					cache		: false,
+                    showLoader	: true,
+                    data		: {
                         countryCode: self.countryId()
 						,billingAddress: billingAddress
-                    },
-                    cache: false,
-                    showLoader: true
+                    }
                 })
                 .done(function(res) {
                     if (res && res.error == 0) {

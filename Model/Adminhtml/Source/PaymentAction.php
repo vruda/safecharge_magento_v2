@@ -2,7 +2,6 @@
 
 namespace Safecharge\Safecharge\Model\Adminhtml\Source;
 
-use Magento\Payment\Model\Method\AbstractMethod;
 use Magento\Framework\Option\ArrayInterface;
 
 /**

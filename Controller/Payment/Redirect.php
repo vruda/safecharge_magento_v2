@@ -81,17 +81,6 @@ class Redirect extends Action
         // for the WebSDK
         if ($this->request->getParam('method') === 'cc_card' && $this->request->getParam('transactionId')) {
             $postData['url'] = $this->moduleConfig->getCallbackSuccessUrl();
-            
-            // try to place an order
-//            if ($this->moduleConfig->doSaveOrderBeforeSuccess()
-//                && strpos($postData['url'], 'callback_complete') !== false
-//            ) {
-//                $this->moduleConfig->createLog('Try to save the Order in Redirect class');
-//
-//                $order_id = $this->saveOrder();
-//
-//                $postData['url'] .= '&order_db_id=' . $order_id;
-//            }
         }
         
         return $result->setData($postData);
