@@ -54,7 +54,10 @@ class UpgradeData implements UpgradeDataInterface
         if (version_compare($context->getVersion(), '2.2.0', '<')) {
             $eavSetup = $this->eavSetupFactory->create(['setup' => $setup]);
             
-//            $eavSetup->removeAttribute(\Magento\Catalog\Model\Product::ENTITY, 'sc_subscription_plans');
+//            $eavSetup->removeAttribute(
+//				\Magento\Catalog\Model\Product::ENTITY,
+//				\Safecharge\Safecharge\Model\Config::PAYMENT_PLANS_ATTR_NAME
+//			);
             
             $eavSetup->addAttribute(
                 \Magento\Catalog\Model\Product::ENTITY,

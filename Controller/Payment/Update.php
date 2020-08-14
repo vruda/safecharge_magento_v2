@@ -73,6 +73,8 @@ class Update extends Action
      */
     public function execute()
     {
+		$this->moduleConfig->createLog('Update Class');
+		
         $params = $this->getRequest()->getParams();
 
         $this->moduleConfig->createLog($params, 'Redirect Update Response: ');

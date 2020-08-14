@@ -17,7 +17,7 @@ class Config
 {
     const MODULE_NAME               = 'Safecharge_Safecharge';
     const PAYMENT_PLANS_ATTR_NAME   = 'nuvei_payment_plans';
-    const PAYMENT_PLANS_ATTR_LABEL	= 'Nuvei Payment Plans';
+    const PAYMENT_PLANS_ATTR_LABEL	= 'SafeCharge Payment Plans';
     const PAYMENT_PLANS_FILE_NAME	= 'nuvei_payment_plans.json';
 
     /**
@@ -150,9 +150,13 @@ class Config
                 if (is_array($data) && !empty($data['paymentMethods'])) {
                     $data['paymentMethods'] = json_encode($data['paymentMethods']);
                 }
+				
+                if (is_array($data) && !empty($data['plans'])) {
+                    $data['paymentMethods'] = json_encode($data['plans']);
+                }
                 
                 if (is_array($data) && !empty($data['userAccountDetails'])) {
-                    $data['userAccountDetails'] = [];
+                    $data['userAccountDetails'] = 'data array';
                 }
                 
                 $string .= print_r($data, true);
@@ -448,8 +452,6 @@ class Config
         $quoteId	= $this->checkoutSession->getQuoteId();
         $version	= $this->productMetadata->getVersion(); //will return the magento version
 		
-        $this->createLog($version, 'magento $version');
-        
         if ($this->versionNum != 0 && $this->versionNum < 220) {
             return $this->urlBuilder->getUrl(
                 'safecharge/payment/callback_completeold',
@@ -592,5 +594,10 @@ class Config
 	public function setNuveiUseCcOnly($val)
 	{
 		$this->checkoutSession->setNuveiUseCcOnly($val);
+	}
+	
+	public function setQuotePaymentMethod($method)
+	{
+		$this->checkoutSession->getQuote()->getPayment()->setMethod($method);
 	}
 }

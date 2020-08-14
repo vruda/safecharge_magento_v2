@@ -93,10 +93,10 @@ define(
         return Component.extend({
             defaults: {
                 template: 'Safecharge_Safecharge/payment/safecharge',
-                isCcFormShown			: true,
-                creditCardToken			: '',
-                ccNumber				: '',
-                creditCardOwner			: '',
+//                isCcFormShown			: true,
+//                creditCardToken			: '',
+//                ccNumber				: '',
+//                creditCardOwner			: '',
                 apmMethods				: [],
                 UPOs					: [],
                 chosenApmMethod			: '',
@@ -110,10 +110,10 @@ define(
 				
                 self._super()
                     .observe([
-                        'creditCardToken',
-                        'ccNumber',
-                        'isCcFormShown',
-                        'creditCardOwner',
+//                        'creditCardToken',
+//                        'ccNumber',
+//                        'isCcFormShown',
+//                        'creditCardOwner',
                         'apmMethods',
                         'UPOs',
                         'chosenApmMethod',
@@ -147,9 +147,9 @@ define(
 				var pmData = {
 					method			: self.item.method,
                     additional_data	: {
-                        cc_token			: self.creditCardToken(),
-                        cc_number			: self.ccNumber(),
-                        cc_owner			: self.creditCardOwner(),
+//                        cc_token			: self.creditCardToken(),
+//                        cc_number			: self.ccNumber(),
+//                        cc_owner			: self.creditCardOwner(),
                         chosen_apm_method	: self.chosenApmMethod(),
                     },
 				};
@@ -167,6 +167,10 @@ define(
 
             getUPOsUrl: function() {
                 return window.checkoutConfig.payment[self.getCode()].getUPOsUrl;
+            },
+			
+            getUpdateQuotePM: function() {
+                return window.checkoutConfig.payment[self.getCode()].updateQuotePM;
             },
 			
             getMerchantPaymentMethodsUrl: function() {
@@ -348,8 +352,9 @@ define(
 						
                         if(typeof resp.result != 'undefined') {
                             if(resp.result == 'APPROVED' && resp.transactionId != 'undefined') {
-                                self.ccNumber(resp.ccCardNumber);
-                                self.creditCardToken(resp.dsTransID);
+								console.log(resp)
+//                                self.ccNumber(resp.ccCardNumber);
+//                                self.creditCardToken(resp.dsTransID);
                                 self.continueWithOrder(resp.transactionId);
                             }
                             else if(resp.result == 'DECLINED') {
@@ -534,6 +539,40 @@ define(
 					discountSent = true;
 				});
 				// detect adding a Coupon END
+				
+				// update Quote Payment Method
+				var paymentProvider = $('input[name="payment[method]"]:checked').val();
+				
+				var scAjaxQuoteUpdateParams = {
+					dataType	: "json",
+					url			: self.getUpdateQuotePM(),
+					cache		: false,
+					showLoader	: true,
+					data		: { paymentMethod: paymentProvider }
+				};
+				
+				if('safecharge' == paymentProvider) {
+					// update the quote
+					$.ajax(scAjaxQuoteUpdateParams)
+						.done(function(resp) {})
+						.fail(function(e) {
+							console.error(e.responseText);
+						});
+				}
+
+				$(function() {
+					$('body').on('change', 'input[name="payment[method]"]', function() {
+						scAjaxQuoteUpdateParams.data.paymentMethod = $('input[name="payment[method]"]:checked').val();
+						
+						// update the quote
+						$.ajax(scAjaxQuoteUpdateParams)
+							.done(function(resp) {})
+							.fail(function(e) {
+								console.error(e.responseText);
+							});
+					});
+				});
+				// update Quote Payment Method END
             },
 			
 			attachFields: function() {

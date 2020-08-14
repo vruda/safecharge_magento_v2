@@ -113,22 +113,10 @@ class Refund extends AbstractPayment implements RequestInterface
             $order->getId()
         );
 
-        $authCode            = null;
-        $transactionDetails    = $transaction->getAdditionalInformation(OrderTransaction::RAW_DETAILS);
-        
-        if ($transactionDetails) {
-            if (!empty($transactionDetails['authCode'])) {
-                $authCode = $transactionDetails['authCode'];
-            } elseif (!empty($transactionDetails['AuthCode'])) {
-                $authCode = $transactionDetails['AuthCode'];
-            } else {
-                $authCode = $orderPayment->getAdditionalInformation(Payment::TRANSACTION_AUTH_CODE_KEY);
-            }
-        }
-        
-        $payment_method = $orderPayment->getAdditionalInformation(Payment::TRANSACTION_EXTERNAL_PAYMENT_METHOD);
+		$authCode		= $orderPayment->getAdditionalInformation(Payment::TRANSACTION_AUTH_CODE_KEY);
+        $payment_method	= $orderPayment->getAdditionalInformation(Payment::TRANSACTION_EXTERNAL_PAYMENT_METHOD);
 
-        if ($authCode === null && Payment::APM_METHOD_CC == $payment_method) {
+        if (empty($authCode) && Payment::APM_METHOD_CC == $payment_method) {
             $msg = __('Transaction does not contain authorization code.');
             $this->config->createLog($msg);
             throw new PaymentException($msg);

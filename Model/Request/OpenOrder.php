@@ -199,11 +199,43 @@ class OpenOrder extends AbstractRequest implements RequestInterface
 		$plans_ids	= [];
 		
 		foreach($items as $item) {
-			$plan_id = $item->getProduct()->getData(\Safecharge\Safecharge\Model\Config::PAYMENT_PLANS_ATTR_NAME);
+			$product = $item->getProduct();
+			
+			$plan_id = $product->getData(\Safecharge\Safecharge\Model\Config::PAYMENT_PLANS_ATTR_NAME);
+//			$plan_id2 = $item->getProduct()->getCustomAttribute(\Safecharge\Safecharge\Model\Config::PAYMENT_PLANS_ATTR_NAME);
+//			$plan_id3 = $item->getProduct()->getAttributeText(\Safecharge\Safecharge\Model\Config::PAYMENT_PLANS_ATTR_NAME);
+//			$plan_id5 = $item->getProduct()->getNuveiPaymentPlans();
+			
+			
+			$this->config->createLog($plan_id, '$plan_id');
+//			$this->config->createLog($plan_id2, '$plan_id2');
+//			$this->config->createLog($plan_id3, '$plan_id3');
+//			$this->config->createLog($plan_id5, '$plan_id5');
+			
+			if(empty($plan_id) || intval($plan_id) == 1) {
+				$options = $product->getTypeInstance(true)->getOrderOptions($product);
+				
+				$this->config->createLog($options, '$options');
+				
+				if(!empty($options['attributes_info']) && is_array($options['attributes_info'])) {
+					foreach($options['attributes_info'] as $data) {
+						if(
+							!empty($data['label'])
+							&& $data['label'] == \Safecharge\Safecharge\Model\Config::PAYMENT_PLANS_ATTR_LABEL
+							&& !empty($data['option_value'])
+						) {
+							$plan_id = $data['option_value'];
+						}
+					}
+				}
+			}
+			
 			if(is_numeric($plan_id) && intval($plan_id) > 1) {
 				$plans_ids[] = $plan_id;
 			}
 		}
+		
+		$this->config->createLog($plans_ids, '$plans_ids');
 
 		$this->config->setNuveiUseCcOnly(!empty($plans_ids) ? true : false);
 		// check in the cart for Nuvei Payment Plan END

@@ -27,7 +27,6 @@ class GetMerchantPaymentMethods extends AbstractRequest implements RequestInterf
     protected $countryCode;
     
     protected $billingAddress;
-    
     protected $cart;
     protected $store;
     

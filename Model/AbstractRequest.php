@@ -35,6 +35,7 @@ abstract class AbstractRequest extends AbstractApi
     const GET_MERCHANT_PAYMENT_METHODS_METHOD   = 'getMerchantPaymentMethods';
     const GET_UPOS_METHOD						= 'getUserUPOs';
     const GET_MERCHANT_PAYMENT_PLANS_METHOD     = 'getPlansList';
+	const CREATE_SUBSCRIPTION					= 'createSubscription';
 
     /**
      * @var Curl
@@ -348,7 +349,7 @@ abstract class AbstractRequest extends AbstractApi
                     $this->config->createLog($key1, 'Limit');
                 }
                 
-                $params[$key1] = filter_var($new_val, $this->params_validation[$key1]['flag']);
+                $params[$key1] = str_replace('\\', ' ', filter_var($new_val, $this->params_validation[$key1]['flag']));
             } elseif (is_array($val1) && !empty($val1)) {
                 foreach ($val1 as $key2 => $val2) {
                     if (!is_array($val2) && !empty($val2) && array_key_exists($key2, $this->params_validation)) {
@@ -360,7 +361,7 @@ abstract class AbstractRequest extends AbstractApi
                             $this->config->createLog($key2, 'Limit');
                         }
 
-                        $params[$key1][$key2] = filter_var($new_val, $this->params_validation[$key2]['flag']);
+                        $params[$key1][$key2] = str_replace('\\', ' ', filter_var($new_val, $this->params_validation[$key2]['flag']));
                     }
                 }
             }

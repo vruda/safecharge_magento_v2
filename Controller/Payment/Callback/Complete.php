@@ -107,8 +107,6 @@ class Complete extends \Magento\Framework\App\Action\Action implements \Magento\
 //                $reservedOrderId = $this->checkoutSession->getQuote()->getReservedOrderId();
 //                $this->moduleConfig->createLog($reservedOrderId, '$reservedOrderId');
                 
-                $this->moduleConfig->createLog($this->checkoutSession->getQuote()->getIsActive(), 'IsActive');
-                
             if (intval($this->checkoutSession->getQuote()->getIsActive()) === 1) {
                 // if the option for save the order in the Redirect is ON, skip placeOrder !!!
                 $result = $this->placeOrder();

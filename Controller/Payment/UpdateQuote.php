@@ -73,6 +73,8 @@ class Update extends Action
      */
     public function execute()
     {
+		$this->moduleConfig->createLog('UpdateQuote Class');
+		
         $params = $this->getRequest()->getParams();
 
         $this->moduleConfig->createLog($params, 'Redirect Update Response: ');

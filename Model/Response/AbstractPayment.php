@@ -79,11 +79,6 @@ abstract class AbstractPayment extends AbstractResponse
         }
         ksort($transactionInformation);
 
-        $this->orderPayment->setTransactionAdditionalInfo(
-            OrderTransaction::RAW_DETAILS,
-            $transactionInformation
-        );
-
         return $this;
     }
 }
