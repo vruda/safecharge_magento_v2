@@ -126,6 +126,10 @@ define(
                 return window.checkoutConfig.payment[self.getCode()].getMerchantPaymentMethodsUrl;
             },
 			
+			getUpdateQuotePM: function() {
+                return window.checkoutConfig.payment[self.getCode()].updateQuotePM;
+            },
+			
             getApmMethods: function() {
 				if(!scGetAPMsAgain) {
 					if (quote.billingAddress() && self.countryId() === quote.billingAddress().countryId) {
@@ -470,6 +474,40 @@ define(
 					discountSent = true;
 				});
 				// detect adding a Coupon END
+				
+				// update Quote Payment Method
+				var paymentProvider = $('input[name="payment[method]"]:checked').val();
+				
+				var scAjaxQuoteUpdateParams = {
+					dataType	: "json",
+					url			: self.getUpdateQuotePM(),
+					cache		: false,
+					showLoader	: true,
+					data		: { paymentMethod: paymentProvider }
+				};
+				
+				if('safecharge' == paymentProvider) {
+					// update the quote
+					$.ajax(scAjaxQuoteUpdateParams)
+						.done(function(resp) {})
+						.fail(function(e) {
+							console.error(e.responseText);
+						});
+				}
+
+				$(function() {
+					$('body').on('change', 'input[name="payment[method]"]', function() {
+						scAjaxQuoteUpdateParams.data.paymentMethod = $('input[name="payment[method]"]:checked').val();
+						
+						// update the quote
+						$.ajax(scAjaxQuoteUpdateParams)
+							.done(function(resp) {})
+							.fail(function(e) {
+								console.error(e.responseText);
+							});
+					});
+				});
+				// update Quote Payment Method END
             },
 			
 			attachFields: function() {

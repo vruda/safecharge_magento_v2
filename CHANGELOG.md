@@ -2,6 +2,12 @@
 
 ---
 
+## 2.0.6.x
+```
+	* Clean the "\" symbol from client details.
+	* Try to force set the Payment provider (method) when it is selected.
+
+
 ## 2.0.5.x
 ```
 	* In OpenOrder request pass order amount into custom fields, to get it again in response and pass it to the front-end.

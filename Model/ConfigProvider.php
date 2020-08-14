@@ -117,6 +117,7 @@ class ConfigProvider extends CcGenericConfigProvider
                     'redirectUrl'                   => $this->urlBuilder->getUrl('safecharge/payment/redirect'),
                     'paymentApmUrl'                 => $this->urlBuilder->getUrl('safecharge/payment/apm'),
                     'getMerchantPaymentMethodsUrl'  => $this->urlBuilder->getUrl('safecharge/payment/GetMerchantPaymentMethods'),
+					'updateQuotePM'					=> $this->urlBuilder->getUrl('safecharge/payment/UpdateQuotePaymentMethod'),
                     // we need this for the WebSDK
                     'merchantSiteId'                => $this->moduleConfig->getMerchantSiteId(),
                     'merchantId'                    => $this->moduleConfig->getMerchantId(),

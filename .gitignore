@@ -1,3 +1,4 @@
 logs/*.txt
 *.bak.*
 *.ffs_db
+composer.*

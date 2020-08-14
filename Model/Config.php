@@ -575,4 +575,9 @@ class Config
     {
         $quote = $this->checkoutSession->getQuote()->getBaseCurrencyCode();
     }
+	
+	public function setQuotePaymentMethod($method)
+	{
+		$this->checkoutSession->getQuote()->getPayment()->setMethod($method);
+	}
 }
