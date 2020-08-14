@@ -12,6 +12,7 @@
 ```
 	* Use 3-fields webSDK instead one-field version, because of mobile optimization;
 
+
 ## 2.0.5.x
 ```
 	* In OpenOrder request pass order amount into custom fields, to get it again in response and pass it to the front-end.
