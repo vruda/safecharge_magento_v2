@@ -8,6 +8,7 @@
 	* When user have a product with a Payment Plan, only CC is allowed.
 	* Added third option for mandatory dorp-downs in the plugin settings.
 
+
 ## 2.1.0.x
 ```
 	* Use 3-fields webSDK instead one-field version, because of mobile optimization;
