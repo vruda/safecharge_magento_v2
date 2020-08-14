@@ -8,11 +8,9 @@
 	* When user have a product with a Payment Plan, only CC is allowed.
 	* Added third option for mandatory dorp-downs in the plugin settings.
 
-
 ## 2.1.0.x
 ```
 	* Use 3-fields webSDK instead one-field version, because of mobile optimization;
-
 
 ## 2.0.5.x
 ```
@@ -25,7 +23,6 @@
 	* In safecharge.js, removed some unused classes.
 	* In safecharge.js, observe for add/remove coupons, and compare the total with the total passed to the OpenOrder request. If there is difference, we call new OpenOrder with correct total amount.
 	* Added validation for the emails first, they are restricted to 79 symbols;
-
 
 ## 2.0.4.x
 ```
