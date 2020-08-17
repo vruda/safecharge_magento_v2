@@ -426,22 +426,22 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
                                 ->setIsTransactionPending(0)
                                 ->setIsTransactionClosed(0)
                                 ->setParentTransactionId(null);
-
-                            $transaction = $this->transObj->setPayment($orderPayment)
+							
+							$transaction = $this->transObj->setPayment($orderPayment)
                                 ->setOrder($order)
                                 ->setTransactionId(!empty($params['relatedTransactionId'])
                                     ? $params['relatedTransactionId'] : uniqid())
                                 ->setFailSafe(true)
                                 ->build(Transaction::TYPE_AUTH);
-
-                            $transaction->save();
-
-                            $tr_type    = $orderPayment->addTransaction(Transaction::TYPE_AUTH);
-                            $msg        = $orderPayment->prependMessage($message);
-
-                            $orderPayment->addTransactionCommentsToOrder($tr_type, $msg);
-                            $orderPayment->save();
-                        }
+							
+							$transaction->save();
+							
+							$tr_type    = $orderPayment->addTransaction(Transaction::TYPE_AUTH);
+							$msg        = $orderPayment->prependMessage($message);
+							
+							$orderPayment->addTransactionCommentsToOrder($tr_type, $msg);
+							$orderPayment->save();
+						}
                         
                         $orderPayment
                             ->setIsTransactionPending(0)
@@ -456,11 +456,11 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
         
                         $transaction->save();
                         
-                        $tr_type    = $orderPayment->addTransaction($transactionType);
-                        $msg        = $orderPayment->prependMessage($message);
+						$tr_type    = $orderPayment->addTransaction($transactionType);
+						$msg        = $orderPayment->prependMessage($message);
                         
-                        $orderPayment->addTransactionCommentsToOrder($tr_type, $msg);
-                    }
+						$orderPayment->addTransactionCommentsToOrder($tr_type, $msg);
+					}
 					elseif (!$order->canInvoice()) {
                         $this->moduleConfig->createLog('We can NOT create invoice.');
                     }
@@ -518,7 +518,7 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
                 
                 $order->setStatus($sc_transaction_type);
                 
-                if ($is_partial_settle) {
+				if ($is_partial_settle) {
                     $order->addStatusHistoryComment(
                         __("The <b>Partial Settle</b> request for amount of "
                             . "<b>" . $inv_amount . ' ' . $params['currency'] . "</b>, "
