@@ -6,6 +6,8 @@
 ```
 	* Clean the "\" symbol from client details.
 	* Try to force set the Payment provider (method) when it is selected.
+	* Replaced OrderFactory with OrderRepositoryInterface.
+	* Do not simulate Auth transaction, when the Order is of type Sale.
 
 
 ## 2.0.5.x

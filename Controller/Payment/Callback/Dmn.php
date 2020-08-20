@@ -17,7 +17,7 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
     /**
      * @var OrderFactory
      */
-    private $orderFactory;
+//    private $orderFactory;
 
     /**
      * @var ModuleConfig
@@ -50,13 +50,16 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
     private $transObj;
     private $quoteFactory;
     private $request;
+    private $orderRepo;
+    private $searchCriteriaBuilder;
+    private $orderResourceModel;
 
     /**
      * Object constructor.
      */
     public function __construct(
         \Magento\Framework\App\Action\Context $context,
-        \Magento\Sales\Model\OrderFactory $orderFactory,
+//        \Magento\Sales\Model\OrderFactory $orderFactory,
         \Safecharge\Safecharge\Model\Config $moduleConfig,
         \Magento\Sales\Model\Order\Payment\State\CaptureCommand $captureCommand,
         \Magento\Framework\DataObjectFactory $dataObjectFactory,
@@ -68,9 +71,12 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
         \Magento\Sales\Model\Order\Payment\Transaction\BuilderInterface $transObj,
         \Magento\Quote\Model\QuoteFactory $quoteFactory,
         \Magento\Framework\App\RequestInterface $request,
-        \Magento\Framework\Event\ManagerInterface $eventManager
+        \Magento\Framework\Event\ManagerInterface $eventManager,
+		\Magento\Sales\Api\OrderRepositoryInterface $orderRepo,
+		\Magento\Framework\Api\SearchCriteriaBuilder $searchCriteriaBuilder,
+		\Magento\Sales\Model\ResourceModel\Order $orderResourceModel
     ) {
-        $this->orderFactory                = $orderFactory;
+//        $this->orderFactory                = $orderFactory;
         $this->moduleConfig                = $moduleConfig;
         $this->captureCommand            = $captureCommand;
         $this->dataObjectFactory        = $dataObjectFactory;
@@ -83,6 +89,9 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
         $this->quoteFactory                = $quoteFactory;
         $this->request                    = $request;
         $this->_eventManager            = $eventManager;
+        $this->orderRepo            = $orderRepo;
+        $this->searchCriteriaBuilder = $searchCriteriaBuilder;
+        $this->orderResourceModel = $orderResourceModel;
         
         parent::__construct($context);
     }
@@ -126,6 +135,8 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
             $status = !empty($params['Status']) ? strtolower($params['Status']) : null;
 
             $this->moduleConfig->createLog($params, 'DMN params:');
+//            $this->moduleConfig->createLog(http_build_query($params), 'DMN params:');
+			
             $this->validateChecksum($params);
             
             if (empty($params['transactionType'])) {
@@ -161,23 +172,33 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
                 $jsonOutput->setData('DMN error - no Order ID parameter.');
                 return $jsonOutput;
             }
+			
+			$searchCriteria = $this->searchCriteriaBuilder->addFilter('increment_id', $orderIncrementId, 'eq')->create();
 
             $tryouts = 0;
             do {
                 $tryouts++;
 
                 /** @var Order $order */
-                $order = $this->orderFactory->create()->loadByIncrementId($orderIncrementId);
+//                $order = $this->orderFactory->create()->loadByIncrementId($orderIncrementId);
+				
+				$orderList = $this->orderRepo->getList($searchCriteria)->getItems();
 
-                if (!($order && $order->getId())) {
+//                if (!($order && $order->getId())) {
+                if (!$orderList || empty($orderList)) {
                     $this->moduleConfig->createLog('DMN try ' . $tryouts
                         . ' there is NO order for TransactionID ' . $params['TransactionID'] . ' yet.');
                     sleep(3);
                 }
-            } while ($tryouts < 5 && !($order && $order->getId()));
+				else {
+					$order = current($orderList);
+				}
+//            } while ($tryouts < 5 && !($order && $order->getId()));
+            } while ( $tryouts < 5 && (empty($order) || empty($orderList)) );
 
             # try to create the order
-            if (!($order && $order->getId())) {
+//            if (!($order && $order->getId())) {
+            if (!$orderList || empty($orderList)) {
                 $this->moduleConfig->createLog('Order '. $orderIncrementId .' not found, try to create it!');
                 
                 $result = $this->placeOrder($params);
@@ -189,17 +210,20 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
                     return $jsonOutput;
                 }
                 
-                $order = $this->orderFactory->create()->loadByIncrementId($orderIncrementId);
+//                $order = $this->orderFactory->create()->loadByIncrementId($orderIncrementId);
+				$orderList = $this->orderRepo->getList($searchCriteria)->getItems();
                 
                 $this->moduleConfig->createLog('An Order with ID '. $orderIncrementId .' was created in the DMN page.');
             }
             # try to create the order END
             
-            if (empty($order)) {
+//            if (empty($order)) {
+            if (!$orderList || empty($orderList)) {
                 $jsonOutput->setData('DMN Callback error - there is no Order and the code did not success to made it.');
                 return $jsonOutput;
             }
-            
+			
+			$order			= current($orderList);
             $orderPayment    = $order->getPayment();
             $order_status    = $orderPayment->getAdditionalInformation(Payment::TRANSACTION_STATUS);
             $order_tr_type    = $orderPayment->getAdditionalInformation(Payment::TRANSACTION_TYPE);
@@ -349,7 +373,8 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
                     $msg        = $orderPayment->prependMessage($message);
 
                     $orderPayment->addTransactionCommentsToOrder($tr_type, $msg);
-                } elseif (in_array($tr_type_param, ['sale', 'settle'])) {
+                }
+				elseif (in_array($tr_type_param, ['sale', 'settle'])) {
                     $transactionType        = Transaction::TYPE_CAPTURE;
                     $sc_transaction_type    = Payment::SC_SETTLED;
                     $invCollection            = $order->getInvoiceCollection();
@@ -419,31 +444,31 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
                         if ('sale' == $tr_type_param) {
                             $this->moduleConfig->createLog('Sale - create an Auth transaction');
 
-                            $orderPayment
-                                ->setIsTransactionPending(0)
-                                ->setIsTransactionClosed(0)
-                                ->setParentTransactionId(null);
-
-                            $transaction = $this->transObj->setPayment($orderPayment)
-                                ->setOrder($order)
-                                ->setTransactionId(!empty($params['relatedTransactionId'])
-                                    ? $params['relatedTransactionId'] : uniqid())
-                                ->setFailSafe(true)
-                                ->build(Transaction::TYPE_AUTH);
-
-                            $transaction->save();
-
-                            $tr_type    = $orderPayment->addTransaction(Transaction::TYPE_AUTH);
-                            $msg        = $orderPayment->prependMessage($message);
-
-                            $orderPayment->addTransactionCommentsToOrder($tr_type, $msg);
-                            $orderPayment->save();
+//                            $orderPayment
+//                                ->setIsTransactionPending(0)
+//                                ->setIsTransactionClosed(0)
+//                                ->setParentTransactionId(null);
+//							
+//                            $transaction = $this->transObj->setPayment($orderPayment)
+//                                ->setOrder($order)
+//                                ->setTransactionId(!empty($params['relatedTransactionId'])
+//                                    ? $params['relatedTransactionId'] : uniqid())
+//                                ->setFailSafe(true)
+//                                ->build(Transaction::TYPE_AUTH);
+//							
+//                            $transaction->save();
+//							
+//                            $tr_type    = $orderPayment->addTransaction(Transaction::TYPE_AUTH);
+//                            $msg        = $orderPayment->prependMessage($message);
+//
+//                            $orderPayment->addTransactionCommentsToOrder($tr_type, $msg);
+//                            $orderPayment->save();
                         }
                         
                         $orderPayment
                             ->setIsTransactionPending(0)
                             ->setIsTransactionClosed(0);
-                        
+						
                         // set transaction
                         $transaction = $this->transObj->setPayment($orderPayment)
                             ->setOrder($order)
@@ -452,21 +477,24 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
                             ->build($transactionType);
         
                         $transaction->save();
-                        
+						
                         $tr_type    = $orderPayment->addTransaction($transactionType);
                         $msg        = $orderPayment->prependMessage($message);
-                        
+						
                         $orderPayment->addTransactionCommentsToOrder($tr_type, $msg);
-                    } elseif (!$order->canInvoice()) {
+                    }
+					elseif (!$order->canInvoice()) {
                         $this->moduleConfig->createLog('We can NOT create invoice.');
                     }
-                } elseif (in_array($tr_type_param, ['void', 'voidcredit'])) {
+                }
+				elseif (in_array($tr_type_param, ['void', 'voidcredit'])) {
                     $transactionType        = Transaction::TYPE_VOID;
                     $sc_transaction_type    = Payment::SC_VOIDED;
                     $is_closed                = true;
                     
                     $order->setData('state', Order::STATE_CLOSED);
-                } elseif (in_array($tr_type_param, ['credit', 'refund'])) {
+                }
+				elseif (in_array($tr_type_param, ['credit', 'refund'])) {
                     $orderPayment->setAdditionalInformation(
                         Payment::REFUND_TRANSACTION_AMOUNT,
                         $params['totalAmount']
@@ -504,7 +532,8 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
                         $sc_transaction_type
                     );
                 }
-            } elseif (in_array($status, ['declined', 'error'])) {
+            }
+			elseif (in_array($status, ['declined', 'error'])) {
                 $params['ErrCode']        = (isset($params['ErrCode'])) ? $params['ErrCode'] : "Unknown";
                 $params['ExErrCode']    = (isset($params['ExErrCode'])) ? $params['ExErrCode'] : "Unknown";
                 
@@ -515,13 +544,22 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
             }
             
             $orderPayment->save();
-            $order->save();
+			$this->moduleConfig->createLog('18');
+//            $order->save();
+//            $this->orderRepo->save($order);
+			$this->orderResourceModel->save($order);
+			
+			$this->moduleConfig->createLog('19');
         } catch (\Exception $e) {
             $msg = $e->getMessage();
 
             $this->moduleConfig->createLog($e->getMessage() . "\n\r" . $e->getTraceAsString(), 'DMN Excception:');
             
             $jsonOutput->setData('Error: ' . $e->getMessage());
+			
+			$order->addStatusHistoryComment($msg);
+//			$order->save();
+			
             return $jsonOutput;
         }
 
