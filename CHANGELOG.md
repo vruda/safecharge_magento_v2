@@ -4,6 +4,13 @@
 
 ## 2.2.0.x
 ```
+	* Clean the "\" symbol from client details.
+	* Try to force set the Payment provider (method) when it is selected.
+	* Replaced OrderFactory with OrderRepositoryInterface.
+	* Do not simulate Auth transaction, when the Order is of type Sale.
+	* Mark Invoice of Order of type Sale with canVoidFlag true.
+	* For Orders of type Sale force show Void button.
+	* In Payment model added metchod canVoid().
 	* Added possibility to append Safecharge Payment Plan to a product, when create new or edit existing one. Plugin get the payment plans from the pre-created plans of the merchant, by click on a button Get Payment Plans in plugin configuration.
 	* When user have a product with a Payment Plan, only CC is allowed.
 	* Added third option for mandatory dorp-downs in the plugin settings.
