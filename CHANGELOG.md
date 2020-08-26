@@ -8,6 +8,9 @@
 	* Try to force set the Payment provider (method) when it is selected.
 	* Replaced OrderFactory with OrderRepositoryInterface.
 	* Do not simulate Auth transaction, when the Order is of type Sale.
+	* Mark Invoice of Order of type Sale with canVoidFlag true.
+	* For Orders of type Sale force show Void button.
+	* In Payment model added metchod canVoid().
 
 
 ## 2.0.5.x

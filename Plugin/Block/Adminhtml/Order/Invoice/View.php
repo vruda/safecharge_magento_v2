@@ -14,24 +14,41 @@ class View extends \Magento\Backend\Block\Widget\Form\Container
 {
     private $request;
     private $invoice;
-    private $order;
+    private $config;
+    private $orderRepo;
+    private $searchCriteriaBuilder;
     
     public function __construct(
         \Magento\Framework\App\RequestInterface $request,
         \Magento\Sales\Model\Order\Invoice $invoice,
-        \Magento\Sales\Model\Order $order
+		\Safecharge\Safecharge\Model\Config $config,
+		\Magento\Sales\Api\OrderRepositoryInterface $orderRepo,
+		\Magento\Framework\Api\SearchCriteriaBuilder $searchCriteriaBuilder
     ) {
         $this->request    = $request;
         $this->invoice    = $invoice;
-        $this->order    = $order;
+        $this->config    = $config;
+        $this->orderRepo    = $orderRepo;
+        $this->searchCriteriaBuilder    = $searchCriteriaBuilder;
     }
     
     public function beforeSetLayout(\Magento\Sales\Block\Adminhtml\Order\Invoice\View $view)
     {
+		$this->config->createLog('admin beforeSetLayout');
+		
         try {
             $invoiceDetails = $this->invoice->load($this->request->getParam('invoice_id'));
             $order_incr_id    = $invoiceDetails->getOrder()->getIncrementId();
-            $order          = $this->order->loadByIncrementId($order_incr_id);
+			
+			$searchCriteria = $this->searchCriteriaBuilder->addFilter('increment_id', $order_incr_id, 'eq')->create();
+			$orderList = $this->orderRepo->getList($searchCriteria)->getItems();
+			
+			if (!$orderList || empty($orderList)) {
+				$this->config->createLog('Modify Order Invoice buttons error - there is no $orderList');
+				return;
+			}
+			
+			$order			= current($orderList);
             $orderPayment    = $order->getPayment();
             $ord_status     = $order->getStatus();
             
@@ -53,7 +70,7 @@ class View extends \Magento\Backend\Block\Widget\Form\Container
                 }
             }
         } catch (Exception $ex) {
-
+			$this->config->createLog($ex->getMessage(), 'admin beforeSetLayout');
         }
     }
 }

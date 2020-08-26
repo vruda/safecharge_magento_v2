@@ -450,4 +450,14 @@ class Payment extends Cc implements TransparentInterface
     {
         return $this;
     }
+	
+	/**
+     * Check void availability
+     * @return bool
+     * @internal param \Magento\Framework\DataObject $payment
+     */
+    public function canVoid()
+    {
+        return $this->_canVoid;
+    }
 }
