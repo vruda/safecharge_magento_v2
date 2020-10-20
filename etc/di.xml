@@ -78,9 +78,14 @@
         </arguments>
     </type>
 	
-	<type name="Magento\Checkout\Model\Cart">
+<!--	remove it-->
+<!--	<type name="Magento\Checkout\Model\Cart">
         <plugin name="prevent_add_to" type="Safecharge\Safecharge\Plugin\PreventAddToCart"/>
-    </type>
+    </type>-->
+	
+	<type name="Magento\Payment\Model\Checks\ZeroTotal">
+		<plugin name="safecharge_zero_total" type="Safecharge\Safecharge\Plugin\ZeroTotal" />
+	</type>
 
     <!-- Interface preferences. -->
     <preference for="Safecharge\Safecharge\Api\RequestLogRepositoryInterface"

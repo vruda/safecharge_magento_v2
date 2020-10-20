@@ -7,6 +7,8 @@ use Safecharge\Safecharge\Model\ResponseInterface;
 
 /**
  * Safecharge Safecharge open order response model.
+ * 
+ * @deprecated since version 2.2.0.x
  */
 class OpenOrder extends AbstractResponse implements ResponseInterface
 {

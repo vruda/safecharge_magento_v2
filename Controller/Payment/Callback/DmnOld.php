@@ -6,8 +6,6 @@ use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Invoice;
 use Magento\Sales\Model\Order\Payment\Transaction;
 use Safecharge\Safecharge\Model\Payment;
-use Magento\Framework\App\Request\InvalidRequestException;
-use Magento\Framework\App\RequestInterface;
 
 /**
  * Safecharge Safecharge payment redirect controller.
@@ -45,7 +43,6 @@ class DmnOld extends \Magento\Framework\App\Action\Action
     private $transObj;
     private $quoteFactory;
     private $request;
-	private $createSubs;
 	private $orderRepo;
     private $searchCriteriaBuilder;
     private $orderResourceModel;
@@ -67,7 +64,6 @@ class DmnOld extends \Magento\Framework\App\Action\Action
         \Magento\Quote\Model\QuoteFactory $quoteFactory,
         \Magento\Framework\App\RequestInterface $request,
         \Magento\Framework\Event\ManagerInterface $eventManager,
-		CreateSubscription $createSubs,
 		\Magento\Sales\Api\OrderRepositoryInterface $orderRepo,
 		\Magento\Framework\Api\SearchCriteriaBuilder $searchCriteriaBuilder,
 		\Magento\Sales\Model\ResourceModel\Order $orderResourceModel
@@ -84,7 +80,6 @@ class DmnOld extends \Magento\Framework\App\Action\Action
         $this->quoteFactory                = $quoteFactory;
         $this->request                    = $request;
         $this->_eventManager            = $eventManager;
-		$this->createSubs			= $createSubs;
 		$this->orderRepo            = $orderRepo;
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
         $this->orderResourceModel = $orderResourceModel;
@@ -438,27 +433,32 @@ class DmnOld extends \Magento\Framework\App\Action\Action
 					
 					/* TODO under construction */
 					// start Subscription plans if we need to
-//					if(
-//						!empty($params['customField2'])
-//						&& is_array($params['customField2'])
-//						&& !empty($params['userPaymentOptionId'])
-//						&& is_numeric($params['userPaymentOptionId'])
-//					) {
-//						foreach ($params['customField2'] as $key => $plan_id) {
-//							$this->moduleConfig->createLog(
-//								[
-//									'plan_id' => $plan_id,
-//									'userPaymentOptionId' => $params['userPaymentOptionId']
-//								],
-//								'Start subscription'
-//							);
-//							
-//							$resp = $this->createSubs
-//								->execute(intval($plan_id), intval($params['userPaymentOptionId']));
-//							
-//							
-//						}
-//					}
+					$customField2 = json_decode($params['customField2'], true);
+					
+					if(
+						!empty($customField2)
+						&& is_array($customField2)
+						&& !empty($params['userPaymentOptionId'])
+						&& is_numeric($params['userPaymentOptionId'])
+					) {
+						foreach ($customField2 as $plan_id) {
+							$this->moduleConfig->createLog(
+								[
+									'plan_id' => $plan_id,
+									'userPaymentOptionId' => $params['userPaymentOptionId']
+								],
+								'Start subscription'
+							);
+							
+							$resp = $this->createSubscription($plan_id, $params['userPaymentOptionId'], $params['email']);
+						}
+					}
+					else {
+						$this->moduleConfig->createLog(!empty($customField2), '!empty($customField2');
+						$this->moduleConfig->createLog(is_array($customField2), 'is_array($customField2');
+						$this->moduleConfig->createLog(!empty($params['userPaymentOptionId']), '!empty(userPaymentOptionId[customField2]');
+						$this->moduleConfig->createLog(is_numeric($params['userPaymentOptionId']), 'is_numeric(userPaymentOptionId[customField2]');
+					}
 					// start Subscription plans if we need to END
                 }
 				elseif (in_array($tr_type_param, ['void', 'voidcredit'])) {
@@ -647,4 +647,43 @@ class DmnOld extends \Magento\Framework\App\Action\Action
 
         return true;
     }
+	
+	private function createSubscription($plan_id, $upo_id, $email) {
+		$result = $this->jsonResultFactory->create()->setHttpResponseCode(\Magento\Framework\Webapi\Response::HTTP_OK);
+		
+		if (!$this->moduleConfig->isActive()) {
+            $this->moduleConfig->createLog('Safecharge payments module is not active at the moment!');
+            return $result->setData(['error_message' => __('Safecharge payments module is not active at the moment!')]);
+        }
+		
+		try {
+			$params = array_merge(
+                $this->request->getParams(),
+                $this->request->getPostValue()
+            );
+			
+            $request = $this->requestFactory->create(AbstractRequest::CREATE_SUBSCRIPTION_METHOD);
+			
+			$result = $request
+				->setPlanId($plan_id)
+				->setUpoId($upo_id)
+				->setUserTokenId($email)
+				->process();
+
+			return [];
+        }
+		catch (PaymentException $e) {
+            $this->moduleConfig->createLog('GetUpos Controller - Error: ' . $e->getMessage());
+            
+            return $result->setData([
+                "error"     => 1,
+                "message"	=> $e->getMessage()
+            ]);
+        }
+
+        return $result->setData([
+            "error"     => 0,
+            "message"	=> "Success"
+        ]);
+	}
 }

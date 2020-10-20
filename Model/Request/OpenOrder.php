@@ -88,11 +88,17 @@ class OpenOrder extends AbstractRequest implements RequestInterface
      */
     public function process()
     {
-        $this->sendRequest();
+		$req_resp = $this->sendRequest(true);
+		
+		$this->orderId      = $req_resp['orderId'];
+        $this->sessionToken = $req_resp['sessionToken'];
+        $this->ooAmount     = $req_resp['merchantDetails']['customField1'];
 
-        return $this
-            ->getResponseHandler()
-            ->process();
+        return $this;
+		
+//        return $this
+//            ->getResponseHandler()
+//            ->process();
     }
     
     public function setBillingAddress($data = [])
@@ -196,49 +202,61 @@ class OpenOrder extends AbstractRequest implements RequestInterface
 		
 		// check in the cart for Nuvei Payment Plan
 		$items		= $this->cart->getQuote()->getItems();
-		$plans_ids	= [];
+		$subs_data	= [];
 		
+		// iterate over Items and search for Subscriptions
 		foreach($items as $item) {
-			$product = $item->getProduct();
+			$product	= $item->getProduct();
+			$attributes	= $product->getAttributes();
 			
-			$plan_id = $product->getData(\Safecharge\Safecharge\Model\Config::PAYMENT_PLANS_ATTR_NAME);
-//			$plan_id2 = $item->getProduct()->getCustomAttribute(\Safecharge\Safecharge\Model\Config::PAYMENT_PLANS_ATTR_NAME);
-//			$plan_id3 = $item->getProduct()->getAttributeText(\Safecharge\Safecharge\Model\Config::PAYMENT_PLANS_ATTR_NAME);
-//			$plan_id5 = $item->getProduct()->getNuveiPaymentPlans();
-			
-			
-			$this->config->createLog($plan_id, '$plan_id');
-//			$this->config->createLog($plan_id2, '$plan_id2');
-//			$this->config->createLog($plan_id3, '$plan_id3');
-//			$this->config->createLog($plan_id5, '$plan_id5');
-			
-			if(empty($plan_id) || intval($plan_id) == 1) {
-				$options = $product->getTypeInstance(true)->getOrderOptions($product);
-				
-				$this->config->createLog($options, '$options');
-				
-				if(!empty($options['attributes_info']) && is_array($options['attributes_info'])) {
-					foreach($options['attributes_info'] as $data) {
-						if(
-							!empty($data['label'])
-							&& $data['label'] == \Safecharge\Safecharge\Model\Config::PAYMENT_PLANS_ATTR_LABEL
-							&& !empty($data['option_value'])
-						) {
-							$plan_id = $data['option_value'];
-						}
-					}
-				}
+			// if subscription is not enabled continue witht the next product
+			if($item->getProduct()->getData(\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_ENABLE) != 1) {
+				continue;
 			}
 			
-			if(is_numeric($plan_id) && intval($plan_id) > 1) {
-				$plans_ids[] = $plan_id;
+			// mandatory data
+			$subs_data[$product->getId()] = array(
+				'planId' => $item->getProduct()->getData(\Safecharge\Safecharge\Model\Config::PAYMENT_PLANS_ATTR_NAME),
+				'initialAmount' => number_format($item->getProduct()
+					->getData(\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_INTIT_AMOUNT), 2, '.', ''),
+				'recurringAmount' => number_format($item->getProduct()
+					->getData(\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_REC_AMOUNT), 2, '.', ''),
+			);
+			
+			# optional data
+			if(!empty($tmp = $item->getProduct()->getData(\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_AFTER_DAY))) {
+				$subs_data[$product->getId()]['startAfter']['day'] = $tmp;
 			}
-		}
+			if(!empty($tmp = $item->getProduct()->getData(\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_AFTER_MONTH))) {
+				$subs_data[$product->getId()]['startAfter']['month'] = $tmp;
+			}
+			if(!empty($tmp = $item->getProduct()->getData(\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_AFTER_YEAR))) {
+				$subs_data[$product->getId()]['startAfter']['year'] = $tmp;
+			}
+			
+			if(!empty($tmp = $item->getProduct()->getData(\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_REC_DAY))) {
+				$subs_data[$product->getId()]['recurringPeriod']['day'] = $tmp;
+			}
+			if(!empty($tmp = $item->getProduct()->getData(\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_REC_MONTH))) {
+				$subs_data[$product->getId()]['recurringPeriod']['month'] = $tmp;
+			}
+			if(!empty($tmp = $item->getProduct()->getData(\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_REC_YEAR))) {
+				$subs_data[$product->getId()]['recurringPeriod']['year'] = $tmp;
+			}
+			
+			if(!empty($tmp = $item->getProduct()->getData(\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_END_DAY))) {
+				$subs_data[$product->getId()]['endAfter']['day'] = $tmp;
+			}
+			if(!empty($tmp = $item->getProduct()->getData(\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_END_MONTHS))) {
+				$subs_data[$product->getId()]['endAfter']['month'] = $tmp;
+			}
+			if(!empty($tmp = $item->getProduct()->getData(\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_END_YEARS))) {
+				$subs_data[$product->getId()]['endAfter']['year'] = $tmp;
+			}
+			# optional data END
+		}	
 		
-		$this->config->createLog($plans_ids, '$plans_ids');
-
-		$this->config->setNuveiUseCcOnly(!empty($plans_ids) ? true : false);
-		// check in the cart for Nuvei Payment Plan END
+		$this->config->setNuveiUseCcOnly(!empty($subs_data) ? true : false);
         
         $params = array_merge_recursive(
             [
@@ -286,7 +304,7 @@ class OpenOrder extends AbstractRequest implements RequestInterface
                 
                 'merchantDetails'    => [
                     'customField1' => (string) number_format($this->cart->getQuote()->getGrandTotal(), 2, '.', ''), // pass amount
-                    'customField2' => json_encode($plans_ids), // payment plans IDs
+                    'customField2' => json_encode($subs_data),
                 ],
             ],
             parent::getParams()
@@ -312,5 +330,29 @@ class OpenOrder extends AbstractRequest implements RequestInterface
             'currency',
             'timeStamp',
         ];
+    }
+	
+	/**
+     * Get attribute options
+     *
+     * @param \Magento\Eav\Api\Data\AttributeInterface $attribute
+     * @return array
+     */
+    private function getOptions(\Magento\Eav\Api\Data\AttributeInterface $attribute) : array
+    {
+        $return = [];
+
+        $options = $attribute->getOptions();
+        foreach ($options as $option) {
+            if ($option->getValue()) {
+                $return[] = [
+                    'value' => $option->getLabel(),
+                    'label' => $option->getLabel(),
+                    'parentAttributeLabel' => $attribute->getDefaultFrontendLabel()
+                ];
+            }
+        }
+
+        return $return;
     }
 }

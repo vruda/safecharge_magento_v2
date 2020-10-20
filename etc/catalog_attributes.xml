@@ -1,6 +1,19 @@
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Catalog:etc/catalog_attributes.xsd">
     <group name="quote_item">
-        <attribute name="nuvei_payment_plans"/>
+        <attribute name="safecharge_sub_enabled"/>
+        <attribute name="safecharge_payment_plans"/>
+        <attribute name="safecharge_sub_init_amount"/>
+        <attribute name="safecharge_sub_rec_amount"/>
+        <attribute name="safecharge_sub_start_after_day"/>
+        <attribute name="safecharge_sub_start_after_month"/>
+        <attribute name="safecharge_sub_start_after_year"/>
+        <attribute name="safecharge_sub_rec_period_day"/>
+        <attribute name="safecharge_sub_rec_period_month"/>
+        <attribute name="safecharge_sub_rec_period_year"/>
+        <attribute name="safecharge_sub_end_day"/>
+        <attribute name="safecharge_sub_end_months"/>
+        <attribute name="safecharge_sub_end_years"/>
+        <attribute name="safecharge_sub_store_decr"/>
     </group>
 </config>

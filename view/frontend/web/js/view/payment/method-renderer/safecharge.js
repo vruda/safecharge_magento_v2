@@ -340,7 +340,7 @@ define(
 					var payParams = {
                         sessionToken		: scData.sessionToken,
                         currency			: window.checkoutConfig.payment[self.getCode()].currency,
-                        amount				: quote.totals().base_grand_total.toFixed(2),
+                        amount				: parseFloat(quote.totals().base_grand_total).toFixed(2),
                         cardHolderName		: document.getElementById('safecharge_cc_owner').value,
                         paymentOption		: sfcFirstField,
 						webMasterId			: window.checkoutConfig.payment[self.getCode()].webMasterId,
@@ -519,7 +519,7 @@ define(
 								mutation.type === 'attributes'
 								&& 'disabled' == mutation.attributeName
 								&& true === discountSent
-								&& quote.totals().base_grand_total.toFixed(2) != scOOTotal
+								&& parseFloat(quote.totals().base_grand_total).toFixed(2) != scOOTotal
 							) {
 								console.log('the total was changed, create new OpenOrder');
 								scGetAPMsAgain = true;

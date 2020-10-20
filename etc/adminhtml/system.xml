@@ -256,6 +256,17 @@
 					<config_path>payment/safecharge/specificcountry</config_path>
 				</field>
 				
+				<field id="notifyURL"
+					   translate="label"
+					   type="label"
+					   sortOrder="165"
+					   showInDefault="1"
+					   showInWebsite="1"
+					   showInStore="0" >
+					<label>Site Notify URL</label>
+					<comment model="Safecharge\Safecharge\Block\System\Config\GetNotifyUrl" />
+				</field>
+				
 				<field id="getPlans"
 					   translate="label"
 					   type="button"
@@ -265,6 +276,7 @@
 					   showInStore="0" >
 					<label>Get Payment Plans</label>
 					<frontend_model>Safecharge\Safecharge\Block\System\Config\Button</frontend_model>
+					<comment model="Safecharge\Safecharge\Block\System\Config\ShowLastDownloadTime" />
 				</field>
             </group>
         </section>

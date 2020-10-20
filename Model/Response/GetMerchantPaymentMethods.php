@@ -8,7 +8,6 @@ use Safecharge\Safecharge\Model\AbstractResponse;
 use Safecharge\Safecharge\Model\Config;
 use Safecharge\Safecharge\Model\Logger as SafechargeLogger;
 use Safecharge\Safecharge\Model\ResponseInterface;
-use Magento\Checkout\Model\Cart;
 
 /**
  * Safecharge Safecharge get merchant payment methods response model.
@@ -31,8 +30,6 @@ class GetMerchantPaymentMethods extends AbstractResponse implements ResponseInte
      * @var string - the session token returned from APMs
      */
     protected $sessionToken = '';
-    
-//	protected $cart;
 
     /**
      * AbstractResponse constructor.
@@ -49,7 +46,6 @@ class GetMerchantPaymentMethods extends AbstractResponse implements ResponseInte
         $requestId,
         Curl $curl,
         Resolver $localeResolver
-//		,Cart $cart
     ) {
         parent::__construct(
             $safechargeLogger,
@@ -59,9 +55,6 @@ class GetMerchantPaymentMethods extends AbstractResponse implements ResponseInte
         );
 
         $this->localeResolver = $localeResolver;
-//        $this->cart = $cart;
-		
-//		var_dump(is_object($this->cart));
     }
 
     /**

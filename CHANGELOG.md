@@ -14,6 +14,8 @@
 	* Added possibility to append Safecharge Payment Plan to a product, when create new or edit existing one. Plugin get the payment plans from the pre-created plans of the merchant, by click on a button Get Payment Plans in plugin configuration.
 	* When user have a product with a Payment Plan, only CC is allowed.
 	* Added third option for mandatory dorp-downs in the plugin settings.
+	* Added Site Notify URL in the plugin settings.
+	* If Payment Plans were downloaded, show the date of the last download under the Collect Plans button.
 
 ## 2.1.0.x
 ```

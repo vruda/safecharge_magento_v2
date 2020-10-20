@@ -35,7 +35,7 @@ abstract class AbstractRequest extends AbstractApi
     const GET_MERCHANT_PAYMENT_METHODS_METHOD   = 'getMerchantPaymentMethods';
     const GET_UPOS_METHOD						= 'getUserUPOs';
     const GET_MERCHANT_PAYMENT_PLANS_METHOD     = 'getPlansList';
-	const CREATE_SUBSCRIPTION					= 'createSubscription';
+	const CREATE_SUBSCRIPTION_METHOD			= 'createSubscription';
 
     /**
      * @var Curl
@@ -420,7 +420,7 @@ abstract class AbstractRequest extends AbstractApi
      * @return AbstractRequest
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    protected function sendRequest()
+    protected function sendRequest($continue_process = false)
     {
         $endpoint    = $this->getEndpoint();
         $headers    = $this->getHeaders();
@@ -432,7 +432,12 @@ abstract class AbstractRequest extends AbstractApi
         $this->config->createLog($params, 'Request params:');
         
         $this->curl->post($endpoint, $params);
-
+		
+		if($continue_process) {
+			// if success return array with the response parameters
+			return $this->checkResponse();
+		}
+		
         return $this;
     }
 
@@ -603,4 +608,84 @@ abstract class AbstractRequest extends AbstractApi
 
         return $quoteData;
     }
+	
+	protected function checkResponse()
+    {
+		$resp_body		= json_decode($this->curl->getBody(), true);
+		$requestStatus	= $this->getResponseStatus($resp_body);
+		
+        $this->config->createLog($resp_body, 'Response data:');
+
+        if ($requestStatus === false) {
+            throw new PaymentException($this->getErrorMessage(
+                !empty($resp_body['reason']) ? $resp_body['reason'] : ''
+            ));
+        }
+		
+		if(empty($resp_body['status'])) {
+			$this->config->createLog('Mising response status!');
+            
+            throw new PaymentException(__('Mising response status!'));
+		}
+
+        return $resp_body;
+    }
+	
+	private function getResponseStatus($body = [])
+    {
+		$httpStatus = $this->curl->getStatus();
+		
+        if ($httpStatus !== 200 && $httpStatus !== 100) {
+            return false;
+        }
+		
+        $responseStatus                = strtolower(!empty($body['status']) ? $body['status'] : '');
+        $responseTransactionStatus    = strtolower(!empty($body['transactionStatus']) ? $body['transactionStatus'] : '');
+        $responseTransactionType    = strtolower(!empty($body['transactionType']) ? $body['transactionType'] : '');
+
+        if (!(
+                (
+                    !in_array($responseTransactionType, ['auth', 'sale'])
+                    && $responseStatus === 'success' && $responseTransactionType !== 'error'
+                )
+                || (
+                    in_array($responseTransactionType, ['auth', 'sale'])
+                    && $responseTransactionStatus === 'approved'
+                )
+            )
+        ) {
+            return false;
+        }
+
+        return true;
+    }
+	
+	/**
+     * @return \Magento\Framework\Phrase
+     */
+    private function getErrorMessage($msg = '')
+    {
+        $errorReason = $this->getErrorReason();
+        if ($errorReason !== false) {
+            return __('Request to payment gateway failed. Details: "%1".', $errorReason);
+        } elseif (!empty($msg)) {
+            return __($msg);
+        }
+        
+        return __('Request to payment gateway failed.');
+    }
+	
+	/**
+     * @return bool|string
+     */
+	protected function getErrorReason()
+    {
+        $body = $this->curl->getBody();
+		
+        if (!empty($body['gwErrorReason'])) {
+            return $body['gwErrorReason'];
+        }
+        return false;
+    }
+	
 }

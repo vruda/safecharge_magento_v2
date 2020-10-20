@@ -176,7 +176,8 @@ class GetMerchantPaymentMethods extends AbstractRequest implements RequestInterf
         }
 		
         $params = [
-            'sessionToken'    => $tokenResponse->getSessionToken(),
+//            'sessionToken'    => $tokenResponse->getSessionToken(),
+            'sessionToken'    => $tokenResponse->sessionToken,
             "currencyCode"    => $currencyCode,
             "countryCode"    => $country_code,
             "languageCode"    => $languageCode,

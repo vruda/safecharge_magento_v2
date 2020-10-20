@@ -25,7 +25,7 @@ abstract class AbstractResponse extends AbstractApi
     const GET_MERCHANT_PAYMENT_METHODS_HANDLER  = 'get_merchant_payment_methods';
     const GET_UPOS_HANDLER						= 'get_user_upos';
     const GET_MERCHANT_PAYMENT_PLANS_HANDLER    = 'get_plans_list';
-	const CREATE_SUBSCRIPTION_HANDLER			= 'create_subscription';
+//	const CREATE_SUBSCRIPTION_HANDLER			= 'create_subscription';
 
     /**
      * Response result const.
