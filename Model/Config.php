@@ -18,34 +18,32 @@ class Config
     const MODULE_NAME						= 'Safecharge_Safecharge';
 	
     const PAYMENT_PLANS_ATTR_NAME			= 'safecharge_payment_plans';
-    const PAYMENT_PLANS_ATTR_LABEL			= 'SafeCharge Payment Plans';
+    const PAYMENT_PLANS_ATTR_LABEL			= 'Nuvei Payment Plans';
 	const PAYMENT_PLANS_FILE_NAME			= 'nuvei_payment_plans.json';
 	
-	const PAYMENT_SUBS_GROUP				= 'SafeCharge Subscription';
+	const PAYMENT_SUBS_GROUP				= 'Nuvei Subscription';
     const PAYMENT_SUBS_ENABLE_LABEL			= 'Enable Subscription';
     const PAYMENT_SUBS_ENABLE				= 'safecharge_sub_enabled';
     const PAYMENT_SUBS_INTIT_AMOUNT_LABEL	= 'Initial Amount';
     const PAYMENT_SUBS_INTIT_AMOUNT			= 'safecharge_sub_init_amount';
 	const PAYMENT_SUBS_REC_AMOUNT_LABEL		= 'Recurring Amount';
 	const PAYMENT_SUBS_REC_AMOUNT			= 'safecharge_sub_rec_amount';
-	const PAYMENT_SUBS_AFTER_DAY_LABEL		= 'Start after days';
-	const PAYMENT_SUBS_AFTER_DAY			= 'safecharge_sub_start_after_day';
-	const PAYMENT_SUBS_AFTER_MONTH_LABEL	= 'Start after months';
-	const PAYMENT_SUBS_AFTER_MONTH			= 'safecharge_sub_start_after_month';
-	const PAYMENT_SUBS_AFTER_YEAR_LABEL		= 'Start after years';
-	const PAYMENT_SUBS_AFTER_YEAR			= 'safecharge_sub_start_after_year';
-	const PAYMENT_SUBS_REC_DAY_LABEL		= 'Recurring period days';
-	const PAYMENT_SUBS_REC_DAY				= 'safecharge_sub_rec_period_day';
-	const PAYMENT_SUBS_REC_MONTH_LABEL		= 'Recurring period months';
-	const PAYMENT_SUBS_REC_MONTH			= 'safecharge_sub_rec_period_month';
-	const PAYMENT_SUBS_REC_YEAR_LABEL		= 'Recurring period years';
-	const PAYMENT_SUBS_REC_YEAR				= 'safecharge_sub_rec_period_year';
-	const PAYMENT_SUBS_END_DAY_LABEL		= 'Ends after days';
-	const PAYMENT_SUBS_END_DAY				= 'safecharge_sub_end_day';
-	const PAYMENT_SUBS_END_MONTHS_LABEL		= 'Ends after months';
-	const PAYMENT_SUBS_END_MONTHS			= 'safecharge_sub_end_months';
-	const PAYMENT_SUBS_END_YEARS_LABEL		= 'Ends after years';
-	const PAYMENT_SUBS_END_YEARS			= 'safecharge_sub_end_years';
+	
+	const PAYMENT_SUBS_RECURR_UNITS			= 'safecharge_sub_recurr_units';
+	const PAYMENT_SUBS_RECURR_UNITS_LABEL	= 'Recurring Units';
+	const PAYMENT_SUBS_RECURR_PERIOD		= 'safecharge_sub_recurr_period';
+	const PAYMENT_SUBS_RECURR_PERIOD_LABEL	= 'Recurring Period';
+	
+	const PAYMENT_SUBS_TRIAL_UNITS			= 'safecharge_sub_trial_units';
+	const PAYMENT_SUBS_TRIAL_UNITS_LABEL	= 'Trial Units';
+	const PAYMENT_SUBS_TRIAL_PERIOD			= 'safecharge_sub_trial_period';
+	const PAYMENT_SUBS_TRIAL_PERIOD_LABEL	= 'Trial Period';
+	
+	const PAYMENT_SUBS_END_AFTER_UNITS			= 'safecharge_sub_end_after_units';
+	const PAYMENT_SUBS_END_AFTER_UNITS_LABEL	= 'End After Units';
+	const PAYMENT_SUBS_END_AFTER_PERIOD			= 'safecharge_sub_end_after_period';
+	const PAYMENT_SUBS_END_AFTER_PERIOD_LABEL	= 'End After Period';
+	
 	const PAYMENT_SUBS_STORE_DESCR			= 'safecharge_sub_store_decr';
 	const PAYMENT_SUBS_STORE_DESCR_LABEL	= 'Subscription details';
     
@@ -205,7 +203,7 @@ class Config
 
             if (is_dir($logsPath)) {
                 file_put_contents(
-                    $logsPath . DIRECTORY_SEPARATOR . 'SafeCharge-' . date('Y-m-d') . '.txt',
+                    $logsPath . DIRECTORY_SEPARATOR . 'Nuvei-' . date('Y-m-d') . '.txt',
                     $string,
                     FILE_APPEND
                 );

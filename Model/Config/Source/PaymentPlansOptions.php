@@ -4,7 +4,7 @@ namespace Safecharge\Safecharge\Model\Config\Source;
 
 class PaymentPlansOptions extends \Magento\Eav\Model\Entity\Attribute\Source\AbstractSource
 {
-    protected $eavConfig;
+//    protected $eavConfig;
     
     private $directory;
     private $config;

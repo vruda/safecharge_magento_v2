@@ -60,53 +60,6 @@ class UpgradeData implements UpgradeDataInterface
 //			\Magento\Catalog\Model\Product::ENTITY,
 //			\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_INTIT_AMOUNT
 //		);
-//		$eavSetup->removeAttribute(
-//			\Magento\Catalog\Model\Product::ENTITY,
-//			\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_REC_AMOUNT
-//		);
-//		$eavSetup->removeAttribute(
-//			\Magento\Catalog\Model\Product::ENTITY,
-//			\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_AFTER_DAY
-//		);
-//		$eavSetup->removeAttribute(
-//			\Magento\Catalog\Model\Product::ENTITY,
-//			\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_AFTER_MONTH
-//		);
-//		$eavSetup->removeAttribute(
-//			\Magento\Catalog\Model\Product::ENTITY,
-//			\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_AFTER_YEAR
-//		);
-//		$eavSetup->removeAttribute(
-//			\Magento\Catalog\Model\Product::ENTITY,
-//			\Safecharge\Safecharge\Model\Config::PAYMENT_PLANS_ATTR_NAME
-//		);
-		
-        // add custom Order Attribute
-//        if (version_compare($context->getVersion(), '2.2.0', '<')) {
-//            $eavSetup->addAttribute(
-//                \Magento\Catalog\Model\Product::ENTITY,
-//                \Safecharge\Safecharge\Model\Config::PAYMENT_PLANS_ATTR_NAME,
-//                [
-//                    'type' => 'int',
-//                    'label' => \Safecharge\Safecharge\Model\Config::PAYMENT_PLANS_ATTR_LABEL,
-//                    'input' => 'select',
-//                    'source' => 'Safecharge\Safecharge\Model\Config\Source\PaymentPlansOptions',
-//                    'global' => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
-//                    'visible' => true,
-//                    'required' => false,
-//                    'user_defined' => true,
-//                    'default' => '',
-//                    'searchable' => true,
-//                    'filterable' => true,
-//                    'visible_on_front' => true,
-//                    'used_in_product_listing' => true,
-//                    'group' => 'General',
-//                    'option' => [
-//                        'values' => [],
-//                    ],
-//                ]
-//            );
-//        }
 		
 		if (version_compare($context->getVersion(), '2.3.0', '<')) {
 			$eavSetup->removeAttribute(
@@ -135,7 +88,6 @@ class UpgradeData implements UpgradeDataInterface
 					'group' => \Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_GROUP,
 					'sort_order' => 10,
 					'class' => 'sc_enable_subscr',
-					'description' => 'description',
 					'note' => 'note',
                 ]
             );
@@ -152,7 +104,7 @@ class UpgradeData implements UpgradeDataInterface
                     'global' => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
                     'visible' => true,
                     'required' => false,
-                    'user_defined' => true,
+                    'user_defined' => false,
                     'default' => '',
                     'searchable' => true,
                     'filterable' => true,
@@ -210,201 +162,147 @@ class UpgradeData implements UpgradeDataInterface
                 ]
             );
 			
-			// Subscription start after day
+			// Recurring Units
 			$eavSetup->addAttribute(
                 \Magento\Catalog\Model\Product::ENTITY,
-                \Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_AFTER_DAY,
+                \Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_RECURR_UNITS,
                 [
-                    'type' => 'int',
-                    'label' => \Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_AFTER_DAY_LABEL,
-                    'input' => 'text',
+                    'type' => 'text',
+                    'label' => \Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_RECURR_UNITS_LABEL,
+                    'input' => 'select',
                     'global' => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
+					'source' => 'Safecharge\Safecharge\Model\Config\Source\SubscriptionUnits',
                     'visible' => true,
                     'required' => false,
-                    'user_defined' => true,
-                    'default' => '0',
-                    'searchable' => true,
-                    'filterable' => true,
+                    'user_defined' => false,
+                    'default' => 'day',
+                    'searchable' => false,
+                    'filterable' => false,
                     'visible_on_front' => false,
-                    'used_in_product_listing' => true,
+                    'used_in_product_listing' => false,
                     'group' => \Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_GROUP,
+					'option' => [
+                        'values' => [],
+                    ],
 					'sort_order' => 50,
                 ]
             );
 			
-			// Subscription start after month
+			// Recurring Period
 			$eavSetup->addAttribute(
                 \Magento\Catalog\Model\Product::ENTITY,
-                \Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_AFTER_MONTH,
+                \Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_RECURR_PERIOD,
                 [
                     'type' => 'int',
-                    'label' => \Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_AFTER_MONTH_LABEL,
+                    'label' => \Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_RECURR_PERIOD_LABEL,
                     'input' => 'text',
                     'global' => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
                     'visible' => true,
                     'required' => false,
-                    'user_defined' => true,
-                    'default' => '0',
-                    'searchable' => true,
-                    'filterable' => true,
+                    'user_defined' => false,
+                    'default' => '',
+                    'searchable' => false,
+                    'filterable' => false,
                     'visible_on_front' => false,
-                    'used_in_product_listing' => true,
+                    'used_in_product_listing' => false,
                     'group' => \Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_GROUP,
 					'sort_order' => 60,
                 ]
             );
 			
-			// Subscription start after year
+			// Trial Units
 			$eavSetup->addAttribute(
                 \Magento\Catalog\Model\Product::ENTITY,
-                \Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_AFTER_YEAR,
+                \Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_TRIAL_UNITS,
                 [
-                    'type' => 'int',
-                    'label' => \Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_AFTER_YEAR_LABEL,
-                    'input' => 'text',
+                    'type' => 'text',
+                    'label' => \Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_TRIAL_UNITS_LABEL,
+                    'input' => 'select',
                     'global' => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
+					'source' => 'Safecharge\Safecharge\Model\Config\Source\SubscriptionUnits',
                     'visible' => true,
                     'required' => false,
-                    'user_defined' => true,
-                    'default' => '0',
-                    'searchable' => true,
-                    'filterable' => true,
+                    'user_defined' => false,
+                    'default' => 'day',
+                    'searchable' => false,
+                    'filterable' => false,
                     'visible_on_front' => false,
-                    'used_in_product_listing' => true,
+                    'used_in_product_listing' => false,
                     'group' => \Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_GROUP,
+					'option' => [
+                        'values' => [],
+                    ],
 					'sort_order' => 70,
                 ]
             );
 			
-			// Recurring period day
+			// Trial Period
 			$eavSetup->addAttribute(
                 \Magento\Catalog\Model\Product::ENTITY,
-                \Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_REC_DAY,
+                \Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_TRIAL_PERIOD,
                 [
                     'type' => 'int',
-                    'label' => \Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_REC_DAY_LABEL,
+                    'label' => \Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_TRIAL_PERIOD_LABEL,
                     'input' => 'text',
                     'global' => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
                     'visible' => true,
                     'required' => false,
-                    'user_defined' => true,
-                    'default' => '0',
-                    'searchable' => true,
-                    'filterable' => true,
+                    'user_defined' => false,
+                    'default' => '',
+                    'searchable' => false,
+                    'filterable' => false,
                     'visible_on_front' => false,
-                    'used_in_product_listing' => true,
+                    'used_in_product_listing' => false,
                     'group' => \Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_GROUP,
 					'sort_order' => 80,
                 ]
             );
 			
-			// Recurring period month
+			// End After Units
 			$eavSetup->addAttribute(
                 \Magento\Catalog\Model\Product::ENTITY,
-                \Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_REC_MONTH,
+                \Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_END_AFTER_UNITS,
                 [
-                    'type' => 'int',
-                    'label' => \Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_REC_MONTH_LABEL,
-                    'input' => 'text',
+                    'type' => 'text',
+                    'label' => \Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_END_AFTER_UNITS_LABEL,
+                    'input' => 'select',
                     'global' => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
+					'source' => 'Safecharge\Safecharge\Model\Config\Source\SubscriptionUnits',
                     'visible' => true,
                     'required' => false,
-                    'user_defined' => true,
-                    'default' => '0',
-                    'searchable' => true,
-                    'filterable' => true,
+                    'user_defined' => false,
+                    'default' => 'day',
+                    'searchable' => false,
+                    'filterable' => false,
                     'visible_on_front' => false,
-                    'used_in_product_listing' => true,
+                    'used_in_product_listing' => false,
                     'group' => \Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_GROUP,
+					'option' => [
+                        'values' => [],
+                    ],
 					'sort_order' => 90,
                 ]
             );
 			
-			// Recurring period year
+			// End After Period
 			$eavSetup->addAttribute(
                 \Magento\Catalog\Model\Product::ENTITY,
-                \Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_REC_YEAR,
+                \Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_END_AFTER_PERIOD,
                 [
                     'type' => 'int',
-                    'label' => \Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_REC_YEAR_LABEL,
+                    'label' => \Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_END_AFTER_PERIOD_LABEL,
                     'input' => 'text',
                     'global' => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
                     'visible' => true,
                     'required' => false,
-                    'user_defined' => true,
-                    'default' => '0',
-                    'searchable' => true,
-                    'filterable' => true,
+                    'user_defined' => false,
+                    'default' => '',
+                    'searchable' => false,
+                    'filterable' => false,
                     'visible_on_front' => false,
-                    'used_in_product_listing' => true,
+                    'used_in_product_listing' => false,
                     'group' => \Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_GROUP,
 					'sort_order' => 100,
-                ]
-            );
-			
-			// Subscription end after days
-			$eavSetup->addAttribute(
-                \Magento\Catalog\Model\Product::ENTITY,
-                \Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_END_DAY,
-                [
-                    'type' => 'int',
-                    'label' => \Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_END_DAY_LABEL,
-                    'input' => 'text',
-                    'global' => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
-                    'visible' => true,
-                    'required' => false,
-                    'user_defined' => true,
-                    'default' => '0',
-                    'searchable' => true,
-                    'filterable' => true,
-                    'visible_on_front' => false,
-                    'used_in_product_listing' => true,
-                    'group' => \Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_GROUP,
-					'sort_order' => 110,
-                ]
-            );
-			
-			// Subscription end after months
-			$eavSetup->addAttribute(
-                \Magento\Catalog\Model\Product::ENTITY,
-                \Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_END_MONTHS,
-                [
-                    'type' => 'int',
-                    'label' => \Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_END_MONTHS_LABEL,
-                    'input' => 'text',
-                    'global' => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
-                    'visible' => true,
-                    'required' => false,
-                    'user_defined' => true,
-                    'default' => '0',
-                    'searchable' => true,
-                    'filterable' => true,
-                    'visible_on_front' => false,
-                    'used_in_product_listing' => true,
-                    'group' => \Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_GROUP,
-					'sort_order' => 120,
-                ]
-            );
-			
-			// Subscription end after years
-			$eavSetup->addAttribute(
-                \Magento\Catalog\Model\Product::ENTITY,
-                \Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_END_YEARS,
-                [
-                    'type' => 'int',
-                    'label' => \Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_END_YEARS_LABEL,
-                    'input' => 'text',
-                    'global' => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
-                    'visible' => true,
-                    'required' => false,
-                    'user_defined' => true,
-                    'default' => '0',
-                    'searchable' => true,
-                    'filterable' => true,
-                    'visible_on_front' => false,
-                    'used_in_product_listing' => true,
-                    'group' => \Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_GROUP,
-					'sort_order' => 130,
                 ]
             );
 			
@@ -421,14 +319,64 @@ class UpgradeData implements UpgradeDataInterface
                     'required' => false,
                     'user_defined' => true,
                     'default' => '0',
-                    'searchable' => true,
+                    'searchable' => false,
                     'filterable' => true,
-                    'visible_on_front' => false,
+                    'visible_on_front' => true,
                     'used_in_product_listing' => true,
                     'group' => \Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_GROUP,
-					'sort_order' => 140,
+					'sort_order' => 110,
                 ]
             );
+			
+			// Add two new statuses for the Subscriptions
+			$scSubscrStarted = $this->orderStatusFactory->create()
+                ->setData('status', 'sc_subscr_started')
+                ->setData('label', 'Nuvei Subscription Started')
+                ->save();
+            $scSubscrStarted->assignState(Order::STATE_PROCESSING, false, true);
+			
+			$scSubscrEnded = $this->orderStatusFactory->create()
+                ->setData('status', 'sc_subscr_ended')
+                ->setData('label', 'Nuvei Subscription Ended')
+                ->save();
+            $scSubscrEnded->assignState(Order::STATE_PROCESSING, false, true);
+			
+			// modify old order States
+			$scVoided = $this->orderStatusFactory->create()
+                ->setData('status', 'sc_voided')
+                ->setData('label', 'Nuvei Voided')
+                ->save();
+            $scVoided->assignState(Order::STATE_PROCESSING, false, true);
+
+            $scSettled = $this->orderStatusFactory->create()
+                ->setData('status', 'sc_settled')
+                ->setData('label', 'Nuvei Settled')
+                ->save();
+            $scSettled->assignState(Order::STATE_PROCESSING, false, true);
+
+            $scPartiallySettled = $this->orderStatusFactory->create()
+                ->setData('status', 'sc_partially_settled')
+                ->setData('label', 'Nuvei Partially Settled')
+                ->save();
+            $scPartiallySettled->assignState(Order::STATE_PROCESSING, false, true);
+
+            $scAuth = $this->orderStatusFactory->create()
+                ->setData('status', 'sc_auth')
+                ->setData('label', 'Nuvei Auth')
+                ->save();
+            $scAuth->assignState(Order::STATE_PROCESSING, false, true);
+            
+            $scProcessing = $this->orderStatusFactory->create()
+                ->setData('status', 'sc_processing')
+                ->setData('label', 'Nuvei Processing')
+                ->save();
+            $scProcessing->assignState(Order::STATE_PROCESSING, false, true);
+            
+            $scRefunded = $this->orderStatusFactory->create()
+                ->setData('status', 'sc_refunded')
+                ->setData('label', 'Nuvei Refunded')
+                ->save();
+            $scRefunded->assignState(Order::STATE_PROCESSING, false, false);
 		}
         
         // add few new Order States

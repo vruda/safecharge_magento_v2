@@ -4,6 +4,7 @@
 
 ## 2.2.0.x
 ```
+	* Added Plugin Product, to modify visible price of the products with Rebilling Plan.
 	* Clean the "\" symbol from client details.
 	* Try to force set the Payment provider (method) when it is selected.
 	* Replaced OrderFactory with OrderRepositoryInterface.
@@ -16,6 +17,7 @@
 	* Added third option for mandatory dorp-downs in the plugin settings.
 	* Added Site Notify URL in the plugin settings.
 	* If Payment Plans were downloaded, show the date of the last download under the Collect Plans button.
+	* In the DMN class check if the Order Paymend was made with SafeCharge module.
 
 ## 2.1.0.x
 ```

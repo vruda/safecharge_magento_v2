@@ -5,15 +5,12 @@
         <attribute name="safecharge_payment_plans"/>
         <attribute name="safecharge_sub_init_amount"/>
         <attribute name="safecharge_sub_rec_amount"/>
-        <attribute name="safecharge_sub_start_after_day"/>
-        <attribute name="safecharge_sub_start_after_month"/>
-        <attribute name="safecharge_sub_start_after_year"/>
-        <attribute name="safecharge_sub_rec_period_day"/>
-        <attribute name="safecharge_sub_rec_period_month"/>
-        <attribute name="safecharge_sub_rec_period_year"/>
-        <attribute name="safecharge_sub_end_day"/>
-        <attribute name="safecharge_sub_end_months"/>
-        <attribute name="safecharge_sub_end_years"/>
+        <attribute name="safecharge_sub_recurr_units"/>
+        <attribute name="safecharge_sub_recurr_period"/>
+        <attribute name="safecharge_sub_trial_units"/>
+        <attribute name="safecharge_sub_trial_period"/>
+        <attribute name="safecharge_sub_end_after_units"/>
+        <attribute name="safecharge_sub_end_after_period"/>
         <attribute name="safecharge_sub_store_decr"/>
     </group>
 </config>

@@ -18,7 +18,7 @@
                    showInDefault="1"
                    showInWebsite="1"
                    showInStore="1">
-                <label>Safecharge</label>
+                <label>Nuvei</label>
                 
 				<field id="active"
 					   translate="label"
@@ -105,7 +105,7 @@
 					   showInStore="0">
 					<label>Merchant ID</label>
 					<backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
-					<comment>Value provided by Safecharge.</comment>
+					<comment>Value provided by Nuvei.</comment>
 					<config_path>payment/safecharge/merchant_id</config_path>
 				</field>
 
@@ -117,7 +117,7 @@
 					   showInWebsite="1"
 					   showInStore="0">
 					<label>Merchant Site Id</label>
-					<comment>Value provided by Safecharge.</comment>
+					<comment>Value provided by Nuvei.</comment>
 					<config_path>payment/safecharge/merchant_site_id</config_path>
 				</field>
 
@@ -130,7 +130,7 @@
 					   showInStore="0">
 					<label>Merchant Secret Key</label>
 					<backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
-					<comment>Value provided by Safecharge.</comment>
+					<comment>Value provided by Nuvei.</comment>
 					<config_path>payment/safecharge/merchant_secret_key</config_path>
 				</field>
 
@@ -143,7 +143,7 @@
 					   showInStore="0">
 					<label>Sandbox Merchant ID</label>
 					<backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
-					<comment>Value provided by Safecharge.</comment>
+					<comment>Value provided by Nuvei.</comment>
 					<config_path>payment/safecharge/sandbox_merchant_id</config_path>
 				</field>
 
@@ -155,7 +155,7 @@
 					   showInWebsite="1"
 					   showInStore="0">
 					<label>Sandbox Merchant Site Id</label>
-					<comment>Value provided by Safecharge.</comment>
+					<comment>Value provided by Nuvei.</comment>
 					<config_path>payment/safecharge/sandbox_merchant_site_id</config_path>
 				</field>
 
@@ -168,7 +168,7 @@
 					   showInStore="0">
 					<label>Sandbox Merchant Secret Key</label>
 					<backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
-					<comment>Value provided by Safecharge.</comment>
+					<comment>Value provided by Nuvei.</comment>
 					<config_path>payment/safecharge/sandbox_merchant_secret_key</config_path>
 				</field>
                     

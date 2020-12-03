@@ -133,7 +133,7 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
             $status = !empty($params['Status']) ? strtolower($params['Status']) : null;
 
             $this->moduleConfig->createLog($params, 'DMN params:');
-            
+			
             if (!empty($params["order"])) {
                 $orderIncrementId = $params["order"];
             } elseif (!empty($params["merchant_unique_id"]) && intval($params["merchant_unique_id"]) != 0) {
@@ -158,29 +158,8 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
 			
 			$this->validateChecksum($params, $orderIncrementId);
 			
-//			$searchCriteria = $this->searchCriteriaBuilder->addFilter('increment_id', $orderIncrementId, 'eq')->create();
-//
-//            $tryouts = 0;
-//            do {
-//                $tryouts++;
-//				$orderList = $this->orderRepo->getList($searchCriteria)->getItems();
-//
-//                if (!$orderList || empty($orderList)) {
-//                    $this->moduleConfig->createLog('DMN try ' . $tryouts
-//                        . ' there is NO order for TransactionID ' . $params['TransactionID'] . ' yet.');
-//                    sleep(3);
-//                }
-//				else {
-//					$order = current($orderList);
-//				}
-//            } while ( $tryouts < 5 && (empty($order) || empty($orderList)) );
-			
 			# in case this is Subscription confirm DMN
-			if(
-				!empty($params['dmnType'])
-				&& 'subscription' == $params['dmnType']
-//				&& !empty($this->order)
-			) {
+			if(!empty($params['dmnType']) && 'subscription' == $params['dmnType']) {
 				$this->getOrCreateOrder($params, $orderIncrementId, $jsonOutput);
 				
 				$orderPayment = $this->order->getPayment();
@@ -208,27 +187,20 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
                     $subs
                 );
 				
+				if(!empty($params['subscriptionState'])) {
+					if('active' == strtolower($params['subscriptionState'])) {
+						$this->order->setData('state', Order::STATE_PROCESSING);
+						$this->order->setStatus(Payment::SC_SUBSCRT_STARTED);
+					}
+					elseif('inactive' == strtolower($params['subscriptionState'])) {
+						$this->order->setData('state', Order::STATE_COMPLETE);
+						$this->order->setStatus(Payment::SC_SUBSCRT_ENDED);
+					}
+				}
+				
 				$orderPayment->save();
 				$this->orderResourceModel->save($this->order);
 				
-//				if (!$orderList || empty($orderList)) {
-//					$msg = 'DMN Error - Activated Subscription for not existing Order!';
-//
-//					$this->moduleConfig->createLog($msg);
-//					$jsonOutput->setData($msg);
-//
-//					return $jsonOutput;
-//				}
-//
-//				$order = current($orderList);
-//
-//				$order->addStatusHistoryComment(
-//					__('For the Order was started <b>Subscription</b>.') . '</br> '
-//						. __('Status: ') . '<b>' . $params['subscriptionState'] . '</b>.</br> '
-//						. __('PlanId/Name: ') . $params['planId'] . '/' . $params['productName']
-//				);
-//				$this->orderResourceModel->save($order);
-//
 				$this->moduleConfig->createLog('Subscription DMN process end for order #' . $orderIncrementId);
 				$jsonOutput->setData('Subscription DMN process end for order #' . $orderIncrementId);
 
@@ -243,12 +215,12 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
                 return $jsonOutput;
             }
             
-            if (in_array($params['transactionType'], ['Auth', 'Sale']) && $status === 'declined') {
-                $this->moduleConfig->createLog('DMN message - Declined Order, process stops here.');
-                
-                $jsonOutput->setData('DMN error - Declined Order, process stops here.');
-                return $jsonOutput;
-            }
+//            if (in_array($params['transactionType'], ['Auth', 'Sale']) && $status === 'declined') {
+//                $this->moduleConfig->createLog('DMN message - Declined Order, process stops here.');
+//                
+//                $jsonOutput->setData('DMN error - Declined Order, process stops here.');
+//                return $jsonOutput;
+//            }
             
             if (empty($params['TransactionID'])) {
                 $this->moduleConfig->createLog('DMN error - missing Transaction ID.');
@@ -259,33 +231,7 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
 
             # try to create the order
 			$this->getOrCreateOrder($params, $orderIncrementId, $jsonOutput);
-//            if (
-//				(!$orderList || empty($orderList))
-//				&& !isset($params['dmnType'])
-//			) {
-//                $this->moduleConfig->createLog('Order '. $orderIncrementId .' not found, try to create it!');
-//                
-//                $result = $this->placeOrder($params);
-//                
-//                if ($result->getSuccess() !== true) {
-//                    $this->moduleConfig->createLog('DMN Callback error - place order error: ' . $result->getMessage());
-//                    
-//                    $jsonOutput->setData('DMN Callback error - place order error: ' . $result->getMessage());
-//                    return $jsonOutput;
-//                }
-//                
-//				$orderList = $this->orderRepo->getList($searchCriteria)->getItems();
-//				
-//                $this->moduleConfig->createLog('An Order with ID '. $orderIncrementId .' was created in the DMN page.');
-//            }
-            # try to create the order END
-            
-//            if (!$orderList || empty($orderList)) {
-//                $jsonOutput->setData('DMN Callback error - there is no Order and the code did not success to made it.');
-//                return $jsonOutput;
-//            }
 			
-//			$order			= current($orderList);
 			$order			= $this->order;
             $orderPayment   = $order->getPayment();
             $order_status   = $orderPayment->getAdditionalInformation(Payment::TRANSACTION_STATUS);
@@ -440,10 +386,11 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
                     ->setStatus('pending');
             }
             
+			// APPROVED TRANSACTION
             if (in_array($status, ['approved', 'success'])) {
                 $message                = $this->captureCommand->execute($orderPayment, $order->getBaseGrandTotal(), $order);
                 $sc_transaction_type    = Payment::SC_PROCESSING;
-                $is_closed              = false;
+//                $is_closed              = false;
                 $refund_msg             = '';
                 $is_partial_settle      = false;
                 
@@ -591,7 +538,7 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
 				elseif (in_array($tr_type_param, ['void', 'voidcredit'])) {
                     $transactionType        = Transaction::TYPE_VOID;
                     $sc_transaction_type    = Payment::SC_VOIDED;
-                    $is_closed                = true;
+//                    $is_closed                = true;
                     
                     $order->setData('state', Order::STATE_CLOSED);
                 }
@@ -652,10 +599,6 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
 			$jsonOutput->setData('DMN process end for order #' . $orderIncrementId);
 			
 			// start Subscription plans if we need to
-//			if (
-//				in_array($status, ['approved', 'success'])
-//				&& in_array($tr_type_param, ['sale', 'settle'])
-//			) {
 			if($start_subscr) {
 				$customField2	= json_decode($params['customField2'], true); // subscriptions data
 				$subs			= $orderPayment->getAdditionalInformation(Payment::TRANSACTION_SUBS); // array
@@ -667,32 +610,9 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
 					&& !empty($params['userPaymentOptionId'])
 					&& is_numeric($params['userPaymentOptionId'])
 				) {
-//					foreach ($customField2 as $plan_id) {
 					foreach ($customField2 as $item_id => $subsc_data) {
-//						$isSubsActive = false;
-						
-//						if(!empty($subs) && is_array($subs)) {
-//							foreach($subs as $subs_id => $subsData) {
-//								if(
-//									$plan_id == $subsData['planId']
-//									&& 'active' == strtolower($subsData['subscriptionState'])
-//								) {
-//									$this->moduleConfig->createLog('There is active Subscription with ID #'
-//										. $subs_id . ' for Plan ID #' . $plan_id);
-//									
-//									$isSubsActive = true;
-//									break;
-//								}
-//							}
-//						}
-//						
-//						if($isSubsActive) {
-//							continue;
-//						}
-						
 						$this->moduleConfig->createLog(
 							[
-//								'plan_id' => $plan_id,
 								'userPaymentOptionId'	=> $params['userPaymentOptionId'],
 								'subscr_details'		=> $subsc_data
 							],
@@ -705,13 +625,7 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
 						$subscr_request_data['clientRequestId']		= $orderIncrementId;
 						$subscr_request_data['currency']			= $params['currency'];
 
-						$resp = $this->createSubscription(
-							$subscr_request_data,
-//							$plan_id,
-//							$params['userPaymentOptionId'],
-//							$params['email'],
-							$orderIncrementId
-						);
+						$resp = $this->createSubscription($subscr_request_data, $orderIncrementId);
 
 						// add note to the Order
 						if('success' == strtolower($resp['status'])) {
@@ -992,5 +906,28 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
 		}
 		
 		$this->order = current($orderList);
+		
+		// check if the Order belongs to SafeCharge
+		try {
+			$method = $this->order->getPayment()->getMethod();
+			
+			if('safecharge' != $method) {
+				$this->moduleConfig->createLog(
+					[
+						'orderIncrementId' => $orderIncrementId,
+						'module' => $method,
+					],
+					'DMN getOrCreateOrder() error - the order does was not made with SafeCharge module.'
+				);
+
+				$jsonOutput->setData('DMN getOrCreateOrder() error - the order does was not made with SafeCharge module.');
+				return $jsonOutput;
+			}
+		} catch (Exception $ex) {
+			$this->moduleConfig->createLog($ex->getMessage(), 'DMN getOrCreateOrder() Exception');
+			
+			$jsonOutput->setData('DMN getOrCreateOrder() Exception');
+			return $jsonOutput;
+		}
 	}
 }

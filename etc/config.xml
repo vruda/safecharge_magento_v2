@@ -15,7 +15,7 @@
             <safecharge>
                 <!-- Basic Configuration. -->
                 <active>1</active>
-                <title>Safecharge</title>
+                <title>Nuvei</title>
                 <mode></mode>
                 <hash></hash>
 				<payment_action></payment_action>

@@ -6,10 +6,12 @@ require(["jquery"], function($){
 			if(_self.is(':checked')) {
 				$('input[name="product[price]"')
 					.val('0.00')
-					.prop('disabled', true);
+					.prop('readonly', true);
+			
+				$('input[name="product[price]"').trigger('change');
 			}
 			else {
-				$('input[name="product[price]"').prop('disabled', false);
+				$('input[name="product[price]"').prop('readonly', false);
 			}
 		}
 	});

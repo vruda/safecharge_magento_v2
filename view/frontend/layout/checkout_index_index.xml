@@ -11,7 +11,7 @@
       xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <head>
         <script src="https://cdn.safecharge.com/safecharge_resources/v1/websdk/safecharge.js" src_type="url" />
-		<script src="https://cdn.safecharge.com/safecharge_resources/v1/sc_api_applepay.min.js" src_type="url" />
+		<!--<script src="https://cdn.safecharge.com/safecharge_resources/v1/sc_api_applepay.min.js" src_type="url" />-->
     </head>
     
     <body>

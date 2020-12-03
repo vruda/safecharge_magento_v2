@@ -217,42 +217,28 @@ class OpenOrder extends AbstractRequest implements RequestInterface
 			// mandatory data
 			$subs_data[$product->getId()] = array(
 				'planId' => $item->getProduct()->getData(\Safecharge\Safecharge\Model\Config::PAYMENT_PLANS_ATTR_NAME),
+				
 				'initialAmount' => number_format($item->getProduct()
 					->getData(\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_INTIT_AMOUNT), 2, '.', ''),
+				
 				'recurringAmount' => number_format($item->getProduct()
 					->getData(\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_REC_AMOUNT), 2, '.', ''),
 			);
 			
+			$this->config->createLog($subs_data, '$subs_data');
+			
 			# optional data
-			if(!empty($tmp = $item->getProduct()->getData(\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_AFTER_DAY))) {
-				$subs_data[$product->getId()]['startAfter']['day'] = $tmp;
-			}
-			if(!empty($tmp = $item->getProduct()->getData(\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_AFTER_MONTH))) {
-				$subs_data[$product->getId()]['startAfter']['month'] = $tmp;
-			}
-			if(!empty($tmp = $item->getProduct()->getData(\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_AFTER_YEAR))) {
-				$subs_data[$product->getId()]['startAfter']['year'] = $tmp;
-			}
+			$recurr_unit = $item->getProduct()->getData(\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_RECURR_UNITS);
+			$recurr_period = $item->getProduct()->getData(\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_RECURR_PERIOD);
+			$subs_data[$product->getId()]['recurringPeriod'][strtolower($recurr_unit)] = $recurr_period;
 			
-			if(!empty($tmp = $item->getProduct()->getData(\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_REC_DAY))) {
-				$subs_data[$product->getId()]['recurringPeriod']['day'] = $tmp;
-			}
-			if(!empty($tmp = $item->getProduct()->getData(\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_REC_MONTH))) {
-				$subs_data[$product->getId()]['recurringPeriod']['month'] = $tmp;
-			}
-			if(!empty($tmp = $item->getProduct()->getData(\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_REC_YEAR))) {
-				$subs_data[$product->getId()]['recurringPeriod']['year'] = $tmp;
-			}
+			$trial_unit = $item->getProduct()->getData(\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_TRIAL_UNITS);
+			$trial_period = $item->getProduct()->getData(\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_TRIAL_PERIOD);
+			$subs_data[$product->getId()]['startAfter'][strtolower($trial_unit)] = $trial_period;
 			
-			if(!empty($tmp = $item->getProduct()->getData(\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_END_DAY))) {
-				$subs_data[$product->getId()]['endAfter']['day'] = $tmp;
-			}
-			if(!empty($tmp = $item->getProduct()->getData(\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_END_MONTHS))) {
-				$subs_data[$product->getId()]['endAfter']['month'] = $tmp;
-			}
-			if(!empty($tmp = $item->getProduct()->getData(\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_END_YEARS))) {
-				$subs_data[$product->getId()]['endAfter']['year'] = $tmp;
-			}
+			$end_after_unit = $item->getProduct()->getData(\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_END_AFTER_UNITS);
+			$end_after_period = $item->getProduct()->getData(\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_END_AFTER_PERIOD);
+			$subs_data[$product->getId()]['endAfter'][strtolower($end_after_unit)] = $end_after_period;
 			# optional data END
 		}	
 		

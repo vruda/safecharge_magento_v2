@@ -71,6 +71,8 @@ class Payment extends Cc implements TransparentInterface
     const SC_VOIDED             = 'sc_voided';
     const SC_REFUNDED           = 'sc_refunded';
     const SC_PROCESSING         = 'sc_processing';
+    const SC_SUBSCRT_STARTED    = 'sc_subscr_started';
+    const SC_SUBSCRT_ENDED		= 'sc_subscr_ended';
 
     const SOLUTION_INTERNAL        = 'internal';
     const SOLUTION_EXTERNAL        = 'external';
