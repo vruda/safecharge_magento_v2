@@ -113,22 +113,14 @@ class Refund extends AbstractPayment implements RequestInterface
             $order->getId()
         );
 
-        $authCode            = null;
-        $transactionDetails    = $transaction->getAdditionalInformation(OrderTransaction::RAW_DETAILS);
-        
-        if ($transactionDetails) {
-            if (!empty($transactionDetails['authCode'])) {
-                $authCode = $transactionDetails['authCode'];
-            } elseif (!empty($transactionDetails['AuthCode'])) {
-                $authCode = $transactionDetails['AuthCode'];
-            } else {
-                $authCode = $orderPayment->getAdditionalInformation(Payment::TRANSACTION_AUTH_CODE_KEY);
-            }
-        }
-        
-        $payment_method = $orderPayment->getAdditionalInformation(Payment::TRANSACTION_EXTERNAL_PAYMENT_METHOD);
+//        $authCode		= $orderPayment->getAdditionalInformation(Payment::TRANSACTION_AUTH_CODE_KEY);
+        $sale_settle_params	= $orderPayment->getAdditionalInformation(Payment::SALE_SETTLE_PARAMS);
+        $payment_method		= $orderPayment->getAdditionalInformation(Payment::TRANSACTION_EXTERNAL_PAYMENT_METHOD);
 
-        if ($authCode === null && Payment::APM_METHOD_CC == $payment_method) {
+		$this->config->createLog($sale_settle_params, '$sale_settle_params');
+		
+//        if (empty($authCode) && Payment::APM_METHOD_CC == $payment_method) {
+        if (empty($sale_settle_params['AuthCode']) && Payment::APM_METHOD_CC == $payment_method) {
             $msg = __('Transaction does not contain authorization code.');
             $this->config->createLog($msg);
             throw new PaymentException($msg);
@@ -139,7 +131,8 @@ class Refund extends AbstractPayment implements RequestInterface
             'currency'              => $order->getBaseCurrencyCode(),
             'amount'                => (float)$this->amount,
             'relatedTransactionId'    => $transactionId,
-            'authCode'              => is_null($authCode) ? '' : $authCode,
+//            'authCode'              => is_null($authCode) ? '' : $authCode,
+            'authCode'              => empty($sale_settle_params['AuthCode']) ? '' : $sale_settle_params['AuthCode'],
             'comment'               => '',
             'merchant_unique_id'    => $order->getIncrementId(),
             'urlDetails'            => [

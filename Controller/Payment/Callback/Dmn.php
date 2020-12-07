@@ -355,6 +355,24 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
                     $invCollection            = $order->getInvoiceCollection();
                     $inv_amount                = round(floatval($order->getBaseGrandTotal()), 2);
                         
+					$orderPayment->setAdditionalInformation(
+                        Payment::SALE_SETTLE_PARAMS,
+                        [
+                            'TransactionID'    => $params['TransactionID'],
+                            'AuthCode'        => $params['AuthCode'],
+                            'totalAmount'        => $params['totalAmount'],
+                        ]
+                    );
+					
+					$this->moduleConfig->createLog(
+						[
+                            'TransactionID'    => $params['TransactionID'],
+                            'AuthCode'        => $params['AuthCode'],
+                            'totalAmount'        => $params['totalAmount'],
+                        ],
+						Payment::SALE_SETTLE_PARAMS
+					);
+					
                     if ('settle' == $tr_type_param
                         && ($inv_amount - round(floatval($params['totalAmount']), 2) > 0.00)
                     ) {

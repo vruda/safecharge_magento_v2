@@ -2,6 +2,13 @@
 
 ---
 
+#2.1.1.x
+```
+	* Fix for the Sale flow and Refund, the message - "Transaction does not contain authorization code.". The fix was got from Dev version.
+	* Refactored checkout JS file. Using new observers for Order Amount and Billing address.
+	* Small changes into createLog method.
+```
+
 ## 2.1.0.x
 ```
 	* Use 3-fields webSDK instead one-field version, because of mobile optimization;

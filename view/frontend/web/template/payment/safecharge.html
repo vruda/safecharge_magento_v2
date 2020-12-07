@@ -94,7 +94,7 @@
 	}
 	
 	#sc_date_cvv_holder .sc_fields:last-child {
-		float: right;
+		float: left;
 	}
 	
 	#sc_apms label {
@@ -314,11 +314,12 @@
 
 						<div class="" tabindex="1" id="sc_date_cvv_holder">
 							<div class="field number sc_fields" tabindex="1">
-								<div id="sc_card_expiry"></div>
+								<!--<div id="sc_card_cvc" data-bind="afterRender: $parent.attachFields()"></div>-->
+								<div id="sc_card_cvc"></div>
 							</div>
-
+							
 							<div class="field number sc_fields" tabindex="1">
-								<div id="sc_card_cvc" data-bind="afterRender: $parent.attachFields()"></div>
+								<div id="sc_card_expiry"></div>
 							</div>
 						</div>
 						

@@ -135,34 +135,42 @@ class Config
         if (! $this->isDebugEnabled()) {
             return;
         }
+		
+		$d = $data;
         
-        $string = date('Y-m-d H:i:s') . "\r\n";
+		if (is_array($data)) {
+			// do not log accounts if on prod
+			if (! $this->isTestModeEnabled()) {
+				if (isset($data['userAccountDetails']) && is_array($data['userAccountDetails'])) {
+					$data['userAccountDetails'] = 'account details';
+				}
+				if (isset($data['userPaymentOption']) && is_array($data['userPaymentOption'])) {
+					$data['userPaymentOption'] = 'user payment options details';
+				}
+				if (isset($data['paymentOption']) && is_array($data['paymentOption'])) {
+					$data['paymentOption'] = 'payment options details';
+				}
+			}
+			// do not log accounts if on prod
+			
+			if (!empty($data['paymentMethods']) && is_array($data['paymentMethods'])) {
+				$data['paymentMethods'] = json_encode($data['paymentMethods']);
+			}
+			
+			$d = $this->isTestModeEnabled() ? print_r($data, true) : json_encode($data);
+		} elseif (is_object($data)) {
+			$d = $this->isTestModeEnabled() ? print_r($data, true) : json_encode($data);
+		} elseif (is_bool($data)) {
+			$d = $data ? 'true' : 'false';
+		}
+		
+		$string = date('Y-m-d H:i:s') . ' [v.' . $this->moduleList->getOne(self::MODULE_NAME)['setup_version'] . '] | ';
         
         if (!empty($title)) {
-            $string .= $title . "\r\n";
+            $string .= $title;
         }
-        
-        if (!empty($data)) {
-            if (is_array($data) or is_object($data)) {
-                if (is_array($data) && !empty($data['paymentMethods'])) {
-                    $data['paymentMethods'] = json_encode($data['paymentMethods']);
-                }
-                
-                if (is_array($data) && !empty($data['userAccountDetails'])) {
-                    $data['userAccountDetails'] = [];
-                }
-                
-                $string .= print_r($data, true);
-            } elseif (is_bool($data)) {
-                $string .= $data ? 'true' : 'false';
-            } else {
-                $string .= $data;
-            }
-        } else {
-            $string .= 'Data is Empty.';
-        }
-        
-        $string .= "\r\n" . "\r\n";
+		
+        $string .= "\r\n" . $d . "\r\n\r\n";
         
         try {
             $logsPath = $this->directory->getPath('log');

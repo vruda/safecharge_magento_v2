@@ -12,12 +12,10 @@ define(
     function (Component, rendererList) {
         'use strict';
         
-        rendererList.push(
-            {
-                type: 'safecharge',
-                component: 'Safecharge_Safecharge/js/view/payment/method-renderer/safecharge'
-            }
-        );
+        rendererList.push({
+			type: 'safecharge',
+			component: 'Safecharge_Safecharge/js/view/payment/method-renderer/safecharge'
+		});
 
         return Component.extend({});
     }

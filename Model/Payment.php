@@ -57,9 +57,10 @@ class Payment extends Cc implements TransparentInterface
     const TRANSACTION_PAYMENT_SOLUTION          = 'payment_solution';
     const TRANSACTION_EXTERNAL_PAYMENT_METHOD   = 'external_payment_method';
     const TRANSACTION_STATUS                    = 'sc_status';
-    const TRANSACTION_TYPE                        = 'sc_transaction_type';
-    const REFUND_TRANSACTION_AMOUNT                = 'sc_refund_amount';
-    const AUTH_PARAMS                            = 'sc_auth_params';
+    const TRANSACTION_TYPE                      = 'sc_transaction_type';
+    const REFUND_TRANSACTION_AMOUNT             = 'sc_refund_amount';
+    const AUTH_PARAMS                           = 'sc_auth_params';
+    const SALE_SETTLE_PARAMS                    = 'sc_sale_settle_params';
 
     /**
      * Order statuses.
