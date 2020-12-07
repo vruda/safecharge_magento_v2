@@ -4,6 +4,9 @@
 
 ## 2.2.0.x
 ```
+	* Fix for the second partial Refund.
+	* Added plugin version into the logs. Do not log credentials on Prod. Expand arrays on Sandbox for better view.
+	* Changes in checkout JS, for better work of webSDK.
 	* Added Plugin Product, to modify visible price of the products with Rebilling Plan.
 	* Clean the "\" symbol from client details.
 	* Try to force set the Payment provider (method) when it is selected.

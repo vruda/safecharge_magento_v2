@@ -440,6 +440,24 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
                     $invCollection          = $order->getInvoiceCollection();
                     $inv_amount             = round(floatval($order->getBaseGrandTotal()), 2);
 					
+					$orderPayment->setAdditionalInformation(
+                        Payment::SALE_SETTLE_PARAMS,
+                        [
+                            'TransactionID'    => $params['TransactionID'],
+                            'AuthCode'        => $params['AuthCode'],
+                            'totalAmount'        => $params['totalAmount'],
+                        ]
+                    );
+					
+					$this->moduleConfig->createLog(
+						[
+                            'TransactionID'    => $params['TransactionID'],
+                            'AuthCode'        => $params['AuthCode'],
+                            'totalAmount'        => $params['totalAmount'],
+                        ],
+						Payment::SALE_SETTLE_PARAMS
+					);
+					
 					if($params['totalAmount'] > 0) {
 						$start_subscr = true;
 					}
@@ -591,6 +609,10 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
                     . "(Code: {$params['ErrCode']}, Reason: {$params['ExErrCode']}).")
                 );
             }
+			else {
+				$this->moduleConfig->createLog('DMN for Order #' . $orderIncrementId . ' was not recognized.');
+				$jsonOutput->setData('DMN for Order #' . $orderIncrementId . ' was not recognized.');
+			}
             
             $orderPayment->save();
 			$this->orderResourceModel->save($order);

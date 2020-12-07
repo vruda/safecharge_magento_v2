@@ -165,38 +165,60 @@ class Config
         if (! $this->isDebugEnabled()) {
             return;
         }
-        
-        $string = date('Y-m-d H:i:s') . "\r\n";
-        
-        if (!empty($title)) {
-            $string .= $title . "\r\n";
-        }
-        
+		
+		$d		= $data;
+		$string	= '';
+		
         if (!empty($data)) {
-            if (is_array($data) or is_object($data)) {
-                if (is_array($data) && !empty($data['paymentMethods'])) {
-                    $data['paymentMethods'] = json_encode($data['paymentMethods']);
-                }
+            if (is_array($data)) {
+				// do not log accounts if on prod
+				if (!$this->isTestModeEnabled()) {
+					if (isset($data['userAccountDetails']) && is_array($data['userAccountDetails'])) {
+						$data['userAccountDetails'] = 'account details';
+					}
+					if (isset($data['userPaymentOption']) && is_array($data['userPaymentOption'])) {
+						$data['userPaymentOption'] = 'user payment options details';
+					}
+					if (isset($data['paymentOption']) && is_array($data['paymentOption'])) {
+						$data['paymentOption'] = 'payment options details';
+					}
+				}
+				// do not log accounts if on prod
 				
-                if (is_array($data) && !empty($data['plans'])) {
-                    $data['paymentMethods'] = json_encode($data['plans']);
+				if (!empty($data['paymentMethods']) && is_array($data['paymentMethods'])) {
+					$data['paymentMethods'] = json_encode($data['paymentMethods']);
+				}
+				
+				if (!empty($data['plans']) && is_array($data['plans'])) {
+                    $data['plans'] = json_encode($data['plans']);
                 }
-                
-                if (is_array($data) && !empty($data['userAccountDetails'])) {
-                    $data['userAccountDetails'] = 'data array';
-                }
-                
-                $string .= print_r($data, true);
-            } elseif (is_bool($data)) {
-                $string .= $data ? 'true' : 'false';
-            } else {
-                $string .= $data;
+
+				$d = $this->isTestModeEnabled() ? print_r($data, true) : json_encode($data);
+            } 
+			elseif(is_object($data)) {
+				$d = $this->isTestModeEnabled() ? print_r($data, true) : json_encode($data);
+			}
+			elseif (is_bool($data)) {
+                $d = $data ? 'true' : 'false';
             }
         } else {
             $string .= 'Data is Empty.';
         }
-        
-        $string .= "\r\n" . "\r\n";
+		
+		$string .= '[v.' . $this->moduleList->getOne(self::MODULE_NAME)['setup_version'] . '] | ';
+		
+		if (!empty($title)) {
+			if (is_string($title)) {
+				$string .= $title;
+			} else {
+				$string .= "\r\n" . ( $this->isTestModeEnabled()
+					? json_encode($title, JSON_PRETTY_PRINT) : json_encode($title) );
+			}
+			
+			$string .= "\r\n";
+		}
+
+		$string .= $d . "\r\n\r\n";
         
         try {
             $logsPath = $this->directory->getPath('log');
@@ -204,7 +226,7 @@ class Config
             if (is_dir($logsPath)) {
                 file_put_contents(
                     $logsPath . DIRECTORY_SEPARATOR . 'Nuvei-' . date('Y-m-d') . '.txt',
-                    $string,
+                    date('H:i:s', time()) . ': ' . $string,
                     FILE_APPEND
                 );
             }

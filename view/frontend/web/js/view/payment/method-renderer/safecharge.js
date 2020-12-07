@@ -36,7 +36,7 @@ define(
 		var sfcFirstField		= null;
 		var scFields			= null;
 		var scData				= {};
-		var isCardAttached		= false;
+//		var isCardAttached		= false;
 		
 		var isCCNumEmpty		= true;
 		var isCCNumComplete		= false;
@@ -47,7 +47,7 @@ define(
 		var isCCDateEmpty		= true;
 		var isCCDateComplete	= false;
 		
-		var scGetAPMsAgain		= false;
+//		var scGetAPMsAgain		= false;
 		var scOOTotal			= 0;
 
 		var fieldsStyle	= {
@@ -78,51 +78,76 @@ define(
 			invalid	: 'invalid'
 		};
 		
-		var discountSent	= false;
-		var discountElemId	= 'discount-code';
-		
-		$('body').on('change', '#safecharge_cc_owner', function(){
-			$('#safecharge_cc_owner').css('box-shadow', 'inherit');
-			$('#cc_name_error_msg').hide();
-		});
+//		var discountSent	= false;
+//		var discountElemId	= 'discount-code';
 		
 		var checkoutConfig = window.checkoutConfig,
 			agreementsConfig = checkoutConfig ? checkoutConfig.checkoutAgreements : {},
 			agreementsInputPath = '.payment-method._active div.checkout-agreements input';
 		
+		$(function() {
+			console.log('document ready')
+			
+			$('body').on('change', '#safecharge_cc_owner', function(){
+				$('#safecharge_cc_owner').css('box-shadow', 'inherit');
+				$('#cc_name_error_msg').hide();
+			});
+			
+			$('body').on('change', 'input[name="safecharge_apm_payment_method"]', function() {
+				self.scCleanCard();
+				
+				if($(this).val() == 'cc_card') {
+					self.initFields();
+				}
+			});
+		});
+		
         return Component.extend({
             defaults: {
-                template: 'Safecharge_Safecharge/payment/safecharge',
-//                isCcFormShown			: true,
-//                creditCardToken			: '',
-//                ccNumber				: '',
-//                creditCardOwner			: '',
+                template				: 'Safecharge_Safecharge/payment/safecharge',
+                isCcFormShown			: true,
+                creditCardToken			: '',
+                ccNumber				: '',
+                creditCardOwner			: '',
                 apmMethods				: [],
-                UPOs					: [],
                 chosenApmMethod			: '',
-                countryId				: null
+                countryId				: ''
             },
 			
-			totals: quote.getTotals(),
+			scOrderTotal: quote.totals().base_grand_total.toFixed(2),
+			
+			scBillingCountry: quote.billingAddress().countryId,
+			
+			scPaymentMethod: '',
 			
             initObservable: function() {
+				console.log('initObservable()')
+				
                 self = this;
 				
                 self._super()
                     .observe([
-//                        'creditCardToken',
-//                        'ccNumber',
-//                        'isCcFormShown',
-//                        'creditCardOwner',
+                        'creditCardToken',
+                        'ccNumber',
+                        'isCcFormShown',
+                        'creditCardOwner',
                         'apmMethods',
-                        'UPOs',
                         'chosenApmMethod',
                         'countryId'
                     ]);
                     
-                self.getApmMethods();
-                self.getUPOs();
-                quote.billingAddress.subscribe(self.getApmMethods, this, 'change');
+//                self.getApmMethods();
+//                quote.billingAddress.subscribe(self.getApmMethods, this, 'change');
+
+				if(quote.paymentMethod._latestValue != null) {
+					self.scPaymentMethod = quote.paymentMethod._latestValue.method;
+				}
+
+                quote.billingAddress.subscribe(self.scBillingAddrChange, this, 'change');
+                quote.totals.subscribe(self.scTotalsChange, this, 'change');
+                quote.paymentMethod.subscribe(self.scPaymentMethodChange, this, 'change');
+				
+				self.getApmMethods();
 				
                 return self;
             },
@@ -147,9 +172,9 @@ define(
 				var pmData = {
 					method			: self.item.method,
                     additional_data	: {
-//                        cc_token			: self.creditCardToken(),
-//                        cc_number			: self.ccNumber(),
-//                        cc_owner			: self.creditCardOwner(),
+                        cc_token			: self.creditCardToken(),
+                        cc_number			: self.ccNumber(),
+                        cc_owner			: self.creditCardOwner(),
                         chosen_apm_method	: self.chosenApmMethod(),
                     },
 				};
@@ -165,69 +190,25 @@ define(
                 return window.checkoutConfig.payment[self.getCode()].paymentApmUrl;
             },
 
-            getUPOsUrl: function() {
-                return window.checkoutConfig.payment[self.getCode()].getUPOsUrl;
-            },
-			
-            getUpdateQuotePM: function() {
-                return window.checkoutConfig.payment[self.getCode()].updateQuotePM;
-            },
-			
             getMerchantPaymentMethodsUrl: function() {
                 return window.checkoutConfig.payment[self.getCode()].getMerchantPaymentMethodsUrl;
             },
 			
-			getUPOs: function() {
-				console.log('getUPOs()');
+            getApmMethods: function() {
+				console.log('getApmMethods()');
 				
-				if(
-					self.apmMethods.length == 0
-					|| window.checkoutConfig.payment[self.getCode()].useUPOs == 0
-				) {
+				if('safecharge' != self.scPaymentMethod) {
+					console.log('getApmMethods() - slected payment method is not Safecharge');
 					return;
 				}
 				
-				$.ajax({
-                    dataType	: "json",
-                    url			: self.getUPOsUrl(),
-					cache		: false,
-                    showLoader	: true,
-                    data		: { apms: JSON.stringify(self.apmMethods) }
-                })
-					.done(function(resp) {
-						console.log(resp);
-					})
-					.fail(function(e) {
-						console.error(e.responseText);
-					});
-			},
-			
-            getApmMethods: function() {
-				var billingAddress = {};
-				
-				if (
-					true === scGetAPMsAgain
-					|| (
-						null !== quote.billingAddress()
-						&& null !== self.countryId()
-						&& self.countryId() !== quote.billingAddress().countryId
-					)
-				) {
-					self.countryId(quote.billingAddress().countryId);
-					cardNumber = cardExpiry = cardCvc = null;
-					$('#sc_card_number, #sc_card_expiry, #sc_card_cvc').html('');
-					
-					billingAddress = {
-						firstName: quote.billingAddress().firstname,
-						lastName: quote.billingAddress().lastname,
-						address: quote.billingAddress().street[0],
-						phone: quote.billingAddress().telephone,
-						zip: quote.billingAddress().postcode,
-						city: quote.billingAddress().city
-					};
-				}
-				else {
-					if (null !== quote.billingAddress() && self.countryId() === quote.billingAddress().countryId) {
+				/*
+				if(!scGetAPMsAgain) {
+					if (quote.billingAddress() && self.countryId() === quote.billingAddress().countryId) {
+						if(typeof scData.merchantSiteId == 'undefined') {
+							self.initFields();
+						}
+						
 						return;
 					}
 					else if (quote.billingAddress()) {
@@ -235,6 +216,10 @@ define(
 					}
 					else if ($('input[name="billing-address-same-as-shipping"]:checked').length && quote.shippingAddress()) {
 						if (self.countryId() === quote.shippingAddress().countryId) {
+							if(typeof scData.merchantSiteId == 'undefined') {
+								self.initFields();
+							}
+							
 							return;
 						}
 						else {
@@ -242,21 +227,31 @@ define(
 						}
 					}
 					else {
+						if(typeof scData.merchantSiteId == 'undefined') {
+							self.initFields();
+						}
+						
 						return;
 					}
 				}
-				
-                $.ajax({
-                    dataType	: "json",
-                    url			: self.getMerchantPaymentMethodsUrl(),
-					cache		: false,
-                    showLoader	: true,
-                    data		: {
-                        countryCode: self.countryId()
-						,billingAddress: billingAddress
-                    }
+				else { // clean card and container
+					self.scCleanCard();
+				}
+                */
+                
+				$.ajax({
+                    dataType: "json",
+                    url: self.getMerchantPaymentMethodsUrl(),
+                    data: {
+                        countryCode	: self.scBillingCountry,
+						grandTotal	: self.scOrderTotal
+                    },
+                    cache: false,
+                    showLoader: true
                 })
                 .done(function(res) {
+					console.log(res);
+					
                     if (res && res.error == 0) {
                         self.apmMethods(res.apmMethods);
                         
@@ -281,7 +276,11 @@ define(
                         console.error(res);
 						self.isPlaceOrderActionAllowed(false);
                     }
-					
+
+//					if(typeof scData.merchantSiteId == 'undefined') {
+//						self.initFields();
+//					}
+
 					$('.loading-mask').css('display', 'none');
                 })
                 .fail(function(e) {
@@ -289,10 +288,12 @@ define(
 					self.isPlaceOrderActionAllowed(false);
                 });
 				
-				scGetAPMsAgain = false;
+//				scGetAPMsAgain = false;
             },
 
             placeOrder: function(data, event) {
+				console.log('placeOrder()');
+				
                 if (event) {
                     event.preventDefault();
                 }
@@ -340,7 +341,7 @@ define(
 					var payParams = {
                         sessionToken		: scData.sessionToken,
                         currency			: window.checkoutConfig.payment[self.getCode()].currency,
-                        amount				: parseFloat(quote.totals().base_grand_total).toFixed(2),
+                        amount				: quote.totals().base_grand_total.toFixed(2),
                         cardHolderName		: document.getElementById('safecharge_cc_owner').value,
                         paymentOption		: sfcFirstField,
 						webMasterId			: window.checkoutConfig.payment[self.getCode()].webMasterId,
@@ -352,15 +353,15 @@ define(
 						
                         if(typeof resp.result != 'undefined') {
                             if(resp.result == 'APPROVED' && resp.transactionId != 'undefined') {
-								console.log(resp)
-//                                self.ccNumber(resp.ccCardNumber);
-//                                self.creditCardToken(resp.dsTransID);
+                                self.ccNumber(resp.ccCardNumber);
+                                self.creditCardToken(resp.dsTransID);
                                 self.continueWithOrder(resp.transactionId);
                             }
                             else if(resp.result == 'DECLINED') {
 								if(!alert($.mage.__('Your Payment was DECLINED. Please try another payment method!'))) {
-									scGetAPMsAgain = true;
-									self.getApmMethods();
+									self.scCleanCard();
+									self.initFields();
+									$('.loading-mask').css('display', 'none');
 								}
                             }
                             else {
@@ -376,14 +377,16 @@ define(
 								console.error(resp);
 								
 								if(!alert($.mage.__(respError))) {
-									scGetAPMsAgain = true;
+									self.scCleanCard();
+//									scGetAPMsAgain = true;
 									self.getApmMethods();
 								}
                             }
                         }
                         else {
 							if(!alert($.mage.__('Unexpected error, please try again later!'))) {
-								scGetAPMsAgain = true;
+//								scGetAPMsAgain = true;
+								self.scCleanCard();
 								self.getApmMethods();
 							}
                         }
@@ -395,6 +398,8 @@ define(
             },
             
             continueWithOrder: function(transactionId) {
+				console.log('continueWithOrder()');
+				
                 if (self.validate()) {
                     self.isPlaceOrderActionAllowed(false);
 
@@ -486,13 +491,20 @@ define(
             },
             
             initFields: function() {
+				console.log('initFields()')
+				
+				if('safecharge' != self.scPaymentMethod) {
+					console.log('initFields() - slected payment method is not Safecharge');
+					return;
+				}
+				
                 // for the Fields
 				scData.merchantSiteId		= window.checkoutConfig.payment[self.getCode()].merchantSiteId;
 				scData.merchantId			= window.checkoutConfig.payment[self.getCode()].merchantId;
 				scData.sourceApplication	= window.checkoutConfig.payment[self.getCode()].sourceApplication;
 				
                 if(window.checkoutConfig.payment[self.getCode()].isTestMode == true) {
-                    scData.env = 'test';
+                    scData.env = 'int';
                 }
 				
                 sfc = SafeCharge(scData);
@@ -502,16 +514,29 @@ define(
                     locale: checkoutConfig.payment[self.getCode()].locale
                 });
 
+//				console.log(isCardAttached);
+
+//				if(
+//					!isCardAttached
+//					&& $('#sc_card_number').length > 0
+//					&& $('#sc_card_expiry').length > 0
+//					&& $('#sc_card_cvc').length > 0
+//				) {
+//					self.attachFields();
+//				}
+				
 				if(
-					!isCardAttached
-					&& $('#sc_card_number').length > 0
-					&& $('#sc_card_expiry').length > 0
-					&& $('#sc_card_cvc').length > 0
+					$('#sc_card_number').html() == ''
+					&& $('#sc_card_expiry').html() == ''
+					&& $('#sc_card_cvc').html() == ''
 				) {
 					self.attachFields();
 				}
 				
+				
+				
 				// detect adding a Coupon
+				/*
 				if($('#' + discountElemId).length > 0) {
 					new MutationObserver(function(mutationsList, observer) {
 						for(let mutation of mutationsList) {
@@ -519,13 +544,12 @@ define(
 								mutation.type === 'attributes'
 								&& 'disabled' == mutation.attributeName
 								&& true === discountSent
-								&& parseFloat(quote.totals().base_grand_total).toFixed(2) != scOOTotal
+								&& quote.totals().base_grand_total.toFixed(2) != scOOTotal
 							) {
 								console.log('the total was changed, create new OpenOrder');
 								scGetAPMsAgain = true;
 								self.getApmMethods();
 							}
-
 							discountSent = false;
 						}
 					})
@@ -534,48 +558,19 @@ define(
 							{ attributes: true }
 						);
 				}
-
 				$('body').on('click', '#discount-form button.action', function(){
 					discountSent = true;
 				});
+				*/
 				// detect adding a Coupon END
 				
-				// update Quote Payment Method
-				var paymentProvider = $('input[name="payment[method]"]:checked').val();
 				
-				var scAjaxQuoteUpdateParams = {
-					dataType	: "json",
-					url			: self.getUpdateQuotePM(),
-					cache		: false,
-					showLoader	: true,
-					data		: { paymentMethod: paymentProvider }
-				};
-				
-				if('safecharge' == paymentProvider) {
-					// update the quote
-					$.ajax(scAjaxQuoteUpdateParams)
-						.done(function(resp) {})
-						.fail(function(e) {
-							console.error(e.responseText);
-						});
-				}
-
-				$(function() {
-					$('body').on('change', 'input[name="payment[method]"]', function() {
-						scAjaxQuoteUpdateParams.data.paymentMethod = $('input[name="payment[method]"]:checked').val();
-						
-						// update the quote
-						$.ajax(scAjaxQuoteUpdateParams)
-							.done(function(resp) {})
-							.fail(function(e) {
-								console.error(e.responseText);
-							});
-					});
-				});
-				// update Quote Payment Method END
             },
 			
 			attachFields: function() {
+				console.log('attachFields()')
+				console.log('scFields', scFields)
+				
 				if(null === scFields) {
 					console.log('scFields is null');
 					return;
@@ -666,32 +661,108 @@ define(
 					});
 				}
 				
-				isCardAttached = true;
+//				isCardAttached = true;
 			},
 			
 			/**
 			  * Validate checkout agreements
 			 *
 			 * @returns {Boolean}
-			 */
+			*/
 			validate: function (hideError) {
-			   var isValid = true;
+				console.log('validate()');
+				
+				var isValid = true;
 
-			   if (!agreementsConfig.isEnabled || $(agreementsInputPath).length === 0) {
+				if (!agreementsConfig.isEnabled || $(agreementsInputPath).length === 0) {
 				   return true;
-			   }
+				}
 
-			   $(agreementsInputPath).each(function (index, element) {
+				$(agreementsInputPath).each(function (index, element) {
 				   if (!$.validator.validateSingleElement(element, {
 					   errorElement: 'div',
 					   hideError: hideError || false
 				   })) {
 					   isValid = false;
 				   }
-			   });
+				});
 
-			   return isValid;
-		   }
+				return isValid;
+		   },
+		   
+			scCleanCard: function () {
+				console.log('scCleanCard()');
+				
+				cardNumber = cardExpiry = cardCvc = sfcFirstField = null;
+//				isCardAttached = false;
+				
+				$('#sc_card_number, #sc_card_expiry, #sc_card_cvc').html('');
+			},
+			
+			scBillingAddrChange: function() {
+				console.log('scBillingAddrChange()', quote.billingAddress());
+				
+				if(quote.billingAddress() == null) {
+					console.log('scBillingAddrChange() - the BillingAddr is null. Stop here.');
+					return;
+				}
+				
+				if(quote.billingAddress().countryId == self.scBillingCountry) {
+					console.log('scBillingAddrChange() - the country is same. Stop here.');
+					return;
+				}
+				
+				console.log('scBillingAddrChange() - the country was changed to', quote.billingAddress().countryId);
+				self.scBillingCountry = quote.billingAddress().countryId;
+				
+				self.scCleanCard();
+				self.getApmMethods();
+			},
+			
+			scTotalsChange: function() {
+				console.log('scTotalsChange()');
+				
+				var currentTotal = quote.totals().base_grand_total.toFixed(2);
+				
+				if(currentTotal == self.scOrderTotal) {
+					console.log('scTotalsChange() - the total is same. Stop here.');
+					return;
+				}
+				
+				console.log('scTotalsChange() - the total was changed to', currentTotal);
+				self.scOrderTotal = currentTotal;
+				
+				self.scCleanCard();
+				self.getApmMethods();
+			},
+			
+			scPaymentMethodChange: function() {
+				console.log('scPaymentMethodChange()', quote.paymentMethod);
+				
+				if(
+					quote.paymentMethod._latestValue != null
+					&& self.scPaymentMethod != quote.paymentMethod._latestValue.method
+				) {
+					console.log('new paymentMethod is', quote.paymentMethod._latestValue.method)
+					
+					self.scPaymentMethod = quote.paymentMethod._latestValue.method;
+					
+					if('safecharge' == self.scPaymentMethod) {
+						console.log('sfc', sfc);
+						
+						if(null == sfc) {
+							self.getApmMethods();
+						}
+						
+						if(jQuery('input[name="safecharge_apm_payment_method"]:checked').val() == 'cc_card') {
+							self.initFields();
+						}
+					}
+					else {
+						self.scCleanCard();
+					}
+				}
+			}
         });
     }
 );
