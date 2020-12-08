@@ -294,6 +294,14 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
 			# Subscription transaction DMN END
 			
             // do not overwrite Order status
+			$this->moduleConfig->createLog(
+				array(
+					'Order status' => $order_status,
+					'Order transaction type' => $order_tr_type,
+				),
+				'Order info'
+			);
+			
             if ('auth' === $tr_type_param
                 && round(floatval($order->getBaseGrandTotal()), 2) != round(floatval($params['totalAmount']), 2)
             ) {
@@ -319,7 +327,9 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
                 return $jsonOutput;
             }
             
-            if (strtolower($order_tr_type == 'void')
+			// do not override status if the Order is Voided or Refunded
+            if (
+				in_array(strtolower($order_tr_type), ['void', 'refund', 'credit'])
                 && strtolower($order_status) == 'approved'
             ) {
                 $msg = 'No more actions are allowed for order #' . $order->getId();

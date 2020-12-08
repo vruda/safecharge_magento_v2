@@ -61,7 +61,7 @@ class UpgradeData implements UpgradeDataInterface
 //			\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_INTIT_AMOUNT
 //		);
 		
-		if (version_compare($context->getVersion(), '2.3.0', '<')) {
+		if (version_compare($context->getVersion(), '2.1.1', '<')) {
 			$eavSetup->removeAttribute(
 				\Magento\Catalog\Model\Product::ENTITY,
 				\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_ENABLE

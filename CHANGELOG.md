@@ -2,12 +2,13 @@
 
 ---
 
-## 2.2.0.x
+## 2.1.1.x
 ```
+	* Fix for overriding of Order with status Void or Refund.
+	* Removed Void button from Invoices.
 	* Fix for the second partial Refund.
 	* Added plugin version into the logs. Do not log credentials on Prod. Expand arrays on Sandbox for better view.
 	* Changes in checkout JS, for better work of webSDK.
-	* Added Plugin Product, to modify visible price of the products with Rebilling Plan.
 	* Clean the "\" symbol from client details.
 	* Try to force set the Payment provider (method) when it is selected.
 	* Replaced OrderFactory with OrderRepositoryInterface.
@@ -15,11 +16,8 @@
 	* Mark Invoice of Order of type Sale with canVoidFlag true.
 	* For Orders of type Sale force show Void button.
 	* In Payment model added metchod canVoid().
-	* Added possibility to append Safecharge Payment Plan to a product, when create new or edit existing one. Plugin get the payment plans from the pre-created plans of the merchant, by click on a button Get Payment Plans in plugin configuration.
-	* When user have a product with a Payment Plan, only CC is allowed.
 	* Added third option for mandatory dorp-downs in the plugin settings.
 	* Added Site Notify URL in the plugin settings.
-	* If Payment Plans were downloaded, show the date of the last download under the Collect Plans button.
 	* In the DMN class check if the Order Paymend was made with SafeCharge module.
 
 ## 2.1.0.x

@@ -400,6 +400,8 @@ define(
             continueWithOrder: function(transactionId) {
 				console.log('continueWithOrder()');
 				
+				debugger;
+				
                 if (self.validate()) {
                     self.isPlaceOrderActionAllowed(false);
 
@@ -514,17 +516,6 @@ define(
                     locale: checkoutConfig.payment[self.getCode()].locale
                 });
 
-//				console.log(isCardAttached);
-
-//				if(
-//					!isCardAttached
-//					&& $('#sc_card_number').length > 0
-//					&& $('#sc_card_expiry').length > 0
-//					&& $('#sc_card_cvc').length > 0
-//				) {
-//					self.attachFields();
-//				}
-				
 				if(
 					$('#sc_card_number').html() == ''
 					&& $('#sc_card_expiry').html() == ''
@@ -532,39 +523,6 @@ define(
 				) {
 					self.attachFields();
 				}
-				
-				
-				
-				// detect adding a Coupon
-				/*
-				if($('#' + discountElemId).length > 0) {
-					new MutationObserver(function(mutationsList, observer) {
-						for(let mutation of mutationsList) {
-							if (
-								mutation.type === 'attributes'
-								&& 'disabled' == mutation.attributeName
-								&& true === discountSent
-								&& quote.totals().base_grand_total.toFixed(2) != scOOTotal
-							) {
-								console.log('the total was changed, create new OpenOrder');
-								scGetAPMsAgain = true;
-								self.getApmMethods();
-							}
-							discountSent = false;
-						}
-					})
-						.observe(
-							document.getElementById(discountElemId),
-							{ attributes: true }
-						);
-				}
-				$('body').on('click', '#discount-form button.action', function(){
-					discountSent = true;
-				});
-				*/
-				// detect adding a Coupon END
-				
-				
             },
 			
 			attachFields: function() {
@@ -660,8 +618,6 @@ define(
 						}
 					});
 				}
-				
-//				isCardAttached = true;
 			},
 			
 			/**
@@ -694,8 +650,6 @@ define(
 				console.log('scCleanCard()');
 				
 				cardNumber = cardExpiry = cardCvc = sfcFirstField = null;
-//				isCardAttached = false;
-				
 				$('#sc_card_number, #sc_card_expiry, #sc_card_cvc').html('');
 			},
 			
