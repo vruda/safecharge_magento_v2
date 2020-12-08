@@ -71,6 +71,9 @@ class UpdateQuotePaymentMethod extends Action
     public function execute()
     {
 		$result = $this->jsonResultFactory->create()->setHttpResponseCode(\Magento\Framework\Webapi\Response::HTTP_OK);
+		
+		$this->moduleConfig->createLog($this->getRequest()->getParam('paymentMethod'), 'Class UpdateQuotePaymentMethod');
+		
 		$this->moduleConfig->setQuotePaymentMethod($this->getRequest()->getParam('paymentMethod'));
 		
 		return $result->setData([

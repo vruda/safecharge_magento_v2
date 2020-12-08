@@ -36,7 +36,6 @@ define(
 		var sfcFirstField		= null;
 		var scFields			= null;
 		var scData				= {};
-//		var isCardAttached		= false;
 		
 		var isCCNumEmpty		= true;
 		var isCCNumComplete		= false;
@@ -47,7 +46,6 @@ define(
 		var isCCDateEmpty		= true;
 		var isCCDateComplete	= false;
 		
-//		var scGetAPMsAgain		= false;
 		var scOOTotal			= 0;
 
 		var fieldsStyle	= {
@@ -78,9 +76,6 @@ define(
 			invalid	: 'invalid'
 		};
 		
-//		var discountSent	= false;
-//		var discountElemId	= 'discount-code';
-		
 		var checkoutConfig = window.checkoutConfig,
 			agreementsConfig = checkoutConfig ? checkoutConfig.checkoutAgreements : {},
 			agreementsInputPath = '.payment-method._active div.checkout-agreements input';
@@ -94,6 +89,8 @@ define(
 			});
 			
 			$('body').on('change', 'input[name="safecharge_apm_payment_method"]', function() {
+				console.log('change safecharge_apm_payment_method');
+				
 				self.scCleanCard();
 				
 				if($(this).val() == 'cc_card') {
@@ -105,11 +102,12 @@ define(
         return Component.extend({
             defaults: {
                 template				: 'Safecharge_Safecharge/payment/safecharge',
-                isCcFormShown			: true,
-                creditCardToken			: '',
-                ccNumber				: '',
-                creditCardOwner			: '',
+//                isCcFormShown			: true,
+//                creditCardToken			: '',
+//                ccNumber				: '',
+//                creditCardOwner			: '',
                 apmMethods				: [],
+				UPOs					: [],
                 chosenApmMethod			: '',
                 countryId				: ''
             },
@@ -127,11 +125,12 @@ define(
 				
                 self._super()
                     .observe([
-                        'creditCardToken',
-                        'ccNumber',
-                        'isCcFormShown',
-                        'creditCardOwner',
+//                        'creditCardToken',
+//                        'ccNumber',
+//                        'isCcFormShown',
+//                        'creditCardOwner',
                         'apmMethods',
+						'UPOs',
                         'chosenApmMethod',
                         'countryId'
                     ]);
@@ -141,6 +140,8 @@ define(
 
 				if(quote.paymentMethod._latestValue != null) {
 					self.scPaymentMethod = quote.paymentMethod._latestValue.method;
+					
+					self.scUpdateQuotePM();
 				}
 
                 quote.billingAddress.subscribe(self.scBillingAddrChange, this, 'change');
@@ -148,6 +149,7 @@ define(
                 quote.paymentMethod.subscribe(self.scPaymentMethodChange, this, 'change');
 				
 				self.getApmMethods();
+				self.getUPOs();
 				
                 return self;
             },
@@ -172,9 +174,9 @@ define(
 				var pmData = {
 					method			: self.item.method,
                     additional_data	: {
-                        cc_token			: self.creditCardToken(),
-                        cc_number			: self.ccNumber(),
-                        cc_owner			: self.creditCardOwner(),
+//                        cc_token			: self.creditCardToken(),
+//                        cc_number			: self.ccNumber(),
+//                        cc_owner			: self.creditCardOwner(),
                         chosen_apm_method	: self.chosenApmMethod(),
                     },
 				};
@@ -189,10 +191,48 @@ define(
             getPaymentApmUrl: function() {
                 return window.checkoutConfig.payment[self.getCode()].paymentApmUrl;
             },
+			
+			getUPOsUrl: function() {
+                return window.checkoutConfig.payment[self.getCode()].getUPOsUrl;
+            },
+			
+			getUpdateQuotePM: function() {
+                return window.checkoutConfig.payment[self.getCode()].updateQuotePM;
+            },
 
             getMerchantPaymentMethodsUrl: function() {
                 return window.checkoutConfig.payment[self.getCode()].getMerchantPaymentMethodsUrl;
             },
+			
+			getUPOs: function() {
+				console.log('getUPOs()');
+				
+				if('safecharge' != self.scPaymentMethod) {
+					console.log('getUPOs() - slected payment method is not Safecharge');
+					return;
+				}
+				
+				if(
+					self.apmMethods.length == 0
+					|| window.checkoutConfig.payment[self.getCode()].useUPOs == 0
+				) {
+					return;
+				}
+				
+				$.ajax({
+                    dataType	: "json",
+                    url			: self.getUPOsUrl(),
+					cache		: false,
+                    showLoader	: true,
+                    data		: { apms: JSON.stringify(self.apmMethods) }
+                })
+					.done(function(resp) {
+						console.log(resp);
+					})
+					.fail(function(e) {
+						console.error(e.responseText);
+					});
+			},
 			
             getApmMethods: function() {
 				console.log('getApmMethods()');
@@ -287,8 +327,6 @@ define(
                     console.error(e.responseText);
 					self.isPlaceOrderActionAllowed(false);
                 });
-				
-//				scGetAPMsAgain = false;
             },
 
             placeOrder: function(data, event) {
@@ -353,8 +391,8 @@ define(
 						
                         if(typeof resp.result != 'undefined') {
                             if(resp.result == 'APPROVED' && resp.transactionId != 'undefined') {
-                                self.ccNumber(resp.ccCardNumber);
-                                self.creditCardToken(resp.dsTransID);
+//                                self.ccNumber(resp.ccCardNumber);
+//                                self.creditCardToken(resp.dsTransID);
                                 self.continueWithOrder(resp.transactionId);
                             }
                             else if(resp.result == 'DECLINED') {
@@ -380,6 +418,7 @@ define(
 									self.scCleanCard();
 //									scGetAPMsAgain = true;
 									self.getApmMethods();
+									self.getUPOs();
 								}
                             }
                         }
@@ -388,6 +427,7 @@ define(
 //								scGetAPMsAgain = true;
 								self.scCleanCard();
 								self.getApmMethods();
+								self.getUPOs();
 							}
                         }
                     });
@@ -399,8 +439,6 @@ define(
             
             continueWithOrder: function(transactionId) {
 				console.log('continueWithOrder()');
-				
-				debugger;
 				
                 if (self.validate()) {
                     self.isPlaceOrderActionAllowed(false);
@@ -671,6 +709,7 @@ define(
 				
 				self.scCleanCard();
 				self.getApmMethods();
+				self.getUPOs();
 			},
 			
 			scTotalsChange: function() {
@@ -688,6 +727,7 @@ define(
 				
 				self.scCleanCard();
 				self.getApmMethods();
+				self.getUPOs();
 			},
 			
 			scPaymentMethodChange: function() {
@@ -697,7 +737,9 @@ define(
 					quote.paymentMethod._latestValue != null
 					&& self.scPaymentMethod != quote.paymentMethod._latestValue.method
 				) {
-					console.log('new paymentMethod is', quote.paymentMethod._latestValue.method)
+					console.log('new paymentMethod is', quote.paymentMethod._latestValue.method);
+					
+					self.scUpdateQuotePM();
 					
 					self.scPaymentMethod = quote.paymentMethod._latestValue.method;
 					
@@ -706,6 +748,7 @@ define(
 						
 						if(null == sfc) {
 							self.getApmMethods();
+							self.getUPOs();
 						}
 						
 						if(jQuery('input[name="safecharge_apm_payment_method"]:checked').val() == 'cc_card') {
@@ -715,6 +758,31 @@ define(
 					else {
 						self.scCleanCard();
 					}
+				}
+			},
+			
+			scUpdateQuotePM: function() {
+				console.log('scUpdateQuotePM()');
+				console.log('self.scPaymentMethod', self.scPaymentMethod);
+				console.log('quote.paymentMethod._latestValue.method', quote.paymentMethod._latestValue.method);
+				
+				var scAjaxQuoteUpdateParams = {
+					dataType	: "json",
+					url			: self.getUpdateQuotePM(),
+					cache		: false,
+					showLoader	: true,
+					data		: { paymentMethod: quote.paymentMethod._latestValue.method }
+				};
+
+				// update new payment method
+				if('' != self.scPaymentMethod || quote.paymentMethod._latestValue.method != self.scPaymentMethod) {
+					console.log('update quote payment method', quote.paymentMethod._latestValue.method);
+
+					$.ajax(scAjaxQuoteUpdateParams)
+						.done(function(resp) {})
+						.fail(function(e) {
+							console.error(e.responseText);
+						});
 				}
 			}
         });

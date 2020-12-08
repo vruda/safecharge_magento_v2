@@ -648,5 +648,6 @@ class Config
 	public function setQuotePaymentMethod($method)
 	{
 		$this->checkoutSession->getQuote()->getPayment()->setMethod($method);
+		$this->createLog($this->checkoutSession->getQuote()->getPayment()->getMethod(), 'quote payment method');
 	}
 }

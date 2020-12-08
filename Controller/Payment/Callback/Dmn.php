@@ -702,7 +702,12 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
      */
     private function placeOrder($params)
     {
-        $this->moduleConfig->createLog('PlaceOrder()');
+        $this->moduleConfig->createLog(
+			array(
+				'quote' => $params['quote'],
+			),
+			'PlaceOrder()'
+		);
         
         $result = $this->dataObjectFactory->create();
         
@@ -715,7 +720,13 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
         try {
             $quote = $this->quoteFactory->create()->loadByIdWithoutStore((int) $params['quote']);
 			
-			$this->moduleConfig->createLog($quote->getPayment()->getMethod(), '$quote->getPayment()->getMethod()');
+			$this->moduleConfig->createLog(
+				array(
+					'quote Method' => $quote->getPayment()->getMethod(),
+					'quote id' => $quote->getQuoteId(),
+				),
+				'$quote->getPayment()->getMethod()'
+			);
 
             if (intval($quote->getIsActive()) == 0) {
                 $this->moduleConfig->createLog($quote->getQuoteId(), 'Quote ID');
