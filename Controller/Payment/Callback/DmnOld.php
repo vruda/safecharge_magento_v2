@@ -433,6 +433,7 @@ class DmnOld extends \Magento\Framework\App\Action\Action
 					
 					/* TODO under construction */
 					// start Subscription plans if we need to
+					/*
 					$customField2 = json_decode($params['customField2'], true);
 					
 					if(
@@ -459,6 +460,7 @@ class DmnOld extends \Magento\Framework\App\Action\Action
 						$this->moduleConfig->createLog(!empty($params['userPaymentOptionId']), '!empty(userPaymentOptionId[customField2]');
 						$this->moduleConfig->createLog(is_numeric($params['userPaymentOptionId']), 'is_numeric(userPaymentOptionId[customField2]');
 					}
+					 */
 					// start Subscription plans if we need to END
                 }
 				elseif (in_array($tr_type_param, ['void', 'voidcredit'])) {

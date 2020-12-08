@@ -78,20 +78,20 @@
         </arguments>
     </type>
 	
-	<type name="Magento\Checkout\Model\Cart">
+<!--	<type name="Magento\Checkout\Model\Cart">
         <plugin name="prevent_add_to" 
 				type="Safecharge\Safecharge\Plugin\PreventAddToCart"/>
-    </type>
+    </type>-->
 	
-	<type name="Magento\Payment\Model\Checks\ZeroTotal">
+<!--	<type name="Magento\Payment\Model\Checks\ZeroTotal">
 		<plugin name="safecharge_zero_total" 
 				type="Safecharge\Safecharge\Plugin\ZeroTotal" />
-	</type>
+	</type>-->
 	
-	<type name="Magento\Catalog\Model\Product">
+<!--	<type name="Magento\Catalog\Model\Product">
 		<plugin name="change_product" 
 				type="Safecharge\Safecharge\Plugin\Product" />
-	</type>
+	</type>-->
 	
     <!-- Interface preferences. -->
     <preference for="Safecharge\Safecharge\Api\RequestLogRepositoryInterface"

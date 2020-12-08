@@ -159,6 +159,7 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
 			$this->validateChecksum($params, $orderIncrementId);
 			
 			# in case this is Subscription confirm DMN
+			/*
 			if(!empty($params['dmnType']) && 'subscription' == $params['dmnType']) {
 				$this->getOrCreateOrder($params, $orderIncrementId, $jsonOutput);
 				
@@ -206,6 +207,7 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
 
 				return $jsonOutput;
 			}
+			 */
 			# in case this is Subscription confirm DMN END
 			
 			if (empty($params['transactionType'])) {
@@ -237,9 +239,10 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
             $order_status   = $orderPayment->getAdditionalInformation(Payment::TRANSACTION_STATUS);
             $order_tr_type  = $orderPayment->getAdditionalInformation(Payment::TRANSACTION_TYPE);
             $tr_type_param	= strtolower($params['transactionType']);
-			$start_subscr	= false;
+//			$start_subscr	= false;
             
 			# Subscription transaction DMN
+			/*
 			if(
 				!empty($params['dmnType'])
 				&& 'subscriptionPayment' == $params['dmnType']
@@ -287,6 +290,7 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
 
 				return $jsonOutput;
 			}
+			 */
 			# Subscription transaction DMN END
 			
             // do not overwrite Order status
@@ -398,9 +402,9 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
                     $transactionType        = Transaction::TYPE_AUTH;
                     $sc_transaction_type	= Payment::SC_AUTH;
 					
-					if(0 == $params['totalAmount']) {
-						$start_subscr = true;
-					}
+//					if(0 == $params['totalAmount']) {
+//						$start_subscr = true;
+//					}
                     
 					// we use this params in Void process
 					$orderPayment->setAdditionalInformation(
@@ -458,9 +462,9 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
 						Payment::SALE_SETTLE_PARAMS
 					);
 					
-					if($params['totalAmount'] > 0) {
-						$start_subscr = true;
-					}
+//					if($params['totalAmount'] > 0) {
+//						$start_subscr = true;
+//					}
                         
                     if ('settle' == $tr_type_param
                         && ($inv_amount - round(floatval($params['totalAmount']), 2) > 0.00)
@@ -621,6 +625,7 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
 			$jsonOutput->setData('DMN process end for order #' . $orderIncrementId);
 			
 			// start Subscription plans if we need to
+			/*
 			if($start_subscr) {
 				$customField2	= json_decode($params['customField2'], true); // subscriptions data
 				$subs			= $orderPayment->getAdditionalInformation(Payment::TRANSACTION_SUBS); // array
@@ -668,6 +673,7 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
 					}
 				}
 			}
+			 */
 			// start Subscription plans if we need to END
 		}
 		catch (\Exception $e) {

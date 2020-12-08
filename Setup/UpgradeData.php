@@ -67,6 +67,7 @@ class UpgradeData implements UpgradeDataInterface
 				\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_ENABLE
 			);
 			
+			/*
 			// Enable subscription
 			$eavSetup->addAttribute(
                 \Magento\Catalog\Model\Product::ENTITY,
@@ -327,8 +328,10 @@ class UpgradeData implements UpgradeDataInterface
 					'sort_order' => 110,
                 ]
             );
+			 */
 			
 			// Add two new statuses for the Subscriptions
+			/*
 			$scSubscrStarted = $this->orderStatusFactory->create()
                 ->setData('status', 'sc_subscr_started')
                 ->setData('label', 'Nuvei Subscription Started')
@@ -340,6 +343,7 @@ class UpgradeData implements UpgradeDataInterface
                 ->setData('label', 'Nuvei Subscription Ended')
                 ->save();
             $scSubscrEnded->assignState(Order::STATE_PROCESSING, false, true);
+			 */
 			
 			// modify old order States
 			$scVoided = $this->orderStatusFactory->create()

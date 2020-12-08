@@ -205,6 +205,7 @@ class OpenOrder extends AbstractRequest implements RequestInterface
 		$subs_data	= [];
 		
 		// iterate over Items and search for Subscriptions
+		/*
 		foreach($items as $item) {
 			$product	= $item->getProduct();
 			$attributes	= $product->getAttributes();
@@ -240,7 +241,8 @@ class OpenOrder extends AbstractRequest implements RequestInterface
 			$end_after_period = $item->getProduct()->getData(\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_END_AFTER_PERIOD);
 			$subs_data[$product->getId()]['endAfter'][strtolower($end_after_unit)] = $end_after_period;
 			# optional data END
-		}	
+		}
+		 */	
 		
 		$this->config->setNuveiUseCcOnly(!empty($subs_data) ? true : false);
         
