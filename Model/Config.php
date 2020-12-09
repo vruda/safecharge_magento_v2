@@ -219,13 +219,20 @@ class Config
 		}
 
 		$string .= $d . "\r\n\r\n";
+		
+		if($this->isDebugEnabled(true) == 1) {
+			$log_file_name = 'Nuvei';
+		}
+		else {
+			$log_file_name = 'Nuvei-' . date('Y-m-d');
+		}
         
         try {
             $logsPath = $this->directory->getPath('log');
 
             if (is_dir($logsPath)) {
                 file_put_contents(
-                    $logsPath . DIRECTORY_SEPARATOR . 'Nuvei-' . date('Y-m-d') . '.txt',
+                    $logsPath . DIRECTORY_SEPARATOR . $log_file_name . '.txt',
                     date('H:i:s', time()) . ': ' . $string,
                     FILE_APPEND
                 );
@@ -458,13 +465,18 @@ class Config
     }
 
     /**
-     * Return bool value depends of that if payment method debug mode
+     * Return bool|int value depends of the selected option
      * is enabled or not.
      *
-     * @return bool
+	 * @param bool $return_value - by default is false, set true to get int value
+     * @return bool|int
      */
-    public function isDebugEnabled()
+    public function isDebugEnabled($return_value = false)
     {
+		if($return_value) {
+			return (int)$this->getConfigValue('debug');
+		}
+		
         return (bool)$this->getConfigValue('debug');
     }
 	

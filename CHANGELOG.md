@@ -2,6 +2,11 @@
 
 ---
 
+## next
+```
+	* Added an option into admin to save the Debug log file in single file, or split files by days.
+```
+
 ## 2.1.1.x
 ```
 	* Fix for overriding of Order with status Void or Refund.
