@@ -2,6 +2,11 @@
 
 ---
 
+### 2.1.2.x
+```
+	* Fix for the late load of quote in the checkout JS.
+```
+
 ## 2.1.1.x
 ```
 	* Fix for overriding of Order with status Void or Refund.
