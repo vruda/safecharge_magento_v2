@@ -102,19 +102,15 @@ define(
         return Component.extend({
             defaults: {
                 template				: 'Safecharge_Safecharge/payment/safecharge',
-//                isCcFormShown			: true,
-//                creditCardToken			: '',
-//                ccNumber				: '',
-//                creditCardOwner			: '',
-                apmMethods				: [],
-				UPOs					: [],
+		apmMethods				: [],
+		UPOs					: [],
                 chosenApmMethod			: '',
                 countryId				: ''
             },
 			
-			scOrderTotal: quote.totals().base_grand_total.toFixed(2),
+			scOrderTotal: 0,
 			
-			scBillingCountry: quote.billingAddress().countryId,
+			scBillingCountry: '',
 			
 			scPaymentMethod: '',
 			
@@ -125,24 +121,20 @@ define(
 				
                 self._super()
                     .observe([
-//                        'creditCardToken',
-//                        'ccNumber',
-//                        'isCcFormShown',
-//                        'creditCardOwner',
-                        'apmMethods',
-						'UPOs',
+			'apmMethods',
+			'UPOs',
                         'chosenApmMethod',
                         'countryId'
                     ]);
                     
-//                self.getApmMethods();
-//                quote.billingAddress.subscribe(self.getApmMethods, this, 'change');
+		if(quote.paymentMethod._latestValue != null) {
+			self.scPaymentMethod = quote.paymentMethod._latestValue.method;
 
-				if(quote.paymentMethod._latestValue != null) {
-					self.scPaymentMethod = quote.paymentMethod._latestValue.method;
-					
-					self.scUpdateQuotePM();
-				}
+			self.scUpdateQuotePM();
+		}
+		    
+	    	self.scOrderTotal = parseFloat(quote.totals().base_grand_total).toFixed(2);
+		self.scBillingCountry = quote.billingAddress().countryId;
 
                 quote.billingAddress.subscribe(self.scBillingAddrChange, this, 'change');
                 quote.totals.subscribe(self.scTotalsChange, this, 'change');
@@ -377,11 +369,11 @@ define(
 					
 					// we use variable just for debug
 					var payParams = {
-                        sessionToken		: scData.sessionToken,
-                        currency			: window.checkoutConfig.payment[self.getCode()].currency,
-                        amount				: quote.totals().base_grand_total.toFixed(2),
-                        cardHolderName		: document.getElementById('safecharge_cc_owner').value,
-                        paymentOption		: sfcFirstField,
+						sessionToken		: scData.sessionToken,
+						currency			: window.checkoutConfig.payment[self.getCode()].currency,
+						amount				: parseFloat(quote.totals().base_grand_total).toFixed(2),
+						cardHolderName		: document.getElementById('safecharge_cc_owner').value,
+						paymentOption		: sfcFirstField,
 						webMasterId			: window.checkoutConfig.payment[self.getCode()].webMasterId,
                     };
 					
@@ -715,7 +707,7 @@ define(
 			scTotalsChange: function() {
 				console.log('scTotalsChange()');
 				
-				var currentTotal = quote.totals().base_grand_total.toFixed(2);
+				var currentTotal = parseFloat(quote.totals().base_grand_total).toFixed(2);
 				
 				if(currentTotal == self.scOrderTotal) {
 					console.log('scTotalsChange() - the total is same. Stop here.');
