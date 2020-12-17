@@ -29,7 +29,7 @@
 
                 <!-- Advanced Configuration. -->
                 <save_order_before_success>0</save_order_before_success>
-                <debug>2</debug>
+                <debug>3</debug>
                 <min_order_total/>
                 <max_order_total/>
                 <sort_order/>

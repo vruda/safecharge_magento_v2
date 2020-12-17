@@ -102,19 +102,15 @@ define(
         return Component.extend({
             defaults: {
                 template				: 'Safecharge_Safecharge/payment/safecharge',
-//                isCcFormShown			: true,
-//                creditCardToken			: '',
-//                ccNumber				: '',
-//                creditCardOwner			: '',
                 apmMethods				: [],
 				UPOs					: [],
                 chosenApmMethod			: '',
                 countryId				: ''
             },
 			
-			scOrderTotal: quote.totals().base_grand_total.toFixed(2),
+			scOrderTotal: 0,
 			
-			scBillingCountry: quote.billingAddress().countryId,
+			scBillingCountry: '',
 			
 			scPaymentMethod: '',
 			
@@ -125,24 +121,20 @@ define(
 				
                 self._super()
                     .observe([
-//                        'creditCardToken',
-//                        'ccNumber',
-//                        'isCcFormShown',
-//                        'creditCardOwner',
                         'apmMethods',
 						'UPOs',
                         'chosenApmMethod',
                         'countryId'
                     ]);
                     
-//                self.getApmMethods();
-//                quote.billingAddress.subscribe(self.getApmMethods, this, 'change');
-
 				if(quote.paymentMethod._latestValue != null) {
 					self.scPaymentMethod = quote.paymentMethod._latestValue.method;
 					
 					self.scUpdateQuotePM();
 				}
+
+				self.scOrderTotal = parseFloat(quote.totals().base_grand_total).toFixed(2);
+				self.scBillingCountry = quote.billingAddress().countryId;
 
                 quote.billingAddress.subscribe(self.scBillingAddrChange, this, 'change');
                 quote.totals.subscribe(self.scTotalsChange, this, 'change');
@@ -242,43 +234,6 @@ define(
 					return;
 				}
 				
-				/*
-				if(!scGetAPMsAgain) {
-					if (quote.billingAddress() && self.countryId() === quote.billingAddress().countryId) {
-						if(typeof scData.merchantSiteId == 'undefined') {
-							self.initFields();
-						}
-						
-						return;
-					}
-					else if (quote.billingAddress()) {
-						self.countryId(quote.billingAddress().countryId);
-					}
-					else if ($('input[name="billing-address-same-as-shipping"]:checked').length && quote.shippingAddress()) {
-						if (self.countryId() === quote.shippingAddress().countryId) {
-							if(typeof scData.merchantSiteId == 'undefined') {
-								self.initFields();
-							}
-							
-							return;
-						}
-						else {
-							self.countryId(quote.shippingAddress().countryId);
-						}
-					}
-					else {
-						if(typeof scData.merchantSiteId == 'undefined') {
-							self.initFields();
-						}
-						
-						return;
-					}
-				}
-				else { // clean card and container
-					self.scCleanCard();
-				}
-                */
-                
 				$.ajax({
                     dataType: "json",
                     url: self.getMerchantPaymentMethodsUrl(),
@@ -379,7 +334,7 @@ define(
 					var payParams = {
                         sessionToken		: scData.sessionToken,
                         currency			: window.checkoutConfig.payment[self.getCode()].currency,
-                        amount				: quote.totals().base_grand_total.toFixed(2),
+                        amount				: parseFloat(quote.totals().base_grand_total).toFixed(2),
                         cardHolderName		: document.getElementById('safecharge_cc_owner').value,
                         paymentOption		: sfcFirstField,
 						webMasterId			: window.checkoutConfig.payment[self.getCode()].webMasterId,
@@ -388,11 +343,9 @@ define(
                     // create payment with WebSDK
                     sfc.createPayment(payParams, function(resp){
 						console.log('create payment');
-						
-                        if(typeof resp.result != 'undefined') {
+						//debugger;
+                        if(typeof resp != 'undefined' && resp.hasOwnProperty('result')) {
                             if(resp.result == 'APPROVED' && resp.transactionId != 'undefined') {
-//                                self.ccNumber(resp.ccCardNumber);
-//                                self.creditCardToken(resp.dsTransID);
                                 self.continueWithOrder(resp.transactionId);
                             }
                             else if(resp.result == 'DECLINED') {
@@ -416,7 +369,6 @@ define(
 								
 								if(!alert($.mage.__(respError))) {
 									self.scCleanCard();
-//									scGetAPMsAgain = true;
 									self.getApmMethods();
 									self.getUPOs();
 								}
@@ -424,7 +376,6 @@ define(
                         }
                         else {
 							if(!alert($.mage.__('Unexpected error, please try again later!'))) {
-//								scGetAPMsAgain = true;
 								self.scCleanCard();
 								self.getApmMethods();
 								self.getUPOs();
@@ -586,7 +537,7 @@ define(
 					});
 
 					cardNumber.on('change', function (e) {
-						console.log('on focus', e);
+						console.log('on change', e);
 
 						$('#sc_card_number').css('box-shadow', '0px 0 3px 1px #00699d');
 						$('#cc_num_error_msg').hide();
@@ -714,8 +665,8 @@ define(
 			
 			scTotalsChange: function() {
 				console.log('scTotalsChange()');
+				var currentTotal = parseFloat(quote.totals().base_grand_total).toFixed(2);
 				
-				var currentTotal = quote.totals().base_grand_total.toFixed(2);
 				
 				if(currentTotal == self.scOrderTotal) {
 					console.log('scTotalsChange() - the total is same. Stop here.');
@@ -765,6 +716,7 @@ define(
 				console.log('scUpdateQuotePM()');
 				console.log('self.scPaymentMethod', self.scPaymentMethod);
 				console.log('quote.paymentMethod._latestValue.method', quote.paymentMethod._latestValue.method);
+				console.log('quote id', quote._id);
 				
 				var scAjaxQuoteUpdateParams = {
 					dataType	: "json",

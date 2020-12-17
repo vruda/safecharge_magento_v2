@@ -7,8 +7,8 @@ use Magento\Sales\Model\Order\Invoice;
 use Magento\Sales\Model\Order\Payment\Transaction;
 use Safecharge\Safecharge\Model\Payment;
 use Magento\Framework\App\Request\InvalidRequestException;
-use Magento\Framework\App\RequestInterface;
-use Safecharge\Safecharge\Model\AbstractRequest;
+//use Magento\Framework\App\RequestInterface;
+use Safecharge\Safecharge\Model\AbstractRequest; // use it in createSubscription()
 
 /**
  * Safecharge Safecharge payment redirect controller.
@@ -721,13 +721,10 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
             $quote = $this->quoteFactory->create()->loadByIdWithoutStore((int) $params['quote']);
 			
 			$this->moduleConfig->createLog(
-				array(
-					'quote Method' => $quote->getPayment()->getMethod(),
-					'quote id' => $quote->getQuoteId(),
-				),
-				'$quote->getPayment()->getMethod()'
+				array('quote Payment Method' => $quote->getPayment()->getMethod()),
+				'quote'
 			);
-
+			
             if (intval($quote->getIsActive()) == 0) {
                 $this->moduleConfig->createLog($quote->getQuoteId(), 'Quote ID');
 
@@ -739,7 +736,7 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
             if ($quote->getPayment()->getMethod() !== Payment::METHOD_CODE) {
                 return $result
                     ->setData('error', true)
-                    ->setData('message', 'Quote payment method is "'
+                    ->setData('message', 'placeOrder() Error - Quote payment method is "'
                         . $quote->getPayment()->getMethod() . '"');
             }
 

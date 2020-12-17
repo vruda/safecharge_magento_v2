@@ -163,11 +163,16 @@ class Config
     public function createLog($data, $title = '')
     {
         if (! $this->isDebugEnabled()) {
-            return;
+            return false;
         }
 		
-		$d		= $data;
-		$string	= '';
+		$logsPath	= $this->directory->getPath('log');
+		$d			= $data;
+		$string		= '';
+		
+		if (!is_dir($logsPath)) {
+			return false;
+		}
 		
         if (!empty($data)) {
             if (is_array($data)) {
@@ -220,25 +225,37 @@ class Config
 
 		$string .= $d . "\r\n\r\n";
 		
-		if($this->isDebugEnabled(true) == 1) {
-			$log_file_name = 'Nuvei';
-		}
-		else {
-			$log_file_name = 'Nuvei-' . date('Y-m-d');
-		}
-        
-        try {
-            $logsPath = $this->directory->getPath('log');
-
-            if (is_dir($logsPath)) {
-                file_put_contents(
-                    $logsPath . DIRECTORY_SEPARATOR . $log_file_name . '.txt',
-                    date('H:i:s', time()) . ': ' . $string,
-                    FILE_APPEND
-                );
-            }
+		try {
+			switch ($this->isDebugEnabled(true) ) {
+				case 3: // save log file per days
+					$log_file_name = 'Nuvei-' . date('Y-m-d');
+					break;
+				
+				case 2: // save single log file
+					$log_file_name = 'Nuvei';
+					break;
+				
+				case 1: // save both files
+					$log_file_name = 'Nuvei';
+					
+					file_put_contents(
+						$logsPath . DIRECTORY_SEPARATOR . 'Nuvei-' . date('Y-m-d') . '.txt',
+						date('H:i:s', time()) . ': ' . $string,
+						FILE_APPEND
+					);
+					break;
+				
+				default:
+					return;
+			}
+			
+			return file_put_contents(
+				$logsPath . DIRECTORY_SEPARATOR . $log_file_name . '.txt',
+				date('H:i:s', time()) . ': ' . $string,
+				FILE_APPEND
+			);
         } catch (exception $e) {
-
+			return false;
         }
     }
     
@@ -474,10 +491,14 @@ class Config
     public function isDebugEnabled($return_value = false)
     {
 		if($return_value) {
-			return (int)$this->getConfigValue('debug');
+			return intval($this->getConfigValue('debug'));
 		}
 		
-        return (bool)$this->getConfigValue('debug');
+		if(intval($this->getConfigValue('debug')) == 0) {
+			return false;
+		}
+        
+		return true;
     }
 	
 	public function useUPOs()
@@ -489,6 +510,11 @@ class Config
     {
         return "Magento Plugin {$this->moduleList->getOne(self::MODULE_NAME)['setup_version']}";
     }
+	
+	public function getMagentoVersion()
+	{
+		return $this->productMetadata->getVersion();
+	}
 
     /**
      * Return full endpoint;
@@ -659,7 +685,17 @@ class Config
 	
 	public function setQuotePaymentMethod($method)
 	{
-		$this->checkoutSession->getQuote()->getPayment()->setMethod($method);
-		$this->createLog($this->checkoutSession->getQuote()->getPayment()->getMethod(), 'quote payment method');
+		$quote = $this->checkoutSession->getQuote();
+		
+		$quote->getPayment()->setMethod($method);
+		$quote->save();
+		
+//		$this->createLog(
+//			array(
+//				'quote payment, paymenth method' => $quote->getPayment()->getMethod(),
+//				'quote id' => $quote->getId(),
+//			),
+//			'quote after set payment method'
+//		);
 	}
 }

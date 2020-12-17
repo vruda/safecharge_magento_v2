@@ -4,6 +4,9 @@
 
 ## next
 ```
+	* In checkout JS - change initialize place for few variables; removed commented code; when we use quote total parse it as float and round it to 2 signs after decimal point.
+	* Pass Magento version in each requrest in merchantDetails['customField3'] array.
+	* Fix for the setQuotePaymentMethod(), now we force save quote.
 	* Added an option into admin to save the Debug log file in single file, or split files by days.
 ```
 

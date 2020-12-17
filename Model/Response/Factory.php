@@ -32,8 +32,8 @@ class Factory
             => \Safecharge\Safecharge\Model\Response\Payment\Refund::class,
         AbstractResponse::PAYMENT_VOID_HANDLER
             => \Safecharge\Safecharge\Model\Response\Payment\Cancel::class,
-        AbstractResponse::OPEN_ORDER_HANDLER
-            => \Safecharge\Safecharge\Model\Response\OpenOrder::class,
+//        AbstractResponse::OPEN_ORDER_HANDLER
+//            => \Safecharge\Safecharge\Model\Response\OpenOrder::class,
         AbstractResponse::PAYMENT_APM_HANDLER
             => \Safecharge\Safecharge\Model\Response\PaymentApm::class,
         AbstractResponse::GET_MERCHANT_PAYMENT_METHODS_HANDLER

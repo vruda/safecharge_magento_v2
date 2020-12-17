@@ -292,7 +292,8 @@ class OpenOrder extends AbstractRequest implements RequestInterface
                 
                 'merchantDetails'    => [
                     'customField1' => (string) number_format($this->cart->getQuote()->getGrandTotal(), 2, '.', ''), // pass amount
-                    'customField2' => json_encode($subs_data),
+                    'customField2' => json_encode($subs_data), // subscription data
+                    // customField3 => Magento version is added in AbstractRequest
                 ],
             ],
             parent::getParams()
