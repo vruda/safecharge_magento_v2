@@ -33,7 +33,6 @@ define(
 		var cardNumber			= null;
 		var cardExpiry			= null;
 		var cardCvc				= null;
-		var sfcFirstField		= null;
 		var scFields			= null;
 		var scData				= {};
 		
@@ -102,8 +101,8 @@ define(
         return Component.extend({
             defaults: {
                 template				: 'Safecharge_Safecharge/payment/safecharge',
-		apmMethods				: [],
-		UPOs					: [],
+				apmMethods				: [],
+				UPOs					: [],
                 chosenApmMethod			: '',
                 countryId				: ''
             },
@@ -165,10 +164,7 @@ define(
             getData: function() {
 				var pmData = {
 					method			: self.item.method,
-                    additional_data	: {
-//                        cc_token			: self.creditCardToken(),
-//                        cc_number			: self.ccNumber(),
-//                        cc_owner			: self.creditCardOwner(),
+						additional_data		: {
                         chosen_apm_method	: self.chosenApmMethod(),
                     },
 				};
@@ -234,43 +230,6 @@ define(
 					return;
 				}
 				
-				/*
-				if(!scGetAPMsAgain) {
-					if (quote.billingAddress() && self.countryId() === quote.billingAddress().countryId) {
-						if(typeof scData.merchantSiteId == 'undefined') {
-							self.initFields();
-						}
-						
-						return;
-					}
-					else if (quote.billingAddress()) {
-						self.countryId(quote.billingAddress().countryId);
-					}
-					else if ($('input[name="billing-address-same-as-shipping"]:checked').length && quote.shippingAddress()) {
-						if (self.countryId() === quote.shippingAddress().countryId) {
-							if(typeof scData.merchantSiteId == 'undefined') {
-								self.initFields();
-							}
-							
-							return;
-						}
-						else {
-							self.countryId(quote.shippingAddress().countryId);
-						}
-					}
-					else {
-						if(typeof scData.merchantSiteId == 'undefined') {
-							self.initFields();
-						}
-						
-						return;
-					}
-				}
-				else { // clean card and container
-					self.scCleanCard();
-				}
-                */
-                
 				$.ajax({
                     dataType: "json",
                     url: self.getMerchantPaymentMethodsUrl(),
@@ -309,10 +268,6 @@ define(
 						self.isPlaceOrderActionAllowed(false);
                     }
 
-//					if(typeof scData.merchantSiteId == 'undefined') {
-//						self.initFields();
-//					}
-
 					$('.loading-mask').css('display', 'none');
                 })
                 .fail(function(e) {
@@ -324,6 +279,8 @@ define(
             placeOrder: function(data, event) {
 				console.log('placeOrder()');
 				
+				$('body').trigger('processStart'); // show loader
+				
                 if (event) {
                     event.preventDefault();
                 }
@@ -334,6 +291,8 @@ define(
 						$('#cc_name_error_msg').show();
 						
 						document.getElementById("safecharge_cc_owner").scrollIntoView();
+						$('body').trigger('processStop');
+						
 						return;
 					}
 					
@@ -342,6 +301,8 @@ define(
 						$('#cc_num_error_msg').show();
 						
 						document.getElementById("safecharge_cc_owner").scrollIntoView();
+						$('body').trigger('processStop');
+						
 						return;
 					}
 					
@@ -350,6 +311,8 @@ define(
 						$('#cc_error_msg').show();
 						
 						document.getElementById("safecharge_cc_owner").scrollIntoView();
+						$('body').trigger('processStop');
+						
 						return;
 					}
 					
@@ -358,14 +321,24 @@ define(
 						$('#cc_error_msg').show();
 						
 						document.getElementById("safecharge_cc_owner").scrollIntoView();
+						$('body').trigger('processStop');
+						
 						return;
 					}
 					
 					if(! self.validate()) {
+						$('body').trigger('processStop');
 						return;
 					}
 					
-					$('.loading-mask').css('display', 'block');
+//					$('.loading-mask').css('display', 'block');
+					
+					if(null == cardNumber) {
+						alert($.mage.__('Unexpected error! If the fields of the selected payment method do not reload in few seconds, please reload the page!'));
+						$('body').trigger('processStop');
+//						
+						return;
+					}
 					
 					// we use variable just for debug
 					var payParams = {
@@ -373,7 +346,7 @@ define(
 						currency			: window.checkoutConfig.payment[self.getCode()].currency,
 						amount				: parseFloat(quote.totals().base_grand_total).toFixed(2),
 						cardHolderName		: document.getElementById('safecharge_cc_owner').value,
-						paymentOption		: sfcFirstField,
+						paymentOption		: cardNumber,
 						webMasterId			: window.checkoutConfig.payment[self.getCode()].webMasterId,
                     };
 					
@@ -381,17 +354,15 @@ define(
                     sfc.createPayment(payParams, function(resp){
 						console.log('create payment');
 						
-                        if(typeof resp.result != 'undefined') {
+                        if(typeof resp != 'undefined' && resp.hasOwnProperty('result')) {
                             if(resp.result == 'APPROVED' && resp.transactionId != 'undefined') {
-//                                self.ccNumber(resp.ccCardNumber);
-//                                self.creditCardToken(resp.dsTransID);
                                 self.continueWithOrder(resp.transactionId);
                             }
                             else if(resp.result == 'DECLINED') {
 								if(!alert($.mage.__('Your Payment was DECLINED. Please try another payment method!'))) {
 									self.scCleanCard();
 									self.initFields();
-									$('.loading-mask').css('display', 'none');
+//									$('.loading-mask').css('display', 'none');
 								}
                             }
                             else {
@@ -408,18 +379,18 @@ define(
 								
 								if(!alert($.mage.__(respError))) {
 									self.scCleanCard();
-//									scGetAPMsAgain = true;
 									self.getApmMethods();
 									self.getUPOs();
+									$('body').trigger('processStop');
+									
+									return;
 								}
                             }
                         }
                         else {
 							if(!alert($.mage.__('Unexpected error, please try again later!'))) {
-//								scGetAPMsAgain = true;
-								self.scCleanCard();
-								self.getApmMethods();
-								self.getUPOs();
+								window.location.reload();
+								return;
 							}
                         }
                     });
@@ -461,19 +432,23 @@ define(
 									.done(function(res) {
 										if (res && res.error == 0 && res.redirectUrl) {
 											window.location.href = res.redirectUrl;
+											return;
 										}
 										else {
 											console.error(res);
 											window.location.reload();
+											return;
 										}
 									})
 									.fail(function(e) {
 										console.error(e);
 										window.location.reload();
+										return;
 									});
 								}.bind(self)
 							);
 
+						$('body').trigger('processStop');
                         return;
                     }
 
@@ -492,8 +467,6 @@ define(
 					
 					setPaymentMethodAction(self.messageContainer)
                         .done(function() {
-                            $('body').trigger('processStart');
-
                             $.ajax(ajaxData)
 								.done(function(postData) {
 									if (postData) {
@@ -503,22 +476,27 @@ define(
 											&& !isNaN(transactionId)
 										) {
 											window.location.href = postData.url;
+											return;
 										}
 
 										$.redirect(postData.url, postData.params, "POST");
+										return;
 									}
 									else {
 										window.location.reload();
+										return;
 									}
 								})
 								.fail(function() {
 									window.location.reload();
+									return;
 								});
                         }.bind(self));
 
                     return true;
                 }
 
+				$('body').trigger('processStop');
                 return false;
             },
             
@@ -527,6 +505,8 @@ define(
 				
 				if('safecharge' != self.scPaymentMethod) {
 					console.log('initFields() - slected payment method is not Safecharge');
+					$('body').trigger('processStop');
+					
 					return;
 				}
 				
@@ -538,6 +518,9 @@ define(
                 if(window.checkoutConfig.payment[self.getCode()].isTestMode == true) {
                     scData.env = 'int';
                 }
+				else {
+					scData.env = 'prod';
+				}
 				
                 sfc = SafeCharge(scData);
 
@@ -561,11 +544,13 @@ define(
 				
 				if(null === scFields) {
 					console.log('scFields is null');
+					$('body').trigger('processStop');
+					
 					return;
 				}
 				
 				if(null === cardNumber) {
-					cardNumber = sfcFirstField = scFields.create('ccNumber', {
+					cardNumber = scFields.create('ccNumber', {
 						classes: elementClasses
 						,style: fieldsStyle
 					});
@@ -578,8 +563,6 @@ define(
 					});
 
 					cardNumber.on('change', function (e) {
-						console.log('on focus', e);
-
 						$('#sc_card_number').css('box-shadow', '0px 0 3px 1px #00699d');
 						$('#cc_num_error_msg').hide();
 						
@@ -606,8 +589,6 @@ define(
 					});
 
 					cardExpiry.on('change', function (e) {
-						console.log('on focus', e);
-
 						$('#sc_card_expiry').css('box-shadow', '0px 0 3px 1px #00699d');
 						$('#cc_error_msg').hide();
 						
@@ -634,8 +615,6 @@ define(
 					});
 
 					cardCvc.on('change', function (e) {
-						console.log('on focus', e);
-
 						$('#sc_card_cvc').css('box-shadow', '0px 0 3px 1px #00699d');
 						$('#cc_error_msg').hide();
 						
@@ -648,6 +627,8 @@ define(
 						}
 					});
 				}
+				
+				$('body').trigger('processStop');
 			},
 			
 			/**
@@ -679,7 +660,7 @@ define(
 			scCleanCard: function () {
 				console.log('scCleanCard()');
 				
-				cardNumber = cardExpiry = cardCvc = sfcFirstField = null;
+				cardNumber = cardExpiry = cardCvc = null;
 				$('#sc_card_number, #sc_card_expiry, #sc_card_cvc').html('');
 			},
 			

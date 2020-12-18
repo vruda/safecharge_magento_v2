@@ -477,6 +477,11 @@ class Config
     {
         return "Magento Plugin {$this->moduleList->getOne(self::MODULE_NAME)['setup_version']}";
     }
+	
+	public function getMagentoVersion()
+	{
+		return $this->productMetadata->getVersion();
+	}
 
     /**
      * Return full endpoint;
@@ -647,7 +652,8 @@ class Config
 	
 	public function setQuotePaymentMethod($method)
 	{
-		$this->checkoutSession->getQuote()->getPayment()->setMethod($method);
-		$this->createLog($this->checkoutSession->getQuote()->getPayment()->getMethod(), 'quote payment method');
+		$quote = $this->checkoutSession->getQuote();
+		$quote->getPayment()->setMethod($method);
+		$quote->save();
 	}
 }

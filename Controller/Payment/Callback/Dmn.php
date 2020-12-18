@@ -931,6 +931,16 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
 			(!$orderList || empty($orderList))
 			&& !isset($params['dmnType'])
 		) {
+			if(
+				in_array(strtolower($params['transactionType']), array('sale', 'auth'))
+				&& strtolower($params['Status']) != 'approved'
+			) {
+				$this->moduleConfig->createLog('The Order '. $orderIncrementId .' is not approved, stop process.');
+				$jsonOutput->setData('getOrCreateOrder() error - The Order '. $orderIncrementId .' is not approved, stop process.');
+				
+				return $jsonOutput;
+			}
+			
 			$this->moduleConfig->createLog('Order '. $orderIncrementId .' not found, try to create it!');
 
 			$result = $this->placeOrder($params);

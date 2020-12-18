@@ -277,6 +277,9 @@ abstract class AbstractRequest extends AbstractApi
             'timeStamp'            => date('YmdHis'),
             'webMasterId'        => $this->config->getSourcePlatformField(),
             'encoding'            => 'UTF-8',
+			'merchantDetails'    => [
+				'customField3' => 'Magento v.' . $this->config->getMagentoVersion(), // Magento version
+			],
         ];
 
         return $params;

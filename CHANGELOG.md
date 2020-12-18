@@ -2,6 +2,18 @@
 
 ---
 
+### 2.1.3.x
+```
+	* Implemented Magento 2 Loader Widget on the checkout.
+	* When store is not on Test mode, pass scData.env = 'prod' to the webSDK.
+	* On checkout, if we get "Unexpected error..." message after webSDK request - reload the page.
+	* Additional check to prevent passing null in webSDK paymentOption.
+	* Pass cardNumber object to webSDK, instead of sfcFirstField.
+	* Pass Magento version in each request in merchantDetails['customField3'] array.
+	* Do not allow DMN code to create order if the incoming status is not Approved.
+	* Force quote to save the payment method when passed.
+```
+
 ### 2.1.2.x
 ```
 	* Fix for the late load of quote in the checkout JS.
