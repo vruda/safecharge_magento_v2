@@ -94,11 +94,15 @@ class OpenOrder extends AbstractRequest implements RequestInterface
         $this->sessionToken = $req_resp['sessionToken'];
         $this->ooAmount     = $req_resp['merchantDetails']['customField1'];
 
-        return $this;
+		// save the session token in the Quote
+//		$this->cart->getQuote()->getPayment()->unsAdditionalInformation('nuvei_session_token');
+		$this->cart->getQuote()->getPayment()->setAdditionalInformation(
+            'nuvei_session_token',
+            $req_resp['sessionToken']
+        );
+		$this->cart->getQuote()->save();
 		
-//        return $this
-//            ->getResponseHandler()
-//            ->process();
+        return $this;
     }
     
     public function setBillingAddress($data = [])
@@ -145,19 +149,7 @@ class OpenOrder extends AbstractRequest implements RequestInterface
             $billing_country = $this->countryCode;
         }
         
-        $email = $this->cart->getQuote()->getBillingAddress()->getEmail();
-        if (empty($email)) {
-            $email = $this->cart->getQuote()->getCustomerEmail();
-        }
-        if (empty($email)) {
-            $email = $this->config->getCheckoutSession()->getQuote()->getCustomerEmail();
-        }
-        if (empty($email) && !empty($_COOKIE['guestSippingMail'])) {
-            $email = filter_var($_COOKIE['guestSippingMail'], FILTER_VALIDATE_EMAIL);
-        }
-        if (empty($email)) {
-            $email = 'quoteID_' . $this->config->getCheckoutSession()->getQuoteId() . '@magentoMerchant.com';
-        }
+        $email = $this->config->getUserEmail();
         
         $shipping_email = $this->cart->getQuote()->getShippingAddress()->getEmail();
         if (empty($shipping_email)) {

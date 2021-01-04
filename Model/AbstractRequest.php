@@ -555,10 +555,11 @@ abstract class AbstractRequest extends AbstractApi
         }
 
         $quoteData = [
-            'userTokenId' => $quote->getCustomerId() ?: $quote->getCustomerEmail(),
+//            'userTokenId' => $quote->getCustomerId() ?: $quote->getCustomerEmail(),
+            'userTokenId' => $this->config->getUserEmail(),
             'clientUniqueId' => $quote->getReservedOrderId() ?: $this->config->getReservedOrderId(),
             'currency' => $quote->getBaseCurrencyCode(),
-            'amountDetails' => [
+            'amountDetails'	=> [
                 'totalShipping' => (float)$shipping,
                 'totalHandling' => (float)0,
                 'totalDiscount' => (float)abs($quote->getBaseSubtotal() - $quote->getBaseSubtotalWithDiscount()),

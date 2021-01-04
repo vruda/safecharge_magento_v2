@@ -129,10 +129,16 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
                 $this->request->getParams(),
                 $this->request->getPostValue()
             );
+			
+			$this->moduleConfig->createLog($params, 'DMN params:');
             
             $status = !empty($params['Status']) ? strtolower($params['Status']) : null;
-
-            $this->moduleConfig->createLog($params, 'DMN params:');
+			
+			// modify it because of the PayPal Sandbox problem with duplicate Orders IDs
+			// we modify it also in Class PaymenAPM getParams().
+			if(!empty($params['payment_method']) && 'cc_card' != $params['payment_method']) {
+				$params["merchant_unique_id"] = $this->moduleConfig->getClientUniqueId($params["merchant_unique_id"]);
+			}
 			
             if (!empty($params["order"])) {
                 $orderIncrementId = $params["order"];

@@ -192,8 +192,8 @@
 					   showInDefault="1"
 					   showInWebsite="1"
 					   showInStore="0" >
-					<label>Debug</label>
-					<source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+					<label>Save Debug log</label>
+					<source_model>Safecharge\Safecharge\Model\Adminhtml\Source\Debug</source_model>
 					<config_path>payment/safecharge/debug</config_path>
 				</field>
 

@@ -112,6 +112,8 @@ class Config
     private $directory;
     private $httpHeader;
     private $remoteIp;
+	
+	private $clientUniqueIdPostfix = '_sandbox_apm'; // postfix for Sandbox APM payments
 
     /**
      * Object initialization.
@@ -166,8 +168,9 @@ class Config
             return;
         }
 		
-		$d		= $data;
-		$string	= '';
+		$logsPath	= $this->directory->getPath('log');
+		$d			= $data;
+		$string		= '';
 		
         if (!empty($data)) {
             if (is_array($data)) {
@@ -202,7 +205,7 @@ class Config
                 $d = $data ? 'true' : 'false';
             }
         } else {
-            $string .= 'Data is Empty.';
+            $d .= 'Data is Empty.';
         }
 		
 		$string .= '[v.' . $this->moduleList->getOne(self::MODULE_NAME)['setup_version'] . '] | ';
@@ -221,11 +224,32 @@ class Config
 		$string .= $d . "\r\n\r\n";
         
         try {
-            $logsPath = $this->directory->getPath('log');
-
+			switch ($this->isDebugEnabled(true)) {
+				case 3: // save log file per days
+					$log_file_name = 'Nuvei-' . date('Y-m-d');
+					break;
+				
+				case 2: // save single log file
+					$log_file_name = 'Nuvei';
+					break;
+				
+				case 1: // save both files
+					$log_file_name = 'Nuvei';
+					
+					file_put_contents(
+						$logsPath . DIRECTORY_SEPARATOR . 'Nuvei-' . date('Y-m-d') . '.txt',
+						date('H:i:s', time()) . ': ' . $string,
+						FILE_APPEND
+					);
+					break;
+				
+				default:
+					return;
+			}
+			
             if (is_dir($logsPath)) {
-                file_put_contents(
-                    $logsPath . DIRECTORY_SEPARATOR . 'Nuvei-' . date('Y-m-d') . '.txt',
+                return file_put_contents(
+                    $logsPath . DIRECTORY_SEPARATOR . $log_file_name . '.txt',
                     date('H:i:s', time()) . ': ' . $string,
                     FILE_APPEND
                 );
@@ -461,11 +485,20 @@ class Config
      * Return bool value depends of that if payment method debug mode
      * is enabled or not.
      *
+	 * @param bool $return_value - by default is false, set true to get int value
      * @return bool
      */
-    public function isDebugEnabled()
+    public function isDebugEnabled($return_value = false)
     {
-        return (bool)$this->getConfigValue('debug');
+        if($return_value) {
+			return intval($this->getConfigValue('debug'));
+		}
+		
+		if(intval($this->getConfigValue('debug')) == 0) {
+			return false;
+		}
+        
+		return true;
     }
 	
 	public function useUPOs()
@@ -655,5 +688,60 @@ class Config
 		$quote = $this->checkoutSession->getQuote();
 		$quote->getPayment()->setMethod($method);
 		$quote->save();
+	}
+	
+	/**
+	 * Function setClientUniqueId
+	 * 
+	 * Set client unique id.
+	 * We change it only for Sandbox (test) mode.
+	 * 
+	 * @param int $order_id - cart or order id
+	 * @return int|string
+	 */
+	public function setClientUniqueId($order_id) {
+		if(!$this->isDebugEnabled()) {
+			return (int)$order_id;
+		}
+		
+		return $order_id . '_' . time() . $this->clientUniqueIdPostfix;
+	}
+	
+	/**
+	 * Function getCuid
+	 * 
+	 * Get client unique id.
+	 * We change it only for Sandbox (test) mode.
+	 * 
+	 * @param string|int $merchant_unique_id
+	 * @return int|string
+	 */
+	public function getClientUniqueId($merchant_unique_id) {
+		if(!$this->isDebugEnabled()) {
+			return $merchant_unique_id;
+		}
+		
+		if(strpos($merchant_unique_id, $this->clientUniqueIdPostfix) !== false) {
+			return current(explode('_', $merchant_unique_id));
+		}
+		
+		return $merchant_unique_id;
+	}
+	
+	public function getUserEmail() {
+		$quote	= $this->checkoutSession->getQuote();
+		$email	= $quote->getBillingAddress()->getEmail();
+		
+        if (empty($email)) {
+            $email = $quote->getCustomerEmail();
+        }
+        if (empty($email) && !empty($_COOKIE['guestSippingMail'])) {
+            $email = filter_var($_COOKIE['guestSippingMail'], FILTER_VALIDATE_EMAIL);
+        }
+        if (empty($email)) {
+            $email = 'quoteID_' . $quote->getId() . '@magentoMerchant.com';
+        }
+		
+		return $email;
 	}
 }

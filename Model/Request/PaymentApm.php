@@ -133,43 +133,53 @@ class PaymentApm extends AbstractRequest implements RequestInterface
      */
     protected function getParams()
     {
-        /** @var Quote $quote */
-        $quote = $this->checkoutSession->getQuote();
+        $quote			= $this->checkoutSession->getQuote();
+        $quotePayment	= $quote->getPayment();
 
-        $quotePayment = $quote->getPayment();
-
-        $this->config->createLog('requestFactory GET_SESSION_TOKEN_METHOD - PaymentApm.php');
+//        $this->config->createLog('requestFactory GET_SESSION_TOKEN_METHOD - PaymentApm.php');
         
-        $tokenRequest = $this->requestFactory
-            ->create(AbstractRequest::GET_SESSION_TOKEN_METHOD);
-        $tokenResponse = $tokenRequest->process();
+//        $tokenRequest = $this->requestFactory
+//            ->create(AbstractRequest::GET_SESSION_TOKEN_METHOD);
+//        $tokenResponse = $tokenRequest->process();
 
-        $quotePayment->unsAdditionalInformation(Payment::TRANSACTION_SESSION_TOKEN);
-        $quotePayment->setAdditionalInformation(
-            Payment::TRANSACTION_SESSION_TOKEN,
-            $tokenResponse->getToken()
-        );
+//        $quotePayment->unsAdditionalInformation(Payment::TRANSACTION_SESSION_TOKEN);
+//        $quotePayment->setAdditionalInformation(
+//            Payment::TRANSACTION_SESSION_TOKEN,
+//            $tokenResponse->getToken()
+//        );
 
         $reservedOrderId = $quotePayment->getAdditionalInformation(Payment::TRANSACTION_ORDER_ID)
             ?: $this->config->getReservedOrderId();
-
+		
+		$session_token = $quotePayment->getAdditionalInformation('nuvei_session_token');
+		
+		if(empty($session_token)) {
+			$this->config->createLog($session_token, 'PaymentAPM - quote session token is missing, try to get new one.');
+			$session_token = $tokenResponse->getToken();
+		}
+		
         $params = array_merge_recursive(
             $this->getQuoteData($quote),
             [
-                'sessionToken'            => $tokenResponse->getToken(),
+                'sessionToken'          => $session_token,
                 'amount'                => (float)$quote->getGrandTotal(),
-                'merchant_unique_id'    => $reservedOrderId,
-                'urlDetails'            => [
+//                'merchant_unique_id'    => $reservedOrderId,
+//				'clientUniqueId'		=> $this->config->setClientUniqueId($reservedOrderId),
+                
+				'urlDetails'            => [
                     'successUrl'        => $this->config->getCallbackSuccessUrl(),
                     'failureUrl'        => $this->config->getCallbackErrorUrl(),
                     'pendingUrl'        => $this->config->getCallbackPendingUrl(),
                     'backUrl'            => $this->config->getBackUrl(),
                     'notificationUrl'    => $this->config->getCallbackDmnUrl($reservedOrderId),
                 ],
-                'paymentMethod'            => $this->getPaymentMethod(),
+                
+				'paymentMethod'            => $this->getPaymentMethod(),
             ]
         );
-        
+		
+		$params['clientUniqueId'] = $this->config->setClientUniqueId($reservedOrderId);
+		
         $pmFields = $this->getPaymentMethodFields();
         
         if (null !== $pmFields) {

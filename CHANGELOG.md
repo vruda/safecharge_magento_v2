@@ -4,6 +4,9 @@
 
 ### 2.1.3.x
 ```
+	* Use custom unique clientUniqueId for APMs in Sandbox.
+	* When call OpenOrder save the result session token in the Quote. Use it later in PaymentAPM class.
+	* Added an option into admin to save the Debug log file in single file, or split files by days.
 	* Implemented Magento 2 Loader Widget on the checkout.
 	* When store is not on Test mode, pass scData.env = 'prod' to the webSDK.
 	* On checkout, if we get "Unexpected error..." message after webSDK request - reload the page.
