@@ -308,18 +308,6 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
 				'Order info'
 			);
 			
-            if ('auth' === $tr_type_param
-                && round(floatval($order->getBaseGrandTotal()), 2) != round(floatval($params['totalAmount']), 2)
-            ) {
-                $msg = 'The DMN total amount (' . round(floatval($params['totalAmount']), 2)
-                    .') is different than Order total amount (' . round(floatval($order->getBaseGrandTotal()), 2)
-                    . '). The process stops here!';
-                
-                $this->moduleConfig->createLog($msg);
-                $jsonOutput->setData($msg);
-                return $jsonOutput;
-            }
-            
             if (strtolower($order_tr_type) == $tr_type_param
                 && strtolower($order_status) == 'approved'
                 && $order_status != $params['Status']
@@ -405,7 +393,24 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
                     ->setState(Order::STATE_NEW)
                     ->setStatus('pending');
             }
+			
+			// Order Amount check
+//            if (in_array($tr_type_param, ['auth', 'sale']) 
+//                && round(floatval($order->getBaseGrandTotal()), 2) != round(floatval($params['totalAmount']), 2)
+//            ) {
+//                $msg = 'The DMN total amount (' . round(floatval($params['totalAmount']), 2)
+//                    .') is different than Order total amount (' . round(floatval($order->getBaseGrandTotal()), 2)
+//                    . '). The process stops here!';
+//                
+//                $this->moduleConfig->createLog($msg);
+////                $jsonOutput->setData($msg);
+////                return $jsonOutput;
+//            }
             
+			// compare them later
+			$order_total	= round(floatval($order->getBaseGrandTotal()), 2);
+			$dmn_total		= round(floatval($params['totalAmount']), 2);
+			
 			// APPROVED TRANSACTION
             if (in_array($status, ['approved', 'success'])) {
                 $message                = $this->captureCommand->execute($orderPayment, $order->getBaseGrandTotal(), $order);
@@ -417,6 +422,19 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
                 if ($tr_type_param == 'auth') {
                     $transactionType        = Transaction::TYPE_AUTH;
                     $sc_transaction_type	= Payment::SC_AUTH;
+					
+					// amount check
+					if($order_total != $dmn_total) {
+						$sc_transaction_type = 'fraud';
+						
+						$order->addStatusHistoryComment(
+							__('<b>Attention!</b> - There is a problem with the Order. The Order amount is ')
+								. $order->getOrderCurrencyCode() . ' '
+								. $order_total . __(', but the Authorized amount is ')
+								. $params['currency'] . ' ' . $dmn_total,
+							$sc_transaction_type
+						);
+					}
 					
 //					if(0 == $params['totalAmount']) {
 //						$start_subscr = true;
@@ -434,7 +452,7 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
                     
                     $orderPayment
                         ->setAuthAmount($params['totalAmount'])
-                        ->setIsTransactionPending(false)
+                        ->setIsTransactionPending(true)
                         ->setIsTransactionClosed(0);
 
                     // set transaction
@@ -469,14 +487,14 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
                         ]
                     );
 					
-					$this->moduleConfig->createLog(
-						[
-                            'TransactionID'    => $params['TransactionID'],
-                            'AuthCode'        => $params['AuthCode'],
-                            'totalAmount'        => $params['totalAmount'],
-                        ],
-						Payment::SALE_SETTLE_PARAMS
-					);
+//					$this->moduleConfig->createLog(
+//						[
+//                            'TransactionID'    => $params['TransactionID'],
+//                            'AuthCode'        => $params['AuthCode'],
+//                            'totalAmount'        => $params['totalAmount'],
+//                        ],
+//						Payment::SALE_SETTLE_PARAMS
+//					);
 					
 //					if($params['totalAmount'] > 0) {
 //						$start_subscr = true;
@@ -489,6 +507,19 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
                         $inv_amount             = round(floatval($params['totalAmount']), 2);
                         $is_partial_settle      = true;
                     }
+					
+					// amount check
+					if($order_total != $dmn_total) {
+						$sc_transaction_type = 'fraud';
+						
+						$order->addStatusHistoryComment(
+							__('<b>Attention!</b> - There is a problem with the Order. The Order amount is ')
+								. $order->getOrderCurrencyCode() . ' '
+								. $order_total . __(', but the Paid amount is ')
+								. $params['currency'] . ' ' . $dmn_total,
+							$sc_transaction_type
+						);
+					}
                     
                     $orderPayment->setSaleSettleAmount($inv_amount);
                     

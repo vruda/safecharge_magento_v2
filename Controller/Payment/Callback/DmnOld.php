@@ -107,10 +107,16 @@ class DmnOld extends \Magento\Framework\App\Action\Action
                 $this->request->getParams(),
                 $this->request->getPostValue()
             );
+			
+			$this->moduleConfig->createLog($params, 'DMN params:');
             
             $status = !empty($params['Status']) ? strtolower($params['Status']) : null;
-
-            $this->moduleConfig->createLog($params, 'DMN params:');
+			
+			// modify it because of the PayPal Sandbox problem with duplicate Orders IDs
+			// we modify it also in Class PaymenAPM getParams().
+			if(!empty($params['payment_method']) && 'cc_card' != $params['payment_method']) {
+				$params["merchant_unique_id"] = $this->moduleConfig->getClientUniqueId($params["merchant_unique_id"]);
+			}
 			
             if (!empty($params["order"])) {
                 $orderIncrementId = $params["order"];
@@ -280,18 +286,6 @@ class DmnOld extends \Magento\Framework\App\Action\Action
 				'Order info'
 			);
 			
-            if ('auth' === $tr_type_param
-                && round(floatval($order->getBaseGrandTotal()), 2) != round(floatval($params['totalAmount']), 2)
-            ) {
-                $msg = 'The DMN total amount (' . round(floatval($params['totalAmount']), 2)
-                    .') is different than Order total amount (' . round(floatval($order->getBaseGrandTotal()), 2)
-                    . '). The process stops here!';
-                
-                $this->moduleConfig->createLog($msg);
-                $jsonOutput->setData($msg);
-                return $jsonOutput;
-            }
-            
             if (strtolower($order_tr_type) == $tr_type_param
                 && strtolower($order_status) == 'approved'
                 && $order_status != $params['Status']
@@ -377,7 +371,24 @@ class DmnOld extends \Magento\Framework\App\Action\Action
                     ->setState(Order::STATE_NEW)
                     ->setStatus('pending');
             }
+			
+			// Order Amount check
+//            if (in_array($tr_type_param, ['auth', 'sale']) 
+//                && round(floatval($order->getBaseGrandTotal()), 2) != round(floatval($params['totalAmount']), 2)
+//            ) {
+//                $msg = 'The DMN total amount (' . round(floatval($params['totalAmount']), 2)
+//                    .') is different than Order total amount (' . round(floatval($order->getBaseGrandTotal()), 2)
+//                    . '). The process stops here!';
+//                
+//                $this->moduleConfig->createLog($msg);
+////                $jsonOutput->setData($msg);
+////                return $jsonOutput;
+//            }
             
+			// compare them later
+			$order_total	= round(floatval($order->getBaseGrandTotal()), 2);
+			$dmn_total		= round(floatval($params['totalAmount']), 2);
+			
 			// APPROVED TRANSACTION
             if (in_array($status, ['approved', 'success'])) {
                 $message                = $this->captureCommand->execute($orderPayment, $order->getBaseGrandTotal(), $order);
@@ -389,6 +400,19 @@ class DmnOld extends \Magento\Framework\App\Action\Action
                 if ($tr_type_param == 'auth') {
                     $transactionType        = Transaction::TYPE_AUTH;
                     $sc_transaction_type	= Payment::SC_AUTH;
+					
+					// amount check
+					if($order_total != $dmn_total) {
+						$sc_transaction_type = 'fraud';
+						
+						$order->addStatusHistoryComment(
+							__('<b>Attention!</b> - There is a problem with the Order. The Order amount is ')
+								. $order->getOrderCurrencyCode() . ' '
+								. $order_total . __(', but the Authorized amount is ')
+								. $params['currency'] . ' ' . $dmn_total,
+							$sc_transaction_type
+						);
+					}
 					
 //					if(0 == $params['totalAmount']) {
 //						$start_subscr = true;
@@ -406,7 +430,7 @@ class DmnOld extends \Magento\Framework\App\Action\Action
                     
                     $orderPayment
                         ->setAuthAmount($params['totalAmount'])
-                        ->setIsTransactionPending(false)
+                        ->setIsTransactionPending(true)
                         ->setIsTransactionClosed(0);
 
                     // set transaction
@@ -441,14 +465,14 @@ class DmnOld extends \Magento\Framework\App\Action\Action
                         ]
                     );
 					
-					$this->moduleConfig->createLog(
-						[
-                            'TransactionID'    => $params['TransactionID'],
-                            'AuthCode'        => $params['AuthCode'],
-                            'totalAmount'        => $params['totalAmount'],
-                        ],
-						Payment::SALE_SETTLE_PARAMS
-					);
+//					$this->moduleConfig->createLog(
+//						[
+//                            'TransactionID'    => $params['TransactionID'],
+//                            'AuthCode'        => $params['AuthCode'],
+//                            'totalAmount'        => $params['totalAmount'],
+//                        ],
+//						Payment::SALE_SETTLE_PARAMS
+//					);
 					
 //					if($params['totalAmount'] > 0) {
 //						$start_subscr = true;
@@ -461,6 +485,19 @@ class DmnOld extends \Magento\Framework\App\Action\Action
                         $inv_amount             = round(floatval($params['totalAmount']), 2);
                         $is_partial_settle      = true;
                     }
+					
+					// amount check
+					if($order_total != $dmn_total) {
+						$sc_transaction_type = 'fraud';
+						
+						$order->addStatusHistoryComment(
+							__('<b>Attention!</b> - There is a problem with the Order. The Order amount is ')
+								. $order->getOrderCurrencyCode() . ' '
+								. $order_total . __(', but the Paid amount is ')
+								. $params['currency'] . ' ' . $dmn_total,
+							$sc_transaction_type
+						);
+					}
                     
                     $orderPayment->setSaleSettleAmount($inv_amount);
                     
@@ -892,7 +929,25 @@ class DmnOld extends \Magento\Framework\App\Action\Action
 	private function getOrCreateOrder($params, $orderIncrementId, $jsonOutput) {
 		$searchCriteria = $this->searchCriteriaBuilder->addFilter('increment_id', $orderIncrementId, 'eq')->create();
 
-		$tryouts = 0;
+		$tryouts	= 0;
+		$max_tries	= 5;
+		
+		// search only once for Refund/Credit
+		if(in_array(strtolower($params['transactionType']), ['refund', 'credit'])) {
+			$max_tries = 0;
+		}
+		
+		// do not search more than once for Auth and Sale, if the DMN response time is more than 24 hours before now
+		if(
+			$max_tries > 0
+			&& in_array(strtolower($params['transactionType']), ['sale', 'auth'])
+			&& !empty($params['customField4'])
+			&& is_numeric($params['customField4'])
+			&& time() - $params['customField4'] > 3600
+		) {
+			$max_tries = 0;
+		}
+		
 		do {
 			$tryouts++;
 			$orderList = $this->orderRepo->getList($searchCriteria)->getItems();
@@ -902,13 +957,23 @@ class DmnOld extends \Magento\Framework\App\Action\Action
 					. ' there is NO order for TransactionID ' . $params['TransactionID'] . ' yet.');
 				sleep(3);
 			}
-		} while ( $tryouts < 5 && empty($orderList) );
+		} while ( $tryouts < $max_tries && empty($orderList) );
 		
 		// try to create the order
 		if (
 			(!$orderList || empty($orderList))
 			&& !isset($params['dmnType'])
 		) {
+			if(
+				in_array(strtolower($params['transactionType']), array('sale', 'auth'))
+				&& strtolower($params['Status']) != 'approved'
+			) {
+				$this->moduleConfig->createLog('The Order '. $orderIncrementId .' is not approved, stop process.');
+				$jsonOutput->setData('getOrCreateOrder() error - The Order '. $orderIncrementId .' is not approved, stop process.');
+				
+				return $jsonOutput;
+			}
+			
 			$this->moduleConfig->createLog('Order '. $orderIncrementId .' not found, try to create it!');
 
 			$result = $this->placeOrder($params);
