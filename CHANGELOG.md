@@ -4,6 +4,7 @@
 
 ### 2.1.3.x
 ```
+	* When we receive DMN for Refund/Credit search for order only once, without sleep.
 	* When we receive DMN for Auth or Settle  with more than an hour delay, search for order only once, without sleep.
 	* Use custom unique clientUniqueId for APMs in Sandbox.
 	* When call OpenOrder save the result session token in the Quote. Use it later in PaymentAPM class.

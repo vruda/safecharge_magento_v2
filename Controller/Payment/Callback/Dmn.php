@@ -923,9 +923,15 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
 		$tryouts	= 0;
 		$max_tries	= 5;
 		
+		// search only once for Refund/Credit
+		if(in_array(strtolower($params['transactionType']), ['refund', 'credit'])) {
+			$max_tries = 0;
+		}
+		
 		// do not search more than once for Auth and Sale, if the DMN response time is more than 24 hours before now
 		if(
-			in_array(strtolower($params['transactionType']), ['sale', 'auth'])
+			$max_tries > 0
+			&& in_array(strtolower($params['transactionType']), ['sale', 'auth'])
 			&& !empty($params['customField4'])
 			&& is_numeric($params['customField4'])
 			&& time() - $params['customField4'] > 3600
