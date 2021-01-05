@@ -920,7 +920,19 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
 	private function getOrCreateOrder($params, $orderIncrementId, $jsonOutput) {
 		$searchCriteria = $this->searchCriteriaBuilder->addFilter('increment_id', $orderIncrementId, 'eq')->create();
 
-		$tryouts = 0;
+		$tryouts	= 0;
+		$max_tries	= 5;
+		
+		// do not search more than once for Auth and Sale, if the DMN response time is more than 24 hours before now
+		if(
+			in_array(strtolower($params['transactionType']), ['sale', 'auth'])
+			&& !empty($params['customField4'])
+			&& is_numeric($params['customField4'])
+			&& time() - $params['customField4'] > 3600
+		) {
+			$max_tries = 0;
+		}
+		
 		do {
 			$tryouts++;
 			$orderList = $this->orderRepo->getList($searchCriteria)->getItems();
@@ -930,7 +942,7 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
 					. ' there is NO order for TransactionID ' . $params['TransactionID'] . ' yet.');
 				sleep(3);
 			}
-		} while ( $tryouts < 5 && empty($orderList) );
+		} while ( $tryouts < $max_tries && empty($orderList) );
 		
 		// try to create the order
 		if (
