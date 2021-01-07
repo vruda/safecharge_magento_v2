@@ -26,8 +26,6 @@ class createSubscription extends AbstractRequest implements RequestInterface
 
 
 	/**
-     * OpenOrder constructor.
-     *
      * @param SafechargeLogger $safechargeLogger
      * @param Config           $config
      * @param Curl             $curl

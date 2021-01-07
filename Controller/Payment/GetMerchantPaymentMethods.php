@@ -78,15 +78,17 @@ class GetMerchantPaymentMethods extends Action
 
         if (!$this->moduleConfig->isActive()) {
             $this->moduleConfig->createLog('Safecharge payments module is not active at the moment!');
-            return $result->setData(['error_message' => __('Safecharge payments module is not active at the moment!')]);
+            
+			return $result->setData(['error_message' => __('Safecharge payments module is not active at the moment!')]);
         }
 
         try {
-            $countryCode    = $this->getRequest()->getParam('countryCode');
-            $grandTotal     = $this->getRequest()->getParam('grandTotal');
-            $billingAddress    = $this->getRequest()->getParam('billingAddress');
-            
-            $apmMethodsData = $this->getApmMethods($countryCode, $grandTotal, $billingAddress);
+//            $countryCode    = $this->getRequest()->getParam('countryCode');
+//            $grandTotal     = $this->getRequest()->getParam('grandTotal');
+//            $billingAddress	= $this->getRequest()->getParam('billingAddress');
+//            
+//            $apmMethodsData = $this->getApmMethods($countryCode, $grandTotal, $billingAddress);
+            $apmMethodsData = $this->getApmMethods();
         } catch (PaymentException $e) {
             $this->moduleConfig->createLog('GetMerchantPaymentMethods Controller - Error: ' . $e->getMessage());
             
@@ -115,22 +117,28 @@ class GetMerchantPaymentMethods extends Action
      *
      * @return array
      */
-    private function getApmMethods($countryCode = null, $grandTotal = null, $billingAddress = [])
+//    private function getApmMethods($countryCode = null, $grandTotal = null, $billingAddress = [])
+    private function getApmMethods()
     {
         $request = $this->requestFactory->create(AbstractRequest::GET_MERCHANT_PAYMENT_METHODS_METHOD);
 
-        try {
-            $apmMethods = $request
-                ->setCountryCode($countryCode)
-                ->setBillingAddress($billingAddress)
-                ->process();
-        } catch (PaymentException $e) {
-            return [];
-        }
+//		$this->moduleConfig->createLog(
+//			[
+//				'$countryCode' => $countryCode,
+//				'$grandTotal' => $grandTotal,
+//				'$billingAddress' => $billingAddress,
+//			],
+//			'GetMerchantPaymentMethods->getApmMethods() controller'
+//		);
+		
+		$apmMethods = $request
+//                ->setCountryCode($countryCode)
+//                ->setBillingAddress($billingAddress)
+			->process();
         
         return [
-            'apmMethods'    => $apmMethods->getScPaymentMethods(),
-            'sessionToken'    => $apmMethods->getSessionToken(),
+            'apmMethods'	=> $apmMethods->getScPaymentMethods(),
+            'sessionToken'  => $apmMethods->getSessionToken(),
         ];
     }
 }

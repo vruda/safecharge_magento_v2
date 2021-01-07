@@ -62,6 +62,7 @@ class Payment extends Cc implements TransparentInterface
     const REFUND_TRANSACTION_AMOUNT             = 'sc_refund_amount';
     const AUTH_PARAMS                           = 'sc_auth_params';
     const SALE_SETTLE_PARAMS                    = 'sc_sale_settle_params';
+	const ORDER_DATA							= 'nuvei_order_data';
 
     /**
      * Order statuses.
@@ -75,9 +76,9 @@ class Payment extends Cc implements TransparentInterface
     const SC_SUBSCRT_STARTED    = 'sc_subscr_started';
     const SC_SUBSCRT_ENDED		= 'sc_subscr_ended';
 
-    const SOLUTION_INTERNAL        = 'internal';
-    const SOLUTION_EXTERNAL        = 'external';
-    const APM_METHOD_CC            = 'cc_card';
+    const SOLUTION_INTERNAL     = 'internal';
+    const SOLUTION_EXTERNAL     = 'external';
+    const APM_METHOD_CC         = 'cc_card';
     
     const PAYMETNS_SUPPORT_REFUND = ['cc_card', 'apmgw_expresscheckout'];
 

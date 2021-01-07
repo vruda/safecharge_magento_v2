@@ -31,8 +31,6 @@ class GetMerchantPaymentMethods extends AbstractRequest implements RequestInterf
     protected $store;
     
     /**
-     * OpenOrder constructor.
-     *
      * @param SafechargeLogger $safechargeLogger
      * @param Config           $config
      * @param Curl             $curl
@@ -55,8 +53,8 @@ class GetMerchantPaymentMethods extends AbstractRequest implements RequestInterf
             $responseFactory
         );
 
-        $this->requestFactory    = $requestFactory;
-        $this->cart                = $cart;
+        $this->requestFactory	= $requestFactory;
+        $this->cart             = $cart;
         $this->store            = $store;
     }
 
@@ -81,42 +79,6 @@ class GetMerchantPaymentMethods extends AbstractRequest implements RequestInterf
     }
 
     /**
-     * @param  string|null $countryCode
-     * @return $this
-     */
-    public function setCountryCode($countryCode = null)
-    {
-        $this->countryCode = (string)$countryCode;
-        return $this;
-    }
-    
-    /**
-     * @param  array|null $setBillingAddress
-     * @return $this
-     */
-    public function setBillingAddress($setBillingAddress = [])
-    {
-        $this->billingAddress = $setBillingAddress;
-        return $this;
-    }
-    
-    /**
-     * @return string
-     */
-    public function getCountryCode()
-    {
-        return $this->countryCode;
-    }
-    
-    /**
-     * @return array
-     */
-    public function getBillingAddress()
-    {
-        return $this->billingAddress;
-    }
-    
-    /**
      * @return AbstractResponse
      * @throws \Magento\Framework\Exception\LocalizedException
      * @throws PaymentException
@@ -127,7 +89,7 @@ class GetMerchantPaymentMethods extends AbstractRequest implements RequestInterf
 
         return $this
             ->getResponseHandler()
-            ->process($this->getCountryCode());
+            ->process();
     }
 
     /**
@@ -137,38 +99,18 @@ class GetMerchantPaymentMethods extends AbstractRequest implements RequestInterf
      */
     protected function getParams()
     {
-        $country_code   = $this->getCountryCode() ?: $this->config->getQuoteCountryCode();
-        $tokenRequest   = $this->requestFactory->create(AbstractRequest::OPEN_ORDER_METHOD);
+        $country_code	= $this->config->getQuoteCountryCode();
+		$tokenRequest   = $this->requestFactory->create(AbstractRequest::OPEN_ORDER_METHOD);
+		$tokenResponse	= $tokenRequest->process();
+        $languageCode	= 'en';
         
-        // pass new billing data
-        $tokenRequest->setBillingAddress($this->getBillingAddress());
-        $tokenRequest->setCountryCode($this->getCountryCode());
-        
-        $tokenResponse    = $tokenRequest->process();
-        
-        if (empty($country_code)) {
-            try {
-                
-                $billingAddress = $this->cart->getQuote()->getBillingAddress()->getData();
-                
-                if (!empty($billingAddress)) {
-                    $country_code = $country_code;
-                }
-            } catch (Exception $e) {
-                $this->config->createLog(
-                    $e->getMessage(),
-                    __FILE__ . ' ' . __FUNCTION__ . '() Exception:'
-                );
-            }
-        }
-        
-        $languageCode = 'en';
-        if ($this->store && $this->store->getLocaleCode()) {
+		if ($this->store && $this->store->getLocaleCode()) {
             $languageCode = $this->store->getLocaleCode();
         }
         
         $currencyCode = $this->config->getQuoteBaseCurrency();
-        if ((empty($currencyCode) || is_null($currencyCode))
+        if (
+			(empty($currencyCode) || is_null($currencyCode))
             && $this->cart
         ) {
             $currencyCode = empty($this->cart->getQuote()->getOrderCurrencyCode())
@@ -176,10 +118,10 @@ class GetMerchantPaymentMethods extends AbstractRequest implements RequestInterf
         }
 		
         $params = [
-            'sessionToken'    => $tokenResponse->sessionToken,
-            "currencyCode"    => $currencyCode,
-            "countryCode"    => $country_code,
-            "languageCode"    => $languageCode,
+            'sessionToken'	=> $tokenResponse->sessionToken,
+            "currencyCode"  => $currencyCode,
+            "countryCode"   => $country_code,
+            "languageCode"  => $languageCode,
         ];
 
         $params = array_merge_recursive(parent::getParams(), $params);

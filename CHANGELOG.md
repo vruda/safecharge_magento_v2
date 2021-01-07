@@ -4,6 +4,7 @@
 
 ### 2.1.3.x
 ```
+	* Call UpdateOrder before each OpenOrder try. Also update the Order when click on Pay button.
 	* When we receive DMN for Auth or Sale compare the Order amount, if they do not match, add note and set Order status to "Suspected Fraud".
 	* When we receive DMN for Refund/Credit search for order only once, without sleep.
 	* When we receive DMN for Auth or Settle  with more than an hour delay, search for order only once, without sleep.

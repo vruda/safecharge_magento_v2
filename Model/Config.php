@@ -658,20 +658,80 @@ class Config
 
     public function getQuoteCountryCode()
     {
-        $quote = $this->checkoutSession->getQuote();
-        $billing = ($quote) ? $quote->getBillingAddress() : null;
-        $countryCode =  ($billing) ? $billing->getCountryId() : null;
-        if (!$countryCode) {
-            $shipping = ($quote) ? $quote->getShippingAddress() : null;
-            $countryCode =  ($shipping && $shipping->getSameAsBilling()) ? $shipping->getCountryId() : null;
+        $quote			= $this->checkoutSession->getQuote();
+        $billing		= ($quote) ? $quote->getBillingAddress() : null;
+        $countryCode	= ($billing) ? $billing->getCountryId() : null;
+        
+		if (!$countryCode) {
+            $shipping		= ($quote) ? $quote->getShippingAddress() : null;
+            $countryCode	= ($shipping && $shipping->getSameAsBilling()) ? $shipping->getCountryId() : null;
         }
-        return $countryCode;
+		
+		if (!$countryCode) {
+			$countryCode = $this->getDefaultCountry();
+		}
+        
+		return $countryCode;
     }
 
     public function getQuoteBaseCurrency()
     {
         $quote = $this->checkoutSession->getQuote()->getBaseCurrencyCode();
     }
+	
+	public function getQuoteBillingAddress() {
+		$quote			= $this->checkoutSession->getQuote();
+		$billingAddress	= $quote->getBillingAddress();
+			
+		$b_f_name = $billingAddress->getFirstname();
+        if (empty($b_f_name)) {
+            $b_f_name = $quote->getCustomerFirstname();
+        }
+		
+		$b_l_name = $billingAddress->getLastname();
+        if (empty($b_l_name)) {
+            $b_l_name = $quote->getCustomerLastname();
+        }
+		
+		$billing_country = $billingAddress->getCountry();
+        if (empty($billing_country)) {
+            $billing_country = $this->getQuoteCountryCode();
+        }
+        if (empty($billing_country)) {
+            $billing_country = $this->getDefaultCountry();
+        }
+		
+		return [
+			"firstName"	=> $b_f_name,
+			"lastName"  => $b_l_name,
+			"address"   => $billingAddress->getStreetFull(),
+			"phone"     => $billingAddress->getTelephone(),
+			"zip"       => $billingAddress->getPostcode(),
+			"city"      => $billingAddress->getCity(),
+			'country'   => $billing_country,
+			'email'     => $this->getUserEmail(),
+		];
+	}
+	
+	public function getQuoteShippingAddress() {
+		$shipping_address	= $this->checkoutSession->getQuote()->getShippingAddress();
+        $shipping_email		= $shipping_address->getEmail();
+		
+        if (empty($shipping_email)) {
+            $shipping_email = $this->getUserEmail();
+        }
+		
+		return [
+			"firstName"	=> $shipping_address->getFirstname(),
+			"lastName"  => $shipping_address->getLastname(),
+			"address"   => $shipping_address->getStreetFull(),
+			"phone"     => $shipping_address->getTelephone(),
+			"zip"		=> $shipping_address->getPostcode(),
+			"city"      => $shipping_address->getCity(),
+			'country'   => $shipping_address->getCountry(),
+			'email'     => $shipping_email,
+		];
+	}
 	
 	public function getNuveiUseCcOnly()
 	{

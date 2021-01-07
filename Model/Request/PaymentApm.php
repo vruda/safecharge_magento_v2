@@ -41,8 +41,6 @@ class PaymentApm extends AbstractRequest implements RequestInterface
     private $checkoutSession;
 
     /**
-     * OpenOrder constructor.
-     *
      * @param SafechargeLogger $safechargeLogger
      * @param Config           $config
      * @param Curl             $curl
@@ -151,11 +149,13 @@ class PaymentApm extends AbstractRequest implements RequestInterface
         $reservedOrderId = $quotePayment->getAdditionalInformation(Payment::TRANSACTION_ORDER_ID)
             ?: $this->config->getReservedOrderId();
 		
-		$session_token = $quotePayment->getAdditionalInformation('nuvei_session_token');
+		$order_data = $quotePayment->getAdditionalInformation(Payment::ORDER_DATA);
 		
-		if(empty($session_token)) {
-			$this->config->createLog($session_token, 'PaymentAPM - quote session token is missing, try to get new one.');
+		if(empty($order_data['sessionToken'])) {
 			$session_token = $tokenResponse->getToken();
+		}
+		else {
+			$session_token = $order_data['sessionToken'];
 		}
 		
         $params = array_merge_recursive(

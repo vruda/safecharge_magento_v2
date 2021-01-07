@@ -120,20 +120,20 @@ define(
 				
                 self._super()
                     .observe([
-			'apmMethods',
-			'UPOs',
+						'apmMethods',
+						'UPOs',
                         'chosenApmMethod',
                         'countryId'
                     ]);
                     
-		if(quote.paymentMethod._latestValue != null) {
-			self.scPaymentMethod = quote.paymentMethod._latestValue.method;
+				if(quote.paymentMethod._latestValue != null) {
+					self.scPaymentMethod = quote.paymentMethod._latestValue.method;
 
-			self.scUpdateQuotePM();
-		}
-		    
-	    	self.scOrderTotal = parseFloat(quote.totals().base_grand_total).toFixed(2);
-		self.scBillingCountry = quote.billingAddress().countryId;
+					self.scUpdateQuotePM();
+				}
+
+				self.scOrderTotal = parseFloat(quote.totals().base_grand_total).toFixed(2);
+				self.scBillingCountry = quote.billingAddress().countryId;
 
                 quote.billingAddress.subscribe(self.scBillingAddrChange, this, 'change');
                 quote.totals.subscribe(self.scTotalsChange, this, 'change');
@@ -163,9 +163,9 @@ define(
 
             getData: function() {
 				var pmData = {
-					method			: self.item.method,
-						additional_data		: {
-                        chosen_apm_method	: self.chosenApmMethod(),
+					method : self.item.method,
+					additional_data	: {
+                        chosen_apm_method : self.chosenApmMethod(),
                     },
 				};
 				
@@ -184,10 +184,14 @@ define(
                 return window.checkoutConfig.payment[self.getCode()].getUPOsUrl;
             },
 			
+			getUpdateOrderUrl: function() {
+				return window.checkoutConfig.payment[self.getCode()].getUpdateOrderUrl;
+			},
+			
 			getUpdateQuotePM: function() {
                 return window.checkoutConfig.payment[self.getCode()].updateQuotePM;
             },
-
+			
             getMerchantPaymentMethodsUrl: function() {
                 return window.checkoutConfig.payment[self.getCode()].getMerchantPaymentMethodsUrl;
             },
@@ -234,8 +238,8 @@ define(
                     dataType: "json",
                     url: self.getMerchantPaymentMethodsUrl(),
                     data: {
-                        countryCode	: self.scBillingCountry,
-						grandTotal	: self.scOrderTotal
+//                        countryCode	: self.scBillingCountry,
+//						grandTotal	: self.scOrderTotal
                     },
                     cache: false,
                     showLoader: true
@@ -275,7 +279,7 @@ define(
 					self.isPlaceOrderActionAllowed(false);
                 });
             },
-
+			
             placeOrder: function(data, event) {
 				console.log('placeOrder()');
 				
@@ -285,7 +289,37 @@ define(
                     event.preventDefault();
                 }
 				
-                if(self.chosenApmMethod() === 'cc_card') {
+				jQuery.ajax({
+					dataType: 'json',
+					url: self.getUpdateOrderUrl()
+				})
+					.fail(function(){
+						self.validateOrderData();
+					})
+					.done(function(resp) {
+						console.log(resp);
+
+						if(
+							resp.hasOwnProperty('sessionToken')
+							&& '' != resp.sessionToken
+							&& resp.sessionToken != scData.sessionToken
+						) {
+							scData.sessionToken = resp.sessionToken;
+
+							sfc			= SafeCharge(scData);
+							scFields	= sfc.fields({
+								locale: checkoutConfig.payment[self.getCode()].locale
+							});
+						}
+
+						self.validateOrderData();
+					});
+            },
+            
+			validateOrderData: function() {
+				console.log('validateOrderData()');
+				
+				if(self.chosenApmMethod() === 'cc_card') {
 					if($('#safecharge_cc_owner').val() == '') {
 						$('#safecharge_cc_owner').css('box-shadow', 'red 0px 0px 3px 1px');
 						$('#cc_name_error_msg').show();
@@ -331,12 +365,10 @@ define(
 						return;
 					}
 					
-//					$('.loading-mask').css('display', 'block');
-					
 					if(null == cardNumber) {
 						alert($.mage.__('Unexpected error! If the fields of the selected payment method do not reload in few seconds, please reload the page!'));
 						$('body').trigger('processStop');
-//						
+						
 						return;
 					}
 					
@@ -398,8 +430,8 @@ define(
                 else {
                     self.continueWithOrder();
                 }
-            },
-            
+			},
+			
             continueWithOrder: function(transactionId) {
 				console.log('continueWithOrder()');
 				
@@ -655,7 +687,7 @@ define(
 				});
 
 				return isValid;
-		   },
+			},
 		   
 			scCleanCard: function () {
 				console.log('scCleanCard()');

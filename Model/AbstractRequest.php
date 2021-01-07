@@ -24,13 +24,14 @@ abstract class AbstractRequest extends AbstractApi
     /**
      * Payment gateway methods.
      */
-    const GET_SESSION_TOKEN_METHOD              = 'getSessionToken';
+    //const GET_SESSION_TOKEN_METHOD              = 'getSessionToken';
     const PAYMENT_SETTLE_METHOD                 = 'settleTransaction';
     const CREATE_USER_METHOD                    = 'createUser';
     const GET_USER_DETAILS_METHOD               = 'getUserDetails';
     const PAYMENT_REFUND_METHOD                 = 'refundTransaction';
     const PAYMENT_VOID_METHOD                   = 'voidTransaction';
     const OPEN_ORDER_METHOD                     = 'openOrder';
+    const UPDATE_ORDER_METHOD                   = 'updateOrder';
     const PAYMENT_APM_METHOD                    = 'paymentAPM';
     const GET_MERCHANT_PAYMENT_METHODS_METHOD   = 'getMerchantPaymentMethods';
     const GET_UPOS_METHOD						= 'getUserUPOs';
@@ -423,22 +424,24 @@ abstract class AbstractRequest extends AbstractApi
      * @return AbstractRequest
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    protected function sendRequest($continue_process = false)
+    protected function sendRequest($continue_process = false, $accept_error_status = false)
     {
-        $endpoint    = $this->getEndpoint();
+        $endpoint	= $this->getEndpoint();
         $headers    = $this->getHeaders();
-        $params        = $this->prepareParams();
+        $params     = $this->prepareParams();
 
         $this->curl->setHeaders($headers);
 
-        $this->config->createLog($endpoint, 'Request Endpoint:');
-        $this->config->createLog($params, 'Request params:');
-        
+        $this->config->createLog([
+			'Request Endpoint'	=> $endpoint,
+			'Request params'	=> $params
+		]);
+		
         $this->curl->post($endpoint, $params);
 		
 		if($continue_process) {
 			// if success return array with the response parameters
-			return $this->checkResponse();
+			return $this->checkResponse($accept_error_status);
 		}
 		
         return $this;
@@ -613,14 +616,18 @@ abstract class AbstractRequest extends AbstractApi
         return $quoteData;
     }
 	
-	protected function checkResponse()
+	protected function checkResponse($accept_error_status)
     {
 		$resp_body		= json_decode($this->curl->getBody(), true);
 		$requestStatus	= $this->getResponseStatus($resp_body);
 		
-        $this->config->createLog($resp_body, 'Response data:');
+        $this->config->createLog([
+			'Request Status'	=> $requestStatus,
+			'Response data'		=> $resp_body
+		]);
 
-        if ($requestStatus === false) {
+		// we do not want exception when UpdateOrder return Error
+        if ($accept_error_status === false && $requestStatus === false) {
             throw new PaymentException($this->getErrorMessage(
                 !empty($resp_body['reason']) ? $resp_body['reason'] : ''
             ));

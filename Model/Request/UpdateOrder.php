@@ -11,12 +11,11 @@ use Safecharge\Safecharge\Model\RequestInterface;
 use Safecharge\Safecharge\Model\Response\Factory as ResponseFactory;
 use Magento\Framework\Exception\PaymentException;
 use Safecharge\Safecharge\Model\Request\Factory as RequestFactory;
-use Safecharge\Safecharge\Model\Payment;
 
 /**
  * Safecharge Safecharge open order request model.
  */
-class OpenOrder extends AbstractRequest implements RequestInterface
+class UpdateOrder extends AbstractRequest implements RequestInterface
 {
     /**
      * @var RequestFactory
@@ -29,13 +28,7 @@ class OpenOrder extends AbstractRequest implements RequestInterface
     protected $orderData;
     protected $cart;
     
-    private $billingAddress; // array
-    private $countryCode; // string
-	private $requestParams = [];
-
     /**
-     * OpenOrder constructor.
-     *
      * @param SafechargeLogger $safechargeLogger
      * @param Config           $config
      * @param Curl             $curl
@@ -68,9 +61,20 @@ class OpenOrder extends AbstractRequest implements RequestInterface
      */
     protected function getRequestMethod()
     {
-        return self::OPEN_ORDER_METHOD;
+        return self::UPDATE_ORDER_METHOD;
     }
 
+    /**
+     * @param array $orderData
+     *
+     * @return OpenOrder
+     */
+    public function setOrderData(array $orderData)
+    {
+        $this->orderData = $orderData;
+        return $this;
+    }
+    
     /**
      * @return AbstractResponse
      * @throws \Magento\Framework\Exception\LocalizedException
@@ -78,45 +82,21 @@ class OpenOrder extends AbstractRequest implements RequestInterface
      */
     public function process()
     {
-		// first try to update order
-		$quote		= $this->cart->getQuote();
-		$order_data	= $quote->getPayment()->getAdditionalInformation(Payment::ORDER_DATA);
+		$req_resp = $this->sendRequest(true, true);
 		
-		// first try - update order
-		if(!empty($order_data)) {
-			$update_order_request = $this->requestFactory->create(AbstractRequest::UPDATE_ORDER_METHOD);
-
-			$req_resp = $update_order_request
-				->setOrderData($order_data)
-				->process();
-		}
-		
-		// if UpdateOrder fails - continue with OpenOrder
-		if(empty($req_resp['status']) || 'success' != strtolower($req_resp['status'])) {
-			$req_resp = $this->sendRequest(true);
-		}
-		
-		$this->orderId      = $req_resp['orderId'];
-        $this->sessionToken = $req_resp['sessionToken'];
-        $this->ooAmount     = $req_resp['merchantDetails']['customField1'];
+//		$this->orderId      = $req_resp['orderId'];
+//        $this->sessionToken = $req_resp['sessionToken'];
+//        $this->ooAmount     = $req_resp['merchantDetails']['customField1'];
 
 		// save the session token in the Quote
-		$quote->getPayment()->setAdditionalInformation(
-            Payment::ORDER_DATA,
-            [
-				'sessionToken'		=> $req_resp['sessionToken'],
-			//	'amount'			=> $this->requestParams['amount'],
-				'userTokenId'		=> $req_resp['userTokenId'],
-				'clientRequestId'	=> $req_resp['clientRequestId'],
-				'orderId'			=> $req_resp['orderId'],
-			//	'merchantDetails'	=> $req_resp['merchantDetails'],
-			//	'billingAddress'	=> $this->requestParams['billingAddress'],
-			//	'items'				=> '', // TODO
-			]
-        );
-		$this->cart->getQuote()->save();
+//		$this->cart->getQuote()->getPayment()->unsAdditionalInformation('nuvei_session_token');
+//		$this->cart->getQuote()->getPayment()->setAdditionalInformation(
+//            'nuvei_session_token',
+//            $req_resp['sessionToken']
+//        );
+//		$this->cart->getQuote()->save();
 		
-        return $this;
+        return $req_resp;
     }
     
     /**
@@ -138,25 +118,27 @@ class OpenOrder extends AbstractRequest implements RequestInterface
     protected function getParams()
     {
         if (null === $this->cart || empty($this->cart)) {
+			$this->config->createLog('UpdateOrder Error - There is no Cart data.');
+			
             throw new PaymentException(__('There is no Cart data.'));
         }
-		
-		$quote		= $this->cart->getQuote();
-		$items		= $quote->getItems();
-		$items_data	= [];
-		
+        
 		// check in the cart for Nuvei Payment Plan
+		$quote		= $this->cart->getQuote();
+		$items		= $this->cart->getQuote()->getItems();
+		$items_data	= [];
 		$subs_data	= [];
 		
 		// iterate over Items and search for Subscriptions
 		foreach($items as $item) {
+			$product = $item->getProduct();
+			
 			$items_data[$item->getId()] = [
 				'quantity'	=> $item->getQty(),
 				'price'		=> $item->getPrice(),
 			];
 			
 			/*
-			$product	= $item->getProduct();
 			$attributes	= $product->getAttributes();
 			
 			// if subscription is not enabled continue witht the next product
@@ -195,44 +177,50 @@ class OpenOrder extends AbstractRequest implements RequestInterface
 		
 		$this->config->setNuveiUseCcOnly(!empty($subs_data) ? true : false);
 		
-		$billingAddress = $this->config->getQuoteBillingAddress();
-        
-        $this->requestParams = array_merge_recursive(
-            [
-                'userTokenId'		=> $billingAddress['email'],
-                'clientUniqueId'    => $this->config->getCheckoutSession()->getQuoteId(),
-                
-                'currency'          => $quote->getOrderCurrencyCode() ?: $quote->getStoreCurrencyCode(),
-                'amount'            => (string) number_format($quote->getGrandTotal(), 2, '.', ''),
-                'deviceDetails'     => $this->config->getDeviceDetails(),
-                'shippingAddress'   => $this->config->getQuoteShippingAddress(),
-                'billingAddress'    => $billingAddress,
-                
-                'urlDetails'        => [
-                    'successUrl'        => $this->config->getCallbackSuccessUrl(),
-                    'failureUrl'        => $this->config->getCallbackErrorUrl(),
-                    'pendingUrl'        => $this->config->getCallbackPendingUrl(),
-                    'backUrl'           => $this->config->getBackUrl(),
-                    'notificationUrl'   => $this->config->getCallbackDmnUrl(),
-                ],
-                
-                'paymentOption'      => ['card' => ['threeD' => ['isDynamic3D' => 1]]],
-                'transactionType'    => $this->config->getPaymentAction(),
-                
-                'merchantDetails'    => [
-                    'customField1' => (string) number_format($quote->getGrandTotal(), 2, '.', ''), // pass amount
-                    'customField2' => json_encode($subs_data), // subscription data
-				//	'customField3' => 'Magento v.' . $this->config->getMagentoVersion(), // pass it in AbstractRequest
-					'customField4' => time(), // time when we create the request
-					'customField5' => json_encode($items_data), // list of Order items
-                ],
-            ],
-            parent::getParams()
-        );
-        
-        $this->requestParams['userDetails'] = $this->requestParams['billingAddress'];
-        
-        return $this->requestParams;
+		$currency = $quote->getOrderCurrencyCode();
+		if(empty($currency)) {
+			$currency = $quote->getStoreCurrencyCode();
+		}
+		if(empty($currency)) {
+			$currency = $this->config->getQuoteBaseCurrency();
+		}
+		
+		$params = array_merge_recursive(
+			parent::getParams(),
+			[
+				'currency'			=> $currency,
+				'amount'			=> (string) number_format($quote->getGrandTotal(), 2, '.', ''),
+				'billingAddress'	=> $this->config->getQuoteBillingAddress(),
+				'shippingAddress'   => $this->config->getQuoteShippingAddress(),
+				
+				'items'				=> [[
+					'name'		=> 'magento_order',
+					'price'		=> (string) number_format($quote->getGrandTotal(), 2, '.', ''),
+					'quantity'	=> 1,
+				]],
+				'merchantDetails'	=> [
+					'customField1'		=> (string) number_format($quote->getGrandTotal(), 2, '.', ''), // pass amount
+					'customField2'		=> json_encode($subs_data), // subscription data
+				//	'customField3'		=> 'Magento v.' . $this->config->getMagentoVersion(), // pass it in AbstractRequest
+					'customField4'		=> time(), // time when we create the request
+					'customField5'		=> json_encode($items_data), // list of Order items
+				],
+			]
+		);
+		
+		$params['userDetails']		= $params['billingAddress'];
+		$params['sessionToken']		= $this->orderData['sessionToken'];
+		$params['orderId']			= $this->orderData['orderId'] ?: '';
+		$params['userTokenId']		= $this->orderData['userTokenId'] ?: '';
+		$params['clientRequestId']	= $this->orderData['clientRequestId'] ?: '';
+		
+		$params['checksum'] = hash(
+			$this->config->getHash(),
+			$this->config->getMerchantId() . $this->config->getMerchantSiteId() . $params['clientRequestId']
+				. $params['amount'] . $params['currency'] . $params['timeStamp'] . $this->config->getMerchantSecretKey()
+		);
+		
+        return $params;
     }
 
     /**

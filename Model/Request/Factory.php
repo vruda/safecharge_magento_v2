@@ -18,12 +18,13 @@ class Factory
      * @var array
      */
     private $invokableClasses = [
-        AbstractRequest::GET_SESSION_TOKEN_METHOD               => \Safecharge\Safecharge\Model\Request\Token::class,
+        //AbstractRequest::GET_SESSION_TOKEN_METHOD               => \Safecharge\Safecharge\Model\Request\Token::class,
         AbstractRequest::CREATE_USER_METHOD                     => \Safecharge\Safecharge\Model\Request\CreateUser::class,
         AbstractRequest::GET_USER_DETAILS_METHOD                => \Safecharge\Safecharge\Model\Request\GetUserDetails::class,
         AbstractRequest::OPEN_ORDER_METHOD                      => \Safecharge\Safecharge\Model\Request\OpenOrder::class,
+        AbstractRequest::UPDATE_ORDER_METHOD                    => \Safecharge\Safecharge\Model\Request\UpdateOrder::class,
         AbstractRequest::PAYMENT_APM_METHOD                     => \Safecharge\Safecharge\Model\Request\PaymentApm::class,
-        AbstractRequest::GET_MERCHANT_PAYMENT_METHODS_METHOD    => \Safecharge\Safecharge\Model\Request\GetMerchantPaymentMethods::class,
+        AbstractRequest::GET_MERCHANT_PAYMENT_METHODS_METHOD	=> \Safecharge\Safecharge\Model\Request\GetMerchantPaymentMethods::class,
         AbstractRequest::GET_MERCHANT_PAYMENT_PLANS_METHOD      => \Safecharge\Safecharge\Model\Request\GetPlansList::class,
         AbstractRequest::CREATE_SUBSCRIPTION_METHOD				=> \Safecharge\Safecharge\Model\Request\CreateSubscription::class,
     ];

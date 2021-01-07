@@ -394,19 +394,6 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
                     ->setStatus('pending');
             }
 			
-			// Order Amount check
-//            if (in_array($tr_type_param, ['auth', 'sale']) 
-//                && round(floatval($order->getBaseGrandTotal()), 2) != round(floatval($params['totalAmount']), 2)
-//            ) {
-//                $msg = 'The DMN total amount (' . round(floatval($params['totalAmount']), 2)
-//                    .') is different than Order total amount (' . round(floatval($order->getBaseGrandTotal()), 2)
-//                    . '). The process stops here!';
-//                
-//                $this->moduleConfig->createLog($msg);
-////                $jsonOutput->setData($msg);
-////                return $jsonOutput;
-//            }
-            
 			// compare them later
 			$order_total	= round(floatval($order->getBaseGrandTotal()), 2);
 			$dmn_total		= round(floatval($params['totalAmount']), 2);
@@ -444,9 +431,9 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
 					$orderPayment->setAdditionalInformation(
                         Payment::AUTH_PARAMS,
                         [
-                            'TransactionID'    => $params['TransactionID'],
-                            'AuthCode'        => $params['AuthCode'],
-                            'totalAmount'        => $params['totalAmount'],
+                            'TransactionID'	=> $params['TransactionID'],
+                            'AuthCode'      => $params['AuthCode'],
+                            'totalAmount'   => $params['totalAmount'],
                         ]
                     );
                     
@@ -538,19 +525,17 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
 						$order->canInvoice()
                         && (
                             'sale' == $tr_type_param // Sale flow
-                            || (
+                            || ( // APMs flow
                                 $params["order"] == $params["merchant_unique_id"]
                                 && $params["payment_method"] != 'cc_card'
-                            ) // APMs flow
-                            || (
+                            )
+                            || ( // CPanel Settle
                                 !empty($params["merchant_unique_id"])
                                 && $params["merchant_unique_id"] != $params["order"]
-                            ) // CPanel Settle
+                            )
                         )
                     ) {
 						// create Invoicees and Transactions for non-Magento actions
-                        $this->moduleConfig->createLog('DMN - we can create invoice.');
-                        
                         // Prepare the invoice
                         $invoice = $this->invoiceService->prepareInvoice($order);
                         $invoice->setRequestedCaptureCase(Invoice::CAPTURE_ONLINE)
@@ -607,7 +592,6 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
 				elseif (in_array($tr_type_param, ['void', 'voidcredit'])) {
                     $transactionType        = Transaction::TYPE_VOID;
                     $sc_transaction_type    = Payment::SC_VOIDED;
-//                    $is_closed                = true;
                     
                     $order->setData('state', Order::STATE_CLOSED);
                 }

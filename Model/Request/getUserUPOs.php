@@ -25,8 +25,6 @@ class getUserUPOs extends AbstractRequest implements RequestInterface
     protected $store;
     
     /**
-     * OpenOrder constructor.
-     *
      * @param SafechargeLogger $safechargeLogger
      * @param Config           $config
      * @param Curl             $curl
