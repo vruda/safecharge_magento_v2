@@ -4,6 +4,9 @@
 
 ### 2.1.3.x
 ```
+	* Added product Id, price and quantity in OpenOrder and UpdateOrder in merchantDetails->customField5.
+	* The Order amount and currency were removed from the webSDK request.
+	* After declined transaction do not get new Session token and do not reload the sdk fields.
 	* Call UpdateOrder before each OpenOrder try. Also update the Order when click on Pay button.
 	* When we receive DMN for Auth or Sale compare the Order amount, if they do not match, add note and set Order status to "Suspected Fraud".
 	* When we receive DMN for Refund/Credit search for order only once, without sleep.

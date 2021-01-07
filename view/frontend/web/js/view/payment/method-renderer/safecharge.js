@@ -375,8 +375,6 @@ define(
 					// we use variable just for debug
 					var payParams = {
 						sessionToken		: scData.sessionToken,
-						currency			: window.checkoutConfig.payment[self.getCode()].currency,
-						amount				: parseFloat(quote.totals().base_grand_total).toFixed(2),
 						cardHolderName		: document.getElementById('safecharge_cc_owner').value,
 						paymentOption		: cardNumber,
 						webMasterId			: window.checkoutConfig.payment[self.getCode()].webMasterId,
@@ -392,9 +390,7 @@ define(
                             }
                             else if(resp.result == 'DECLINED') {
 								if(!alert($.mage.__('Your Payment was DECLINED. Please try another payment method!'))) {
-									self.scCleanCard();
-									self.initFields();
-//									$('.loading-mask').css('display', 'none');
+									$('body').trigger('processStop');
 								}
                             }
                             else {
