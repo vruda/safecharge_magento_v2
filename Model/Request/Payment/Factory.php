@@ -19,8 +19,8 @@ class Factory
      * @var array
      */
     private $invokableClasses = [
-        AbstractRequest::PAYMENT_SETTLE_METHOD  => \Safecharge\Safecharge\Model\Request\Payment\Settle::class,
-        AbstractRequest::PAYMENT_REFUND_METHOD    => \Safecharge\Safecharge\Model\Request\Payment\Refund::class,
+        AbstractRequest::PAYMENT_SETTLE_METHOD	=> \Safecharge\Safecharge\Model\Request\Payment\Settle::class,
+        AbstractRequest::PAYMENT_REFUND_METHOD  => \Safecharge\Safecharge\Model\Request\Payment\Refund::class,
         AbstractRequest::PAYMENT_VOID_METHOD    => \Safecharge\Safecharge\Model\Request\Payment\Cancel::class,
     ];
 

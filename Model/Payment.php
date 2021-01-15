@@ -27,6 +27,8 @@ use Safecharge\Safecharge\Model\Request\Payment\Factory as PaymentRequestFactory
 
 /**
  * Safecharge Safecharge payment model.
+ * 
+ * * TODO - Cc class is deprecated. Use \Magento\Payment\Model\MethodInterface instead.
  */
 class Payment extends Cc implements TransparentInterface
 {
@@ -53,7 +55,6 @@ class Payment extends Cc implements TransparentInterface
     const TRANSACTION_AUTH_CODE_KEY             = 'authorization_code';
     const TRANSACTION_ID                        = 'transaction_id';
     const TRANSACTION_USER_PAYMENT_OPTION_ID    = 'user_payment_option_id';
-//    const TRANSACTION_SESSION_TOKEN             = 'session_token';
     const TRANSACTION_PAYMENT_SOLUTION          = 'payment_solution';
     const TRANSACTION_EXTERNAL_PAYMENT_METHOD   = 'external_payment_method';
     const TRANSACTION_STATUS                    = 'sc_status';
@@ -183,11 +184,6 @@ class Payment extends Cc implements TransparentInterface
      * @var ModuleConfig
      */
     private $moduleConfig;
-
-    /**
-     * @var PrivateDataKeysProvider
-     */
-//    private $privateDataKeysProvider;
 
     /**
      * @var CheckoutSession
@@ -342,6 +338,8 @@ class Payment extends Cc implements TransparentInterface
      * @throws \Magento\Framework\Exception\LocalizedException
      *
      * @api
+	 * 
+	 * TODO this method create the request too early. Use invoice observer, so can get the Invoice ID.
      */
     public function capture(InfoInterface $payment, $amount)
     {

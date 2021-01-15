@@ -3,9 +3,7 @@
 namespace Safecharge\Safecharge\Model\Redirect;
 
 use Magento\Checkout\Model\Session as CheckoutSession;
-use Magento\Quote\Model\Quote;
 use Safecharge\Safecharge\Model\Config as ModuleConfig;
-use Safecharge\Safecharge\Model\Payment;
 use Magento\Framework\App\Request\Http as Http;
 
 /**

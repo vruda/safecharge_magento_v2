@@ -205,7 +205,7 @@ class Config
                 $d = $data ? 'true' : 'false';
             }
         } else {
-            $d .= 'Data is Empty.';
+            $d = 'Data is Empty.';
         }
 		
 		$string .= '[v.' . $this->moduleList->getOne(self::MODULE_NAME)['setup_version'] . '] | ';

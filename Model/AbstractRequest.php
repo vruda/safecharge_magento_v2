@@ -274,13 +274,15 @@ abstract class AbstractRequest extends AbstractApi
         $params = [
             'merchantId'        => $this->config->getMerchantId(),
             'merchantSiteId'    => $this->config->getMerchantSiteId(),
-            'clientRequestId'    => (string)$this->getRequestId(),
-            'timeStamp'            => date('YmdHis'),
-            'webMasterId'        => $this->config->getSourcePlatformField(),
+            'clientRequestId'   => (string)$this->getRequestId(),
+            'timeStamp'         => date('YmdHis'),
+            'webMasterId'       => $this->config->getSourcePlatformField(),
+			'sourceApplication'	=> $this->config->getSourceApplication(),
             'encoding'            => 'UTF-8',
-			'merchantDetails'    => [
+			'merchantDetails'   => [
 				'customField3' => 'Magento v.' . $this->config->getMagentoVersion(), // Magento version
 			],
+			
         ];
 
         return $params;
@@ -678,7 +680,7 @@ abstract class AbstractRequest extends AbstractApi
     {
         $errorReason = $this->getErrorReason();
         if ($errorReason !== false) {
-            return __('Request to payment gateway failed. Details: "%1".', $errorReason);
+            return __('Request to payment gateway failed. Details: %1.', $errorReason);
         } elseif (!empty($msg)) {
             return __($msg);
         }

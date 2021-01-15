@@ -2,13 +2,11 @@
 
 namespace Safecharge\Safecharge\Model\Request;
 
-use Magento\Framework\Exception\PaymentException;
 use Magento\Sales\Model\Order\Payment as OrderPayment;
 use Safecharge\Safecharge\Lib\Http\Client\Curl;
 use Safecharge\Safecharge\Model\AbstractRequest;
 use Safecharge\Safecharge\Model\Config;
 use Safecharge\Safecharge\Model\Logger as SafechargeLogger;
-use Safecharge\Safecharge\Model\Payment;
 use Safecharge\Safecharge\Model\Request\Factory as RequestFactory;
 use Safecharge\Safecharge\Model\Request\Payment\Factory as PaymentRequestFactory;
 use Safecharge\Safecharge\Model\Response\Factory as ResponseFactory;

@@ -14,6 +14,12 @@ use Magento\Sales\Model\Order\Payment as OrderPayment;
  */
 class Register implements ObserverInterface
 {
+	private $config;
+	
+	public function __construct(\Safecharge\Safecharge\Model\Config $config) {
+		$this->config = $config;
+	}
+	
     /**
      * @param Observer $observer
      *
@@ -28,6 +34,8 @@ class Register implements ObserverInterface
         $payment = $order->getPayment();
 
         if ($payment->getMethod() !== Payment::METHOD_CODE) {
+			$this->config->createLog($payment->getMethod(), 'Invoice Register Observer Error - payment method is');
+			
             return $this;
         }
 
@@ -35,6 +43,8 @@ class Register implements ObserverInterface
         $invoice = $observer->getInvoice();
 
         if ($invoice->getState() !== Invoice::STATE_PAID) {
+			$this->config->createLog($invoice->getState(), 'Invoice Register Observer Error - $invoice state is');
+			
             return $this;
         }
 

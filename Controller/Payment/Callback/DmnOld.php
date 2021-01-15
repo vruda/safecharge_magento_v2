@@ -142,6 +142,9 @@ class DmnOld extends \Magento\Framework\App\Action\Action
 			
 			$this->validateChecksum($params, $orderIncrementId);
 			
+			// collect the info for the current transaction (action)
+			$curr_trans_info = [];
+			
 			# in case this is Subscription confirm DMN
 			/*
 			if(!empty($params['dmnType']) && 'subscription' == $params['dmnType']) {
@@ -321,7 +324,25 @@ class DmnOld extends \Magento\Framework\App\Action\Action
             // do not overwrite Order status END
 
             // add data to the Payment
-            $parent_trans_id = empty($params['relatedTransactionId']) ? null : $params['relatedTransactionId'];
+			// the new structure of the data
+			$ord_trans_addit_info = $orderPayment->getAdditionalInformation('nuvei');
+			$this->moduleConfig->createLog($ord_trans_addit_info, '$ord_trans_addit_info');
+			
+			if(empty($ord_trans_addit_info)) {
+				$ord_trans_addit_info = [];
+			}
+			
+			$curr_trans_info = [
+				Payment::TRANSACTION_ID							=> $params['TransactionID'],
+				Payment::TRANSACTION_AUTH_CODE_KEY				=> $params['AuthCode'] ?: '',
+				Payment::TRANSACTION_EXTERNAL_PAYMENT_METHOD	=> $params['payment_method'] ?: '',
+				Payment::TRANSACTION_STATUS						=> $params['Status'] ?: '',
+				Payment::TRANSACTION_TYPE						=> $params['transactionType'] ?: '',
+				'upo_id'										=> $params['userPaymentOptionId'] ?: '',
+			];
+			// the new structure of the data END
+			
+            $parent_trans_id = $params['relatedTransactionId'] ?: null;
             
             $orderPayment
                 ->setTransactionId($params['TransactionID'])
@@ -395,7 +416,7 @@ class DmnOld extends \Magento\Framework\App\Action\Action
 						$order->addStatusHistoryComment(
 							__('<b>Attention!</b> - There is a problem with the Order. The Order amount is ')
 								. $order->getOrderCurrencyCode() . ' '
-								. $order_total . __(', but the Authorized amount is ')
+								. $order_total . ', ' . __('but the Authorized amount is ')
 								. $params['currency'] . ' ' . $dmn_total,
 							$sc_transaction_type
 						);
@@ -446,9 +467,9 @@ class DmnOld extends \Magento\Framework\App\Action\Action
 					$orderPayment->setAdditionalInformation(
                         Payment::SALE_SETTLE_PARAMS,
                         [
-                            'TransactionID'    => $params['TransactionID'],
-                            'AuthCode'        => $params['AuthCode'],
-                            'totalAmount'        => $params['totalAmount'],
+                            'TransactionID'	=> $params['TransactionID'],
+                            'AuthCode'      => $params['AuthCode'],
+                            'totalAmount'   => $params['totalAmount'],
                         ]
                     );
 					
@@ -468,19 +489,17 @@ class DmnOld extends \Magento\Framework\App\Action\Action
                     if ('settle' == $tr_type_param
                         && ($inv_amount - round(floatval($params['totalAmount']), 2) > 0.00)
                     ) {
-                        $sc_transaction_type	= Payment::SC_PARTIALLY_SETTLED;
-                        $inv_amount             = round(floatval($params['totalAmount']), 2);
+//                        $sc_transaction_type	= Payment::SC_PARTIALLY_SETTLED;
+//                        $inv_amount             = round(floatval($params['totalAmount']), 2);
                         $is_partial_settle      = true;
                     }
-					
-					// amount check
-					if($order_total != $dmn_total) {
+					else if($order_total != $dmn_total) { // amount check for Sale only
 						$sc_transaction_type = 'fraud';
 						
 						$order->addStatusHistoryComment(
 							__('<b>Attention!</b> - There is a problem with the Order. The Order amount is ')
 								. $order->getOrderCurrencyCode() . ' '
-								. $order_total . __(', but the Paid amount is ')
+								. $order_total . ', ' . __('but the Paid amount is ')
 								. $params['currency'] . ' ' . $dmn_total,
 							$sc_transaction_type
 						);
@@ -489,16 +508,23 @@ class DmnOld extends \Magento\Framework\App\Action\Action
                     $orderPayment->setSaleSettleAmount($inv_amount);
                     
                     if (count($invCollection) > 0) {
-                        $this->moduleConfig->createLog('There is/are invoice/s');
+                        $this->moduleConfig->createLog('There is/are Invoice/s');
+						
+						$invoices = [];
                         
                         foreach ($order->getInvoiceCollection() as $invoice) {
+							$this->moduleConfig->createLog($invoice->getId(), 'Invoice ID');
+							
+							$invoices[] = $invoice->getId();
+							
                             $invoice
                                 ->setTransactionId($params['TransactionID'])
                                 ->pay()
                                 ->save();
                         }
+						
+						$curr_trans_info['invoice_id'] = max($invoices);
                     }
-                    
                     elseif (
 						$order->canInvoice()
                         && (
@@ -513,6 +539,8 @@ class DmnOld extends \Magento\Framework\App\Action\Action
                             )
                         )
                     ) {
+						$this->moduleConfig->createLog('We can create Invoice');
+						
 						// create Invoicees and Transactions for non-Magento actions
                         // Prepare the invoice
                         $invoice = $this->invoiceService->prepareInvoice($order);
@@ -541,6 +569,8 @@ class DmnOld extends \Magento\Framework\App\Action\Action
 							$order->setCanVoidPayment(true);
 							$orderPayment->setCanVoid(true);
                         }
+						
+						$curr_trans_info['invoice_id'] = $invoice->getId();
 						
 						// Save the invoice
                         $this->invoiceRepository->save($invoice);
@@ -596,19 +626,22 @@ class DmnOld extends \Magento\Framework\App\Action\Action
                 
 				if ($is_partial_settle) {
                     $order->addStatusHistoryComment(
-                        __("The <b>Partial Settle</b> request for amount of "
+                        __("The <b>Partial Settle</b> request for amount of ")
                             . "<b>" . $inv_amount . ' ' . $params['currency'] . "</b>, "
-                            . "returned <b>" . $params['Status'] . "</b> status.<br/>"
-                            . 'Transaction ID: ' . $params['TransactionID'] .', Related Transaction ID: ')
+                            . __("returned") . " <b>" . $params['Status'] . "</b> "
+							. __("status") . ".<br/>"
+                            . __('Transaction ID: ') . $params['TransactionID'] .', '
+							. __('Related Transaction ID: ')
                             . $params['relatedTransactionId'] . $refund_msg,
                         $sc_transaction_type
                     );
                 }
 				else {
                     $order->addStatusHistoryComment(
-                        __("The <b>{$params['transactionType']}</b> request returned <b>" . $params['Status'] . "</b> status."
-                            . '<br/>Transaction ID: ' . $params['TransactionID'] .', Related Transaction ID: ')
-                            . $params['relatedTransactionId'] . $refund_msg,
+						'<b>' . $params['transactionType'] . '</b> '
+						. __("request, response status is") . ' <b>' . $params['Status'] . '</b>.<br/>'
+                        . __('Transaction ID: ') . $params['TransactionID'] .', '
+						. __('Related Transaction ID: ') . $params['relatedTransactionId'] . $refund_msg,
                         $sc_transaction_type
                     );
                 }
@@ -618,14 +651,23 @@ class DmnOld extends \Magento\Framework\App\Action\Action
                 $params['ExErrCode']    = (isset($params['ExErrCode'])) ? $params['ExErrCode'] : "Unknown";
                 
                 $order->addStatusHistoryComment(
-                    __("The {$params['transactionType']} request returned '{$params['Status']}' status "
-                    . "(Code: {$params['ErrCode']}, Reason: {$params['ExErrCode']}).")
+					'<b>' . $params['transactionType'] . '</b> '
+					. __("request, response status is") . ' <b>' . $params['Status'] . '</b>.<br/>('
+					. __('Code: ') . $params['ErrCode'] . ', '
+					. __('Reason: ') . $params['ExErrCode'] . '.'
                 );
             }
 			else {
 				$this->moduleConfig->createLog('DMN for Order #' . $orderIncrementId . ' was not recognized.');
 				$jsonOutput->setData('DMN for Order #' . $orderIncrementId . ' was not recognized.');
 			}
+			
+			$ord_trans_addit_info[] = $curr_trans_info;
+			
+			$orderPayment->setAdditionalInformation(
+				'nuvei',
+				$ord_trans_addit_info
+			);
             
             $orderPayment->save();
 			$this->orderResourceModel->save($order);
@@ -878,8 +920,11 @@ class DmnOld extends \Magento\Framework\App\Action\Action
 		$result = $this->jsonResultFactory->create()->setHttpResponseCode(\Magento\Framework\Webapi\Response::HTTP_OK);
 		
 		if (!$this->moduleConfig->isActive()) {
-            $this->moduleConfig->createLog('Safecharge payments module is not active at the moment!');
-            return $result->setData(['error_message' => __('Safecharge payments module is not active at the moment!')]);
+            $this->moduleConfig->createLog('Nuvei payments module is not active at the moment!');
+           
+			return $result->setData([
+				'error_message' => __('Nuvei payments module is not active at the moment!')
+			]);
         }
 		
 		try {

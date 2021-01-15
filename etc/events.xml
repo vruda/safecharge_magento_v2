@@ -9,6 +9,10 @@
 -->
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+	
+	<!-- sales_order_invoice_register  - original-->
+	<!-- sales_order_invoice_save_after  - use this so can get Invoice ID-->
+	<!-- controller_action_postdispatch_sales_order_invoice_save - not tested-->
     <event name="sales_order_invoice_register">
         <observer name="safecharge_capture_order_status_update"
                   instance="Safecharge\Safecharge\Observer\Sales\Order\Invoice\Register"/>

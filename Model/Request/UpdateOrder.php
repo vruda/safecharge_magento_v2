@@ -130,49 +130,51 @@ class UpdateOrder extends AbstractRequest implements RequestInterface
 		$subs_data	= [];
 		
 		// iterate over Items and search for Subscriptions
-		foreach($items as $item) {
-			$product = $item->getProduct();
-			
-			$items_data[$item->getId()] = [
-				'quantity'	=> $item->getQty(),
-				'price'		=> $item->getPrice(),
-			];
-			
-			/*
-			$attributes	= $product->getAttributes();
-			
-			// if subscription is not enabled continue witht the next product
-			if($item->getProduct()->getData(\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_ENABLE) != 1) {
-				continue;
+		if(is_array($items)) {
+			foreach($items as $item) {
+				$product = $item->getProduct();
+
+				$items_data[$item->getId()] = [
+					'quantity'	=> $item->getQty(),
+					'price'		=> $item->getPrice(),
+				];
+
+				/*
+				$attributes	= $product->getAttributes();
+
+				// if subscription is not enabled continue witht the next product
+				if($item->getProduct()->getData(\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_ENABLE) != 1) {
+					continue;
+				}
+
+				// mandatory data
+				$subs_data[$product->getId()] = array(
+					'planId' => $item->getProduct()->getData(\Safecharge\Safecharge\Model\Config::PAYMENT_PLANS_ATTR_NAME),
+
+					'initialAmount' => number_format($item->getProduct()
+						->getData(\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_INTIT_AMOUNT), 2, '.', ''),
+
+					'recurringAmount' => number_format($item->getProduct()
+						->getData(\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_REC_AMOUNT), 2, '.', ''),
+				);
+
+				$this->config->createLog($subs_data, '$subs_data');
+
+				# optional data
+				$recurr_unit = $item->getProduct()->getData(\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_RECURR_UNITS);
+				$recurr_period = $item->getProduct()->getData(\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_RECURR_PERIOD);
+				$subs_data[$product->getId()]['recurringPeriod'][strtolower($recurr_unit)] = $recurr_period;
+
+				$trial_unit = $item->getProduct()->getData(\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_TRIAL_UNITS);
+				$trial_period = $item->getProduct()->getData(\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_TRIAL_PERIOD);
+				$subs_data[$product->getId()]['startAfter'][strtolower($trial_unit)] = $trial_period;
+
+				$end_after_unit = $item->getProduct()->getData(\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_END_AFTER_UNITS);
+				$end_after_period = $item->getProduct()->getData(\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_END_AFTER_PERIOD);
+				$subs_data[$product->getId()]['endAfter'][strtolower($end_after_unit)] = $end_after_period;
+				# optional data END
+				 */
 			}
-			
-			// mandatory data
-			$subs_data[$product->getId()] = array(
-				'planId' => $item->getProduct()->getData(\Safecharge\Safecharge\Model\Config::PAYMENT_PLANS_ATTR_NAME),
-				
-				'initialAmount' => number_format($item->getProduct()
-					->getData(\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_INTIT_AMOUNT), 2, '.', ''),
-				
-				'recurringAmount' => number_format($item->getProduct()
-					->getData(\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_REC_AMOUNT), 2, '.', ''),
-			);
-			
-			$this->config->createLog($subs_data, '$subs_data');
-			
-			# optional data
-			$recurr_unit = $item->getProduct()->getData(\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_RECURR_UNITS);
-			$recurr_period = $item->getProduct()->getData(\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_RECURR_PERIOD);
-			$subs_data[$product->getId()]['recurringPeriod'][strtolower($recurr_unit)] = $recurr_period;
-			
-			$trial_unit = $item->getProduct()->getData(\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_TRIAL_UNITS);
-			$trial_period = $item->getProduct()->getData(\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_TRIAL_PERIOD);
-			$subs_data[$product->getId()]['startAfter'][strtolower($trial_unit)] = $trial_period;
-			
-			$end_after_unit = $item->getProduct()->getData(\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_END_AFTER_UNITS);
-			$end_after_period = $item->getProduct()->getData(\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_END_AFTER_PERIOD);
-			$subs_data[$product->getId()]['endAfter'][strtolower($end_after_unit)] = $end_after_period;
-			# optional data END
-			 */
 		}
 		
 		$this->config->setNuveiUseCcOnly(!empty($subs_data) ? true : false);
@@ -211,7 +213,7 @@ class UpdateOrder extends AbstractRequest implements RequestInterface
 		$params['userDetails']		= $params['billingAddress'];
 		$params['sessionToken']		= $this->orderData['sessionToken'];
 		$params['orderId']			= $this->orderData['orderId'] ?: '';
-		$params['userTokenId']		= $this->orderData['userTokenId'] ?: '';
+//		$params['userTokenId']		= $this->orderData['userTokenId'] ?: '';
 		$params['clientRequestId']	= $this->orderData['clientRequestId'] ?: '';
 		
 		$params['checksum'] = hash(

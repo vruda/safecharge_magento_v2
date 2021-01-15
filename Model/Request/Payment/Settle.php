@@ -3,8 +3,6 @@
 namespace Safecharge\Safecharge\Model\Request\Payment;
 
 use Magento\Framework\Exception\PaymentException;
-use Magento\Sales\Model\Order;
-use Magento\Sales\Model\Order\Payment as OrderPayment;
 use Safecharge\Safecharge\Model\AbstractRequest;
 use Safecharge\Safecharge\Model\AbstractResponse;
 use Safecharge\Safecharge\Model\Payment;
@@ -45,16 +43,26 @@ class Settle extends AbstractPayment implements RequestInterface
      */
     protected function getParams()
     {
-        $orderPayment        = $this->orderPayment;
-        $order                = $orderPayment->getOrder();
-        $auth_data            = $orderPayment->getAdditionalInformation(Payment::AUTH_PARAMS);
-        
+        $orderPayment	= $this->orderPayment;
+        $order          = $orderPayment->getOrder();
+        $auth_data      = $orderPayment->getAdditionalInformation(Payment::AUTH_PARAMS);
+//		$nuvei_data		= $orderPayment->getAdditionalInformation('nuvei');
+		
         if (empty($auth_data['AuthCode']) or empty($auth_data['TransactionID'])) {
             $this->config->createLog($auth_data, 'Missing Auth paramters!');
             
             throw new PaymentException(__('Missing Auth parameters.'));
         }
-        
+		
+//		$invCollection	= $order->getInvoiceCollection();
+//		$inv_ids		= [];
+//		
+//		if(!empty($invCollection) && is_array($invCollection)) {
+//			foreach ($invCollection as $invoice) {
+//				$inv_ids[] = $invoice->getId();
+//			}
+//		}
+		
         $getIncrementId = $order->getIncrementId();
 
         $params = [
@@ -66,7 +74,6 @@ class Settle extends AbstractPayment implements RequestInterface
             'urlDetails'                => [
                 'notificationUrl' => $this->config->getCallbackDmnUrl($getIncrementId),
             ],
-            'sourceApplication'            => $this->config->getSourceApplication(),
         ];
 
         $params = array_merge_recursive(parent::getParams(), $params);

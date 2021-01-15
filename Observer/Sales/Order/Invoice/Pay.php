@@ -14,6 +14,12 @@ use Safecharge\Safecharge\Model\Payment;
  */
 class Pay implements ObserverInterface
 {
+	private $config;
+	
+	public function __construct(\Safecharge\Safecharge\Model\Config $config) {
+		$this->config = $config;
+	}
+	
     /**
      * @param Observer $observer
      *
@@ -31,10 +37,14 @@ class Pay implements ObserverInterface
         $payment = $order->getPayment();
 
         if ($payment->getMethod() !== Payment::METHOD_CODE) {
+			$this->config->createLog($payment->getMethod(), 'Invoice Pay Observer Error - payment method is');
+			
             return $this;
         }
 
         if ($invoice->getState() !== Invoice::STATE_PAID) {
+			$this->config->createLog($invoice->getState(), 'Invoice Pay Observer Error - $invoice state is');
+			
             return $this;
         }
 

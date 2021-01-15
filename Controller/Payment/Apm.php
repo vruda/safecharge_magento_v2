@@ -78,7 +78,9 @@ class Apm extends Action
             ->setHttpResponseCode(\Magento\Framework\Webapi\Response::HTTP_OK);
 
         if (!$this->moduleConfig->isActive()) {
-            return $result->setData(['error_message' => __('Safecharge payments module is not active at the moment!')]);
+            return $result->setData([
+				'error_message' => __('Nuvei payments module is not active at the moment!')
+			]);
         }
 
         $params = array_merge(

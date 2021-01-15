@@ -5,10 +5,7 @@ namespace Safecharge\Safecharge\Observer\Sales\Order\Refund;
 use Safecharge\Safecharge\Model\Payment;
 use Magento\Framework\Event\ObserverInterface;
 use Magento\Framework\Event\Observer;
-use Magento\Sales\Model\Order;
-use Magento\Sales\Model\Order\Invoice;
 use Magento\Sales\Model\Order\Payment as OrderPayment;
-
 /**
  * Safecharge Safecharge sales order refund register observer.
  */

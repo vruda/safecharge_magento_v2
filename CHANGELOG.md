@@ -4,6 +4,16 @@
 
 ### 2.1.3.x
 ```
+	* Added logs in some Observers.
+	* Preparation for fixing the Refund of Partial Settle in Model\Refund and Settle classes.
+	* Removed userTokenId parameter from openOrder and updateOrder requests.
+	* Removed unused "use" models calls.
+	* Small fix for createLog() method.
+	* Added \i18n\phrases.csv file. Use it for translations.
+	* In the DMN class added new object - "nuvei" as additional information for the Order.
+	* Replaced "Safecharge" with "Nuvei" in the code.
+	* Formatting code.
+	* Added sourceApplication in AbstractRequest class.
 	* Added product Id, price and quantity in OpenOrder and UpdateOrder in merchantDetails->customField5.
 	* The Order amount and currency were removed from the webSDK request.
 	* After declined transaction do not get new Session token and do not reload the sdk fields.
