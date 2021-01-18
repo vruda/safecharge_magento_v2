@@ -1,14 +1,14 @@
 <?php
 
-namespace Safecharge\Safecharge\Model\Request;
+namespace Nuvei\Payments\Model\Request;
 
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\ObjectManagerInterface;
-use Safecharge\Safecharge\Model\AbstractRequest;
-use Safecharge\Safecharge\Model\RequestInterface;
+use Nuvei\Payments\Model\AbstractRequest;
+use Nuvei\Payments\Model\RequestInterface;
 
 /**
- * Safecharge Safecharge request factory model.
+ * Nuvei Payments request factory model.
  */
 class Factory
 {
@@ -18,15 +18,14 @@ class Factory
      * @var array
      */
     private $invokableClasses = [
-        //AbstractRequest::GET_SESSION_TOKEN_METHOD               => \Safecharge\Safecharge\Model\Request\Token::class,
-        AbstractRequest::CREATE_USER_METHOD                     => \Safecharge\Safecharge\Model\Request\CreateUser::class,
-        AbstractRequest::GET_USER_DETAILS_METHOD                => \Safecharge\Safecharge\Model\Request\GetUserDetails::class,
-        AbstractRequest::OPEN_ORDER_METHOD                      => \Safecharge\Safecharge\Model\Request\OpenOrder::class,
-        AbstractRequest::UPDATE_ORDER_METHOD                    => \Safecharge\Safecharge\Model\Request\UpdateOrder::class,
-        AbstractRequest::PAYMENT_APM_METHOD                     => \Safecharge\Safecharge\Model\Request\PaymentApm::class,
-        AbstractRequest::GET_MERCHANT_PAYMENT_METHODS_METHOD	=> \Safecharge\Safecharge\Model\Request\GetMerchantPaymentMethods::class,
-        AbstractRequest::GET_MERCHANT_PAYMENT_PLANS_METHOD      => \Safecharge\Safecharge\Model\Request\GetPlansList::class,
-        AbstractRequest::CREATE_SUBSCRIPTION_METHOD				=> \Safecharge\Safecharge\Model\Request\CreateSubscription::class,
+        AbstractRequest::CREATE_USER_METHOD                     => \Nuvei\Payments\Model\Request\CreateUser::class,
+        AbstractRequest::GET_USER_DETAILS_METHOD                => \Nuvei\Payments\Model\Request\GetUserDetails::class,
+        AbstractRequest::OPEN_ORDER_METHOD                      => \Nuvei\Payments\Model\Request\OpenOrder::class,
+        AbstractRequest::UPDATE_ORDER_METHOD                    => \Nuvei\Payments\Model\Request\UpdateOrder::class,
+        AbstractRequest::PAYMENT_APM_METHOD                     => \Nuvei\Payments\Model\Request\PaymentApm::class,
+        AbstractRequest::GET_MERCHANT_PAYMENT_METHODS_METHOD	=> \Nuvei\Payments\Model\Request\GetMerchantPaymentMethods::class,
+        AbstractRequest::GET_MERCHANT_PAYMENT_PLANS_METHOD      => \Nuvei\Payments\Model\Request\GetPlansList::class,
+        AbstractRequest::CREATE_SUBSCRIPTION_METHOD				=> \Nuvei\Payments\Model\Request\CreateSubscription::class,
     ];
 
     /**
@@ -72,7 +71,7 @@ class Factory
         if (!$model instanceof RequestInterface) {
             throw new LocalizedException(
                 __(
-                    '%1 doesn\'t implement \Safecharge\Safecharge\Model\RequestInterface',
+                    '%1 doesn\'t implement \Nuvei\Payments\Model\RequestInterface',
                     $className
                 )
             );

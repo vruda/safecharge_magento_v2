@@ -1,17 +1,17 @@
 <?php
 
-namespace Safecharge\Safecharge\Model\Plugin\Service\CreditmemoService;
+namespace Nuvei\Payments\Model\Plugin\Service\CreditmemoService;
 
-use Safecharge\Safecharge\Api\Data\RequestLogInterface;
-use Safecharge\Safecharge\Model\RequestLogFactory;
-use Safecharge\Safecharge\Model\Logger;
+use Nuvei\Payments\Api\Data\RequestLogInterface;
+use Nuvei\Payments\Model\RequestLogFactory;
+use Nuvei\Payments\Model\Logger;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Registry as CoreRegistry;
 use Magento\Sales\Model\Order\Creditmemo;
 use Magento\Sales\Model\Service\CreditmemoService;
 
 /**
- * Safecharge Safecharge credit memo service plugin model.
+ * Nuvei Payments credit memo service plugin model.
  */
 class Plugin
 {

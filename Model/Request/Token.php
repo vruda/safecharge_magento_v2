@@ -1,14 +1,14 @@
 <?php
 
-namespace Safecharge\Safecharge\Model\Request;
+namespace Nuvei\Payments\Model\Request;
 
-use Safecharge\Safecharge\Model\AbstractRequest;
-use Safecharge\Safecharge\Model\AbstractResponse;
-use Safecharge\Safecharge\Model\RequestInterface;
+use Nuvei\Payments\Model\AbstractRequest;
+use Nuvei\Payments\Model\AbstractResponse;
+use Nuvei\Payments\Model\RequestInterface;
 use Magento\Framework\Exception\PaymentException;
 
 /**
- * Safecharge Safecharge token request model.
+ * Nuvei Payments token request model.
  */
 class Token extends AbstractRequest implements RequestInterface
 {

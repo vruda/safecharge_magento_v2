@@ -1,16 +1,16 @@
 <?php
 
-namespace Safecharge\Safecharge\Model\Response;
+namespace Nuvei\Payments\Model\Response;
 
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\ObjectManagerInterface;
 use Magento\Sales\Model\Order\Payment as OrderPayment;
-use Safecharge\Safecharge\Lib\Http\Client\Curl;
-use Safecharge\Safecharge\Model\AbstractResponse;
-use Safecharge\Safecharge\Model\ResponseInterface;
+use Nuvei\Payments\Lib\Http\Client\Curl;
+use Nuvei\Payments\Model\AbstractResponse;
+use Nuvei\Payments\Model\ResponseInterface;
 
 /**
- * Safecharge Safecharge response factory model.
+ * Nuvei Payments response factory model.
  */
 class Factory
 {
@@ -21,23 +21,23 @@ class Factory
      */
     private $invokableClasses = [
         AbstractResponse::TOKEN_HANDLER
-            => \Safecharge\Safecharge\Model\Response\Token::class,
+            => \Nuvei\Payments\Model\Response\Token::class,
         AbstractResponse::PAYMENT_SETTLE_HANDLER
-            => \Safecharge\Safecharge\Model\Response\Payment\Settle::class,
+            => \Nuvei\Payments\Model\Response\Payment\Settle::class,
         AbstractResponse::CREATE_USER_HANDLER
-            => \Safecharge\Safecharge\Model\Response\CreateUser::class,
+            => \Nuvei\Payments\Model\Response\CreateUser::class,
         AbstractResponse::GET_USER_DETAILS_HANDLER
-            => \Safecharge\Safecharge\Model\Response\GetUserDetails::class,
+            => \Nuvei\Payments\Model\Response\GetUserDetails::class,
         AbstractResponse::PAYMENT_REFUND_HANDLER
-            => \Safecharge\Safecharge\Model\Response\Payment\Refund::class,
+            => \Nuvei\Payments\Model\Response\Payment\Refund::class,
         AbstractResponse::PAYMENT_VOID_HANDLER
-            => \Safecharge\Safecharge\Model\Response\Payment\Cancel::class,
+            => \Nuvei\Payments\Model\Response\Payment\Cancel::class,
         AbstractResponse::PAYMENT_APM_HANDLER
-            => \Safecharge\Safecharge\Model\Response\PaymentApm::class,
+            => \Nuvei\Payments\Model\Response\PaymentApm::class,
         AbstractResponse::GET_MERCHANT_PAYMENT_METHODS_HANDLER
-            => \Safecharge\Safecharge\Model\Response\GetMerchantPaymentMethods::class,
+            => \Nuvei\Payments\Model\Response\GetMerchantPaymentMethods::class,
         AbstractResponse::GET_MERCHANT_PAYMENT_PLANS_HANDLER
-            => \Safecharge\Safecharge\Model\Response\GetPlansList::class,
+            => \Nuvei\Payments\Model\Response\GetPlansList::class,
     ];
 
     /**
@@ -95,7 +95,7 @@ class Factory
         if (!$model instanceof ResponseInterface) {
             throw new LocalizedException(
                 __(
-                    '%1 doesn\'t implement \Safecharge\Safecharge\Mode\ResponseInterface',
+                    '%1 doesn\'t implement \Nuvei\Payments\Mode\ResponseInterface',
                     $className
                 )
             );

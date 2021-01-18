@@ -1,6 +1,6 @@
 <?php
 
-namespace Safecharge\Safecharge\Block\System\Config;
+namespace Nuvei\Payments\Block\System\Config;
 
 class ShowLastDownloadTime implements \Magento\Config\Model\Config\CommentInterface
 {
@@ -8,7 +8,7 @@ class ShowLastDownloadTime implements \Magento\Config\Model\Config\CommentInterf
 	private $directory;
 	
 	public function __construct(
-		\Safecharge\Safecharge\Model\Config $config,
+		\Nuvei\Payments\Model\Config $config,
 		\Magento\Framework\Filesystem\DirectoryList $directory
 	) {
 		$this->config = $config;

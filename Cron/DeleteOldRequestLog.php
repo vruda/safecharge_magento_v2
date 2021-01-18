@@ -1,12 +1,12 @@
 <?php
 
-namespace Safecharge\Safecharge\Cron;
+namespace Nuvei\Payments\Cron;
 
-use Safecharge\Safecharge\Model\Config as ModuleConfig;
-use Safecharge\Safecharge\Model\ResourceModel\RequestLog\CollectionFactory;
+use Nuvei\Payments\Model\Config as ModuleConfig;
+use Nuvei\Payments\Model\ResourceModel\RequestLog\CollectionFactory;
 
 /**
- * Safecharge Safecharge delete old request log entries cron job.
+ * Nuvei Payments delete old request log entries cron job.
  */
 class DeleteOldRequestLog
 {

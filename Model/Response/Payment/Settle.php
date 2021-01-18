@@ -1,13 +1,13 @@
 <?php
 
-namespace Safecharge\Safecharge\Model\Response\Payment;
+namespace Nuvei\Payments\Model\Response\Payment;
 
-use Safecharge\Safecharge\Model\Payment;
-use Safecharge\Safecharge\Model\Response\AbstractPayment;
-use Safecharge\Safecharge\Model\ResponseInterface;
+use Nuvei\Payments\Model\Payment;
+use Nuvei\Payments\Model\Response\AbstractPayment;
+use Nuvei\Payments\Model\ResponseInterface;
 
 /**
- * Safecharge Safecharge payment settle response model.
+ * Nuvei Payments payment settle response model.
  */
 class Settle extends AbstractPayment implements ResponseInterface
 {

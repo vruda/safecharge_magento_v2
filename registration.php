@@ -1,12 +1,12 @@
 <?php
 /**
- * Safecharge Safecharge module registration.
+ * Nuvei Payments module registration.
  */
 
 use Magento\Framework\Component\ComponentRegistrar;
 
 ComponentRegistrar::register(
     ComponentRegistrar::MODULE,
-    'Safecharge_Safecharge',
+    'Nuvei_Payments',
     __DIR__
 );

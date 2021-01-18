@@ -1,11 +1,11 @@
 <?php
 
-namespace Safecharge\Safecharge\Model\ResourceModel\RequestLog;
+namespace Nuvei\Payments\Model\ResourceModel\RequestLog;
 
 use Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection;
 
 /**
- * Safecharge Safecharge request log collection model.
+ * Nuvei Payments request log collection model.
  */
 class Collection extends AbstractCollection
 {
@@ -19,8 +19,8 @@ class Collection extends AbstractCollection
         parent::_construct();
 
         $this->_init(
-            \Safecharge\Safecharge\Model\RequestLog::class,
-            \Safecharge\Safecharge\Model\ResourceModel\RequestLog::class
+            \Nuvei\Payments\Model\RequestLog::class,
+            \Nuvei\Payments\Model\ResourceModel\RequestLog::class
         );
     }
 }

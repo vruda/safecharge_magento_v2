@@ -1,13 +1,13 @@
 <?php
 
-namespace Safecharge\Safecharge\Model\Request;
+namespace Nuvei\Payments\Model\Request;
 
-use Safecharge\Safecharge\Model\AbstractRequest;
-use Safecharge\Safecharge\Model\RequestInterface;
+use Nuvei\Payments\Model\AbstractRequest;
+use Nuvei\Payments\Model\RequestInterface;
 
-use Safecharge\Safecharge\Model\Logger as SafechargeLogger;
-use Safecharge\Safecharge\Model\Config;
-use Safecharge\Safecharge\Lib\Http\Client\Curl;
+use Nuvei\Payments\Model\Logger as SafechargeLogger;
+use Nuvei\Payments\Model\Config;
+use Nuvei\Payments\Lib\Http\Client\Curl;
 
 class GetPlansList extends AbstractRequest implements RequestInterface
 {
@@ -17,8 +17,8 @@ class GetPlansList extends AbstractRequest implements RequestInterface
         SafechargeLogger $safechargeLogger,
         Config $config,
         Curl $curl,
-        \Safecharge\Safecharge\Model\Response\Factory $responseFactory,
-        \Safecharge\Safecharge\Model\Request\Factory $requestFactory
+        \Nuvei\Payments\Model\Response\Factory $responseFactory,
+        \Nuvei\Payments\Model\Request\Factory $requestFactory
     ) {
         parent::__construct(
             $safechargeLogger,
@@ -46,7 +46,7 @@ class GetPlansList extends AbstractRequest implements RequestInterface
     
     protected function getResponseHandlerType()
     {
-        return \Safecharge\Safecharge\Model\AbstractResponse::GET_MERCHANT_PAYMENT_PLANS_HANDLER;
+        return \Nuvei\Payments\Model\AbstractResponse::GET_MERCHANT_PAYMENT_PLANS_HANDLER;
     }
     
     protected function getParams()

@@ -1,11 +1,11 @@
 <?php
 
-namespace Safecharge\Safecharge\Model\Adminhtml\Source;
+namespace Nuvei\Payments\Model\Adminhtml\Source;
 
 use Magento\Framework\Option\ArrayInterface;
 
 /**
- * Safecharge Safecharge mode source model.
+ * Nuvei Payments mode source model.
  */
 class Debug implements ArrayInterface
 {

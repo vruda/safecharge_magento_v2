@@ -1,9 +1,9 @@
 <?php
 
-namespace Safecharge\Safecharge\Model;
+namespace Nuvei\Payments\Model;
 
 /**
- * Safecharge Safecharge request interface.
+ * Nuvei Payments request interface.
  */
 interface RequestInterface
 {

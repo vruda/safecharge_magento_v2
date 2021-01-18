@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
 <!--
 /**
- * Safecharge Safecharge layout configuration.
+ * Nuvei Payments layout configuration.
  *
- * @category Safecharge
- * @package  Safecharge_Safecharge
+ * @category Nuvei
+ * @package  Nuvei_Payments
  */
 -->
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" layout="1column"
@@ -46,7 +46,7 @@
                                                                 <item name="safecharge-payments"
                                                                       xsi:type="array">
                                                                     <item name="component"
-                                                                          xsi:type="string">Safecharge_Safecharge/js/view/payment/safecharge</item>
+                                                                          xsi:type="string">Nuvei_Payments/js/view/payment/safecharge</item>
                                                                     <item name="methods"
                                                                           xsi:type="array">
                                                                         <item name="safecharge"

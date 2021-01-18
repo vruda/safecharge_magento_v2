@@ -1,18 +1,18 @@
 <?php
 
-namespace Safecharge\Safecharge\Controller\Payment;
+namespace Nuvei\Payments\Controller\Payment;
 
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\App\ResponseInterface;
 use Magento\Framework\Controller\Result\JsonFactory;
-use Safecharge\Safecharge\Model\Config as ModuleConfig;
-use Safecharge\Safecharge\Model\Logger as SafechargeLogger;
-use Safecharge\Safecharge\Model\Redirect\Url as RedirectUrlBuilder;
-use Safecharge\Safecharge\Model\Request\Factory as RequestFactory;
+use Nuvei\Payments\Model\Config as ModuleConfig;
+use Nuvei\Payments\Model\Logger as SafechargeLogger;
+use Nuvei\Payments\Model\Redirect\Url as RedirectUrlBuilder;
+use Nuvei\Payments\Model\Request\Factory as RequestFactory;
 
 /**
- * Safecharge Safecharge GetMerchantPaymentMethods controller.
+ * Nuvei Payments GetMerchantPaymentMethods controller.
  */
 class UpdateQuotePaymentMethod extends Action
 {

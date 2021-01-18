@@ -1,16 +1,16 @@
 <?php
 
-namespace Safecharge\Safecharge\Model\Response;
+namespace Nuvei\Payments\Model\Response;
 
 use Magento\Framework\Locale\Resolver;
-use Safecharge\Safecharge\Lib\Http\Client\Curl;
-use Safecharge\Safecharge\Model\AbstractResponse;
-use Safecharge\Safecharge\Model\Config;
-use Safecharge\Safecharge\Model\Logger as SafechargeLogger;
-use Safecharge\Safecharge\Model\ResponseInterface;
+use Nuvei\Payments\Lib\Http\Client\Curl;
+use Nuvei\Payments\Model\AbstractResponse;
+use Nuvei\Payments\Model\Config;
+use Nuvei\Payments\Model\Logger as SafechargeLogger;
+use Nuvei\Payments\Model\ResponseInterface;
 
 /**
- * Safecharge Safecharge get merchant payment methods response model.
+ * Nuvei Payments get merchant payment methods response model.
  */
 class GetMerchantPaymentMethods extends AbstractResponse implements ResponseInterface
 {

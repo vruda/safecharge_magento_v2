@@ -1,6 +1,6 @@
 <?php
 
-namespace Safecharge\Safecharge\Setup;
+namespace Nuvei\Payments\Setup;
 
 use Magento\Sales\Model\Order\StatusFactory as OrderStatusFactory;
 use Magento\Framework\Setup\UpgradeDataInterface;
@@ -9,7 +9,7 @@ use Magento\Framework\Setup\ModuleDataSetupInterface;
 use Magento\Sales\Model\Order;
 
 /**
- * Safecharge Safecharge upgrade data.
+ * Nuvei Payments upgrade data.
  */
 class UpgradeData implements UpgradeDataInterface
 {
@@ -58,23 +58,68 @@ class UpgradeData implements UpgradeDataInterface
 		
 //		$eavSetup->removeAttribute(
 //			\Magento\Catalog\Model\Product::ENTITY,
-//			\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_INTIT_AMOUNT
+//			\Nuvei\Payments\Model\Config::PAYMENT_SUBS_INTIT_AMOUNT
 //		);
+		
+		// add few new Order States
+        if (version_compare($context->getVersion(), '2.0.2', '<')) {
+            $scVoided = $this->orderStatusFactory->create()
+                ->setData('status', 'sc_voided')
+                ->setData('label', 'SC Voided')
+                ->save();
+            $scVoided->assignState(Order::STATE_PROCESSING, false, true);
+
+            $scSettled = $this->orderStatusFactory->create()
+                ->setData('status', 'sc_settled')
+                ->setData('label', 'SC Settled')
+                ->save();
+            $scSettled->assignState(Order::STATE_PROCESSING, false, true);
+
+            $scPartiallySettled = $this->orderStatusFactory->create()
+                ->setData('status', 'sc_partially_settled')
+                ->setData('label', 'SC Partially Settled')
+                ->save();
+            $scPartiallySettled->assignState(Order::STATE_PROCESSING, false, true);
+
+            $scAuth = $this->orderStatusFactory->create()
+                ->setData('status', 'sc_auth')
+                ->setData('label', 'SC Auth')
+                ->save();
+            $scAuth->assignState(Order::STATE_PROCESSING, false, true);
+            
+            $scProcessing = $this->orderStatusFactory->create()
+                ->setData('status', 'sc_processing')
+                ->setData('label', 'SC Processing')
+                ->save();
+            $scProcessing->assignState(Order::STATE_PROCESSING, false, true);
+            
+            $scRefunded = $this->orderStatusFactory->create()
+                ->setData('status', 'sc_refunded')
+                ->setData('label', 'SC Refunded')
+                ->save();
+            $scRefunded->assignState(Order::STATE_PROCESSING, false, false);
+        }
+        // a patch for last three statuses above
+        elseif (version_compare($context->getVersion(), '2.0.3', '<')) {
+            $this->resourceConnection->getConnection()->query("UPDATE sales_order_status_state SET is_default = 0 WHERE sales_order_status_state.status = 'sc_refunded';");
+            $this->resourceConnection->getConnection()->query("UPDATE sales_order_status_state SET is_default = 0 WHERE sales_order_status_state.status = 'sc_processing';");
+            $this->resourceConnection->getConnection()->query("UPDATE sales_order_status_state SET is_default = 0 WHERE sales_order_status_state.status = 'sc_auth';");
+        }
 		
 		if (version_compare($context->getVersion(), '2.2.0', '<')) {
 			$eavSetup->removeAttribute(
 				\Magento\Catalog\Model\Product::ENTITY,
-				\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_ENABLE
+				\Nuvei\Payments\Model\Config::PAYMENT_SUBS_ENABLE
 			);
 			
 			/*
 			// Enable subscription
 			$eavSetup->addAttribute(
                 \Magento\Catalog\Model\Product::ENTITY,
-                \Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_ENABLE,
+                \Nuvei\Payments\Model\Config::PAYMENT_SUBS_ENABLE,
                 [
                     'type' => 'int',
-                    'label' => \Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_ENABLE_LABEL,
+                    'label' => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_ENABLE_LABEL,
                     'input' => 'boolean',
                     'global' => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
                     'source'   => 'Magento\Eav\Model\Entity\Attribute\Source\Boolean',
@@ -86,7 +131,7 @@ class UpgradeData implements UpgradeDataInterface
                     'filterable' => true,
                     'visible_on_front' => false,
                     'used_in_product_listing' => true,
-					'group' => \Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_GROUP,
+					'group' => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
 					'sort_order' => 10,
 					'class' => 'sc_enable_subscr',
 					'note' => 'note',
@@ -96,12 +141,12 @@ class UpgradeData implements UpgradeDataInterface
 			// Plan IDs
 			$eavSetup->addAttribute(
                 \Magento\Catalog\Model\Product::ENTITY,
-                \Safecharge\Safecharge\Model\Config::PAYMENT_PLANS_ATTR_NAME,
+                \Nuvei\Payments\Model\Config::PAYMENT_PLANS_ATTR_NAME,
                 [
                     'type' => 'int',
-                    'label' => \Safecharge\Safecharge\Model\Config::PAYMENT_PLANS_ATTR_LABEL,
+                    'label' => \Nuvei\Payments\Model\Config::PAYMENT_PLANS_ATTR_LABEL,
                     'input' => 'select',
-                    'source' => 'Safecharge\Safecharge\Model\Config\Source\PaymentPlansOptions',
+                    'source' => 'Nuvei\Payments\Model\Config\Source\PaymentPlansOptions',
                     'global' => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
                     'visible' => true,
                     'required' => false,
@@ -111,7 +156,7 @@ class UpgradeData implements UpgradeDataInterface
                     'filterable' => true,
                     'visible_on_front' => false,
                     'used_in_product_listing' => true,
-                    'group' => \Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_GROUP,
+                    'group' => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
                     'option' => [
                         'values' => [],
                     ],
@@ -122,10 +167,10 @@ class UpgradeData implements UpgradeDataInterface
 			// Initial Amount
 			$eavSetup->addAttribute(
                 \Magento\Catalog\Model\Product::ENTITY,
-                \Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_INTIT_AMOUNT,
+                \Nuvei\Payments\Model\Config::PAYMENT_SUBS_INTIT_AMOUNT,
                 [
                     'type' => 'decimal',
-                    'label' => \Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_INTIT_AMOUNT_LABEL,
+                    'label' => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_INTIT_AMOUNT_LABEL,
                     'input' => 'price',
                     'global' => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
                     'visible' => true,
@@ -136,7 +181,7 @@ class UpgradeData implements UpgradeDataInterface
                     'filterable' => true,
                     'visible_on_front' => false,
                     'used_in_product_listing' => true,
-                    'group' => \Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_GROUP,
+                    'group' => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
 					'sort_order' => 30,
                 ]
             );
@@ -144,10 +189,10 @@ class UpgradeData implements UpgradeDataInterface
 			// Recurring Amount
 			$eavSetup->addAttribute(
                 \Magento\Catalog\Model\Product::ENTITY,
-                \Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_REC_AMOUNT,
+                \Nuvei\Payments\Model\Config::PAYMENT_SUBS_REC_AMOUNT,
                 [
                     'type' => 'decimal',
-                    'label' => \Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_REC_AMOUNT_LABEL,
+                    'label' => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_REC_AMOUNT_LABEL,
                     'input' => 'price',
                     'global' => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
                     'visible' => true,
@@ -158,7 +203,7 @@ class UpgradeData implements UpgradeDataInterface
                     'filterable' => true,
                     'visible_on_front' => false,
                     'used_in_product_listing' => true,
-                    'group' => \Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_GROUP,
+                    'group' => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
 					'sort_order' => 40,
                 ]
             );
@@ -166,13 +211,13 @@ class UpgradeData implements UpgradeDataInterface
 			// Recurring Units
 			$eavSetup->addAttribute(
                 \Magento\Catalog\Model\Product::ENTITY,
-                \Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_RECURR_UNITS,
+                \Nuvei\Payments\Model\Config::PAYMENT_SUBS_RECURR_UNITS,
                 [
                     'type' => 'text',
-                    'label' => \Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_RECURR_UNITS_LABEL,
+                    'label' => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_RECURR_UNITS_LABEL,
                     'input' => 'select',
                     'global' => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
-					'source' => 'Safecharge\Safecharge\Model\Config\Source\SubscriptionUnits',
+					'source' => 'Nuvei\Payments\Model\Config\Source\SubscriptionUnits',
                     'visible' => true,
                     'required' => false,
                     'user_defined' => false,
@@ -181,7 +226,7 @@ class UpgradeData implements UpgradeDataInterface
                     'filterable' => false,
                     'visible_on_front' => false,
                     'used_in_product_listing' => false,
-                    'group' => \Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_GROUP,
+                    'group' => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
 					'option' => [
                         'values' => [],
                     ],
@@ -192,10 +237,10 @@ class UpgradeData implements UpgradeDataInterface
 			// Recurring Period
 			$eavSetup->addAttribute(
                 \Magento\Catalog\Model\Product::ENTITY,
-                \Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_RECURR_PERIOD,
+                \Nuvei\Payments\Model\Config::PAYMENT_SUBS_RECURR_PERIOD,
                 [
                     'type' => 'int',
-                    'label' => \Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_RECURR_PERIOD_LABEL,
+                    'label' => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_RECURR_PERIOD_LABEL,
                     'input' => 'text',
                     'global' => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
                     'visible' => true,
@@ -206,7 +251,7 @@ class UpgradeData implements UpgradeDataInterface
                     'filterable' => false,
                     'visible_on_front' => false,
                     'used_in_product_listing' => false,
-                    'group' => \Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_GROUP,
+                    'group' => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
 					'sort_order' => 60,
                 ]
             );
@@ -214,13 +259,13 @@ class UpgradeData implements UpgradeDataInterface
 			// Trial Units
 			$eavSetup->addAttribute(
                 \Magento\Catalog\Model\Product::ENTITY,
-                \Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_TRIAL_UNITS,
+                \Nuvei\Payments\Model\Config::PAYMENT_SUBS_TRIAL_UNITS,
                 [
                     'type' => 'text',
-                    'label' => \Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_TRIAL_UNITS_LABEL,
+                    'label' => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_TRIAL_UNITS_LABEL,
                     'input' => 'select',
                     'global' => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
-					'source' => 'Safecharge\Safecharge\Model\Config\Source\SubscriptionUnits',
+					'source' => 'Nuvei\Payments\Model\Config\Source\SubscriptionUnits',
                     'visible' => true,
                     'required' => false,
                     'user_defined' => false,
@@ -229,7 +274,7 @@ class UpgradeData implements UpgradeDataInterface
                     'filterable' => false,
                     'visible_on_front' => false,
                     'used_in_product_listing' => false,
-                    'group' => \Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_GROUP,
+                    'group' => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
 					'option' => [
                         'values' => [],
                     ],
@@ -240,10 +285,10 @@ class UpgradeData implements UpgradeDataInterface
 			// Trial Period
 			$eavSetup->addAttribute(
                 \Magento\Catalog\Model\Product::ENTITY,
-                \Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_TRIAL_PERIOD,
+                \Nuvei\Payments\Model\Config::PAYMENT_SUBS_TRIAL_PERIOD,
                 [
                     'type' => 'int',
-                    'label' => \Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_TRIAL_PERIOD_LABEL,
+                    'label' => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_TRIAL_PERIOD_LABEL,
                     'input' => 'text',
                     'global' => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
                     'visible' => true,
@@ -254,7 +299,7 @@ class UpgradeData implements UpgradeDataInterface
                     'filterable' => false,
                     'visible_on_front' => false,
                     'used_in_product_listing' => false,
-                    'group' => \Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_GROUP,
+                    'group' => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
 					'sort_order' => 80,
                 ]
             );
@@ -262,13 +307,13 @@ class UpgradeData implements UpgradeDataInterface
 			// End After Units
 			$eavSetup->addAttribute(
                 \Magento\Catalog\Model\Product::ENTITY,
-                \Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_END_AFTER_UNITS,
+                \Nuvei\Payments\Model\Config::PAYMENT_SUBS_END_AFTER_UNITS,
                 [
                     'type' => 'text',
-                    'label' => \Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_END_AFTER_UNITS_LABEL,
+                    'label' => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_END_AFTER_UNITS_LABEL,
                     'input' => 'select',
                     'global' => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
-					'source' => 'Safecharge\Safecharge\Model\Config\Source\SubscriptionUnits',
+					'source' => 'Nuvei\Payments\Model\Config\Source\SubscriptionUnits',
                     'visible' => true,
                     'required' => false,
                     'user_defined' => false,
@@ -277,7 +322,7 @@ class UpgradeData implements UpgradeDataInterface
                     'filterable' => false,
                     'visible_on_front' => false,
                     'used_in_product_listing' => false,
-                    'group' => \Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_GROUP,
+                    'group' => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
 					'option' => [
                         'values' => [],
                     ],
@@ -288,10 +333,10 @@ class UpgradeData implements UpgradeDataInterface
 			// End After Period
 			$eavSetup->addAttribute(
                 \Magento\Catalog\Model\Product::ENTITY,
-                \Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_END_AFTER_PERIOD,
+                \Nuvei\Payments\Model\Config::PAYMENT_SUBS_END_AFTER_PERIOD,
                 [
                     'type' => 'int',
-                    'label' => \Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_END_AFTER_PERIOD_LABEL,
+                    'label' => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_END_AFTER_PERIOD_LABEL,
                     'input' => 'text',
                     'global' => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
                     'visible' => true,
@@ -302,7 +347,7 @@ class UpgradeData implements UpgradeDataInterface
                     'filterable' => false,
                     'visible_on_front' => false,
                     'used_in_product_listing' => false,
-                    'group' => \Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_GROUP,
+                    'group' => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
 					'sort_order' => 100,
                 ]
             );
@@ -310,10 +355,10 @@ class UpgradeData implements UpgradeDataInterface
 			// description of the Subscription for the store
 			$eavSetup->addAttribute(
                 \Magento\Catalog\Model\Product::ENTITY,
-                \Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_STORE_DESCR,
+                \Nuvei\Payments\Model\Config::PAYMENT_SUBS_STORE_DESCR,
                 [
                     'type' => 'text',
-                    'label' => \Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_STORE_DESCR_LABEL,
+                    'label' => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_STORE_DESCR_LABEL,
                     'input' => 'textarea',
                     'global' => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
                     'visible' => true,
@@ -324,7 +369,7 @@ class UpgradeData implements UpgradeDataInterface
                     'filterable' => true,
                     'visible_on_front' => true,
                     'used_in_product_listing' => true,
-                    'group' => \Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_GROUP,
+                    'group' => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
 					'sort_order' => 110,
                 ]
             );
@@ -383,51 +428,6 @@ class UpgradeData implements UpgradeDataInterface
             $scRefunded->assignState(Order::STATE_PROCESSING, false, false);
 		}
         
-        // add few new Order States
-        if (version_compare($context->getVersion(), '2.0.2', '<')) {
-            $scVoided = $this->orderStatusFactory->create()
-                ->setData('status', 'sc_voided')
-                ->setData('label', 'SC Voided')
-                ->save();
-            $scVoided->assignState(Order::STATE_PROCESSING, false, true);
-
-            $scSettled = $this->orderStatusFactory->create()
-                ->setData('status', 'sc_settled')
-                ->setData('label', 'SC Settled')
-                ->save();
-            $scSettled->assignState(Order::STATE_PROCESSING, false, true);
-
-            $scPartiallySettled = $this->orderStatusFactory->create()
-                ->setData('status', 'sc_partially_settled')
-                ->setData('label', 'SC Partially Settled')
-                ->save();
-            $scPartiallySettled->assignState(Order::STATE_PROCESSING, false, true);
-
-            $scAuth = $this->orderStatusFactory->create()
-                ->setData('status', 'sc_auth')
-                ->setData('label', 'SC Auth')
-                ->save();
-            $scAuth->assignState(Order::STATE_PROCESSING, false, true);
-            
-            $scProcessing = $this->orderStatusFactory->create()
-                ->setData('status', 'sc_processing')
-                ->setData('label', 'SC Processing')
-                ->save();
-            $scProcessing->assignState(Order::STATE_PROCESSING, false, true);
-            
-            $scRefunded = $this->orderStatusFactory->create()
-                ->setData('status', 'sc_refunded')
-                ->setData('label', 'SC Refunded')
-                ->save();
-            $scRefunded->assignState(Order::STATE_PROCESSING, false, false);
-        }
-        // a patch for last three statuses above
-        elseif (version_compare($context->getVersion(), '2.0.3', '<')) {
-            $this->resourceConnection->getConnection()->query("UPDATE sales_order_status_state SET is_default = 0 WHERE sales_order_status_state.status = 'sc_refunded';");
-            $this->resourceConnection->getConnection()->query("UPDATE sales_order_status_state SET is_default = 0 WHERE sales_order_status_state.status = 'sc_processing';");
-            $this->resourceConnection->getConnection()->query("UPDATE sales_order_status_state SET is_default = 0 WHERE sales_order_status_state.status = 'sc_auth';");
-        }
-
         $setup->endSetup();
     }
 }

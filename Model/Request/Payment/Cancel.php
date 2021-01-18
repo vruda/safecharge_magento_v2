@@ -1,16 +1,16 @@
 <?php
 
-namespace Safecharge\Safecharge\Model\Request\Payment;
+namespace Nuvei\Payments\Model\Request\Payment;
 
 use Magento\Framework\Exception\PaymentException;
-use Safecharge\Safecharge\Model\AbstractRequest;
-use Safecharge\Safecharge\Model\AbstractResponse;
-use Safecharge\Safecharge\Model\Payment;
-use Safecharge\Safecharge\Model\Request\AbstractPayment;
-use Safecharge\Safecharge\Model\RequestInterface;
+use Nuvei\Payments\Model\AbstractRequest;
+use Nuvei\Payments\Model\AbstractResponse;
+use Nuvei\Payments\Model\Payment;
+use Nuvei\Payments\Model\Request\AbstractPayment;
+use Nuvei\Payments\Model\RequestInterface;
 
 /**
- * Safecharge Safecharge void payment request model.
+ * Nuvei Payments void payment request model.
  */
 class Cancel extends AbstractPayment implements RequestInterface
 {

@@ -1,4 +1,4 @@
-# Magento 2 Safecharge Payments Module
+# Magento 2 Nuvei Payments Module
 
 ---
 

@@ -1,12 +1,12 @@
 <?php
 
-namespace Safecharge\Safecharge\Ui\Component\Listing\Column;
+namespace Nuvei\Payments\Ui\Component\Listing\Column;
 
-use Safecharge\Safecharge\Model\AbstractResponse;
+use Nuvei\Payments\Model\AbstractResponse;
 use Magento\Ui\Component\Listing\Columns\Column;
 
 /**
- * Safecharge Safecharge status column handler.
+ * Nuvei Payments status column handler.
  */
 class Status extends Column
 {

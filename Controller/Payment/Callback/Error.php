@@ -1,6 +1,6 @@
 <?php
 
-namespace Safecharge\Safecharge\Controller\Payment\Callback;
+namespace Nuvei\Payments\Controller\Payment\Callback;
 
 use Magento\Framework\Controller\ResultFactory;
 //use Magento\Framework\Controller\ResultInterface;
@@ -9,7 +9,7 @@ use Magento\Framework\App\Request\InvalidRequestException;
 use Magento\Framework\App\RequestInterface;
 
 /**
- * Safecharge Safecharge payment place controller.
+ * Nuvei Payments payment place controller.
  */
 class Error extends \Magento\Framework\App\Action\Action implements \Magento\Framework\App\CsrfAwareActionInterface
 {
@@ -26,7 +26,7 @@ class Error extends \Magento\Framework\App\Action\Action implements \Magento\Fra
      */
     public function __construct(
         \Magento\Framework\App\Action\Context $context,
-        \Safecharge\Safecharge\Model\Config $moduleConfig
+        \Nuvei\Payments\Model\Config $moduleConfig
     ) {
         parent::__construct($context);
 

@@ -1,11 +1,9 @@
 <?php
 
-namespace Safecharge\Safecharge\Model;
+namespace Nuvei\Payments\Model;
 
 /**
- * Safecharge Safecharge private data keys provider model.
- *
- * @deprecated - must be removed
+ * Nuvei Payments private data keys provider model.
  */
 class PrivateDataKeysProvider
 {

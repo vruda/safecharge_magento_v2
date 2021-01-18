@@ -1,17 +1,17 @@
 <?php
 
-namespace Safecharge\Safecharge\Model;
+namespace Nuvei\Payments\Model;
 
-use Safecharge\Safecharge\Api\Data\RequestLogInterface;
-use Safecharge\Safecharge\Api\RequestLogRepositoryInterface;
-use Safecharge\Safecharge\Model\Data\RequestLogFactory;
+use Nuvei\Payments\Api\Data\RequestLogInterface;
+use Nuvei\Payments\Api\RequestLogRepositoryInterface;
+use Nuvei\Payments\Model\Data\RequestLogFactory;
 use Magento\Customer\Model\Session as CustomerSession;
 use Magento\Framework\Api\DataObjectHelper;
 use Magento\Store\Model\StoreManagerInterface;
 use Magento\Framework\Registry as CoreRegistry;
 
 /**
- * Safecharge Safecharge logger model.
+ * Nuvei Payments logger model.
  */
 class Logger extends \Monolog\Logger
 {

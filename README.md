@@ -1,9 +1,9 @@
-# Magento 2 Safecharge Payments Module
+# Magento 2 Nuvei Payments Module
 
 ---
 
 ## Install manually under app/code
-Download & place the contents of this repository under {YOUR-MAGENTO2-ROOT-DIR}/app/code/Safecharge/Safecharge  
+Download & place the contents of this repository under {YOUR-MAGENTO2-ROOT-DIR}/app/code/Nuvei/Payments  
 Then, run the following commands under your Magento 2 root dir:
 ```
 php bin/magento maintenance:enable
@@ -16,9 +16,9 @@ php bin/magento cache:flush
 
 ---
 
-https://www.safecharge.com/
+https://www.nuvei.com/
 
-© 2007 - 2019 SafeCharge International Group Limited.
+© 2007 - 2021 SafeCharge International Group Limited.
 All rights reserved.
 
-![Safecharge Logo](https://www.safecharge.com/docs/API/images/Icons_SC_logo.svg)
+![Nuvei Logo](https://nuvei.com/wp-content/uploads/2020/07/Nuvei-logo-footer.png)

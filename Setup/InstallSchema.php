@@ -1,6 +1,6 @@
 <?php
 
-namespace Safecharge\Safecharge\Setup;
+namespace Nuvei\Payments\Setup;
 
 use Magento\Framework\DB\Adapter\AdapterInterface;
 use Magento\Framework\DB\Ddl\Table;
@@ -9,7 +9,7 @@ use Magento\Framework\Setup\ModuleContextInterface;
 use Magento\Framework\Setup\SchemaSetupInterface;
 
 /**
- * Safecharge Safecharge install schema.
+ * Nuvei Payments install schema.
  */
 class InstallSchema implements InstallSchemaInterface
 {
@@ -149,7 +149,7 @@ class InstallSchema implements InstallSchemaInterface
                     ],
                     'Updated At'
                 )
-                ->setComment('Safecharge Safecharge Api Request Log Grid Table');
+                ->setComment('Nuvei Payments Api Request Log Grid Table');
             $setup->getConnection()->createTable($table);
 
             $setup->getConnection()

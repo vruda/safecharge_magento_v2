@@ -1,11 +1,11 @@
 <?php
 
-namespace Safecharge\Safecharge\Model\ResourceModel;
+namespace Nuvei\Payments\Model\ResourceModel;
 
 use Magento\Framework\Model\ResourceModel\Db\AbstractDb;
 
 /**
- * Safecharge Safecharge request log resource model.
+ * Nuvei Payments request log resource model.
  */
 class RequestLog extends AbstractDb
 {

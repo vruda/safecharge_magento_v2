@@ -1,17 +1,17 @@
 <?php
 
-namespace Safecharge\Safecharge\Controller\Payment\Callback;
+namespace Nuvei\Payments\Controller\Payment\Callback;
 
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Invoice;
 use Magento\Sales\Model\Order\Payment\Transaction;
-use Safecharge\Safecharge\Model\Payment;
+use Nuvei\Payments\Model\Payment;
 use Magento\Framework\App\Request\InvalidRequestException;
 use Magento\Framework\App\RequestInterface;
-use Safecharge\Safecharge\Model\AbstractRequest;
+use Nuvei\Payments\Model\AbstractRequest;
 
 /**
- * Safecharge Safecharge payment redirect controller.
+ * Nuvei Payments payment redirect controller.
  */
 class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Framework\App\CsrfAwareActionInterface
 {
@@ -57,7 +57,7 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
      */
     public function __construct(
         \Magento\Framework\App\Action\Context $context,
-        \Safecharge\Safecharge\Model\Config $moduleConfig,
+        \Nuvei\Payments\Model\Config $moduleConfig,
         \Magento\Sales\Model\Order\Payment\State\CaptureCommand $captureCommand,
         \Magento\Framework\DataObjectFactory $dataObjectFactory,
         \Magento\Quote\Api\CartManagementInterface $cartManagement,
@@ -72,7 +72,7 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
 		\Magento\Sales\Api\OrderRepositoryInterface $orderRepo,
 		\Magento\Framework\Api\SearchCriteriaBuilder $searchCriteriaBuilder,
 		\Magento\Sales\Model\ResourceModel\Order $orderResourceModel,
-		\Safecharge\Safecharge\Model\Request\Factory $requestFactory
+		\Nuvei\Payments\Model\Request\Factory $requestFactory
     ) {
         $this->moduleConfig                = $moduleConfig;
         $this->captureCommand            = $captureCommand;

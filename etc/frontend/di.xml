@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
 <!--
 /**
- * Safecharge Safecharge frontend di config.
+ * Nuvei Payments frontend di config.
  *
- * @category Safecharge
- * @package  Safecharge_Safecharge
+ * @category Nuvei
+ * @package  Nuvei_Payments
  */
 -->
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -14,7 +14,7 @@
             <argument name="methodCodes"
                       xsi:type="array">
                 <item name="safecharge"
-                      xsi:type="const">Safecharge\Safecharge\Model\Payment::METHOD_CODE</item>
+                      xsi:type="const">Nuvei\Payments\Model\Payment::METHOD_CODE</item>
             </argument>
         </arguments>
     </type>
@@ -24,7 +24,7 @@
             <argument name="configProviders"
                       xsi:type="array">
                 <item name="safecharge_config_provider"
-                      xsi:type="object">Safecharge\Safecharge\Model\ConfigProvider</item>
+                      xsi:type="object">Nuvei\Payments\Model\ConfigProvider</item>
             </argument>
         </arguments>
     </type>

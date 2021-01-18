@@ -1,9 +1,9 @@
 <?php
 
-namespace Safecharge\Safecharge\Ui\Component\Listing\Column\Type;
+namespace Nuvei\Payments\Ui\Component\Listing\Column\Type;
 
 /**
- * Safecharge Safecharge column type data formatter.
+ * Nuvei Payments column type data formatter.
  */
 class Json
 {

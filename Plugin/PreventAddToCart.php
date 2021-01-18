@@ -4,11 +4,9 @@
  * Description of PreventAddToCart
  *
  * A product with a rebilling plan must stay alone in a Cart and an Order.
- * 
- * @author Safecharge
  */
 
-namespace Safecharge\Safecharge\Plugin;
+namespace Nuvei\Payments\Plugin;
 
 class PreventAddToCart
 {
@@ -18,7 +16,7 @@ class PreventAddToCart
 	private $product_obj;
 
 	public function __construct(
-		\Safecharge\Safecharge\Model\Config $config,
+		\Nuvei\Payments\Model\Config $config,
 		\Magento\Framework\App\Request\Http $request,
 		\Magento\Framework\Message\ManagerInterface $messanger,
 		\Magento\Catalog\Model\Product $product_obj
@@ -37,7 +35,7 @@ class PreventAddToCart
 			$error_msg_2	= 'You can not add product with a Payment Plan to another products.';
 			
 			if($cartItemsCount > 0) {
-				$sc_label		= \Safecharge\Safecharge\Model\Config::PAYMENT_PLANS_ATTR_LABEL;
+				$sc_label		= \Nuvei\Payments\Model\Config::PAYMENT_PLANS_ATTR_LABEL;
 				$main_product	= $this->request->getParam('product', false);
 				$product_opt_id	= $this->request->getParam('selected_configurable_option', false);
 				
@@ -74,7 +72,7 @@ class PreventAddToCart
 						$product = $this->product_obj->load($options['info_buyRequest']['product']);
 						
 						$prod_custom_attr = $product
-							->getCustomAttribute(\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_ENABLE);
+							->getCustomAttribute(\Nuvei\Payments\Model\Config::PAYMENT_SUBS_ENABLE);
 						
 						$this->config->createLog($prod_custom_attr, 'simple product $prod_custom_attr');
 						
@@ -93,7 +91,7 @@ class PreventAddToCart
 				if($main_product && $product_opt_id && $product_opt_id !== $main_product) {
 					$payment_enabled = $productInfo
 						->load($product_opt_id)
-						->getData(\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_ENABLE);
+						->getData(\Nuvei\Payments\Model\Config::PAYMENT_SUBS_ENABLE);
 					
 					if(
 						!empty($payment_enabled)
@@ -108,7 +106,7 @@ class PreventAddToCart
 				// 2.2 when we have simple peoduct without options
 				elseif($main_product) {
 					$product = $this->product_obj->load($main_product);
-					$payment_enabled = $product->getCustomAttribute(\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_ENABLE);
+					$payment_enabled = $product->getCustomAttribute(\Nuvei\Payments\Model\Config::PAYMENT_SUBS_ENABLE);
 
 					if(!empty($payment_enabled) && $payment_enabled->getValue() > 0) {
 						$this->messanger->addError(__($error_msg_2));

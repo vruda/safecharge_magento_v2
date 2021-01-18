@@ -1,6 +1,6 @@
 <?php
 
-namespace Safecharge\Safecharge\Model\Config\Source;
+namespace Nuvei\Payments\Model\Config\Source;
 
 class SubscriptionUnits extends \Magento\Eav\Model\Entity\Attribute\Source\AbstractSource
 {

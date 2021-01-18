@@ -3,11 +3,9 @@
 /**
  * Description of ZeroTotal
  * Override original logic in Magento 2 and allow Orders with Total Amount of 0
- *
- * @author Safecharge
  */
 
-namespace Safecharge\Safecharge\Plugin;
+namespace Nuvei\Payments\Plugin;
 
 class ZeroTotal {
 	public function afterIsApplicable($subject, $result) {

@@ -1,13 +1,13 @@
 <?php
 
-namespace Safecharge\Safecharge\Observer\Sales\Order\Refund;
+namespace Nuvei\Payments\Observer\Sales\Order\Refund;
 
-use Safecharge\Safecharge\Model\Payment;
+use Nuvei\Payments\Model\Payment;
 use Magento\Framework\Event\ObserverInterface;
 use Magento\Framework\Event\Observer;
 use Magento\Sales\Model\Order\Payment as OrderPayment;
 /**
- * Safecharge Safecharge sales order refund register observer.
+ * Nuvei Payments sales order refund register observer.
  */
 class Register implements ObserverInterface
 {

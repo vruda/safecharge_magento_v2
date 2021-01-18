@@ -1,12 +1,8 @@
 <?php
 
-/**
- * @author SafeCharge
- */
+namespace Nuvei\Payments\Plugin\Block\Widget\Button;
 
-namespace Safecharge\Safecharge\Plugin\Block\Widget\Button;
-
-use Safecharge\Safecharge\Model\Payment;
+use Nuvei\Payments\Model\Payment;
 
 class Toolbar
 {
@@ -15,7 +11,7 @@ class Toolbar
     private $request;
     
     public function __construct(
-        \Safecharge\Safecharge\Model\Config $config,
+        \Nuvei\Payments\Model\Config $config,
         \Magento\Sales\Api\OrderRepositoryInterface $orderRepository,
         \Magento\Framework\App\RequestInterface $request
     ) {

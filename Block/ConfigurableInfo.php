@@ -1,14 +1,14 @@
 <?php
 
-namespace Safecharge\Safecharge\Block;
+namespace Nuvei\Payments\Block;
 
-use Safecharge\Safecharge\Model\Payment;
+use Nuvei\Payments\Model\Payment;
 use Magento\Framework\Phrase;
 use Magento\Framework\View\Element\Template\Context;
 use Magento\Payment\Gateway\ConfigInterface;
 
 /**
- * Safecharge Safecharge configurable info block.
+ * Nuvei Payments configurable info block.
  */
 class ConfigurableInfo extends \Magento\Payment\Block\ConfigurableInfo
 {

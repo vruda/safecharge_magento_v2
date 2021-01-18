@@ -1,12 +1,12 @@
 <?php
 
-namespace Safecharge\Safecharge\Api;
+namespace Nuvei\Payments\Api;
 
-use Safecharge\Safecharge\Api\Data\RequestLogInterface;
+use Nuvei\Payments\Api\Data\RequestLogInterface;
 use Magento\Framework\Exception\LocalizedException;
 
 /**
- * Safecharge Safecharge request log repository interface.
+ * Nuvei Payments request log repository interface.
  */
 interface RequestLogRepositoryInterface
 {

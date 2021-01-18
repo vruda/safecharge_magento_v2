@@ -7,7 +7,7 @@
 	  <referenceBlock name="product.info.details">
             <block class="Magento\Catalog\Block\Product\View"
                    name="safechargeSubStoreDescr.tab"
-                   template="Safecharge_Safecharge::subscr_details.phtml"
+                   template="Nuvei_Payments::subscr_details.phtml"
                    group="detailed_info">
                 <arguments>
                     <argument name="sort_order" xsi:type="string">40</argument>

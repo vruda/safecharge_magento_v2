@@ -1,9 +1,9 @@
 <?php
 
-namespace Safecharge\Safecharge\Lib\Http\Client;
+namespace Nuvei\Payments\Lib\Http\Client;
 
 /**
- * Safecharge Safecharge curl http client library.
+ * Nuvei Payments curl http client library.
  */
 class Curl extends \Magento\Framework\HTTP\Client\Curl
 {

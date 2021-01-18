@@ -1,19 +1,19 @@
 {
-    "name": "safecharge/module-safecharge",
-    "description": "Safecharge Payments For Magento 2",
+    "name": "nuvei/module-payments",
+    "description": "Nuvei Payments For Magento 2",
 	"minimum-stability": "beta",
 	"prefer-stable": true,
     "require": {
         "php": ">=5.5"
     },
     "type": "magento2-module",
-    "version": "2.1.3",
+    "version": "3.0.0",
     "license": [
         "OSL-3.0",
         "AFL-3.0"
     ],
     "authors": [{
-        "name": "Safecharge",
+        "name": "Nuvei",
         "role": "Developer"
     }],
     "autoload": {
@@ -21,7 +21,7 @@
             "registration.php"
         ],
         "psr-4": {
-            "Safecharge\\Safecharge\\": ""
+            "Nuvei\\Payments\\": ""
         }
     },
     "require-dev": {

@@ -1,13 +1,13 @@
 <?php
 
-namespace Safecharge\Safecharge\Model\Redirect;
+namespace Nuvei\Payments\Model\Redirect;
 
 use Magento\Checkout\Model\Session as CheckoutSession;
-use Safecharge\Safecharge\Model\Config as ModuleConfig;
+use Nuvei\Payments\Model\Config as ModuleConfig;
 use Magento\Framework\App\Request\Http as Http;
 
 /**
- * Safecharge Safecharge config provider model.
+ * Nuvei Payments config provider model.
  */
 class Url
 {

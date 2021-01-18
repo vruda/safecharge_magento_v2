@@ -1,9 +1,9 @@
 <?php
 
-namespace Safecharge\Safecharge\Model;
+namespace Nuvei\Payments\Model;
 
-use Safecharge\Safecharge\Api\Data\RequestLogInterface;
-use Safecharge\Safecharge\Api\Data\RequestLogInterfaceFactory;
+use Nuvei\Payments\Api\Data\RequestLogInterface;
+use Nuvei\Payments\Api\Data\RequestLogInterfaceFactory;
 use Magento\Framework\Api\DataObjectHelper;
 use Magento\Framework\Data\Collection\AbstractDb;
 use Magento\Framework\Model\AbstractModel;
@@ -14,7 +14,7 @@ use Magento\Framework\Registry;
 use Magento\Framework\Stdlib\DateTime\DateTime;
 
 /**
- * Safecharge Safecharge request log model.
+ * Nuvei Payments request log model.
  */
 class RequestLog extends AbstractModel
 {
@@ -92,7 +92,7 @@ class RequestLog extends AbstractModel
     {
         parent::_construct();
 
-        $this->_init(\Safecharge\Safecharge\Model\ResourceModel\RequestLog::class);
+        $this->_init(\Nuvei\Payments\Model\ResourceModel\RequestLog::class);
     }
 
     /**

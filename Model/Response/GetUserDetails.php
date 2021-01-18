@@ -1,12 +1,12 @@
 <?php
 
-namespace Safecharge\Safecharge\Model\Response;
+namespace Nuvei\Payments\Model\Response;
 
-use Safecharge\Safecharge\Model\AbstractResponse;
-use Safecharge\Safecharge\Model\ResponseInterface;
+use Nuvei\Payments\Model\AbstractResponse;
+use Nuvei\Payments\Model\ResponseInterface;
 
 /**
- * Safecharge Safecharge get user details response model.
+ * Nuvei Payments get user details response model.
  */
 class GetUserDetails extends AbstractResponse implements ResponseInterface
 {

@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
 <!--
 /**
- * Safecharge Safecharge config config.
+ * Nuvei Payments config config.
  *
- * @category Safecharge
- * @package  Safecharge_Safecharge
+ * @category Nuvei
+ * @package  Nuvei_Payments
  */
 -->
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -43,7 +43,7 @@
                 <can_use_checkout>1</can_use_checkout>
                 
                 <!-- Gateway Configuration. -->
-                <model>Safecharge\Safecharge\Model\Payment</model>
+                <model>Nuvei\Payments\Model\Payment</model>
                 <privateInfoKeys>payment_solution,external_payment_method,authorization_code,transaction_id,safecharge_order_id,transaction_request_id</privateInfoKeys>
                 
 				<paymentInfoKeys>payment_solution,external_payment_method,authorization_code,transaction_id,safecharge_order_id,transaction_request_id</paymentInfoKeys>

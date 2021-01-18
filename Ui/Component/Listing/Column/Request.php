@@ -1,14 +1,14 @@
 <?php
 
-namespace Safecharge\Safecharge\Ui\Component\Listing\Column;
+namespace Nuvei\Payments\Ui\Component\Listing\Column;
 
-use Safecharge\Safecharge\Ui\Component\Listing\Column\Type\Json;
+use Nuvei\Payments\Ui\Component\Listing\Column\Type\Json;
 use Magento\Framework\View\Element\UiComponent\ContextInterface;
 use Magento\Framework\View\Element\UiComponentFactory;
 use Magento\Ui\Component\Listing\Columns\Column;
 
 /**
- * Safecharge Safecharge request column handler.
+ * Nuvei Payments request column handler.
  */
 class Request extends Column
 {

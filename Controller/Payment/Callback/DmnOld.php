@@ -1,14 +1,14 @@
 <?php
 
-namespace Safecharge\Safecharge\Controller\Payment\Callback;
+namespace Nuvei\Payments\Controller\Payment\Callback;
 
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Invoice;
 use Magento\Sales\Model\Order\Payment\Transaction;
-use Safecharge\Safecharge\Model\Payment;
+use Nuvei\Payments\Model\Payment;
 
 /**
- * Safecharge Safecharge payment redirect controller.
+ * Nuvei Payments payment redirect controller.
  */
 class DmnOld extends \Magento\Framework\App\Action\Action
 {
@@ -52,7 +52,7 @@ class DmnOld extends \Magento\Framework\App\Action\Action
      */
     public function __construct(
         \Magento\Framework\App\Action\Context $context,
-        \Safecharge\Safecharge\Model\Config $moduleConfig,
+        \Nuvei\Payments\Model\Config $moduleConfig,
         \Magento\Sales\Model\Order\Payment\State\CaptureCommand $captureCommand,
         \Magento\Framework\DataObjectFactory $dataObjectFactory,
         \Magento\Quote\Api\CartManagementInterface $cartManagement,
@@ -67,7 +67,7 @@ class DmnOld extends \Magento\Framework\App\Action\Action
 		\Magento\Sales\Api\OrderRepositoryInterface $orderRepo,
 		\Magento\Framework\Api\SearchCriteriaBuilder $searchCriteriaBuilder,
 		\Magento\Sales\Model\ResourceModel\Order $orderResourceModel,
-		\Safecharge\Safecharge\Model\Request\Factory $requestFactory
+		\Nuvei\Payments\Model\Request\Factory $requestFactory
     ) {
         $this->moduleConfig                = $moduleConfig;
         $this->captureCommand            = $captureCommand;

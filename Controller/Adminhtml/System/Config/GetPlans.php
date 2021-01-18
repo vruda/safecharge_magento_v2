@@ -1,9 +1,9 @@
 <?php
 
-namespace Safecharge\Safecharge\Controller\Adminhtml\System\Config;
+namespace Nuvei\Payments\Controller\Adminhtml\System\Config;
 
-use Safecharge\Safecharge\Model\AbstractRequest;
-use Safecharge\Safecharge\Model\Request\Factory as RequestFactory;
+use Nuvei\Payments\Model\AbstractRequest;
+use Nuvei\Payments\Model\Request\Factory as RequestFactory;
 
 class GetPlans extends \Magento\Backend\App\Action
 {
@@ -15,7 +15,7 @@ class GetPlans extends \Magento\Backend\App\Action
     public function __construct(
         \Magento\Backend\App\Action\Context $context,
         \Magento\Framework\Controller\Result\JsonFactory $jsonResultFactory,
-        \Safecharge\Safecharge\Model\Config $moduleConfig,
+        \Nuvei\Payments\Model\Config $moduleConfig,
         RequestFactory $requestFactory
     ) {
         parent::__construct($context);

@@ -1,8 +1,8 @@
 /**
- * Safecharge Safecharge js component.
+ * Nuvei Payments js component.
  *
- * @category Safecharge
- * @package  Safecharge_Safecharge
+ * @category Nuvei
+ * @package  Nuvei_Payments
  */
 define(
     [
@@ -15,7 +15,7 @@ define(
         rendererList.push(
             {
                 type: 'safecharge',
-                component: 'Safecharge_Safecharge/js/view/payment/method-renderer/safecharge'
+                component: 'Nuvei_Payments/js/view/payment/method-renderer/safecharge'
             }
         );
 

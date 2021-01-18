@@ -1,15 +1,15 @@
 <?php
 
-namespace Safecharge\Safecharge\Model\Request\Payment;
+namespace Nuvei\Payments\Model\Request\Payment;
 
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\ObjectManagerInterface;
 use Magento\Sales\Model\Order\Payment as OrderPayment;
-use Safecharge\Safecharge\Model\AbstractRequest;
-use Safecharge\Safecharge\Model\RequestInterface;
+use Nuvei\Payments\Model\AbstractRequest;
+use Nuvei\Payments\Model\RequestInterface;
 
 /**
- * Safecharge Safecharge payment request factory model.
+ * Nuvei Payments payment request factory model.
  */
 class Factory
 {
@@ -19,9 +19,9 @@ class Factory
      * @var array
      */
     private $invokableClasses = [
-        AbstractRequest::PAYMENT_SETTLE_METHOD	=> \Safecharge\Safecharge\Model\Request\Payment\Settle::class,
-        AbstractRequest::PAYMENT_REFUND_METHOD  => \Safecharge\Safecharge\Model\Request\Payment\Refund::class,
-        AbstractRequest::PAYMENT_VOID_METHOD    => \Safecharge\Safecharge\Model\Request\Payment\Cancel::class,
+        AbstractRequest::PAYMENT_SETTLE_METHOD	=> \Nuvei\Payments\Model\Request\Payment\Settle::class,
+        AbstractRequest::PAYMENT_REFUND_METHOD  => \Nuvei\Payments\Model\Request\Payment\Refund::class,
+        AbstractRequest::PAYMENT_VOID_METHOD    => \Nuvei\Payments\Model\Request\Payment\Cancel::class,
     ];
 
     /**
@@ -74,7 +74,7 @@ class Factory
         if (!$model instanceof RequestInterface) {
             throw new LocalizedException(
                 __(
-                    "%1 doesn't implement \Safecharge\Safecharge\Mode\RequestInterface",
+                    "%1 doesn't implement \Nuvei\Payments\Mode\RequestInterface",
                     $className
                 )
             );

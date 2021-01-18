@@ -1,6 +1,6 @@
 <?php
 
-namespace Safecharge\Safecharge\Model\Config\Source;
+namespace Nuvei\Payments\Model\Config\Source;
 
 class PaymentPlansOptions extends \Magento\Eav\Model\Entity\Attribute\Source\AbstractSource
 {
@@ -11,7 +11,7 @@ class PaymentPlansOptions extends \Magento\Eav\Model\Entity\Attribute\Source\Abs
     
     public function __construct(
         \Magento\Framework\Filesystem\DirectoryList $directory,
-        \Safecharge\Safecharge\Model\Config $config
+        \Nuvei\Payments\Model\Config $config
     ) {
         $this->directory = $directory;
         $this->config = $config;
@@ -27,7 +27,7 @@ class PaymentPlansOptions extends \Magento\Eav\Model\Entity\Attribute\Source\Abs
         
         # json version
         $file_name = $this->directory->getPath('tmp') . DIRECTORY_SEPARATOR
-			. \Safecharge\Safecharge\Model\Config::PAYMENT_PLANS_FILE_NAME;
+			. \Nuvei\Payments\Model\Config::PAYMENT_PLANS_FILE_NAME;
         
         if (is_readable($file_name)) {
             try {

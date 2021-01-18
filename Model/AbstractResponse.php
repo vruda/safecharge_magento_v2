@@ -1,13 +1,13 @@
 <?php
 
-namespace Safecharge\Safecharge\Model;
+namespace Nuvei\Payments\Model;
 
 use Magento\Framework\Exception\PaymentException;
-use Safecharge\Safecharge\Lib\Http\Client\Curl;
-use Safecharge\Safecharge\Model\Logger as SafechargeLogger;
+use Nuvei\Payments\Lib\Http\Client\Curl;
+use Nuvei\Payments\Model\Logger as SafechargeLogger;
 
 /**
- * Safecharge Safecharge abstract response model.
+ * Nuvei Payments abstract response model.
  */
 abstract class AbstractResponse extends AbstractApi
 {

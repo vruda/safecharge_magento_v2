@@ -1,15 +1,15 @@
 <?php
 
-namespace Safecharge\Safecharge\Model\Response;
+namespace Nuvei\Payments\Model\Response;
 
-use Safecharge\Safecharge\Model\Logger as SafechargeLogger;
-use Safecharge\Safecharge\Model\Config;
-use Safecharge\Safecharge\Lib\Http\Client\Curl;
+use Nuvei\Payments\Model\Logger as SafechargeLogger;
+use Nuvei\Payments\Model\Config;
+use Nuvei\Payments\Lib\Http\Client\Curl;
 
 /**
- * Safecharge Safecharge open order response model.
+ * Nuvei Payments open order response model.
  */
-class GetPlansList extends \Safecharge\Safecharge\Model\AbstractResponse implements \Safecharge\Safecharge\Model\ResponseInterface
+class GetPlansList extends \Nuvei\Payments\Model\AbstractResponse implements \Nuvei\Payments\Model\ResponseInterface
 {
     protected $config;
     
@@ -54,7 +54,7 @@ class GetPlansList extends \Safecharge\Safecharge\Model\AbstractResponse impleme
             
             $fp = fopen(
 				$tempPath. DIRECTORY_SEPARATOR
-					. \Safecharge\Safecharge\Model\Config::PAYMENT_PLANS_FILE_NAME,
+					. \Nuvei\Payments\Model\Config::PAYMENT_PLANS_FILE_NAME,
 				'w'
 			);
 			

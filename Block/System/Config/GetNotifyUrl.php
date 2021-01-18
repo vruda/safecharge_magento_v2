@@ -1,12 +1,12 @@
 <?php
 
-namespace Safecharge\Safecharge\Block\System\Config;
+namespace Nuvei\Payments\Block\System\Config;
 
 class GetNotifyUrl implements \Magento\Config\Model\Config\CommentInterface
 {
 	private $config;
 	
-	public function __construct(\Safecharge\Safecharge\Model\Config $config) {
+	public function __construct(\Nuvei\Payments\Model\Config $config) {
 		$this->config = $config;
 	}
 

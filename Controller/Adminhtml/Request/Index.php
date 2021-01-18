@@ -1,17 +1,17 @@
 <?php
 
-namespace Safecharge\Safecharge\Controller\Adminhtml\Request;
+namespace Nuvei\Payments\Controller\Adminhtml\Request;
 
 use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
 use Magento\Framework\View\Result\PageFactory;
 
 /**
- * Safecharge Safecharge admin request index controller.
+ * Nuvei Payments admin request index controller.
  */
 class Index extends Action
 {
-    const ADMIN_RESOURCE = 'Safecharge_Safecharge::sales_safecharge_request';
+    const ADMIN_RESOURCE = 'Nuvei_Payments::sales_safecharge_request';
 
     /**
      * @var PageFactory
@@ -31,7 +31,7 @@ class Index extends Action
     {
         $resultPage = $this->resultPageFactory->create();
 
-        $resultPage->setActiveMenu('Safecharge_Safecharge::sales_safecharge_request');
+        $resultPage->setActiveMenu('Nuvei_Payments::sales_safecharge_request');
         $resultPage->getConfig()->getTitle()->prepend(__('Nuvei Api Requests'));
 
         $resultPage->addBreadcrumb('Nuvei', 'Nuvei');

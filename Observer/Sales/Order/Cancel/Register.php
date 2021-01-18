@@ -1,15 +1,15 @@
 <?php
 
-namespace Safecharge\Safecharge\Observer\Sales\Order\Cancel;
+namespace Nuvei\Payments\Observer\Sales\Order\Cancel;
 
-use Safecharge\Safecharge\Model\Payment;
+use Nuvei\Payments\Model\Payment;
 use Magento\Framework\Event\ObserverInterface;
 use Magento\Framework\Event\Observer;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Payment as OrderPayment;
 
 /**
- * Safecharge Safecharge sales order void observer.
+ * Nuvei Payments sales order void observer.
  */
 class Register implements ObserverInterface
 {

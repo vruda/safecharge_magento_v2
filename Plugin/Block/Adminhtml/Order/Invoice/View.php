@@ -6,9 +6,9 @@
  * @author SafeCharge
  */
 
-namespace Safecharge\Safecharge\Plugin\Block\Adminhtml\Order\Invoice;
+namespace Nuvei\Payments\Plugin\Block\Adminhtml\Order\Invoice;
 
-use Safecharge\Safecharge\Model\Payment;
+use Nuvei\Payments\Model\Payment;
 
 class View extends \Magento\Backend\Block\Widget\Form\Container
 {
@@ -21,7 +21,7 @@ class View extends \Magento\Backend\Block\Widget\Form\Container
     public function __construct(
         \Magento\Framework\App\RequestInterface $request,
         \Magento\Sales\Model\Order\Invoice $invoice,
-		\Safecharge\Safecharge\Model\Config $config,
+		\Nuvei\Payments\Model\Config $config,
 		\Magento\Sales\Api\OrderRepositoryInterface $orderRepo,
 		\Magento\Framework\Api\SearchCriteriaBuilder $searchCriteriaBuilder
     ) {

@@ -1,21 +1,21 @@
 <?php
 
-namespace Safecharge\Safecharge\Model\Request;
+namespace Nuvei\Payments\Model\Request;
 
 use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Quote\Model\Quote;
-use Safecharge\Safecharge\Lib\Http\Client\Curl;
-use Safecharge\Safecharge\Model\AbstractRequest;
-use Safecharge\Safecharge\Model\AbstractResponse;
-use Safecharge\Safecharge\Model\Config;
-use Safecharge\Safecharge\Model\Logger as SafechargeLogger;
-use Safecharge\Safecharge\Model\Payment;
-use Safecharge\Safecharge\Model\Request\Factory as RequestFactory;
-use Safecharge\Safecharge\Model\RequestInterface;
-use Safecharge\Safecharge\Model\Response\Factory as ResponseFactory;
+use Nuvei\Payments\Lib\Http\Client\Curl;
+use Nuvei\Payments\Model\AbstractRequest;
+use Nuvei\Payments\Model\AbstractResponse;
+use Nuvei\Payments\Model\Config;
+use Nuvei\Payments\Model\Logger as SafechargeLogger;
+use Nuvei\Payments\Model\Payment;
+use Nuvei\Payments\Model\Request\Factory as RequestFactory;
+use Nuvei\Payments\Model\RequestInterface;
+use Nuvei\Payments\Model\Response\Factory as ResponseFactory;
 
 /**
- * Safecharge Safecharge paymentAPM request model.
+ * Nuvei Payments paymentAPM request model.
  */
 class PaymentApm extends AbstractRequest implements RequestInterface
 {

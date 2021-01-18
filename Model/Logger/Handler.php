@@ -1,11 +1,11 @@
 <?php
 
-namespace Safecharge\Safecharge\Model\Logger;
+namespace Nuvei\Payments\Model\Logger;
 
 use Magento\Framework\Logger\Handler\Base;
 
 /**
- * Safecharge Safecharge logger handler model.
+ * Nuvei Payments logger handler model.
  */
 class Handler extends Base
 {

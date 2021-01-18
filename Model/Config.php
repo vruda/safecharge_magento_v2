@@ -1,6 +1,6 @@
 <?php
 
-namespace Safecharge\Safecharge\Model;
+namespace Nuvei\Payments\Model;
 
 use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Framework\App\Config\ScopeConfigInterface;
@@ -11,11 +11,11 @@ use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\StoreManagerInterface;
 
 /**
- * Safecharge Safecharge config model.
+ * Nuvei Payments config model.
  */
 class Config
 {
-    const MODULE_NAME						= 'Safecharge_Safecharge';
+    const MODULE_NAME						= 'Nuvei_Payments';
 	
     const PAYMENT_PLANS_ATTR_NAME			= 'safecharge_payment_plans';
     const PAYMENT_PLANS_ATTR_LABEL			= 'Nuvei Payment Plans';

@@ -1,16 +1,16 @@
 <?php
 
-namespace Safecharge\Safecharge\Controller\Payment\Callback;
+namespace Nuvei\Payments\Controller\Payment\Callback;
 
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\Controller\ResultFactory;
 use Magento\Framework\Controller\ResultInterface;
-use Safecharge\Safecharge\Model\Config as ModuleConfig;
-use Safecharge\Safecharge\Model\Logger as SafechargeLogger;
+use Nuvei\Payments\Model\Config as ModuleConfig;
+use Nuvei\Payments\Model\Logger as SafechargeLogger;
 
 /**
- * Safecharge Safecharge payment place controller.
+ * Nuvei Payments payment place controller.
  */
 class ErrorOld extends Action
 {

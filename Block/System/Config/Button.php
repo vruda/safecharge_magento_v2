@@ -1,16 +1,16 @@
 <?php
 
-namespace Safecharge\Safecharge\Block\System\Config;
+namespace Nuvei\Payments\Block\System\Config;
 
 use Magento\Backend\Block\Template\Context;
 use Magento\Customer\Model\Session;
 use Magento\Framework\ObjectManagerInterface;
 use Magento\Framework\Data\Form\Element\AbstractElement;
-use Safecharge\Safecharge\Model\Config;
+use Nuvei\Payments\Model\Config;
 
 class Button extends \Magento\Config\Block\System\Config\Form\Field
 {
-    protected $_template = 'Safecharge_Safecharge::system/config/getPlans.phtml';
+    protected $_template = 'Nuvei_Payments::system/config/getPlans.phtml';
  
     private $config;
     

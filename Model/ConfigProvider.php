@@ -1,6 +1,6 @@
 <?php
 
-namespace Safecharge\Safecharge\Model;
+namespace Nuvei\Payments\Model;
 
 use Magento\Customer\Model\Session as CustomerSession;
 use Magento\Framework\Exception\PaymentException;
@@ -9,11 +9,11 @@ use Magento\Payment\Helper\Data as PaymentHelper;
 use Magento\Payment\Model\CcConfig;
 use Magento\Payment\Model\CcGenericConfigProvider;
 use Magento\Vault\Api\PaymentTokenManagementInterface;
-use Safecharge\Safecharge\Model\Config as ModuleConfig;
-use Safecharge\Safecharge\Model\Request\Factory as RequestFactory;
+use Nuvei\Payments\Model\Config as ModuleConfig;
+use Nuvei\Payments\Model\Request\Factory as RequestFactory;
 
 /**
- * Safecharge Safecharge config provider model.
+ * Nuvei Payments config provider model.
  */
 class ConfigProvider extends CcGenericConfigProvider
 {

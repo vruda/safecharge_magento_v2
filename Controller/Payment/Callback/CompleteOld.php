@@ -1,6 +1,6 @@
 <?php
 
-namespace Safecharge\Safecharge\Controller\Payment\Callback;
+namespace Nuvei\Payments\Controller\Payment\Callback;
 
 use Magento\Framework\Controller\ResultFactory;
 use Magento\Framework\Exception\PaymentException;
@@ -8,7 +8,7 @@ use Magento\Framework\App\Request\InvalidRequestException;
 use Magento\Framework\App\RequestInterface;
 
 /**
- * Safecharge Safecharge redirect success controller.
+ * Nuvei Payments redirect success controller.
  */
 class CompleteOld extends \Magento\Framework\App\Action\Action
 {
@@ -55,8 +55,8 @@ class CompleteOld extends \Magento\Framework\App\Action\Action
      */
     public function __construct(
         \Magento\Framework\App\Action\Context $context,
-        \Safecharge\Safecharge\Model\Request\Payment\Factory $paymentRequestFactory,
-        \Safecharge\Safecharge\Model\Config $moduleConfig,
+        \Nuvei\Payments\Model\Request\Payment\Factory $paymentRequestFactory,
+        \Nuvei\Payments\Model\Config $moduleConfig,
         \Magento\Framework\DataObjectFactory $dataObjectFactory,
         \Magento\Quote\Api\CartManagementInterface $cartManagement,
         \Magento\Checkout\Model\Session $checkoutSession,

@@ -1,11 +1,11 @@
 <?php
 
-namespace Safecharge\Safecharge\Model;
+namespace Nuvei\Payments\Model;
 
-use Safecharge\Safecharge\Model\Logger as SafechargeLogger;
+use Nuvei\Payments\Model\Logger as SafechargeLogger;
 
 /**
- * Safecharge Safecharge abstract api model.
+ * Nuvei Payments abstract api model.
  */
 abstract class AbstractApi
 {

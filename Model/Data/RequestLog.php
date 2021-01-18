@@ -1,15 +1,15 @@
 <?php
 
-namespace Safecharge\Safecharge\Model\Data;
+namespace Nuvei\Payments\Model\Data;
 
-use Safecharge\Safecharge\Api\Data\RequestLogInterface;
+use Nuvei\Payments\Api\Data\RequestLogInterface;
 use Magento\Framework\Api\AbstractSimpleObject;
 
 /**
- * Safecharge Safecharge request log data object.
+ * Nuvei Payments request log data object.
  *
- * @category Safecharge
- * @package  Safecharge_Safecharge
+ * @category Nuvei
+ * @package  Nuvei_Payments
  */
 class RequestLog extends AbstractSimpleObject implements RequestLogInterface
 {

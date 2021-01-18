@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
 <!--
 /**
- * Safecharge Safecharge layout configuration.
+ * Nuvei Payments layout configuration.
  *
- * @category Safecharge
- * @package  Safecharge_Safecharge
+ * @category Nuvei
+ * @package  Nuvei_Payments
  */
 -->
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -13,7 +13,7 @@
     <body>
         <referenceBlock name="menu">
             <action method="setActive">
-                <argument name="itemId" xsi:type="string">Safecharge_Safecharge::sales_safecharge_request</argument>
+                <argument name="itemId" xsi:type="string">Nuvei_Payments::sales_safecharge_request</argument>
             </action>
         </referenceBlock>
         <referenceBlock name="page.title">

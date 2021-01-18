@@ -1,11 +1,11 @@
 <?php
 
-namespace Safecharge\Safecharge\Model\Adminhtml\Source;
+namespace Nuvei\Payments\Model\Adminhtml\Source;
 
 use Magento\Framework\Option\ArrayInterface;
 
 /**
- * Safecharge Safecharge payment action source model.
+ * Nuvei Payments payment action source model.
  */
 class Hash implements ArrayInterface
 {

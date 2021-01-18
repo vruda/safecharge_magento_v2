@@ -1,16 +1,16 @@
 <?php
 
-namespace Safecharge\Safecharge\Model\Response;
+namespace Nuvei\Payments\Model\Response;
 
-use Safecharge\Safecharge\Lib\Http\Client\Curl;
-use Safecharge\Safecharge\Model\AbstractResponse;
-use Safecharge\Safecharge\Model\Config;
-use Safecharge\Safecharge\Model\Logger as SafechargeLogger;
+use Nuvei\Payments\Lib\Http\Client\Curl;
+use Nuvei\Payments\Model\AbstractResponse;
+use Nuvei\Payments\Model\Config;
+use Nuvei\Payments\Model\Logger as SafechargeLogger;
 use Magento\Sales\Model\Order\Payment as OrderPayment;
 use Magento\Sales\Model\Order\Payment\Transaction as OrderTransaction;
 
 /**
- * Safecharge Safecharge abstract payment response model.
+ * Nuvei Payments abstract payment response model.
  */
 abstract class AbstractPayment extends AbstractResponse
 {

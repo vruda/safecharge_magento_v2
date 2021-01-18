@@ -1,16 +1,16 @@
 <?php
 
-namespace Safecharge\Safecharge\Ui\DataProvider;
+namespace Nuvei\Payments\Ui\DataProvider;
 
-use Safecharge\Safecharge\Model\ResourceModel\RequestLog\CollectionFactory;
-use Safecharge\Safecharge\Model\ResourceModel\RequestLog\Collection;
+use Nuvei\Payments\Model\ResourceModel\RequestLog\CollectionFactory;
+use Nuvei\Payments\Model\ResourceModel\RequestLog\Collection;
 use Magento\Ui\DataProvider\AbstractDataProvider;
 use Magento\Ui\DataProvider\AddFieldToCollectionInterface;
 use Magento\Ui\DataProvider\AddFilterToCollectionInterface;
 use Magento\Framework\Api\Filter;
 
 /**
- * Safecharge Safecharge request log ui data provider.
+ * Nuvei Payments request log ui data provider.
  */
 class RequestLogDataProvider extends AbstractDataProvider
 {

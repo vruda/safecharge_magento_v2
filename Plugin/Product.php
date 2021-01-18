@@ -7,14 +7,14 @@
  * The ne price depends of activated Rebilling Plan for the product.
  */
 
-namespace Safecharge\Safecharge\Plugin;
+namespace Nuvei\Payments\Plugin;
 
 class Product {
 	private $config;
 	private $request;
 
 	public function __construct(
-		\Safecharge\Safecharge\Model\Config $config,
+		\Nuvei\Payments\Model\Config $config,
 		\Magento\Framework\App\RequestInterface $request
 	) {
 		$this->config = $config;
@@ -23,8 +23,8 @@ class Product {
 	
 	public function afterGetPrice(\Magento\Catalog\Model\Product $product, $result) {
 		try {
-			$enabled_nuvei_subscr = $product->getCustomAttribute(\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_ENABLE);
-			$nuvei_subscr_init_amount = $product->getCustomAttribute(\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_INTIT_AMOUNT);
+			$enabled_nuvei_subscr = $product->getCustomAttribute(\Nuvei\Payments\Model\Config::PAYMENT_SUBS_ENABLE);
+			$nuvei_subscr_init_amount = $product->getCustomAttribute(\Nuvei\Payments\Model\Config::PAYMENT_SUBS_INTIT_AMOUNT);
 		
 			if(
 				!empty($enabled_nuvei_subscr)
@@ -52,8 +52,8 @@ class Product {
 //			if(
 //				!empty($post_data['product']['price'])
 //				&& floatval($post_data['product']['price']) > 0
-//				&& !empty($post_data['product'][\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_ENABLE])
-//				&& intval($post_data['product'][\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_ENABLE]) == 1
+//				&& !empty($post_data['product'][\Nuvei\Payments\Model\Config::PAYMENT_SUBS_ENABLE])
+//				&& intval($post_data['product'][\Nuvei\Payments\Model\Config::PAYMENT_SUBS_ENABLE]) == 1
 //			) {
 //				$product->setPrice(0);
 //				
@@ -61,8 +61,8 @@ class Product {
 ////				return $post_data;
 //			}
 //			
-////			$enabled_nuvei_subscr = $product->getCustomAttribute(\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_ENABLE);
-////			$nuvei_subscr_init_amount = $product->getCustomAttribute(\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_INTIT_AMOUNT);
+////			$enabled_nuvei_subscr = $product->getCustomAttribute(\Nuvei\Payments\Model\Config::PAYMENT_SUBS_ENABLE);
+////			$nuvei_subscr_init_amount = $product->getCustomAttribute(\Nuvei\Payments\Model\Config::PAYMENT_SUBS_INTIT_AMOUNT);
 ////		
 ////			if(
 ////				!empty($enabled_nuvei_subscr)

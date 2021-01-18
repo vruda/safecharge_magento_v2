@@ -1,32 +1,21 @@
 <?php
 
-namespace Safecharge\Safecharge\Controller\Payment;
+namespace Nuvei\Payments\Controller\Payment;
 
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\App\ResponseInterface;
 use Magento\Framework\Controller\Result\JsonFactory;
-use Safecharge\Safecharge\Model\AbstractRequest;
-use Safecharge\Safecharge\Model\Config as ModuleConfig;
-use Safecharge\Safecharge\Model\Logger as SafechargeLogger;
-//use Safecharge\Safecharge\Model\Redirect\Url as RedirectUrlBuilder;
-use Safecharge\Safecharge\Model\Request\Factory as RequestFactory;
+use Nuvei\Payments\Model\AbstractRequest;
+use Nuvei\Payments\Model\Config as ModuleConfig;
+use Nuvei\Payments\Model\Logger as SafechargeLogger;
+use Nuvei\Payments\Model\Request\Factory as RequestFactory;
 
 /**
- * Safecharge Safecharge OpenOrder controller.
+ * Nuvei Payments OpenOrder controller.
  */
 class OpenOrder extends Action
 {
-    /**
-     * @var RedirectUrlBuilder
-     */
-//    private $redirectUrlBuilder;
-
-    /**
-     * @var SafechargeLogger
-     */
-//    private $safechargeLogger;
-
     /**
      * @var ModuleConfig
      */

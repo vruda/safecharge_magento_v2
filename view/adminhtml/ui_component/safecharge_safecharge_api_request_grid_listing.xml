@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
 <!--
 /**
- * Safecharge Safecharge ui component configuration.
+ * Nuvei Payments ui component configuration.
  *
- * @category Safecharge
- * @package  Safecharge_Safecharge
+ * @category Nuvei
+ * @package  Nuvei_Payments
  */
 -->
 <listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -15,11 +15,11 @@
             <item name="deps" xsi:type="string">safecharge_safecharge_api_request_grid_listing.safecharge_safecharge_api_request_grid_listing_data_source</item>
         </item>
         <item name="spinner" xsi:type="string">safecharge_safecharge_api_request_grid_columns</item>
-        <item name="acl" xsi:type="string">Safecharge_Safecharge::sales_safecharge_request</item>
+        <item name="acl" xsi:type="string">Nuvei_Payments::sales_safecharge_request</item>
     </argument>
     <dataSource name="safecharge_safecharge_api_request_grid_listing_data_source">
         <argument name="dataProvider" xsi:type="configurableObject">
-            <argument name="class" xsi:type="string">Safecharge\Safecharge\Ui\DataProvider\RequestLogDataProvider</argument>
+            <argument name="class" xsi:type="string">Nuvei\Payments\Ui\DataProvider\RequestLogDataProvider</argument>
             <argument name="name" xsi:type="string">safecharge_safecharge_api_request_grid_listing_data_source</argument>
             <argument name="primaryFieldName" xsi:type="string">request_id</argument>
             <argument name="requestFieldName" xsi:type="string">id</argument>
@@ -151,7 +151,7 @@
                 </item>
             </argument>
         </column>
-        <column name="status" class="Safecharge\Safecharge\Ui\Component\Listing\Column\Status">
+        <column name="status" class="Nuvei\Payments\Ui\Component\Listing\Column\Status">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
                     <item name="filter" xsi:type="string">text</item>
@@ -161,7 +161,7 @@
                 </item>
             </argument>
         </column>
-        <column name="request" class="Safecharge\Safecharge\Ui\Component\Listing\Column\Request">
+        <column name="request" class="Nuvei\Payments\Ui\Component\Listing\Column\Request">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
                     <item name="filter" xsi:type="string">text</item>
@@ -172,7 +172,7 @@
                 </item>
             </argument>
         </column>
-        <column name="response" class="Safecharge\Safecharge\Ui\Component\Listing\Column\Response">
+        <column name="response" class="Nuvei\Payments\Ui\Component\Listing\Column\Response">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
                     <item name="filter" xsi:type="string">text</item>

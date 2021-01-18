@@ -1,17 +1,17 @@
 <?xml version="1.0"?>
 <!--
 /**
- * Safecharge Safecharge crontab config.
+ * Nuvei Payments crontab config.
  *
- * @category Safecharge
- * @package  Safecharge_Safecharge
+ * @category Nuvei
+ * @package  Nuvei_Payments
  */
 -->
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Cron:etc/crontab.xsd">
     <group id="default">
         <job name="safecharge_delete_old_request_log"
-             instance="Safecharge\Safecharge\Cron\DeleteOldRequestLog"
+             instance="Nuvei\Payments\Cron\DeleteOldRequestLog"
              method="execute">
             <schedule>0 1 * * *</schedule>
         </job>

@@ -1,14 +1,14 @@
 <?php
 
-namespace Safecharge\Safecharge\Model\ResourceModel;
+namespace Nuvei\Payments\Model\ResourceModel;
 
-use Safecharge\Safecharge\Api\Data\RequestLogInterface;
-use Safecharge\Safecharge\Api\RequestLogRepositoryInterface;
-use Safecharge\Safecharge\Model\RequestLogFactory;
+use Nuvei\Payments\Api\Data\RequestLogInterface;
+use Nuvei\Payments\Api\RequestLogRepositoryInterface;
+use Nuvei\Payments\Model\RequestLogFactory;
 use Magento\Framework\Event\ManagerInterface;
 
 /**
- * Safecharge Safecharge request log repository model.
+ * Nuvei Payments request log repository model.
  */
 class RequestLogRepository implements RequestLogRepositoryInterface
 {

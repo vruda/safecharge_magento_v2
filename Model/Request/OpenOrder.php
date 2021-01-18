@@ -1,20 +1,20 @@
 <?php
 
-namespace Safecharge\Safecharge\Model\Request;
+namespace Nuvei\Payments\Model\Request;
 
-use Safecharge\Safecharge\Lib\Http\Client\Curl;
-use Safecharge\Safecharge\Model\AbstractRequest;
-use Safecharge\Safecharge\Model\AbstractResponse;
-use Safecharge\Safecharge\Model\Config;
-use Safecharge\Safecharge\Model\Logger as SafechargeLogger;
-use Safecharge\Safecharge\Model\RequestInterface;
-use Safecharge\Safecharge\Model\Response\Factory as ResponseFactory;
+use Nuvei\Payments\Lib\Http\Client\Curl;
+use Nuvei\Payments\Model\AbstractRequest;
+use Nuvei\Payments\Model\AbstractResponse;
+use Nuvei\Payments\Model\Config;
+use Nuvei\Payments\Model\Logger as SafechargeLogger;
+use Nuvei\Payments\Model\RequestInterface;
+use Nuvei\Payments\Model\Response\Factory as ResponseFactory;
 use Magento\Framework\Exception\PaymentException;
-use Safecharge\Safecharge\Model\Request\Factory as RequestFactory;
-use Safecharge\Safecharge\Model\Payment;
+use Nuvei\Payments\Model\Request\Factory as RequestFactory;
+use Nuvei\Payments\Model\Payment;
 
 /**
- * Safecharge Safecharge open order request model.
+ * Nuvei Payments open order request model.
  */
 class OpenOrder extends AbstractRequest implements RequestInterface
 {
@@ -161,34 +161,34 @@ class OpenOrder extends AbstractRequest implements RequestInterface
 				$attributes	= $product->getAttributes();
 
 				// if subscription is not enabled continue witht the next product
-				if($item->getProduct()->getData(\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_ENABLE) != 1) {
+				if($item->getProduct()->getData(\Nuvei\Payments\Model\Config::PAYMENT_SUBS_ENABLE) != 1) {
 					continue;
 				}
 
 				// mandatory data
 				$subs_data[$product->getId()] = array(
-					'planId' => $item->getProduct()->getData(\Safecharge\Safecharge\Model\Config::PAYMENT_PLANS_ATTR_NAME),
+					'planId' => $item->getProduct()->getData(\Nuvei\Payments\Model\Config::PAYMENT_PLANS_ATTR_NAME),
 
 					'initialAmount' => number_format($item->getProduct()
-						->getData(\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_INTIT_AMOUNT), 2, '.', ''),
+						->getData(\Nuvei\Payments\Model\Config::PAYMENT_SUBS_INTIT_AMOUNT), 2, '.', ''),
 
 					'recurringAmount' => number_format($item->getProduct()
-						->getData(\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_REC_AMOUNT), 2, '.', ''),
+						->getData(\Nuvei\Payments\Model\Config::PAYMENT_SUBS_REC_AMOUNT), 2, '.', ''),
 				);
 
 				$this->config->createLog($subs_data, '$subs_data');
 
 				# optional data
-				$recurr_unit = $item->getProduct()->getData(\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_RECURR_UNITS);
-				$recurr_period = $item->getProduct()->getData(\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_RECURR_PERIOD);
+				$recurr_unit = $item->getProduct()->getData(\Nuvei\Payments\Model\Config::PAYMENT_SUBS_RECURR_UNITS);
+				$recurr_period = $item->getProduct()->getData(\Nuvei\Payments\Model\Config::PAYMENT_SUBS_RECURR_PERIOD);
 				$subs_data[$product->getId()]['recurringPeriod'][strtolower($recurr_unit)] = $recurr_period;
 
-				$trial_unit = $item->getProduct()->getData(\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_TRIAL_UNITS);
-				$trial_period = $item->getProduct()->getData(\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_TRIAL_PERIOD);
+				$trial_unit = $item->getProduct()->getData(\Nuvei\Payments\Model\Config::PAYMENT_SUBS_TRIAL_UNITS);
+				$trial_period = $item->getProduct()->getData(\Nuvei\Payments\Model\Config::PAYMENT_SUBS_TRIAL_PERIOD);
 				$subs_data[$product->getId()]['startAfter'][strtolower($trial_unit)] = $trial_period;
 
-				$end_after_unit = $item->getProduct()->getData(\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_END_AFTER_UNITS);
-				$end_after_period = $item->getProduct()->getData(\Safecharge\Safecharge\Model\Config::PAYMENT_SUBS_END_AFTER_PERIOD);
+				$end_after_unit = $item->getProduct()->getData(\Nuvei\Payments\Model\Config::PAYMENT_SUBS_END_AFTER_UNITS);
+				$end_after_period = $item->getProduct()->getData(\Nuvei\Payments\Model\Config::PAYMENT_SUBS_END_AFTER_PERIOD);
 				$subs_data[$product->getId()]['endAfter'][strtolower($end_after_unit)] = $end_after_period;
 				# optional data END
 				 */

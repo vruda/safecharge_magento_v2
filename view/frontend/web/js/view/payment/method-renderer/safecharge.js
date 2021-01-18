@@ -1,8 +1,8 @@
 /**
- * Safecharge Safecharge js component.
+ * Nuvei Payments js component.
  *
- * @category Safecharge
- * @package  Safecharge_Safecharge
+ * @category Nuvei
+ * @package  Nuvei_Payments
  */
 define(
     [
@@ -100,7 +100,7 @@ define(
 		
         return Component.extend({
             defaults: {
-                template				: 'Safecharge_Safecharge/payment/safecharge',
+                template				: 'Nuvei_Payments/payment/safecharge',
 				apmMethods				: [],
 				UPOs					: [],
                 chosenApmMethod			: '',
@@ -200,7 +200,7 @@ define(
 				console.log('getUPOs()');
 				
 				if('safecharge' != self.scPaymentMethod) {
-					console.log('getUPOs() - slected payment method is not Safecharge');
+					console.log('getUPOs() - slected payment method is not Nuvei');
 					return;
 				}
 				
@@ -230,7 +230,7 @@ define(
 				console.log('getApmMethods()');
 				
 				if('safecharge' != self.scPaymentMethod) {
-					console.log('getApmMethods() - slected payment method is not Safecharge');
+					console.log('getApmMethods() - slected payment method is not Nuvei');
 					return;
 				}
 				
@@ -532,7 +532,7 @@ define(
 				console.log('initFields()')
 				
 				if('safecharge' != self.scPaymentMethod) {
-					console.log('initFields() - slected payment method is not Safecharge');
+					console.log('initFields() - slected payment method is not Nuvei');
 					$('body').trigger('processStop');
 					
 					return;

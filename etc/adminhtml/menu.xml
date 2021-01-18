@@ -1,29 +1,29 @@
 <?xml version="1.0"?>
 <!--
 /**
- * Safecharge Safecharge adminhtml menu config.
+ * Nuvei Payments adminhtml menu config.
  *
- * @category Safecharge
- * @package  Safecharge_Safecharge
+ * @category Nuvei
+ * @package  Nuvei_Payments
  */
 -->
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
     <menu>
-        <add id="Safecharge_Safecharge::sales_safecharge"
-             title="Safecharge"
+        <add id="Nuvei_Payments::sales_safecharge"
+             title="Nuvei"
              translate="title"
-             module="Safecharge_Safecharge"
+             module="Nuvei_Payments"
              sortOrder="20"
              parent="Magento_Sales::sales"
-             resource="Safecharge_Safecharge::sales_safecharge"/>
-        <add id="Safecharge_Safecharge::sales_safecharge_request"
+             resource="Nuvei_Payments::sales_safecharge"/>
+        <add id="Nuvei_Payments::sales_safecharge_request"
              title="Api Requests"
              translate="title"
-             module="Safecharge_Safecharge"
+             module="Nuvei_Payments"
              sortOrder="10"
-             parent="Safecharge_Safecharge::sales_safecharge"
+             parent="Nuvei_Payments::sales_safecharge"
              action="safecharge/request"
-             resource="Safecharge_Safecharge::sales_safecharge_request"/>
+             resource="Nuvei_Payments::sales_safecharge_request"/>
     </menu>
 </config>

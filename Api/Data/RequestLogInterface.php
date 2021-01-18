@@ -1,9 +1,9 @@
 <?php
 
-namespace Safecharge\Safecharge\Api\Data;
+namespace Nuvei\Payments\Api\Data;
 
 /**
- * Safecharge Safecharge request log entity interface.
+ * Nuvei Payments request log entity interface.
  */
 interface RequestLogInterface
 {
