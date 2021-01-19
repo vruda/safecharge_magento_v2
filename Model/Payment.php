@@ -21,7 +21,7 @@ use Magento\Payment\Model\Method\Cc;
 use Magento\Payment\Model\Method\Logger as PaymentLogger;
 use Magento\Payment\Model\Method\TransparentInterface;
 use Magento\Quote\Api\Data\PaymentInterface;
-use Magento\Vault\Api\PaymentTokenManagementInterface;
+//use Magento\Vault\Api\PaymentTokenManagementInterface;
 use Nuvei\Payments\Model\Config as ModuleConfig;
 use Nuvei\Payments\Model\Request\Payment\Factory as PaymentRequestFactory;
 
@@ -41,8 +41,8 @@ class Payment extends Cc implements TransparentInterface
     /**
      * Additional information const.
      */
-    const KEY_CC_SAVE           = 'cc_save';
-    const KEY_CC_TOKEN          = 'cc_token';
+//    const KEY_CC_SAVE           = 'cc_save';
+//    const KEY_CC_TOKEN          = 'cc_token';
     const KEY_LAST_ST           = 'last_session_token';
     const KEY_CC_TEMP_TOKEN     = 'cc_temp_token';
     const KEY_CHOSEN_APM_METHOD = 'chosen_apm_method';
@@ -173,7 +173,7 @@ class Payment extends Cc implements TransparentInterface
     /**
      * @var PaymentTokenManagementInterface
      */
-    private $paymentTokenManagement;
+//    private $paymentTokenManagement;
 
     /**
      * @var CustomerSession
@@ -223,7 +223,7 @@ class Payment extends Cc implements TransparentInterface
         ModuleListInterface $moduleList,
         TimezoneInterface $localeDate,
         PaymentRequestFactory $paymentRequestFactory,
-        PaymentTokenManagementInterface $paymentTokenManagement,
+//        PaymentTokenManagementInterface $paymentTokenManagement,
         CustomerSession $customerSession,
         ModuleConfig $moduleConfig,
         PrivateDataKeysProvider $privateDataKeysProvider,
@@ -248,7 +248,7 @@ class Payment extends Cc implements TransparentInterface
         );
 
         $this->paymentRequestFactory = $paymentRequestFactory;
-        $this->paymentTokenManagement = $paymentTokenManagement;
+//        $this->paymentTokenManagement = $paymentTokenManagement;
         $this->customerSession = $customerSession;
         $this->moduleConfig = $moduleConfig;
         $this->checkoutSession = $checkoutSession;
@@ -268,8 +268,8 @@ class Payment extends Cc implements TransparentInterface
 
         $additionalData = $data->getData(PaymentInterface::KEY_ADDITIONAL_DATA);
 
-        $ccToken = !empty($additionalData[self::KEY_CC_TOKEN])
-            ? $additionalData[self::KEY_CC_TOKEN] : null;
+//        $ccToken = !empty($additionalData[self::KEY_CC_TOKEN])
+//            ? $additionalData[self::KEY_CC_TOKEN] : null;
 
         $chosenApmMethod = !empty($additionalData[self::KEY_CHOSEN_APM_METHOD])
             ? $additionalData[self::KEY_CHOSEN_APM_METHOD] : null;
@@ -278,7 +278,7 @@ class Payment extends Cc implements TransparentInterface
             ? $additionalData[self::KEY_LAST_ST] : null;
 
         $info = $this->getInfoInstance();
-        $info->setAdditionalInformation(self::KEY_CC_TOKEN, $ccToken);
+//        $info->setAdditionalInformation(self::KEY_CC_TOKEN, $ccToken);
         $info->setAdditionalInformation(self::KEY_LAST_ST, $lastSessionToken);
         $info->setAdditionalInformation(self::KEY_CHOSEN_APM_METHOD, $chosenApmMethod);
 

@@ -75,9 +75,9 @@ define(
 			invalid	: 'invalid'
 		};
 		
-		var checkoutConfig = window.checkoutConfig,
-			agreementsConfig = checkoutConfig ? checkoutConfig.checkoutAgreements : {},
-			agreementsInputPath = '.payment-method._active div.checkout-agreements input';
+		var checkoutConfig		= window.checkoutConfig,
+			agreementsConfig	= checkoutConfig ? checkoutConfig.checkoutAgreements : {},
+			agreementsInputPath	= '.payment-method._active div.checkout-agreements input';
 		
 		$(function() {
 			console.log('document ready')
@@ -140,7 +140,7 @@ define(
                 quote.paymentMethod.subscribe(self.scPaymentMethodChange, this, 'change');
 				
 				self.getApmMethods();
-				self.getUPOs();
+//				self.getUPOs();
 				
                 return self;
             },
@@ -237,10 +237,7 @@ define(
 				$.ajax({
                     dataType: "json",
                     url: self.getMerchantPaymentMethodsUrl(),
-                    data: {
-//                        countryCode	: self.scBillingCountry,
-//						grandTotal	: self.scOrderTotal
-                    },
+                    data: {},
                     cache: false,
                     showLoader: true
                 })
@@ -710,7 +707,7 @@ define(
 				
 				self.scCleanCard();
 				self.getApmMethods();
-				self.getUPOs();
+//				self.getUPOs();
 			},
 			
 			scTotalsChange: function() {
@@ -728,7 +725,7 @@ define(
 				
 				self.scCleanCard();
 				self.getApmMethods();
-				self.getUPOs();
+//				self.getUPOs();
 			},
 			
 			scPaymentMethodChange: function() {
@@ -749,7 +746,7 @@ define(
 						
 						if(null == sfc) {
 							self.getApmMethods();
-							self.getUPOs();
+//							self.getUPOs();
 						}
 						
 						if(jQuery('input[name="safecharge_apm_payment_method"]:checked').val() == 'cc_card') {

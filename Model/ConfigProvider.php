@@ -3,12 +3,12 @@
 namespace Nuvei\Payments\Model;
 
 use Magento\Customer\Model\Session as CustomerSession;
-use Magento\Framework\Exception\PaymentException;
+//use Magento\Framework\Exception\PaymentException;
 use Magento\Framework\UrlInterface;
 use Magento\Payment\Helper\Data as PaymentHelper;
 use Magento\Payment\Model\CcConfig;
 use Magento\Payment\Model\CcGenericConfigProvider;
-use Magento\Vault\Api\PaymentTokenManagementInterface;
+//use Magento\Vault\Api\PaymentTokenManagementInterface;
 use Nuvei\Payments\Model\Config as ModuleConfig;
 use Nuvei\Payments\Model\Request\Factory as RequestFactory;
 
@@ -30,7 +30,7 @@ class ConfigProvider extends CcGenericConfigProvider
     /**
      * @var PaymentTokenManagementInterface
      */
-    private $paymentTokenManagement;
+//    private $paymentTokenManagement;
 
     /**
      * @var UrlInterface
@@ -64,7 +64,7 @@ class ConfigProvider extends CcGenericConfigProvider
         PaymentHelper $paymentHelper,
         ModuleConfig $moduleConfig,
         CustomerSession $customerSession,
-        PaymentTokenManagementInterface $paymentTokenManagement,
+//        PaymentTokenManagementInterface $paymentTokenManagement,
         UrlInterface $urlBuilder,
         RequestFactory $requestFactory,
         array $methodCodes,
@@ -74,7 +74,7 @@ class ConfigProvider extends CcGenericConfigProvider
     ) {
         $this->moduleConfig                = $moduleConfig;
         $this->customerSession            = $customerSession;
-        $this->paymentTokenManagement    = $paymentTokenManagement;
+//        $this->paymentTokenManagement    = $paymentTokenManagement;
         $this->urlBuilder                = $urlBuilder;
         $this->requestFactory            = $requestFactory;
         $this->storeManager                = $storeManager;

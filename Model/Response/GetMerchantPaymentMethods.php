@@ -86,9 +86,9 @@ class GetMerchantPaymentMethods extends AbstractResponse implements ResponseInte
 			}
 			 */
             
-            $default_dnames = [];
-            $locale_dnames    = [];
-            $pm                = $method;
+            $default_dnames	= [];
+            $locale_dnames  = [];
+            $pm             = $method;
             
             if (isset($method["paymentMethodDisplayName"]) && is_array($method["paymentMethodDisplayName"])) {
                 foreach ($method["paymentMethodDisplayName"] as $kk => $dname) {
@@ -159,13 +159,23 @@ class GetMerchantPaymentMethods extends AbstractResponse implements ResponseInte
             } elseif (!empty($method["logoURL"])) {
                 $pm["logoURL"] = preg_replace('/\.svg\.svg$/', '.svg', $method["logoURL"]);
             }
+			
+			// fix for the Neteller field
+			if (
+				'apmgw_Neteller' == $method["paymentMethod"]
+				&& 1 == count($method['fields'])
+				&& 'nettelerAccount' == $method['fields'][0]['name']
+			) {
+				$pm['fields'][0]['name'] = 'Neteller Account';
+				$pm['fields'][0]['type'] = 'email';
+			}
             
             if (!empty($locale_dnames)) {
-                $pm["paymentMethodDisplayName"]    = $locale_dnames;
-                $this->scPaymentMethods[]        = $pm;
+                $pm["paymentMethodDisplayName"]	= $locale_dnames;
+                $this->scPaymentMethods[]		= $pm;
             } elseif (!empty($default_dnames)) {
-                $pm["paymentMethodDisplayName"] = $default_dnames;
-                $this->scPaymentMethods[]        = $pm;
+                $pm["paymentMethodDisplayName"]	= $default_dnames;
+                $this->scPaymentMethods[]       = $pm;
             }
         }
         

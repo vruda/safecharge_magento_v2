@@ -2,8 +2,10 @@
 
 ---
 
-### 2.1.3.x
+### 3.0.0.x
 ```
+	* Fix for the Payment Methods placeholders.
+	* Fixed Neteller field type and placeholder.
 	* Added logs in some Observers.
 	* Preparation for fixing the Refund of Partial Settle in Model\Refund and Settle classes.
 	* Removed userTokenId parameter from openOrder and updateOrder requests.

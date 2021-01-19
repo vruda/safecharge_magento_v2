@@ -135,6 +135,10 @@
 		border: 1px solid #cccccc !important;
 	}
 	
+	#sc_apms .field input::placeholder {
+		text-transform: capitalize;
+	}
+	
 	#cc_error_msg .message.error, #sc_apms .sc_error .message.error {
 		padding: 8px 12px 8px 45px !important;
 		font-size: 15px !important;
@@ -229,113 +233,112 @@
                 </label>
 
                 <!-- ko if: ($data.paymentMethod !== 'cc_card')-->
-				<!-- ko if: ($parent.chosenApmMethod() === $data.paymentMethod)-->
+					<!-- ko if: ($parent.chosenApmMethod() === $data.paymentMethod)-->
 				
-				<!-- ko if: ($data.fields.length > 0) -->
-				<fieldset data-bind="
-					attr: {class: 'fieldset payment items ccard fields-' + $data.paymentMethod},
-					foreach: $data.fields"
-				>
-					<div class="field number">
-						<div class="control">
-							<input class="input-text" data-bind="attr: {
-								placeholder: name,
-								type: type,
-								name:  name
-							}" required="" />
+						<!-- ko if: ($data.fields.length > 0) -->
+							<fieldset data-bind="
+								attr: {class: 'fieldset payment items ccard fields-' + $data.paymentMethod},
+								foreach: $data.fields"
+							>
+								<div class="field number">
+									<div class="control">
+										<input class="input-text" data-bind="attr: {
+											placeholder: name.replaceAll('_', ' '),
+											type: type,
+											name:  name
+										}" required="" />
+									</div>
+								</div>
+							</fieldset>
+						<!--/ko-->
+				
+						<!-- ko if: ($data.fields.length == 0) -->
+						<div class="safecharge-apm-method-note">
+							<!-- ko i18n: "Please click 'Place Order' in order to proceed" -->
+							<!-- /ko -->
 						</div>
-					</div>
-				</fieldset>
-				<!--/ko-->
-				
-				<!-- ko if: ($data.fields.length == 0) -->
-				<div class="safecharge-apm-method-note">
-					<!-- ko i18n: "Please click 'Place Order' in order to proceed" -->
-					<!-- /ko -->
-				</div>
-				<!--/ko-->
-				<!--/ko-->
-				
+						<!--/ko-->
+					<!--/ko-->
                 <!--/ko-->
 
                 <!-- ko if: ($data.paymentMethod === 'cc_card' && $parent.chosenApmMethod() === 'cc_card')-->
-				<fieldset data-bind="
-					attr: {
-						class: 'fieldset payment items ccard ' + $parent.getCode(),
-						id: $parent.getCode() + '_form_cc'
-					}
-					">
-					<!-- ko if: ($parent.isShowLegend())-->
-					<legend class="legend">
-						<span>
-							<!-- ko i18n: 'Credit Card Information' -->
-							<!-- /ko -->
-						</span>
-					</legend><br />
-					<!-- /ko -->
-
-					<div class="field number">
-						<div class="control">
-							<input type="text" name="payment[cc_owner]" class="input-text" value="" data-bind="
-								attr: {
-									id: $parent.getCode() + '_cc_owner',
-									title: $t('Credit Card Name'),
-									placeholder: $t('Name On Card'),
-									'data-container': $parent.getCode() + '-cc-owner',
-									'data-validate': JSON.stringify({
-										required :true
-									})
-								},
-								value: $parent.creditCardOwner,
-								valueUpdate: 'keyup'
-						   " />
-						</div>
-					</div>
-					
-					<div id="cc_name_error_msg" class="sc_error">
-						<div class="message error">
-							<div data-bind="text: $t('Cardholder name is required')"></div>
-						</div>
-					</div>
-					
-					<div class="" tabindex="1" id="sc_cards_fields_holder">
-						<div class="field number sc_fields" tabindex="1" id="sc_card_number_holder">
-							<div id="sc_card_number"></div>
-						</div>
-						
-						<div id="cc_num_error_msg" class="sc_error">
-							<div class="message error">
-								<div data-bind="text: $t('Wrong Card number, please check it again!')"></div>
-							</div>
-						</div>
-
-						<div class="" tabindex="1" id="sc_date_cvv_holder">
-							<div class="field number sc_fields" tabindex="1">
-								<div id="sc_card_expiry"></div>
-							</div>
-
-							<div class="field number sc_fields" tabindex="1">
-								<!--<div id="sc_card_cvc" data-bind="afterRender: $parent.attachFields()"></div>-->
-								<div id="sc_card_cvc"></div>
-							</div>
-						</div>
-						
-						<div id="cc_error_msg" class="sc_error">
-							<div class="message error">
-								<div data-bind="text: $t('Wrong date or CVC, please check them again!')"></div>
-							</div>
-						</div>
-					</div>
-					
-					<input type="hidden" name="payment[cc_token]" data-bind="
+					<fieldset data-bind="
 						attr: {
-							id: $parent.getCode() + '_cc_token',
-							'data-container': $parent.getCode() + '-cc-token',
-						},
-						value: $parent.creditCardToken,
-						valueUpdate: 'change'
-					" />
-				</fieldset>
+							class: 'fieldset payment items ccard ' + $parent.getCode(),
+							id: $parent.getCode() + '_form_cc'
+						}
+						">
+						<!-- ko if: ($parent.isShowLegend())-->
+							<legend class="legend">
+								<span>
+									<!-- ko i18n: 'Credit Card Information' -->
+									<!-- /ko -->
+								</span>
+							</legend><br />
+						<!-- /ko -->
+
+						<div class="field number">
+							<div class="control">
+								<input type="text" name="payment[cc_owner]" class="input-text" value="" data-bind="
+									attr: {
+										id: $parent.getCode() + '_cc_owner',
+										title: $t('Credit Card Name'),
+										placeholder: $t('Name On Card'),
+										'data-container': $parent.getCode() + '-cc-owner',
+										'data-validate': JSON.stringify({
+											required :true
+										})
+									},
+									value: $parent.creditCardOwner,
+									valueUpdate: 'keyup'
+							   " />
+							</div>
+						</div>
+
+						<div id="cc_name_error_msg" class="sc_error">
+							<div class="message error">
+								<div data-bind="text: $t('Cardholder name is required')"></div>
+							</div>
+						</div>
+
+						<div class="" tabindex="1" id="sc_cards_fields_holder">
+							<div class="field number sc_fields" tabindex="1" id="sc_card_number_holder">
+								<div id="sc_card_number"></div>
+							</div>
+
+							<div id="cc_num_error_msg" class="sc_error">
+								<div class="message error">
+									<div data-bind="text: $t('Wrong Card number, please check it again!')"></div>
+								</div>
+							</div>
+
+							<div class="" tabindex="1" id="sc_date_cvv_holder">
+								<div class="field number sc_fields" tabindex="1">
+									<div id="sc_card_expiry"></div>
+								</div>
+
+								<div class="field number sc_fields" tabindex="1">
+									<!--<div id="sc_card_cvc" data-bind="afterRender: $parent.attachFields()"></div>-->
+									<div id="sc_card_cvc"></div>
+								</div>
+							</div>
+
+							<div id="cc_error_msg" class="sc_error">
+								<div class="message error">
+									<div data-bind="text: $t('Wrong date or CVC, please check them again!')"></div>
+								</div>
+							</div>
+						</div>
+
+						<input type="hidden" name="payment[cc_token]" data-bind="
+							attr: {
+								id: $parent.getCode() + '_cc_token',
+								'data-container': $parent.getCode() + '-cc-token',
+							},
+							value: $parent.creditCardToken,
+							valueUpdate: 'change'
+						" />
+					</fieldset>
                 <!--/ko-->
             </div>
         </div>
