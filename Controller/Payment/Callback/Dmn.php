@@ -661,7 +661,7 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
 				if ($is_partial_settle) {
                     $order->addStatusHistoryComment(
                         __("The <b>Partial Settle</b> request for amount of ")
-                            . "<b>" . $inv_amount . ' ' . $params['currency'] . "</b>, "
+                            . "<b>" . number_format($params['totalAmount'], 2, '.', '') . ' ' . $params['currency'] . "</b>, "
                             . __("returned") . " <b>" . $params['Status'] . "</b> "
 							. __("status") . ".<br/>"
                             . __('Transaction ID: ') . $params['TransactionID'] .', '

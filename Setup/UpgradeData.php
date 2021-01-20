@@ -75,11 +75,11 @@ class UpgradeData implements UpgradeDataInterface
                 ->save();
             $scSettled->assignState(Order::STATE_COMPLETE, false, true);
 
-            $scPartiallySettled = $this->orderStatusFactory->create()
-                ->setData('status', 'nuvei_partially_settled')
-                ->setData('label', 'Nuvei Partially Settled')
-                ->save();
-            $scPartiallySettled->assignState(Order::STATE_PROCESSING, false, true);
+//            $scPartiallySettled = $this->orderStatusFactory->create()
+//                ->setData('status', 'nuvei_partially_settled')
+//                ->setData('label', 'Nuvei Partially Settled')
+//                ->save();
+//            $scPartiallySettled->assignState(Order::STATE_PROCESSING, false, true);
 
             $scAuth = $this->orderStatusFactory->create()
                 ->setData('status', 'nuvei_auth')

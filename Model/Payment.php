@@ -68,14 +68,14 @@ class Payment extends Cc implements TransparentInterface
     /**
      * Order statuses.
      */
-    const SC_AUTH               = 'sc_auth';
-    const SC_SETTLED            = 'sc_settled';
-    const SC_PARTIALLY_SETTLED  = 'sc_partially_settled';
-    const SC_VOIDED             = 'sc_voided';
-    const SC_REFUNDED           = 'sc_refunded';
-    const SC_PROCESSING         = 'sc_processing';
-    const SC_SUBSCRT_STARTED    = 'sc_subscr_started';
-    const SC_SUBSCRT_ENDED		= 'sc_subscr_ended';
+    const SC_AUTH               = 'nuvei_auth';
+    const SC_SETTLED            = 'nuvei_settled';
+//    const SC_PARTIALLY_SETTLED  = 'nuvei_partially_settled';
+    const SC_VOIDED             = 'nuvei_voided';
+    const SC_REFUNDED           = 'nuvei_refunded';
+    const SC_PROCESSING         = 'nuvei_processing';
+    const SC_SUBSCRT_STARTED    = 'nuvei_subscr_started';
+    const SC_SUBSCRT_ENDED		= 'nuvei_subscr_ended';
 
     const SOLUTION_INTERNAL     = 'internal';
     const SOLUTION_EXTERNAL     = 'external';

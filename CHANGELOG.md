@@ -4,6 +4,8 @@
 
 ### 3.0.0.x
 ```
+	* Fix for the Partial Settle wrong amount in the Orders message.
+	* Changed the statuses.
 	* When install add new Order states.
 	* When Billing Address is changed, pass it as parameter in the GetMerchantPaymentMethods ajax request.
 	* Allowed multiple Refund DMNs.
