@@ -4,6 +4,7 @@
 
 ### 3.0.0.x
 ```
+	* When install add new Order states.
 	* When Billing Address is changed, pass it as parameter in the GetMerchantPaymentMethods ajax request.
 	* Allowed multiple Refund DMNs.
 	* Fix for the Payment Methods placeholders.

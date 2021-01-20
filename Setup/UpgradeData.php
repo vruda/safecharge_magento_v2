@@ -62,57 +62,51 @@ class UpgradeData implements UpgradeDataInterface
 //		);
 		
 		// add few new Order States
-        if (version_compare($context->getVersion(), '2.0.2', '<')) {
+        if (version_compare($context->getVersion(), '3.0.0', '<')) {
             $scVoided = $this->orderStatusFactory->create()
-                ->setData('status', 'sc_voided')
-                ->setData('label', 'SC Voided')
+                ->setData('status', 'nuvei_voided')
+                ->setData('label', 'Nuvei Voided')
                 ->save();
-            $scVoided->assignState(Order::STATE_PROCESSING, false, true);
+            $scVoided->assignState(Order::STATE_CANCELED, false, true);
 
             $scSettled = $this->orderStatusFactory->create()
-                ->setData('status', 'sc_settled')
-                ->setData('label', 'SC Settled')
+                ->setData('status', 'nuvei_settled')
+                ->setData('label', 'Nuvei Settled')
                 ->save();
-            $scSettled->assignState(Order::STATE_PROCESSING, false, true);
+            $scSettled->assignState(Order::STATE_COMPLETE, false, true);
 
             $scPartiallySettled = $this->orderStatusFactory->create()
-                ->setData('status', 'sc_partially_settled')
-                ->setData('label', 'SC Partially Settled')
+                ->setData('status', 'nuvei_partially_settled')
+                ->setData('label', 'Nuvei Partially Settled')
                 ->save();
             $scPartiallySettled->assignState(Order::STATE_PROCESSING, false, true);
 
             $scAuth = $this->orderStatusFactory->create()
-                ->setData('status', 'sc_auth')
-                ->setData('label', 'SC Auth')
+                ->setData('status', 'nuvei_auth')
+                ->setData('label', 'Nuvei Auth')
                 ->save();
             $scAuth->assignState(Order::STATE_PROCESSING, false, true);
             
             $scProcessing = $this->orderStatusFactory->create()
-                ->setData('status', 'sc_processing')
-                ->setData('label', 'SC Processing')
+                ->setData('status', 'nuvei_processing')
+                ->setData('label', 'Nuvei Processing')
                 ->save();
             $scProcessing->assignState(Order::STATE_PROCESSING, false, true);
             
             $scRefunded = $this->orderStatusFactory->create()
-                ->setData('status', 'sc_refunded')
-                ->setData('label', 'SC Refunded')
+                ->setData('status', 'nuvei_refunded')
+                ->setData('label', 'Nuvei Refunded')
                 ->save();
-            $scRefunded->assignState(Order::STATE_PROCESSING, false, false);
-        }
-        // a patch for last three statuses above
-        elseif (version_compare($context->getVersion(), '2.0.3', '<')) {
-            $this->resourceConnection->getConnection()->query("UPDATE sales_order_status_state SET is_default = 0 WHERE sales_order_status_state.status = 'sc_refunded';");
-            $this->resourceConnection->getConnection()->query("UPDATE sales_order_status_state SET is_default = 0 WHERE sales_order_status_state.status = 'sc_processing';");
-            $this->resourceConnection->getConnection()->query("UPDATE sales_order_status_state SET is_default = 0 WHERE sales_order_status_state.status = 'sc_auth';");
+            $scRefunded->assignState(Order::STATE_COMPLETE, false, true);
         }
 		
+		/* TODO - for the subscriptions
 		if (version_compare($context->getVersion(), '2.2.0', '<')) {
 			$eavSetup->removeAttribute(
 				\Magento\Catalog\Model\Product::ENTITY,
 				\Nuvei\Payments\Model\Config::PAYMENT_SUBS_ENABLE
 			);
 			
-			/*
 			// Enable subscription
 			$eavSetup->addAttribute(
                 \Magento\Catalog\Model\Product::ENTITY,
@@ -373,10 +367,8 @@ class UpgradeData implements UpgradeDataInterface
 					'sort_order' => 110,
                 ]
             );
-			 */
 			
 			// Add two new statuses for the Subscriptions
-			/*
 			$scSubscrStarted = $this->orderStatusFactory->create()
                 ->setData('status', 'sc_subscr_started')
                 ->setData('label', 'Nuvei Subscription Started')
@@ -388,45 +380,8 @@ class UpgradeData implements UpgradeDataInterface
                 ->setData('label', 'Nuvei Subscription Ended')
                 ->save();
             $scSubscrEnded->assignState(Order::STATE_PROCESSING, false, true);
-			 */
-			
-			// modify old order States
-			$scVoided = $this->orderStatusFactory->create()
-                ->setData('status', 'sc_voided')
-                ->setData('label', 'Nuvei Voided')
-                ->save();
-            $scVoided->assignState(Order::STATE_PROCESSING, false, true);
-
-            $scSettled = $this->orderStatusFactory->create()
-                ->setData('status', 'sc_settled')
-                ->setData('label', 'Nuvei Settled')
-                ->save();
-            $scSettled->assignState(Order::STATE_PROCESSING, false, true);
-
-            $scPartiallySettled = $this->orderStatusFactory->create()
-                ->setData('status', 'sc_partially_settled')
-                ->setData('label', 'Nuvei Partially Settled')
-                ->save();
-            $scPartiallySettled->assignState(Order::STATE_PROCESSING, false, true);
-
-            $scAuth = $this->orderStatusFactory->create()
-                ->setData('status', 'sc_auth')
-                ->setData('label', 'Nuvei Auth')
-                ->save();
-            $scAuth->assignState(Order::STATE_PROCESSING, false, true);
-            
-            $scProcessing = $this->orderStatusFactory->create()
-                ->setData('status', 'sc_processing')
-                ->setData('label', 'Nuvei Processing')
-                ->save();
-            $scProcessing->assignState(Order::STATE_PROCESSING, false, true);
-            
-            $scRefunded = $this->orderStatusFactory->create()
-                ->setData('status', 'sc_refunded')
-                ->setData('label', 'Nuvei Refunded')
-                ->save();
-            $scRefunded->assignState(Order::STATE_PROCESSING, false, false);
 		}
+		 */
         
         $setup->endSetup();
     }
