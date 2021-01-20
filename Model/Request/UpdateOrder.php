@@ -27,6 +27,8 @@ class UpdateOrder extends AbstractRequest implements RequestInterface
      */
     protected $orderData;
     protected $cart;
+	
+	private $billingAddress;
     
     /**
      * @param SafechargeLogger $safechargeLogger
@@ -72,6 +74,12 @@ class UpdateOrder extends AbstractRequest implements RequestInterface
     public function setOrderData(array $orderData)
     {
         $this->orderData = $orderData;
+        return $this;
+    }
+	
+    public function setBillingAddress($billingAddress)
+    {
+        $this->billingAddress = $billingAddress;
         return $this;
     }
     
@@ -187,12 +195,28 @@ class UpdateOrder extends AbstractRequest implements RequestInterface
 			$currency = $this->config->getQuoteBaseCurrency();
 		}
 		
+		$billing_address = $this->config->getQuoteBillingAddress();
+		
+		if(!empty($this->billingAddress)) {
+			$billing_address['firstName']	= $this->billingAddress['firstname'] ?: $billing_address['firstName'];
+			$billing_address['lastName']	= $this->billingAddress['lastname'] ?: $billing_address['lastName'];
+			
+			if(is_array($this->billingAddress['street']) && !empty($this->billingAddress['street'])) {
+				$billing_address['address'] = implode(' ', $this->billingAddress['street']);
+			}
+			
+			$billing_address['phone']	= $this->billingAddress['telephone'] ?: $billing_address['phone'];
+			$billing_address['zip']		= $this->billingAddress['postcode'] ?: $billing_address['zip'];
+			$billing_address['city']	= $this->billingAddress['city'] ?: $billing_address['city'];
+			$billing_address['country']	= $this->billingAddress['countryId'] ?: $billing_address['country'];
+		}
+		
 		$params = array_merge_recursive(
 			parent::getParams(),
 			[
 				'currency'			=> $currency,
 				'amount'			=> (string) number_format($quote->getGrandTotal(), 2, '.', ''),
-				'billingAddress'	=> $this->config->getQuoteBillingAddress(),
+				'billingAddress'	=> $billing_address,
 				'shippingAddress'   => $this->config->getQuoteShippingAddress(),
 				
 				'items'				=> [[

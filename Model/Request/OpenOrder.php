@@ -88,6 +88,7 @@ class OpenOrder extends AbstractRequest implements RequestInterface
 
 			$req_resp = $update_order_request
 				->setOrderData($order_data)
+				->setBillingAddress($this->billingAddress)
 				->process();
 		}
 		
@@ -118,6 +119,13 @@ class OpenOrder extends AbstractRequest implements RequestInterface
 		
         return $this;
     }
+	
+	public function setBillingAddress($billingAddress)
+	{
+		$this->billingAddress = $billingAddress;
+		
+		return $this;
+	}
     
     /**
      * {@inheritdoc}
@@ -197,18 +205,37 @@ class OpenOrder extends AbstractRequest implements RequestInterface
 		
 		$this->config->setNuveiUseCcOnly(!empty($subs_data) ? true : false);
 		
-		$billingAddress = $this->config->getQuoteBillingAddress();
+		$billing_address = $this->config->getQuoteBillingAddress();
+		if(!empty($this->billingAddress)) {
+			$billing_address['firstName']	= $this->billingAddress['firstname'] ?: $billing_address['firstName'];
+			$billing_address['lastName']	= $this->billingAddress['lastname'] ?: $billing_address['lastName'];
+			
+			if(is_array($this->billingAddress['street']) && !empty($this->billingAddress['street'])) {
+				$billing_address['address'] = implode(' ', $this->billingAddress['street']);
+			}
+			
+			$billing_address['phone']	= $this->billingAddress['telephone'] ?: $billing_address['phone'];
+			$billing_address['zip']		= $this->billingAddress['postcode'] ?: $billing_address['zip'];
+			$billing_address['city']	= $this->billingAddress['city'] ?: $billing_address['city'];
+			$billing_address['country']	= $this->billingAddress['countryId'] ?: $billing_address['country'];
+		}
         
+		$currency = $quote->getOrderCurrencyCode();
+		if(empty($currency)) {
+			$currency = $quote->getStoreCurrencyCode();
+		}
+		if(empty($currency)) {
+			$currency = $this->config->getQuoteBaseCurrency();
+		}
+		
         $this->requestParams = array_merge_recursive(
             [
-//                'userTokenId'		=> $billingAddress['email'],
                 'clientUniqueId'    => $this->config->getCheckoutSession()->getQuoteId(),
-                
-                'currency'          => $quote->getOrderCurrencyCode() ?: $quote->getStoreCurrencyCode(),
+                'currency'          => $currency,
                 'amount'            => (string) number_format($quote->getGrandTotal(), 2, '.', ''),
                 'deviceDetails'     => $this->config->getDeviceDetails(),
                 'shippingAddress'   => $this->config->getQuoteShippingAddress(),
-                'billingAddress'    => $billingAddress,
+                'billingAddress'    => $billing_address,
                 
                 'urlDetails'        => [
                     'successUrl'        => $this->config->getCallbackSuccessUrl(),

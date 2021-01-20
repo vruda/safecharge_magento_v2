@@ -4,6 +4,8 @@
 
 ### 3.0.0.x
 ```
+	* When Billing Address is changed, pass it as parameter in the GetMerchantPaymentMethods ajax request.
+	* Allowed multiple Refund DMNs.
 	* Fix for the Payment Methods placeholders.
 	* Fixed Neteller field type and placeholder.
 	* Added logs in some Observers.

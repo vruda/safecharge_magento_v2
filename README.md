@@ -18,7 +18,7 @@ php bin/magento cache:flush
 
 https://www.nuvei.com/
 
-© 2007 - 2021 SafeCharge International Group Limited.
+© 2007 - 2021 Nuvei
 All rights reserved.
 
 ![Nuvei Logo](https://nuvei.com/wp-content/uploads/2020/07/Nuvei-logo-footer.png)

@@ -326,8 +326,20 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
             
 			// do not override status if the Order is Voided or Refunded
             if (
-				in_array(strtolower($order_tr_type), ['void', 'refund', 'credit'])
+				'void' == strtolower($order_tr_type)
                 && strtolower($order_status) == 'approved'
+            ) {
+                $msg = 'No more actions are allowed for order #' . $order->getId();
+                
+                $this->moduleConfig->createLog($msg);
+                $jsonOutput->setData($msg);
+                return $jsonOutput;
+            }
+			
+            if (
+				in_array(strtolower($order_tr_type), ['refund', 'credit'])
+                && strtolower($order_status) == 'approved'
+				&& !in_array(strtolower($params['transactionType']), ['refund', 'credit'])
             ) {
                 $msg = 'No more actions are allowed for order #' . $order->getId();
                 

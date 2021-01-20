@@ -226,7 +226,7 @@ define(
 					});
 			},
 			
-            getApmMethods: function() {
+            getApmMethods: function(billingAddress) {
 				console.log('getApmMethods()');
 				
 				if('safecharge' != self.scPaymentMethod) {
@@ -236,8 +236,11 @@ define(
 				
 				$.ajax({
                     dataType: "json",
+					type: 'post',
                     url: self.getMerchantPaymentMethodsUrl(),
-                    data: {},
+                    data: {
+						billingAddress: billingAddress
+					},
                     cache: false,
                     showLoader: true
                 })
@@ -702,11 +705,13 @@ define(
 					return;
 				}
 				
+				console.log('scBillingAddrChange()', JSON.stringify(quote.billingAddress()));
+				
 				console.log('scBillingAddrChange() - the country was changed to', quote.billingAddress().countryId);
 				self.scBillingCountry = quote.billingAddress().countryId;
 				
 				self.scCleanCard();
-				self.getApmMethods();
+				self.getApmMethods(JSON.stringify(quote.billingAddress()));
 //				self.getUPOs();
 			},
 			

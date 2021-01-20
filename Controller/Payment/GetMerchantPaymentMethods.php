@@ -84,22 +84,7 @@ class GetMerchantPaymentMethods extends Action
 			]);
         }
 
-        try {
-//            $countryCode    = $this->getRequest()->getParam('countryCode');
-//            $grandTotal     = $this->getRequest()->getParam('grandTotal');
-//            $billingAddress	= $this->getRequest()->getParam('billingAddress');
-//            
-//            $apmMethodsData = $this->getApmMethods($countryCode, $grandTotal, $billingAddress);
-            $apmMethodsData = $this->getApmMethods();
-        } catch (PaymentException $e) {
-            $this->moduleConfig->createLog('GetMerchantPaymentMethods Controller - Error: ' . $e->getMessage());
-            
-            return $result->setData([
-                "error"            => 1,
-                "apmMethods"    => [],
-                "message"        => $e->getMessage()
-            ]);
-        }
+		$apmMethodsData = $this->getApmMethods();
 
         return $result->setData([
             "error"            => 0,
@@ -113,29 +98,14 @@ class GetMerchantPaymentMethods extends Action
      * Return AMP Methods.
      * We pass both parameters from JS via Ajax request
      *
-     * @param string $countryCode
-     * @param string $grandTotal
-     * @param array $billingAddress parameters
-     *
      * @return array
      */
-//    private function getApmMethods($countryCode = null, $grandTotal = null, $billingAddress = [])
     private function getApmMethods()
     {
         $request = $this->requestFactory->create(AbstractRequest::GET_MERCHANT_PAYMENT_METHODS_METHOD);
 
-//		$this->moduleConfig->createLog(
-//			[
-//				'$countryCode' => $countryCode,
-//				'$grandTotal' => $grandTotal,
-//				'$billingAddress' => $billingAddress,
-//			],
-//			'GetMerchantPaymentMethods->getApmMethods() controller'
-//		);
-		
 		$apmMethods = $request
-//                ->setCountryCode($countryCode)
-//                ->setBillingAddress($billingAddress)
+			->setBillingAddress($this->getRequest()->getParam('billingAddress'))
 			->process();
         
         return [
