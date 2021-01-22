@@ -6,7 +6,7 @@ use Magento\Sales\Model\Order\Payment as OrderPayment;
 use Nuvei\Payments\Lib\Http\Client\Curl;
 use Nuvei\Payments\Model\AbstractRequest;
 use Nuvei\Payments\Model\Config;
-use Nuvei\Payments\Model\Logger as SafechargeLogger;
+use Nuvei\Payments\Model\Logger as Logger;
 use Nuvei\Payments\Model\Request\Factory as RequestFactory;
 use Nuvei\Payments\Model\Request\Payment\Factory as PaymentRequestFactory;
 use Nuvei\Payments\Model\Response\Factory as ResponseFactory;
@@ -40,7 +40,7 @@ abstract class AbstractPayment extends AbstractRequest
     /**
      * AbstractPayment constructor.
      *
-     * @param SafechargeLogger      $safechargeLogger
+     * @param Logger      $logger
      * @param Config                $config
      * @param Curl                  $curl
      * @param RequestFactory        $requestFactory
@@ -50,7 +50,7 @@ abstract class AbstractPayment extends AbstractRequest
      * @param float|null            $amount
      */
     public function __construct(
-        SafechargeLogger $safechargeLogger,
+        Logger $logger,
         Config $config,
         Curl $curl,
         RequestFactory $requestFactory,
@@ -60,7 +60,7 @@ abstract class AbstractPayment extends AbstractRequest
         $amount = 0.0
     ) {
         parent::__construct(
-            $safechargeLogger,
+            $logger,
             $config,
             $curl,
             $responseFactory

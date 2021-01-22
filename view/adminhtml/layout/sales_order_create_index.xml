@@ -12,8 +12,8 @@
     <body>
         <referenceBlock name="order_create_billing_form">
             <action method="setMethodFormTemplate">
-                <argument name="method" xsi:type="string">safecharge</argument>
-                <argument name="template" xsi:type="string">Nuvei_Payments::payment/safecharge.phtml</argument>
+                <argument name="method" xsi:type="string">nuvei</argument>
+                <argument name="template" xsi:type="string">Nuvei_Payments::payment/nuvei.phtml</argument>
             </action>
         </referenceBlock>
     </body>

@@ -14,22 +14,22 @@
 	<!-- sales_order_invoice_save_after  - use this so can get Invoice ID-->
 	<!-- controller_action_postdispatch_sales_order_invoice_save - not tested-->
     <event name="sales_order_invoice_register">
-        <observer name="safecharge_capture_order_status_update"
+        <observer name="nuvei_capture_order_status_update"
                   instance="Nuvei\Payments\Observer\Sales\Order\Invoice\Register"/>
     </event>
     
     <event name="sales_order_invoice_pay">
-        <observer name="safecharge_invoice_pay"
+        <observer name="nuvei_invoice_pay"
                   instance="Nuvei\Payments\Observer\Sales\Order\Invoice\Pay"/>
     </event>
     
     <event name="sales_order_payment_void">
-        <observer name="safecharge_void_order_status_update"
+        <observer name="nuvei_void_order_status_update"
                   instance="Nuvei\Payments\Observer\Sales\Order\Cancel\Register"/>
     </event>
 	
     <event name="sales_order_creditmemo_refund">
-        <observer name="safecharge_refund_order_status_update"
+        <observer name="nuvei_refund_order_status_update"
                   instance="Nuvei\Payments\Observer\Sales\Order\Refund\Register"/>
     </event>
 </config>

@@ -2,7 +2,7 @@
 
 namespace Nuvei\Payments\Model;
 
-use Nuvei\Payments\Model\Logger as SafechargeLogger;
+use Nuvei\Payments\Model\Logger as Logger;
 
 /**
  * Nuvei Payments abstract api model.
@@ -10,9 +10,9 @@ use Nuvei\Payments\Model\Logger as SafechargeLogger;
 abstract class AbstractApi
 {
     /**
-     * @var SafechargeLogger
+     * @var Logger
      */
-    protected $safechargeLogger;
+    protected $logger;
 
     /**
      * @var Config
@@ -22,14 +22,14 @@ abstract class AbstractApi
     /**
      * Object initialization.
      *
-     * @param SafechargeLogger $safechargeLogger
+     * @param Logger $logger
      * @param Config           $config
      */
     public function __construct(
-        SafechargeLogger $safechargeLogger,
+        Logger $logger,
         Config $config
     ) {
-        $this->safechargeLogger = $safechargeLogger;
+        $this->logger = $logger;
         $this->config = $config;
     }
 }

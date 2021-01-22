@@ -16,6 +16,6 @@ class RequestLog extends AbstractDb
      */
     protected function _construct()
     {
-        $this->_init('safecharge_safecharge_api_request_log_grid', 'request_id');
+        $this->_init('nuvei_payments_api_request_log', 'request_id');
     }
 }

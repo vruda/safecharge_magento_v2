@@ -120,7 +120,7 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
         $jsonOutput->setHttpResponseCode(200);
         
         if (!$this->moduleConfig->isActive()) {
-            $jsonOutput->setData('DMN Error - SafeCharge payment module is not active!');
+            $jsonOutput->setData('DMN Error - Nuvei payment module is not active!');
             return $jsonOutput;
         }
         
@@ -245,11 +245,24 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
 			
 			$order			= $this->order;
             $orderPayment   = $order->getPayment();
-            $order_status   = $orderPayment->getAdditionalInformation(Payment::TRANSACTION_STATUS);
-            $order_tr_type  = $orderPayment->getAdditionalInformation(Payment::TRANSACTION_TYPE);
+			
+			// add data to the Payment
+			// the new structure of the data
+			$ord_trans_addit_info = $orderPayment->getAdditionalInformation(Payment::ORDER_DATA);
+			$this->moduleConfig->createLog($ord_trans_addit_info, '$ord_trans_addit_info');
+			
+			if(empty($ord_trans_addit_info)) {
+				$ord_trans_addit_info = [];
+			}
+			
+            $order_status   = end($ord_trans_addit_info[Payment::TRANSACTION_STATUS]) ?: '';
+            $order_tr_type  = end($ord_trans_addit_info[Payment::TRANSACTION_TYPE]) ?: '';
             $tr_type_param	= strtolower($params['transactionType']);
 //			$start_subscr	= false;
             
+			$this->moduleConfig->createLog($order_status, '$order_status');
+			$this->moduleConfig->createLog($order_tr_type, '$order_tr_type');
+			
 			# Subscription transaction DMN
 			/*
 			if(
@@ -357,22 +370,14 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
             }
             // do not overwrite Order status END
 
-            // add data to the Payment
-			// the new structure of the data
-			$ord_trans_addit_info = $orderPayment->getAdditionalInformation('nuvei');
-			$this->moduleConfig->createLog($ord_trans_addit_info, '$ord_trans_addit_info');
-			
-			if(empty($ord_trans_addit_info)) {
-				$ord_trans_addit_info = [];
-			}
-			
 			$curr_trans_info = [
 				Payment::TRANSACTION_ID							=> $params['TransactionID'],
 				Payment::TRANSACTION_AUTH_CODE_KEY				=> $params['AuthCode'] ?: '',
 				Payment::TRANSACTION_EXTERNAL_PAYMENT_METHOD	=> $params['payment_method'] ?: '',
 				Payment::TRANSACTION_STATUS						=> $params['Status'] ?: '',
 				Payment::TRANSACTION_TYPE						=> $params['transactionType'] ?: '',
-				'upo_id'										=> $params['userPaymentOptionId'] ?: '',
+				Payment::TRANSACTION_UPO_ID						=> $params['userPaymentOptionId'] ?: '',
+				Payment::TRANSACTION_TOTAL_AMOUN				=> $params['totalAmount'] ?: '',
 			];
 			// the new structure of the data END
 			
@@ -383,43 +388,43 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
                 ->setParentTransactionId($parent_trans_id)
                 ->setAuthCode($params['AuthCode']);
             
-            $orderPayment->setAdditionalInformation(
-                Payment::TRANSACTION_ID,
-                $params['TransactionID']
-            );
-
-            if (!empty($params['AuthCode'])) {
-                $orderPayment->setAdditionalInformation(
-                    Payment::TRANSACTION_AUTH_CODE_KEY,
-                    $params['AuthCode']
-                );
-            }
-
-            if (!empty($params['payment_method'])) {
-                $orderPayment->setAdditionalInformation(
-                    Payment::TRANSACTION_EXTERNAL_PAYMENT_METHOD,
-                    $params['payment_method']
-                );
-            }
-            
-            if (!empty($params['Status'])) {
-                $orderPayment->setAdditionalInformation(
-                    Payment::TRANSACTION_STATUS,
-                    $params['Status']
-                );
-            }
-            
-            $orderPayment->setAdditionalInformation(
-                Payment::TRANSACTION_TYPE,
-                $params['transactionType']
-            );
-            
-            if (!empty($params['userPaymentOptionId'])) {
-                $orderPayment->setAdditionalInformation(
-                    'upoID',
-                    $params['userPaymentOptionId']
-                );
-            }
+//            $orderPayment->setAdditionalInformation(
+//                Payment::TRANSACTION_ID,
+//                $params['TransactionID']
+//            );
+//
+//            if (!empty($params['AuthCode'])) {
+//                $orderPayment->setAdditionalInformation(
+//                    Payment::TRANSACTION_AUTH_CODE_KEY,
+//                    $params['AuthCode']
+//                );
+//            }
+//
+//            if (!empty($params['payment_method'])) {
+//                $orderPayment->setAdditionalInformation(
+//                    Payment::TRANSACTION_EXTERNAL_PAYMENT_METHOD,
+//                    $params['payment_method']
+//                );
+//            }
+//            
+//            if (!empty($params['Status'])) {
+//                $orderPayment->setAdditionalInformation(
+//                    Payment::TRANSACTION_STATUS,
+//                    $params['Status']
+//                );
+//            }
+//            
+//            $orderPayment->setAdditionalInformation(
+//                Payment::TRANSACTION_TYPE,
+//                $params['transactionType']
+//            );
+//            
+//            if (!empty($params['userPaymentOptionId'])) {
+//                $orderPayment->setAdditionalInformation(
+//                    'upoID',
+//                    $params['userPaymentOptionId']
+//                );
+//            }
             
             if ($status === "pending") {
                 $order
@@ -461,14 +466,14 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
 //					}
                     
 					// we use this params in Void process
-					$orderPayment->setAdditionalInformation(
-                        Payment::AUTH_PARAMS,
-                        [
-                            'TransactionID'	=> $params['TransactionID'],
-                            'AuthCode'      => $params['AuthCode'],
-                            'totalAmount'   => $params['totalAmount'],
-                        ]
-                    );
+//					$orderPayment->setAdditionalInformation(
+//                        Payment::AUTH_PARAMS,
+//                        [
+//                            'TransactionID'	=> $params['TransactionID'],
+//                            'AuthCode'      => $params['AuthCode'],
+//                            'totalAmount'   => $params['totalAmount'],
+//                        ]
+//                    );
                     
                     $orderPayment
                         ->setAuthAmount($params['totalAmount'])
@@ -498,14 +503,14 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
                     $invCollection          = $order->getInvoiceCollection();
                     $inv_amount             = round(floatval($order->getBaseGrandTotal()), 2);
 					
-					$orderPayment->setAdditionalInformation(
-                        Payment::SALE_SETTLE_PARAMS,
-                        [
-                            'TransactionID'	=> $params['TransactionID'],
-                            'AuthCode'      => $params['AuthCode'],
-                            'totalAmount'   => $params['totalAmount'],
-                        ]
-                    );
+//					$orderPayment->setAdditionalInformation(
+//                        Payment::SALE_SETTLE_PARAMS,
+//                        [
+//                            'TransactionID'	=> $params['TransactionID'],
+//                            'AuthCode'      => $params['AuthCode'],
+//                            'totalAmount'   => $params['totalAmount'],
+//                        ]
+//                    );
 					
 //					$this->moduleConfig->createLog(
 //						[
@@ -638,10 +643,10 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
                     $order->setData('state', Order::STATE_CLOSED);
                 }
 				elseif (in_array($tr_type_param, ['credit', 'refund'])) {
-                    $orderPayment->setAdditionalInformation(
-                        Payment::REFUND_TRANSACTION_AMOUNT,
-                        $params['totalAmount']
-                    );
+//                    $orderPayment->setAdditionalInformation(
+//                        Payment::REFUND_TRANSACTION_AMOUNT,
+//                        $params['totalAmount']
+//                    );
                     
                     $transactionType        = Transaction::TYPE_REFUND;
                     $sc_transaction_type    = Payment::SC_REFUNDED;
@@ -699,7 +704,7 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
 			$ord_trans_addit_info[] = $curr_trans_info;
 			
 			$orderPayment->setAdditionalInformation(
-				'nuvei',
+				Payment::ORDER_DATA,
 				$ord_trans_addit_info
 			);
             
@@ -830,7 +835,7 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
                 ->setData('order_id', $orderId);
 
             $this->_eventManager->dispatch(
-                'safecharge_place_order',
+                'nuvei_place_order',
                 [
                     'result' => $result,
                     'action' => $this,
@@ -1062,20 +1067,20 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
 		
 		$this->order = current($orderList);
 		
-		// check if the Order belongs to SafeCharge
+		// check if the Order belongs to nuvei
 		try {
 			$method = $this->order->getPayment()->getMethod();
 			
-			if('safecharge' != $method) {
+			if('nuvei' != $method) {
 				$this->moduleConfig->createLog(
 					[
 						'orderIncrementId' => $orderIncrementId,
 						'module' => $method,
 					],
-					'DMN getOrCreateOrder() error - the order does was not made with SafeCharge module.'
+					'DMN getOrCreateOrder() error - the order does was not made with Nuvei module.'
 				);
 
-				$jsonOutput->setData('DMN getOrCreateOrder() error - the order does was not made with SafeCharge module.');
+				$jsonOutput->setData('DMN getOrCreateOrder() error - the order does was not made with Nuvei module.');
 				return $jsonOutput;
 			}
 		} catch (Exception $ex) {

@@ -8,7 +8,6 @@ use Nuvei\Payments\Lib\Http\Client\Curl;
 use Nuvei\Payments\Model\AbstractRequest;
 use Nuvei\Payments\Model\AbstractResponse;
 use Nuvei\Payments\Model\Config;
-use Nuvei\Payments\Model\Logger as SafechargeLogger;
 use Nuvei\Payments\Model\Payment;
 use Nuvei\Payments\Model\Request\Factory as RequestFactory;
 use Nuvei\Payments\Model\RequestInterface;
@@ -41,7 +40,6 @@ class PaymentApm extends AbstractRequest implements RequestInterface
     private $checkoutSession;
 
     /**
-     * @param SafechargeLogger $safechargeLogger
      * @param Config           $config
      * @param Curl             $curl
      * @param ResponseFactory  $responseFactory
@@ -49,7 +47,7 @@ class PaymentApm extends AbstractRequest implements RequestInterface
      * @param CheckoutSession  $checkoutSession
      */
     public function __construct(
-        SafechargeLogger $safechargeLogger,
+        \Nuvei\Payments\Model\Logger $logger,
         Config $config,
         Curl $curl,
         ResponseFactory $responseFactory,
@@ -57,7 +55,7 @@ class PaymentApm extends AbstractRequest implements RequestInterface
         CheckoutSession $checkoutSession
     ) {
         parent::__construct(
-            $safechargeLogger,
+            $logger,
             $config,
             $curl,
             $responseFactory
@@ -146,17 +144,27 @@ class PaymentApm extends AbstractRequest implements RequestInterface
 //            $tokenResponse->getToken()
 //        );
 
+		$this->config->createLog(
+			$quotePayment->getAdditionalInformation(Payment::TRANSACTION_ORDER_ID),
+			'PaymentAPM TRANSACTION_ORDER_ID'
+		);
+		
         $reservedOrderId = $quotePayment->getAdditionalInformation(Payment::TRANSACTION_ORDER_ID)
             ?: $this->config->getReservedOrderId();
 		
 		$order_data = $quotePayment->getAdditionalInformation(Payment::ORDER_DATA);
 		
-		if(empty($order_data['sessionToken'])) {
-			$session_token = $tokenResponse->getToken();
-		}
-		else {
-			$session_token = $order_data['sessionToken'];
-		}
+		$this->config->createLog($order_data, 'PaymentAPM $order_data');
+		$this->config->createLog($_POST, 'PaymentAPM $_POST');
+		
+		$session_token = $order_data['sessionToken'] ?: @$tokenResponse->getToken();
+		
+//		if(empty($order_data['sessionToken'])) {
+//			$session_token = $tokenResponse->getToken();
+//		}
+//		else {
+//			$session_token = $order_data['sessionToken'];
+//		}
 		
         $params = array_merge_recursive(
             $this->getQuoteData($quote),
@@ -188,13 +196,13 @@ class PaymentApm extends AbstractRequest implements RequestInterface
 
         $params = array_merge_recursive($params, parent::getParams());
 
-        $this->safechargeLogger->updateRequest(
-            $this->getRequestId(),
-            [
-                'parent_request_id' => $quotePayment->getAdditionalInformation(Payment::TRANSACTION_REQUEST_ID),
-                'increment_id' => $this->config->getReservedOrderId(),
-            ]
-        );
+//        $this->logger->updateRequest(
+//            $this->getRequestId(),
+//            [
+//                'parent_request_id' => $quotePayment->getAdditionalInformation(Payment::TRANSACTION_REQUEST_ID),
+//                'increment_id' => $this->config->getReservedOrderId(),
+//            ]
+//        );
 
         return $params;
     }

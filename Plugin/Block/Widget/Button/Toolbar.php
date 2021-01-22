@@ -38,18 +38,29 @@ class Toolbar
         }
         
         try {
-            $orderId            = $this->request->getParam('order_id');
-            $order                = $this->orderRepository->get($orderId);
-            $orderPayment        = $order->getPayment();
+            $orderId				= $this->request->getParam('order_id');
+            $order					= $this->orderRepository->get($orderId);
+			$ord_status				= $order->getStatus();
+            $orderPayment			= $order->getPayment();
+			$ord_trans_addit_info	= $orderPayment->getAdditionalInformation(Payment::ORDER_DATA);
+			$payment_method			= '';
             
             if ($orderPayment->getMethod() !== Payment::METHOD_CODE) {
                 return [$context, $buttonList];
             }
             
-            $ord_status            = $order->getStatus();
-            $payment_method        = $orderPayment->getAdditionalInformation(
-                Payment::TRANSACTION_EXTERNAL_PAYMENT_METHOD
-            );
+			if(!empty($ord_trans_addit_info) && is_array($ord_trans_addit_info)) {
+				foreach($ord_trans_addit_info as $trans) {
+					if(!empty($trans[Payment::TRANSACTION_EXTERNAL_PAYMENT_METHOD])) {
+						$payment_method = $trans[Payment::TRANSACTION_EXTERNAL_PAYMENT_METHOD];
+						break;
+					}
+				}
+			}
+            
+//            $payment_method        = $orderPayment->getAdditionalInformation(
+//                Payment::TRANSACTION_EXTERNAL_PAYMENT_METHOD
+//            );
             
             // Examples
     //        $buttonList->update('order_edit', 'class', 'edit');

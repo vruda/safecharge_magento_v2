@@ -4,7 +4,7 @@ namespace Nuvei\Payments\Model;
 
 use Magento\Framework\Exception\PaymentException;
 use Nuvei\Payments\Lib\Http\Client\Curl;
-use Nuvei\Payments\Model\Logger as SafechargeLogger;
+use Nuvei\Payments\Model\Logger as Logger;
 
 /**
  * Nuvei Payments abstract response model.
@@ -59,19 +59,19 @@ abstract class AbstractResponse extends AbstractApi
     /**
      * AbstractResponse constructor.
      *
-     * @param Logger $safechargeLogger
+     * @param Logger $Logger
      * @param Config $config
      * @param int    $requestId
      * @param Curl   $curl
      */
     public function __construct(
-        SafechargeLogger $safechargeLogger,
+        Logger $logger,
         Config $config,
         $requestId,
         Curl $curl
     ) {
         parent::__construct(
-            $safechargeLogger,
+            $logger,
             $config
         );
 

@@ -17,34 +17,34 @@ class Config
 {
     const MODULE_NAME						= 'Nuvei_Payments';
 	
-    const PAYMENT_PLANS_ATTR_NAME			= 'safecharge_payment_plans';
+    const PAYMENT_PLANS_ATTR_NAME			= 'nuvei_payment_plans';
     const PAYMENT_PLANS_ATTR_LABEL			= 'Nuvei Payment Plans';
 	const PAYMENT_PLANS_FILE_NAME			= 'nuvei_payment_plans.json';
 	
 	const PAYMENT_SUBS_GROUP				= 'Nuvei Subscription';
     const PAYMENT_SUBS_ENABLE_LABEL			= 'Enable Subscription';
-    const PAYMENT_SUBS_ENABLE				= 'safecharge_sub_enabled';
+    const PAYMENT_SUBS_ENABLE				= 'nuvei_sub_enabled';
     const PAYMENT_SUBS_INTIT_AMOUNT_LABEL	= 'Initial Amount';
-    const PAYMENT_SUBS_INTIT_AMOUNT			= 'safecharge_sub_init_amount';
+    const PAYMENT_SUBS_INTIT_AMOUNT			= 'nuvei_sub_init_amount';
 	const PAYMENT_SUBS_REC_AMOUNT_LABEL		= 'Recurring Amount';
-	const PAYMENT_SUBS_REC_AMOUNT			= 'safecharge_sub_rec_amount';
+	const PAYMENT_SUBS_REC_AMOUNT			= 'nuvei_sub_rec_amount';
 	
-	const PAYMENT_SUBS_RECURR_UNITS			= 'safecharge_sub_recurr_units';
+	const PAYMENT_SUBS_RECURR_UNITS			= 'nuvei_sub_recurr_units';
 	const PAYMENT_SUBS_RECURR_UNITS_LABEL	= 'Recurring Units';
-	const PAYMENT_SUBS_RECURR_PERIOD		= 'safecharge_sub_recurr_period';
+	const PAYMENT_SUBS_RECURR_PERIOD		= 'nuvei_sub_recurr_period';
 	const PAYMENT_SUBS_RECURR_PERIOD_LABEL	= 'Recurring Period';
 	
-	const PAYMENT_SUBS_TRIAL_UNITS			= 'safecharge_sub_trial_units';
+	const PAYMENT_SUBS_TRIAL_UNITS			= 'nuvei_sub_trial_units';
 	const PAYMENT_SUBS_TRIAL_UNITS_LABEL	= 'Trial Units';
-	const PAYMENT_SUBS_TRIAL_PERIOD			= 'safecharge_sub_trial_period';
+	const PAYMENT_SUBS_TRIAL_PERIOD			= 'nuvei_sub_trial_period';
 	const PAYMENT_SUBS_TRIAL_PERIOD_LABEL	= 'Trial Period';
 	
-	const PAYMENT_SUBS_END_AFTER_UNITS			= 'safecharge_sub_end_after_units';
+	const PAYMENT_SUBS_END_AFTER_UNITS			= 'nuvei_sub_end_after_units';
 	const PAYMENT_SUBS_END_AFTER_UNITS_LABEL	= 'End After Units';
-	const PAYMENT_SUBS_END_AFTER_PERIOD			= 'safecharge_sub_end_after_period';
+	const PAYMENT_SUBS_END_AFTER_PERIOD			= 'nuvei_sub_end_after_period';
 	const PAYMENT_SUBS_END_AFTER_PERIOD_LABEL	= 'End After Period';
 	
-	const PAYMENT_SUBS_STORE_DESCR			= 'safecharge_sub_store_decr';
+	const PAYMENT_SUBS_STORE_DESCR			= 'nuvei_sub_store_decr';
 	const PAYMENT_SUBS_STORE_DESCR_LABEL	= 'Subscription details';
     
     /**
@@ -541,16 +541,20 @@ class Config
 		
         if ($this->versionNum != 0 && $this->versionNum < 220) {
             return $this->urlBuilder->getUrl(
-                'safecharge/payment/callback_completeold',
+                'nuvei_payments/payment/callback_completeold',
                 ['quote' => $quoteId]
             );
         }
         
         return $this->urlBuilder->getUrl(
-            'safecharge/payment/callback_complete',
-            ['quote' => $quoteId]
+            'nuvei_payments/payment/callback_complete',
+            [
+				'quote' => $quoteId,
+				'form_key' => $this->formKey->getFormKey(),
+			]
         )
-            . '?form_key=' . $this->formKey->getFormKey();
+//            . '?form_key=' . $this->formKey->getFormKey()
+		;
     }
 
     /**
@@ -562,13 +566,13 @@ class Config
         
         if ($this->versionNum != 0 && $this->versionNum < 220) {
             return $this->urlBuilder->getUrl(
-                'safecharge/payment/callback_completeold',
+                'nuvei_payments/payment/callback_completeold',
                 ['quote' => $quoteId]
             );
         }
         
         return $this->urlBuilder->getUrl(
-            'safecharge/payment/callback_complete',
+            'nuvei_payments/payment/callback_complete',
             ['quote' => $quoteId]
         )
             . '?form_key=' . $this->formKey->getFormKey();
@@ -583,13 +587,13 @@ class Config
 
         if ($this->versionNum != 0 && $this->versionNum < 220) {
                 return $this->urlBuilder->getUrl(
-                    'safecharge/payment/callback_errorold',
+                    'nuvei_payments/payment/callback_errorold',
                     ['quote' => $quoteId]
                 );
         }
         
         return $this->urlBuilder->getUrl(
-            'safecharge/payment/callback_error',
+            'nuvei_payments/payment/callback_error',
             ['quote' => $quoteId]
         )
            . '?form_key=' . $this->formKey->getFormKey();
@@ -607,13 +611,13 @@ class Config
         
         if ($this->versionNum != 0 && $this->versionNum < 220) {
             return $url
-                . 'safecharge/payment/callback_dmnold/order/'
+                . 'nuvei_payments/payment/callback_dmnold/order/'
                 . (is_null($incrementId) ? $this->getReservedOrderId() : $incrementId)
                 . '?quote=' . $quoteId;
         }
         
         return $url
-            . 'safecharge/payment/callback_dmn/order/'
+            . 'nuvei_payments/payment/callback_dmn/order/'
             . (is_null($incrementId) ? $this->getReservedOrderId() : $incrementId)
             . '?form_key=' . $this->formKey->getFormKey()
             . '&quote=' . $quoteId;

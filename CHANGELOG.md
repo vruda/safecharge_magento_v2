@@ -4,6 +4,7 @@
 
 ### 3.0.0.x
 ```
+	* Added uninstall script to remove plugin main data base.
 	* Fix for the Partial Settle wrong amount in the Orders message.
 	* Changed the statuses.
 	* When install add new Order states.

@@ -45,7 +45,7 @@ define(
 		var isCCDateEmpty		= true;
 		var isCCDateComplete	= false;
 		
-		var scOOTotal			= 0;
+//		var scOOTotal			= 0;
 
 		var fieldsStyle	= {
 			base: {
@@ -82,13 +82,13 @@ define(
 		$(function() {
 			console.log('document ready')
 			
-			$('body').on('change', '#safecharge_cc_owner', function(){
-				$('#safecharge_cc_owner').css('box-shadow', 'inherit');
+			$('body').on('change', '#nuvei_cc_owner', function(){
+				$('#nuvei_cc_owner').css('box-shadow', 'inherit');
 				$('#cc_name_error_msg').hide();
 			});
 			
-			$('body').on('change', 'input[name="safecharge_apm_payment_method"]', function() {
-				console.log('change safecharge_apm_payment_method');
+			$('body').on('change', 'input[name="nuvei_apm_payment_method"]', function() {
+				console.log('change nuvei_apm_payment_method');
 				
 				self.scCleanCard();
 				
@@ -100,7 +100,7 @@ define(
 		
         return Component.extend({
             defaults: {
-                template				: 'Nuvei_Payments/payment/safecharge',
+                template				: 'Nuvei_Payments/payment/nuvei',
 				apmMethods				: [],
 				UPOs					: [],
                 chosenApmMethod			: '',
@@ -154,7 +154,7 @@ define(
             },
 
             getCode: function() {
-                return 'safecharge';
+                return 'nuvei';
             },
 
             isActive: function() {
@@ -199,7 +199,7 @@ define(
 			getUPOs: function() {
 				console.log('getUPOs()');
 				
-				if('safecharge' != self.scPaymentMethod) {
+				if('nuvei' != self.scPaymentMethod) {
 					console.log('getUPOs() - slected payment method is not Nuvei');
 					return;
 				}
@@ -229,7 +229,7 @@ define(
             getApmMethods: function(billingAddress) {
 				console.log('getApmMethods()');
 				
-				if('safecharge' != self.scPaymentMethod) {
+				if('nuvei' != self.scPaymentMethod) {
 					console.log('getApmMethods() - slected payment method is not Nuvei');
 					return;
 				}
@@ -256,7 +256,7 @@ define(
 							for(var i in res.apmMethods) {
 								if('cc_card' == res.apmMethods[i].paymentMethod) {
 									scData.sessionToken	= res.sessionToken;
-									scOOTotal			= res.ooAmount;
+//									scOOTotal			= res.ooAmount;
 									
 									self.initFields();
 									break;
@@ -320,11 +320,11 @@ define(
 				console.log('validateOrderData()');
 				
 				if(self.chosenApmMethod() === 'cc_card') {
-					if($('#safecharge_cc_owner').val() == '') {
-						$('#safecharge_cc_owner').css('box-shadow', 'red 0px 0px 3px 1px');
+					if($('#nuvei_cc_owner').val() == '') {
+						$('#nuvei_cc_owner').css('box-shadow', 'red 0px 0px 3px 1px');
 						$('#cc_name_error_msg').show();
 						
-						document.getElementById("safecharge_cc_owner").scrollIntoView();
+						document.getElementById("nuvei_cc_owner").scrollIntoView();
 						$('body').trigger('processStop');
 						
 						return;
@@ -334,7 +334,7 @@ define(
 						$('#sc_card_number').css('box-shadow', 'red 0px 0px 3px 1px');
 						$('#cc_num_error_msg').show();
 						
-						document.getElementById("safecharge_cc_owner").scrollIntoView();
+						document.getElementById("nuvei_cc_owner").scrollIntoView();
 						$('body').trigger('processStop');
 						
 						return;
@@ -344,7 +344,7 @@ define(
 						$('#sc_card_cvc').css('box-shadow', 'red 0px 0px 3px 1px');
 						$('#cc_error_msg').show();
 						
-						document.getElementById("safecharge_cc_owner").scrollIntoView();
+						document.getElementById("nuvei_cc_owner").scrollIntoView();
 						$('body').trigger('processStop');
 						
 						return;
@@ -354,7 +354,7 @@ define(
 						$('#sc_card_expiry').css('box-shadow', 'red 0px 0px 3px 1px');
 						$('#cc_error_msg').show();
 						
-						document.getElementById("safecharge_cc_owner").scrollIntoView();
+						document.getElementById("nuvei_cc_owner").scrollIntoView();
 						$('body').trigger('processStop');
 						
 						return;
@@ -375,7 +375,7 @@ define(
 					// we use variable just for debug
 					var payParams = {
 						sessionToken		: scData.sessionToken,
-						cardHolderName		: document.getElementById('safecharge_cc_owner').value,
+						cardHolderName		: document.getElementById('nuvei_cc_owner').value,
 						paymentOption		: cardNumber,
 						webMasterId			: window.checkoutConfig.payment[self.getCode()].webMasterId,
                     };
@@ -531,7 +531,7 @@ define(
             initFields: function() {
 				console.log('initFields()')
 				
-				if('safecharge' != self.scPaymentMethod) {
+				if('nuvei' != self.scPaymentMethod) {
 					console.log('initFields() - slected payment method is not Nuvei');
 					$('body').trigger('processStop');
 					
@@ -746,7 +746,7 @@ define(
 					
 					self.scPaymentMethod = quote.paymentMethod._latestValue.method;
 					
-					if('safecharge' == self.scPaymentMethod) {
+					if('nuvei' == self.scPaymentMethod) {
 						console.log('sfc', sfc);
 						
 						if(null == sfc) {
@@ -754,7 +754,7 @@ define(
 //							self.getUPOs();
 						}
 						
-						if(jQuery('input[name="safecharge_apm_payment_method"]:checked').val() == 'cc_card') {
+						if(jQuery('input[name="nuvei_apm_payment_method"]:checked').val() == 'cc_card') {
 							self.initFields();
 						}
 					}

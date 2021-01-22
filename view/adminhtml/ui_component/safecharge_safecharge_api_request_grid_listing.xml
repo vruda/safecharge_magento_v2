@@ -11,16 +11,16 @@
          xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
     <argument name="data" xsi:type="array">
         <item name="js_config" xsi:type="array">
-            <item name="provider" xsi:type="string">safecharge_safecharge_api_request_grid_listing.safecharge_safecharge_api_request_grid_listing_data_source</item>
-            <item name="deps" xsi:type="string">safecharge_safecharge_api_request_grid_listing.safecharge_safecharge_api_request_grid_listing_data_source</item>
+            <item name="provider" xsi:type="string">nuvei_payments_api_request_log_listing.nuvei_payments_api_request_log_listing_data_source</item>
+            <item name="deps" xsi:type="string">nuvei_payments_api_request_log_listing.nuvei_payments_api_request_log_listing_data_source</item>
         </item>
-        <item name="spinner" xsi:type="string">safecharge_safecharge_api_request_grid_columns</item>
-        <item name="acl" xsi:type="string">Nuvei_Payments::sales_safecharge_request</item>
+        <item name="spinner" xsi:type="string">nuvei_payments_api_request_log_columns</item>
+        <item name="acl" xsi:type="string">Nuvei_Payments::sales_nuvei_request</item>
     </argument>
-    <dataSource name="safecharge_safecharge_api_request_grid_listing_data_source">
+    <dataSource name="nuvei_payments_api_request_log_listing_data_source">
         <argument name="dataProvider" xsi:type="configurableObject">
             <argument name="class" xsi:type="string">Nuvei\Payments\Ui\DataProvider\RequestLogDataProvider</argument>
-            <argument name="name" xsi:type="string">safecharge_safecharge_api_request_grid_listing_data_source</argument>
+            <argument name="name" xsi:type="string">nuvei_payments_api_request_log_listing_data_source</argument>
             <argument name="primaryFieldName" xsi:type="string">request_id</argument>
             <argument name="requestFieldName" xsi:type="string">id</argument>
             <argument name="data" xsi:type="array">
@@ -48,17 +48,17 @@
                 <item name="config"
                       xsi:type="array">
                     <item name="selectProvider"
-                          xsi:type="string">safecharge_safecharge_api_request_grid_listing.safecharge_safecharge_api_request_grid_listing.safecharge_safecharge_api_request_grid_columns.ids</item>
+                          xsi:type="string">nuvei_payments_api_request_log_listing.nuvei_payments_api_request_log_listing.nuvei_payments_api_request_log_columns.ids</item>
                 </item>
             </argument>
         </exportButton>
         <filterSearch name="fulltext">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
-                    <item name="provider" xsi:type="string">safecharge_safecharge_api_request_grid_listing.safecharge_safecharge_api_request_grid_listing_data_source</item>
-                    <item name="chipsProvider" xsi:type="string">safecharge_safecharge_api_request_grid_listing.safecharge_safecharge_api_request_grid_listing.listing_top.listing_filters_chips</item>
+                    <item name="provider" xsi:type="string">nuvei_payments_api_request_log_listing.nuvei_payments_api_request_log_listing_data_source</item>
+                    <item name="chipsProvider" xsi:type="string">nuvei_payments_api_request_log_listing.nuvei_payments_api_request_log_listing.listing_top.listing_filters_chips</item>
                     <item name="storageConfig" xsi:type="array">
-                        <item name="provider" xsi:type="string">safecharge_safecharge_api_request_grid_listing.safecharge_safecharge_api_request_grid_listing.listing_top.bookmarks</item>
+                        <item name="provider" xsi:type="string">nuvei_payments_api_request_log_listing.nuvei_payments_api_request_log_listing.listing_top.bookmarks</item>
                         <item name="namespace" xsi:type="string">current.search</item>
                     </item>
                 </item>
@@ -67,9 +67,9 @@
         <filters name="listing_filters">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
-                    <item name="columnsProvider" xsi:type="string">safecharge_safecharge_api_request_grid_listing.safecharge_safecharge_api_request_grid_listing.safecharge_safecharge_api_request_grid_columns</item>
+                    <item name="columnsProvider" xsi:type="string">nuvei_payments_api_request_log_listing.nuvei_payments_api_request_log_listing.nuvei_payments_api_request_log_columns</item>
                     <item name="storageConfig" xsi:type="array">
-                        <item name="provider" xsi:type="string">safecharge_safecharge_api_request_grid_listing.safecharge_safecharge_api_request_grid_listing.listing_top.bookmarks</item>
+                        <item name="provider" xsi:type="string">nuvei_payments_api_request_log_listing.nuvei_payments_api_request_log_listing.listing_top.bookmarks</item>
                         <item name="namespace" xsi:type="string">current.filters</item>
                     </item>
                     <item name="templates" xsi:type="array">
@@ -81,9 +81,9 @@
                         </item>
                     </item>
                     <item name="childDefaults" xsi:type="array">
-                        <item name="provider" xsi:type="string">safecharge_safecharge_api_request_grid_listing.safecharge_safecharge_api_request_grid_listing.listing_top.listing_filters</item>
+                        <item name="provider" xsi:type="string">nuvei_payments_api_request_log_listing.nuvei_payments_api_request_log_listing.listing_top.listing_filters</item>
                         <item name="imports" xsi:type="array">
-                            <item name="visible" xsi:type="string">safecharge_safecharge_api_request_grid_listing.safecharge_safecharge_api_request_grid_listing.safecharge_safecharge_api_request_grid_columns.${ $.index }:visible</item>
+                            <item name="visible" xsi:type="string">nuvei_payments_api_request_log_listing.nuvei_payments_api_request_log_listing.nuvei_payments_api_request_log_columns.${ $.index }:visible</item>
                         </item>
                     </item>
                 </item>
@@ -107,14 +107,14 @@
                         </item>
                         <item name="type" xsi:type="string">delete</item>
                         <item name="label" xsi:type="string" translate="true">Delete</item>
-                        <item name="url" xsi:type="url" path="safecharge/request/massDelete"/>
+                        <item name="url" xsi:type="url" path="nuvei/request/massDelete"/>
                     </item>
                 </argument>
             </action>
         </massaction>
         <paging name="listing_paging"/>
     </listingToolbar>
-    <columns name="safecharge_safecharge_api_request_grid_columns">
+    <columns name="nuvei_payments_api_request_log_columns">
         <selectionsColumn name="ids">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">

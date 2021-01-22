@@ -11,7 +11,7 @@ use Magento\Sales\Model\Order;
 /**
  * Nuvei Payments upgrade data.
  */
-class UpgradeData implements UpgradeDataInterface
+class UpgradeData extends \Nuvei\Payments\Setup\InstallSchema implements UpgradeDataInterface
 {
     /**
      * @var OrderStatusFactory
@@ -21,6 +21,7 @@ class UpgradeData implements UpgradeDataInterface
     private $resourceConnection;
 	private $categorySetupFactory;
 	private $attributeSetFactory;
+	private $install;
 
     /**
      * Object constructor.
@@ -32,13 +33,15 @@ class UpgradeData implements UpgradeDataInterface
         \Magento\Framework\App\ResourceConnection $resourceConnection,
         \Magento\Eav\Setup\EavSetupFactory $eavSetupFactory,
 		\Magento\Catalog\Setup\CategorySetupFactory $categorySetupFactory,
-		\Magento\Eav\Model\Entity\Attribute\SetFactory $attributeSetFactory
+		\Magento\Eav\Model\Entity\Attribute\SetFactory $attributeSetFactory,
+		\Magento\Framework\Setup\SchemaSetupInterface $install
     ) {
         $this->orderStatusFactory   = $orderStatusFactory;
         $this->resourceConnection	= $resourceConnection;
         $this->eavSetupFactory      = $eavSetupFactory;
         $this->categorySetupFactory	= $categorySetupFactory;
         $this->attributeSetFactory	= $attributeSetFactory;
+        $this->install				= $install;
     }
 
     /**
@@ -51,6 +54,9 @@ class UpgradeData implements UpgradeDataInterface
      * @throws \Exception
      */
     public function upgrade(ModuleDataSetupInterface $setup, ModuleContextInterface $context) {
+		// try to add main plugin table if not exists, and remove old plugin table if exists
+		$this->install($this->install, $context);
+		
         $setup->startSetup();
 		$eavSetup = $this->eavSetupFactory->create(['setup' => $setup]);
 		

@@ -14,7 +14,7 @@ class Handler extends Base
         $filePath = null,
         $fileName = null
     ) {
-        $fileName = '/var/log/safecharge_'. date('Y-m-d', time()) .'.log';
+        $fileName = '/var/log/nuvei_'. date('Y-m-d', time()) .'.log';
         
         parent::__construct($filesystem, $filePath, $fileName);
     }

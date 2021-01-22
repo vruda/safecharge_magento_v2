@@ -166,7 +166,7 @@ class Complete extends \Magento\Framework\App\Action\Action implements \Magento\
                 ->setData('order_id', $orderId);
 
             $this->_eventManager->dispatch(
-                'safecharge_place_order',
+                'nuvei_place_order',
                 [
                     'result' => $result,
                     'action' => $this,

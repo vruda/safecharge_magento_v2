@@ -22,16 +22,14 @@ class InstallSchema implements InstallSchemaInterface
      * @return void
      * @throws \Zend_Db_Exception
      */
-    public function install(
-        SchemaSetupInterface $setup,
-        ModuleContextInterface $context
-    ) {
+    public function install(SchemaSetupInterface $setup, ModuleContextInterface $context) {
         $setup->startSetup();
 
-        if (!$setup->tableExists('safecharge_safecharge_api_request_log_grid')) {
+		// add plugin table
+        if (!$setup->tableExists('nuvei_payments_api_request_log')) {
             $table = $setup->getConnection()
                 ->newTable(
-                    $setup->getTable('safecharge_safecharge_api_request_log_grid')
+                    $setup->getTable('nuvei_payments_api_request_log')
                 )
                 ->addColumn(
                     'request_id',
@@ -154,9 +152,9 @@ class InstallSchema implements InstallSchemaInterface
 
             $setup->getConnection()
                 ->addIndex(
-                    $setup->getTable('safecharge_safecharge_api_request_log_grid'),
+                    $setup->getTable('nuvei_payments_api_request_log'),
                     $setup->getIdxName(
-                        $setup->getTable('safecharge_safecharge_api_request_log_grid'),
+                        $setup->getTable('nuvei_payments_api_request_log'),
                         ['method', 'request', 'response', 'increment_id'],
                         AdapterInterface::INDEX_TYPE_FULLTEXT
                     ),
@@ -166,9 +164,9 @@ class InstallSchema implements InstallSchemaInterface
 
             $setup->getConnection()
                 ->addIndex(
-                    $setup->getTable('safecharge_safecharge_api_request_log_grid'),
+                    $setup->getTable('nuvei_payments_api_request_log'),
                     $setup->getIdxName(
-                        $setup->getTable('safecharge_safecharge_api_request_log_grid'),
+                        $setup->getTable('nuvei_payments_api_request_log'),
                         ['parent_request_id'],
                         AdapterInterface::INDEX_TYPE_INDEX
                     ),
@@ -178,9 +176,9 @@ class InstallSchema implements InstallSchemaInterface
 
             $setup->getConnection()
                 ->addIndex(
-                    $setup->getTable('safecharge_safecharge_api_request_log_grid'),
+                    $setup->getTable('nuvei_payments_api_request_log'),
                     $setup->getIdxName(
-                        $setup->getTable('safecharge_safecharge_api_request_log_grid'),
+                        $setup->getTable('nuvei_payments_api_request_log'),
                         ['status'],
                         AdapterInterface::INDEX_TYPE_INDEX
                     ),
@@ -188,6 +186,7 @@ class InstallSchema implements InstallSchemaInterface
                     AdapterInterface::INDEX_TYPE_INDEX
                 );
         }
+		
         $setup->endSetup();
     }
 }

@@ -13,7 +13,7 @@
     <body>
         <referenceBlock name="menu">
             <action method="setActive">
-                <argument name="itemId" xsi:type="string">Nuvei_Payments::sales_safecharge_request</argument>
+                <argument name="itemId" xsi:type="string">Nuvei_Payments::sales_nuvei_request</argument>
             </action>
         </referenceBlock>
         <referenceBlock name="page.title">
@@ -22,7 +22,7 @@
             </action>
         </referenceBlock>
         <referenceContainer name="content">
-            <uiComponent name="safecharge_safecharge_api_request_grid_listing"/>
+            <uiComponent name="nuvei_payments_api_request_log_listing"/>
         </referenceContainer>
     </body>
 </page>

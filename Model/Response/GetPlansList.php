@@ -2,7 +2,6 @@
 
 namespace Nuvei\Payments\Model\Response;
 
-use Nuvei\Payments\Model\Logger as SafechargeLogger;
 use Nuvei\Payments\Model\Config;
 use Nuvei\Payments\Lib\Http\Client\Curl;
 
@@ -14,13 +13,13 @@ class GetPlansList extends \Nuvei\Payments\Model\AbstractResponse implements \Nu
     protected $config;
     
     public function __construct(
-        SafechargeLogger $safechargeLogger,
+        \Nuvei\Payments\Model\Logger $logger,
         Config $config,
         $requestId,
         Curl $curl
     ) {
         parent::__construct(
-            $safechargeLogger,
+            $logger,
             $config,
             $requestId,
             $curl

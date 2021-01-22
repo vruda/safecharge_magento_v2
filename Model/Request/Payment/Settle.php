@@ -43,15 +43,35 @@ class Settle extends AbstractPayment implements RequestInterface
      */
     protected function getParams()
     {
-        $orderPayment	= $this->orderPayment;
-        $order          = $orderPayment->getOrder();
-        $auth_data      = $orderPayment->getAdditionalInformation(Payment::AUTH_PARAMS);
+        $orderPayment			= $this->orderPayment;
+        $order					= $orderPayment->getOrder();
+		$ord_trans_addit_info	= $orderPayment->getAdditionalInformation(Payment::ORDER_DATA);
+		$trans_to_settle		[];
+		
+		if(!empty($ord_trans_addit_info) && is_array($ord_trans_addit_info)) {
+			foreach(array_reverse($ord_trans_addit_info) as $trans) {
+				if(
+					strtolower($trans[Payment::TRANSACTION_STATUS]) == 'approved'
+					&& strtolower($trans[Payment::TRANSACTION_TYPE]) == 'auth'
+				) {
+					$trans_to_settle = $trans;
+					break;
+				}
+			}
+		}
+		
+//        $auth_data      = $orderPayment->getAdditionalInformation(Payment::AUTH_PARAMS);
 //		$nuvei_data		= $orderPayment->getAdditionalInformation('nuvei');
 		
-        if (empty($auth_data['AuthCode']) or empty($auth_data['TransactionID'])) {
-            $this->config->createLog($auth_data, 'Missing Auth paramters!');
+        if (
+			empty($trans_to_settle[Payment::TRANSACTION_AUTH_CODE_KEY])
+			|| empty($trans_to_settle[Payment::TRANSACTION_ID])
+		) {
+			$msg = 'Settle Error - Missing Auth paramters.';
+			
+            $this->config->createLog($trans_to_settle, $msg);
             
-            throw new PaymentException(__('Missing Auth parameters.'));
+            throw new PaymentException(__($msg));
         }
 		
 //		$invCollection	= $order->getInvoiceCollection();
@@ -68,9 +88,9 @@ class Settle extends AbstractPayment implements RequestInterface
         $params = [
             'clientUniqueId'            => $getIncrementId,
             'amount'                    => (float)$this->amount,
-            'currency'                    => $order->getBaseCurrencyCode(),
-            'relatedTransactionId'        => $auth_data['TransactionID'],
-            'authCode'                    => $auth_data['AuthCode'],
+            'currency'                  => $order->getBaseCurrencyCode(),
+            'relatedTransactionId'      => $trans_to_settle[Payment::TRANSACTION_ID],
+            'authCode'                  => $trans_to_settle[Payment::TRANSACTION_AUTH_CODE_KEY],
             'urlDetails'                => [
                 'notificationUrl' => $this->config->getCallbackDmnUrl($getIncrementId),
             ],

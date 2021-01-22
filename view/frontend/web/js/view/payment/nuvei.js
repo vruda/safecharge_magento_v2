@@ -14,8 +14,8 @@ define(
         
         rendererList.push(
             {
-                type: 'safecharge',
-                component: 'Nuvei_Payments/js/view/payment/method-renderer/safecharge'
+                type: 'nuvei',
+                component: 'Nuvei_Payments/js/view/payment/method-renderer/nuvei'
             }
         );
 

@@ -8,7 +8,7 @@ use Magento\Framework\App\ResponseInterface;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Nuvei\Payments\Model\AbstractRequest;
 use Nuvei\Payments\Model\Config as ModuleConfig;
-use Nuvei\Payments\Model\Logger as SafechargeLogger;
+use Nuvei\Payments\Model\Logger as Logger;
 use Nuvei\Payments\Model\Request\Factory as RequestFactory;
 
 /**
@@ -35,24 +35,20 @@ class OpenOrder extends Action
      * Redirect constructor.
      *
      * @param Context            $context
-     * @param RedirectUrlBuilder $redirectUrlBuilder
-     * @param SafechargeLogger   $safechargeLogger
+     * @param Logger   $logger
      * @param ModuleConfig       $moduleConfig
      * @param JsonFactory        $jsonResultFactory
      * @param RequestFactory     $requestFactory
      */
     public function __construct(
         Context $context,
-//        RedirectUrlBuilder $redirectUrlBuilder,
-        SafechargeLogger $safechargeLogger,
+        Logger $logger,
         ModuleConfig $moduleConfig,
         JsonFactory $jsonResultFactory,
         RequestFactory $requestFactory
     ) {
         parent::__construct($context);
 
-//        $this->redirectUrlBuilder    = $redirectUrlBuilder;
-//        $this->safechargeLogger        = $safechargeLogger;
         $this->moduleConfig            = $moduleConfig;
         $this->jsonResultFactory    = $jsonResultFactory;
         $this->requestFactory        = $requestFactory;

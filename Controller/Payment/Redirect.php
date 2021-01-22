@@ -105,7 +105,7 @@ class Redirect extends Action
             $orderId = $this->cartManagement->placeOrder((int)$this->checkoutSession->getQuoteId());
             
             $this->_eventManager->dispatch(
-                'safecharge_place_order',
+                'nuvei_place_order',
                 [
                     'result' => $result,
                     'action' => $this,
@@ -124,6 +124,8 @@ class Redirect extends Action
      * Place order.
      *
      * @return DataObject
+	 * 
+	 * TODO - do we use this?
      */
     private function placeOrder()
     {
@@ -143,7 +145,7 @@ class Redirect extends Action
                 ->setData('order_id', $orderId);
 
             $this->_eventManager->dispatch(
-                'safecharge_place_order',
+                'nuvei_place_order',
                 [
                     'result' => $result,
                     'action' => $this,

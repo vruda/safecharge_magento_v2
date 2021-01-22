@@ -21,7 +21,7 @@
 	}
 	/* try to clean all styles END */
 	
-	#sc_apms .safecharge-apm-method-container {
+	#sc_apms .nuvei-apm-method-container {
 		position: relative !important;
 		border-top: 1px solid #cccccc !important;
 		padding: 15px 0 !important;
@@ -50,7 +50,7 @@
 		background-color: transparent !important;
 	}
 	
-	input#safecharge_cc_owner::placeholder {
+	input#nuvei_cc_owner::placeholder {
         color: grey !important;
         font-size: 15px !important;
 		margin-left: 10px !important;
@@ -108,9 +108,9 @@
 		height: 100% !important;
 	}
 	
-	.safecharge-apm-method-icon { width: auto !important; }
+	.nuvei-apm-method-icon { width: auto !important; }
 	
-	#sc_apms .safecharge-apm-method-note {
+	#sc_apms .nuvei-apm-method-note {
 		font-style: italic !important;
 		margin-left: 10px !important;
 		margin-top: 10px !important;
@@ -208,7 +208,7 @@
         </div>
 
         <div id="sc_apms" data-bind="foreach: apmMethods">
-            <div class="safecharge-apm-method-container">
+            <div class="nuvei-apm-method-container">
                 <input type="radio" 
 					   data-bind="
 							checkedValue: $data.paymentMethod,
@@ -218,10 +218,10 @@
 								'name': $parent.getCode() + '_apm_payment_method'
 							}" />
                 
-				<label class="label safecharge-apm-method-label" 
+				<label class="label nuvei-apm-method-label" 
 					   data-bind="attr: {'for': $parent.getCode() + '_' + $data.paymentMethod}">
 					
-					<span class="safecharge-apm-method-icon">
+					<span class="nuvei-apm-method-icon">
 						<img onerror="this.style.display='none'" data-bind="
 							attr: {
 								'src': $data.logoURL,
@@ -229,7 +229,7 @@
 							}" />
 					</span>
                     
-					<span class="label safecharge-apm-method-label-title" data-bind="text: $t($data.paymentMethodDisplayName.message)"></span>
+					<span class="label nuvei-apm-method-label-title" data-bind="text: $t($data.paymentMethodDisplayName.message)"></span>
                 </label>
 
                 <!-- ko if: ($data.paymentMethod !== 'cc_card')-->
@@ -253,7 +253,7 @@
 						<!--/ko-->
 				
 						<!-- ko if: ($data.fields.length == 0) -->
-						<div class="safecharge-apm-method-note">
+						<div class="nuvei-apm-method-note">
 							<!-- ko i18n: "Please click 'Place Order' in order to proceed" -->
 							<!-- /ko -->
 						</div>

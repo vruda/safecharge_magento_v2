@@ -5,7 +5,6 @@ namespace Nuvei\Payments\Model\Response;
 use Nuvei\Payments\Lib\Http\Client\Curl;
 use Nuvei\Payments\Model\AbstractResponse;
 use Nuvei\Payments\Model\Config;
-use Nuvei\Payments\Model\Logger as SafechargeLogger;
 use Magento\Sales\Model\Order\Payment as OrderPayment;
 use Magento\Sales\Model\Order\Payment\Transaction as OrderTransaction;
 
@@ -22,21 +21,20 @@ abstract class AbstractPayment extends AbstractResponse
     /**
      * AbstractPayment constructor.
      *
-     * @param SafechargeLogger  $safechargeLogger
      * @param Config            $config
      * @param int               $requestId
      * @param Curl              $curl
      * @param OrderPayment|null $orderPayment
      */
     public function __construct(
-        SafechargeLogger $safechargeLogger,
+        \Nuvei\Payments\Model\Logger $logger,
         Config $config,
         $requestId,
         Curl $curl,
         OrderPayment $orderPayment
     ) {
         parent::__construct(
-            $safechargeLogger,
+            $logger,
             $config,
             $requestId,
             $curl

@@ -7,7 +7,7 @@ use Magento\Framework\App\Action\Context;
 use Magento\Framework\Controller\ResultFactory;
 use Magento\Framework\Controller\ResultInterface;
 use Nuvei\Payments\Model\Config as ModuleConfig;
-use Nuvei\Payments\Model\Logger as SafechargeLogger;
+use Nuvei\Payments\Model\Logger as Logger;
 
 /**
  * Nuvei Payments payment place controller.
@@ -15,9 +15,9 @@ use Nuvei\Payments\Model\Logger as SafechargeLogger;
 class ErrorOld extends Action
 {
     /**
-     * @var SafechargeLogger
+     * @var NuveiLogger
      */
-    private $safechargeLogger;
+    private $logger;
 
     /**
      * @var ModuleConfig
@@ -28,17 +28,17 @@ class ErrorOld extends Action
      * Error constructor.
      *
      * @param Context          $context
-     * @param SafechargeLogger $safechargeLogger
+     * @param NuveiLogger $nuveiLogger
      * @param ModuleConfig     $moduleConfig
      */
     public function __construct(
         Context $context,
-        SafechargeLogger $safechargeLogger,
+        Logger $logger,
         ModuleConfig $moduleConfig
     ) {
         parent::__construct($context);
 
-        $this->safechargeLogger = $safechargeLogger;
+        $this->logger = $logger;
         $this->moduleConfig = $moduleConfig;
     }
     

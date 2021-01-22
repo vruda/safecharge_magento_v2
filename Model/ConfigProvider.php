@@ -114,12 +114,12 @@ class ConfigProvider extends CcGenericConfigProvider
             'payment' => [
                 Payment::METHOD_CODE => [
                     'countryId'                     => $this->moduleConfig->getQuoteCountryCode(),
-                    'redirectUrl'                   => $this->urlBuilder->getUrl('safecharge/payment/redirect'),
-                    'paymentApmUrl'                 => $this->urlBuilder->getUrl('safecharge/payment/apm'),
-                    'getMerchantPaymentMethodsUrl'  => $this->urlBuilder->getUrl('safecharge/payment/GetMerchantPaymentMethods'),
-                    'getUPOsUrl'					=> $this->urlBuilder->getUrl('safecharge/payment/GetUpos'),
-					'getUpdateOrderUrl'				=> $this->urlBuilder->getUrl('safecharge/payment/OpenOrder'),
-                    'updateQuotePM'					=> $this->urlBuilder->getUrl('safecharge/payment/UpdateQuotePaymentMethod'),
+                    'redirectUrl'                   => $this->urlBuilder->getUrl('nuvei_payments/payment/redirect'),
+                    'paymentApmUrl'                 => $this->urlBuilder->getUrl('nuvei_payments/payment/apm'),
+                    'getMerchantPaymentMethodsUrl'  => $this->urlBuilder->getUrl('nuvei_payments/payment/GetMerchantPaymentMethods'),
+                    'getUPOsUrl'					=> $this->urlBuilder->getUrl('nuvei_payments/payment/GetUpos'),
+					'getUpdateOrderUrl'				=> $this->urlBuilder->getUrl('nuvei_payments/payment/OpenOrder'),
+                    'updateQuotePM'					=> $this->urlBuilder->getUrl('nuvei_payments/payment/UpdateQuotePaymentMethod'),
                     'useUPOs'						=> $this->moduleConfig->useUPOs(),
                     // we need this for the WebSDK
                     'merchantSiteId'                => $this->moduleConfig->getMerchantSiteId(),

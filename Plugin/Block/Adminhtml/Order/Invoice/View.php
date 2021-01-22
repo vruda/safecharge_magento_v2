@@ -3,7 +3,7 @@
 /**
  * Description of View
  *
- * @author SafeCharge
+ * @author Nuvei
  */
 
 namespace Nuvei\Payments\Plugin\Block\Adminhtml\Order\Invoice;
@@ -46,13 +46,24 @@ class View extends \Magento\Backend\Block\Widget\Form\Container
 				return;
 			}
 	
-			$order			= current($orderList);
-            $orderPayment    = $order->getPayment();
-            $ord_status     = $order->getStatus();
-            
-            $payment_method    = $orderPayment->getAdditionalInformation(
-                Payment::TRANSACTION_EXTERNAL_PAYMENT_METHOD
-            );
+			$order					= current($orderList);
+            $orderPayment			= $order->getPayment();
+            $ord_status				= $order->getStatus();
+			$ord_trans_addit_info	= $orderPayment->getAdditionalInformation(Payment::ORDER_DATA);
+			$payment_method			= '';
+			
+			if(!empty($ord_trans_addit_info) && is_array($ord_trans_addit_info)) {
+				foreach($ord_trans_addit_info as $trans) {
+					if(!empty($trans[Payment::TRANSACTION_EXTERNAL_PAYMENT_METHOD])) {
+						$payment_method = $trans[Payment::TRANSACTION_EXTERNAL_PAYMENT_METHOD];
+						break;
+					}
+				}
+			}
+			
+//            $payment_method	= $orderPayment->getAdditionalInformation(
+//                Payment::TRANSACTION_EXTERNAL_PAYMENT_METHOD
+//            );
             
             if ($orderPayment->getMethod() === Payment::METHOD_CODE) {
                 if (!in_array($payment_method, Payment::PAYMETNS_SUPPORT_REFUND)

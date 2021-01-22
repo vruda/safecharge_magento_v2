@@ -11,7 +11,6 @@
       xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <head>
         <script src="https://cdn.safecharge.com/safecharge_resources/v1/websdk/safecharge.js" src_type="url" />
-		<!--<script src="https://cdn.safecharge.com/safecharge_resources/v1/sc_api_applepay.min.js" src_type="url" />-->
     </head>
     
     <body>
@@ -43,13 +42,13 @@
                                                               xsi:type="array">
                                                             <item name="children"
                                                                   xsi:type="array">
-                                                                <item name="safecharge-payments"
+                                                                <item name="nuvei-payments"
                                                                       xsi:type="array">
                                                                     <item name="component"
-                                                                          xsi:type="string">Nuvei_Payments/js/view/payment/safecharge</item>
+                                                                          xsi:type="string">Nuvei_Payments/js/view/payment/nuvei</item>
                                                                     <item name="methods"
                                                                           xsi:type="array">
-                                                                        <item name="safecharge"
+                                                                        <item name="nuvei"
                                                                               xsi:type="array">
                                                                             <item name="isBillingAddressRequired"
                                                                                   xsi:type="boolean">true</item>

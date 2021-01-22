@@ -38,9 +38,9 @@
     <type name="Nuvei\Payments\Model\ResourceModel\Request\Grid\Collection">
         <arguments>
             <argument name="mainTable"
-                      xsi:type="string">safecharge_safecharge_api_request_grid</argument>
+                      xsi:type="string">nuvei_payments_api_request_log</argument>
             <argument name="eventPrefix"
-                      xsi:type="string">safecharge_safecharge_api_request_grid_grid_collection</argument>
+                      xsi:type="string">nuvei_payments_api_request_log_grid_collection</argument>
             <argument name="eventObject"
                       xsi:type="string">api_request_grid_collection</argument>
             <argument name="resourceModel"
@@ -52,7 +52,7 @@
         <arguments>
             <argument name="collections"
                       xsi:type="array">
-                <item name="safecharge_safecharge_api_request_grid_listing_data_source"
+                <item name="nuvei_payments_api_request_log_listing_data_source"
                       xsi:type="string">Nuvei\HelloWorld\Payments\ResourceModel\Request\Grid\Collection</item>
             </argument>
         </arguments>
@@ -69,7 +69,7 @@
     <type name="Nuvei\Payments\Model\Logger">
         <arguments>
             <argument name="name"
-                      xsi:type="string">safechargeLogger</argument>
+                      xsi:type="string">logger</argument>
             <argument name="handlers"
                       xsi:type="array">
                 <item name="system"
@@ -84,7 +84,7 @@
     </type>-->
 	
 <!--	<type name="Magento\Payment\Model\Checks\ZeroTotal">
-		<plugin name="safecharge_zero_total" 
+		<plugin name="nuvei_zero_total" 
 				type="Nuvei\Payments\Plugin\ZeroTotal" />
 	</type>-->
 	

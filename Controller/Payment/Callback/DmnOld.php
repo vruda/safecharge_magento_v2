@@ -98,7 +98,7 @@ class DmnOld extends \Magento\Framework\App\Action\Action
         $jsonOutput->setHttpResponseCode(200);
         
         if (!$this->moduleConfig->isActive()) {
-            $jsonOutput->setData('DMN Error - SafeCharge payment module is not active!');
+            $jsonOutput->setData('DMN Error - Nuvei payment module is not active!');
             return $jsonOutput;
         }
         
@@ -796,7 +796,7 @@ class DmnOld extends \Magento\Framework\App\Action\Action
                 ->setData('order_id', $orderId);
 
             $this->_eventManager->dispatch(
-                'safecharge_place_order',
+                'nuvei_place_order',
                 [
                     'result' => $result,
                     'action' => $this,
@@ -1028,20 +1028,20 @@ class DmnOld extends \Magento\Framework\App\Action\Action
 		
 		$this->order = current($orderList);
 		
-		// check if the Order belongs to SafeCharge
+		// check if the Order belongs to nuvei
 		try {
 			$method = $this->order->getPayment()->getMethod();
 			
-			if('safecharge' != $method) {
+			if('nuvei' != $method) {
 				$this->moduleConfig->createLog(
 					[
 						'orderIncrementId' => $orderIncrementId,
 						'module' => $method,
 					],
-					'DMN getOrCreateOrder() error - the order does was not made with SafeCharge module.'
+					'DMN getOrCreateOrder() error - the order does was not made with Nuvei module.'
 				);
 
-				$jsonOutput->setData('DMN getOrCreateOrder() error - the order does was not made with SafeCharge module.');
+				$jsonOutput->setData('DMN getOrCreateOrder() error - the order does was not made with Nuvei module.');
 				return $jsonOutput;
 			}
 		} catch (Exception $ex) {

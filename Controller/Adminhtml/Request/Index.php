@@ -11,7 +11,7 @@ use Magento\Framework\View\Result\PageFactory;
  */
 class Index extends Action
 {
-    const ADMIN_RESOURCE = 'Nuvei_Payments::sales_safecharge_request';
+    const ADMIN_RESOURCE = 'Nuvei_Payments::sales_nuvei_request';
 
     /**
      * @var PageFactory
@@ -31,7 +31,7 @@ class Index extends Action
     {
         $resultPage = $this->resultPageFactory->create();
 
-        $resultPage->setActiveMenu('Nuvei_Payments::sales_safecharge_request');
+        $resultPage->setActiveMenu('Nuvei_Payments::sales_nuvei_request');
         $resultPage->getConfig()->getTitle()->prepend(__('Nuvei Api Requests'));
 
         $resultPage->addBreadcrumb('Nuvei', 'Nuvei');

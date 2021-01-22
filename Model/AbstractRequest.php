@@ -7,7 +7,7 @@ use Magento\Quote\Model\Quote;
 use Magento\Sales\Api\Data\OrderAddressInterface;
 use Magento\Sales\Model\Order;
 use Nuvei\Payments\Lib\Http\Client\Curl;
-use Nuvei\Payments\Model\Logger as SafechargeLogger;
+use Nuvei\Payments\Model\Logger as Logger;
 use Nuvei\Payments\Model\Response\Factory as ResponseFactory;
 
 /**
@@ -164,19 +164,19 @@ abstract class AbstractRequest extends AbstractApi
     /**
      * Object constructor.
      *
-     * @param Logger          $safechargeLogger
+     * @param Logger          $logger
      * @param Config          $config
      * @param Curl            $curl
      * @param ResponseFactory $responseFactory
      */
     public function __construct(
-        SafechargeLogger $safechargeLogger,
+        Logger $logger,
         Config $config,
         Curl $curl,
         ResponseFactory $responseFactory
     ) {
         parent::__construct(
-            $safechargeLogger,
+            $logger,
             $config
         );
 
@@ -213,7 +213,7 @@ abstract class AbstractRequest extends AbstractApi
     protected function initRequest()
     {
         if ($this->requestId === null) {
-            $requestLog = $this->safechargeLogger->createRequest(
+            $requestLog = $this->logger->createRequest(
                 [
                     'request' => [
                         'Type' => 'POST',

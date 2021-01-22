@@ -13,7 +13,7 @@
         <arguments>
             <argument name="methodCodes"
                       xsi:type="array">
-                <item name="safecharge"
+                <item name="nuvei"
                       xsi:type="const">Nuvei\Payments\Model\Payment::METHOD_CODE</item>
             </argument>
         </arguments>
@@ -23,7 +23,7 @@
         <arguments>
             <argument name="configProviders"
                       xsi:type="array">
-                <item name="safecharge_config_provider"
+                <item name="nuvei_config_provider"
                       xsi:type="object">Nuvei\Payments\Model\ConfigProvider</item>
             </argument>
         </arguments>

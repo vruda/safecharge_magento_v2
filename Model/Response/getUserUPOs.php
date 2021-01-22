@@ -5,7 +5,6 @@ namespace Nuvei\Payments\Model\Response;
 use Nuvei\Payments\Lib\Http\Client\Curl;
 use Nuvei\Payments\Model\AbstractResponse;
 use Nuvei\Payments\Model\Config;
-use Nuvei\Payments\Model\Logger as SafechargeLogger;
 use Nuvei\Payments\Model\ResponseInterface;
 
 /**
@@ -22,19 +21,18 @@ class getUserUPOs extends AbstractResponse implements ResponseInterface
     /**
      * AbstractResponse constructor.
      *
-     * @param SafechargeLogger $safechargeLogger
      * @param Config $config
      * @param int $requestId
      * @param Curl $curl
      */
     public function __construct(
-        SafechargeLogger $safechargeLogger,
+        \Nuvei\Payments\Model\Logger $logger,
         Config $config,
         $requestId,
         Curl $curl
     ) {
         parent::__construct(
-            $safechargeLogger,
+            $logger,
             $config,
             $requestId,
             $curl

@@ -6,7 +6,6 @@ use Magento\Framework\Locale\Resolver;
 use Nuvei\Payments\Lib\Http\Client\Curl;
 use Nuvei\Payments\Model\AbstractResponse;
 use Nuvei\Payments\Model\Config;
-use Nuvei\Payments\Model\Logger as SafechargeLogger;
 use Nuvei\Payments\Model\ResponseInterface;
 
 /**
@@ -34,21 +33,20 @@ class GetMerchantPaymentMethods extends AbstractResponse implements ResponseInte
     /**
      * AbstractResponse constructor.
      *
-     * @param SafechargeLogger $safechargeLogger
      * @param Config $config
      * @param int $requestId
      * @param Curl $curl
      * @param Resolver $localeResolver
      */
     public function __construct(
-        SafechargeLogger $safechargeLogger,
+        \Nuvei\Payments\Model\Logger $logger,
         Config $config,
         $requestId,
         Curl $curl,
         Resolver $localeResolver
     ) {
         parent::__construct(
-            $safechargeLogger,
+            $logger,
             $config,
             $requestId,
             $curl

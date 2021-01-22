@@ -10,20 +10,20 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
     <menu>
-        <add id="Nuvei_Payments::sales_safecharge"
+        <add id="Nuvei_Payments::sales_nuvei"
              title="Nuvei"
              translate="title"
              module="Nuvei_Payments"
              sortOrder="20"
              parent="Magento_Sales::sales"
-             resource="Nuvei_Payments::sales_safecharge"/>
-        <add id="Nuvei_Payments::sales_safecharge_request"
+             resource="Nuvei_Payments::sales_nuvei"/>
+        <add id="Nuvei_Payments::sales_nuvei_request"
              title="Api Requests"
              translate="title"
              module="Nuvei_Payments"
              sortOrder="10"
-             parent="Nuvei_Payments::sales_safecharge"
-             action="safecharge/request"
-             resource="Nuvei_Payments::sales_safecharge_request"/>
+             parent="Nuvei_Payments::sales_nuvei"
+             action="nuvei/request"
+             resource="Nuvei_Payments::sales_nuvei_request"/>
     </menu>
 </config>

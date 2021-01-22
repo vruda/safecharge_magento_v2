@@ -8,7 +8,7 @@ use Magento\Framework\App\ResponseInterface;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Nuvei\Payments\Model\AbstractRequest;
 use Nuvei\Payments\Model\Config as ModuleConfig;
-use Nuvei\Payments\Model\Logger as SafechargeLogger;
+use Nuvei\Payments\Model\Logger as NuveiLogger;
 use Nuvei\Payments\Model\Redirect\Url as RedirectUrlBuilder;
 use Nuvei\Payments\Model\Request\Factory as RequestFactory;
 
@@ -23,9 +23,9 @@ class Apm extends Action
     private $redirectUrlBuilder;
 
     /**
-     * @var SafechargeLogger
+     * @var NuveiLogger
      */
-    private $safechargeLogger;
+    private $nuveiLogger;
 
     /**
      * @var ModuleConfig
@@ -47,7 +47,7 @@ class Apm extends Action
      *
      * @param Context            $context
      * @param RedirectUrlBuilder $redirectUrlBuilder
-     * @param SafechargeLogger   $safechargeLogger
+     * @param NuveiLogger   $nuveiLogger
      * @param ModuleConfig       $moduleConfig
      * @param JsonFactory        $jsonResultFactory
      * @param RequestFactory     $requestFactory
@@ -55,7 +55,7 @@ class Apm extends Action
     public function __construct(
         Context $context,
         RedirectUrlBuilder $redirectUrlBuilder,
-        SafechargeLogger $safechargeLogger,
+        NuveiLogger $nuveiLogger,
         ModuleConfig $moduleConfig,
         JsonFactory $jsonResultFactory,
         RequestFactory $requestFactory
@@ -63,7 +63,7 @@ class Apm extends Action
         parent::__construct($context);
 
         $this->redirectUrlBuilder    = $redirectUrlBuilder;
-        $this->safechargeLogger        = $safechargeLogger;
+        $this->nuveiLogger        = $nuveiLogger;
         $this->moduleConfig            = $moduleConfig;
         $this->jsonResultFactory    = $jsonResultFactory;
         $this->requestFactory        = $requestFactory;

@@ -10,7 +10,6 @@ use Nuvei\Payments\Lib\Http\Client\Curl;
 use Nuvei\Payments\Model\AbstractRequest;
 use Nuvei\Payments\Model\AbstractResponse;
 use Nuvei\Payments\Model\Config;
-use Nuvei\Payments\Model\Logger as SafechargeLogger;
 use Nuvei\Payments\Model\Payment;
 use Nuvei\Payments\Model\Request\AbstractPayment;
 use Nuvei\Payments\Model\Request\Factory as RequestFactory;
@@ -32,7 +31,6 @@ class Refund extends AbstractPayment implements RequestInterface
     /**
      * Refund constructor.
      *
-     * @param SafechargeLogger               $safechargeLogger
      * @param Config                         $config
      * @param Curl                           $curl
      * @param RequestFactory                 $requestFactory
@@ -43,7 +41,7 @@ class Refund extends AbstractPayment implements RequestInterface
      * @param float                          $amount
      */
     public function __construct(
-        SafechargeLogger $safechargeLogger,
+        \Nuvei\Payments\Model\Logger $logger,
         Config $config,
         Curl $curl,
         RequestFactory $requestFactory,
@@ -55,7 +53,7 @@ class Refund extends AbstractPayment implements RequestInterface
 		\Magento\Framework\App\Request\Http $request
     ) {
         parent::__construct(
-            $safechargeLogger,
+            $logger,
             $config,
             $curl,
             $requestFactory,
@@ -98,13 +96,26 @@ class Refund extends AbstractPayment implements RequestInterface
      */
     protected function getParams()
     {
-        $orderPayment   = $this->orderPayment;
-        $order          = $orderPayment->getOrder();
-        $transactionId	= $orderPayment->getRefundTransactionId();
-//		$nuvei_data		= $orderPayment->getAdditionalInformation('nuvei');
-        
-//		$this->config->createLog($nuvei_data, '$nuvei_data');
-//		$this->config->createLog($this->request->getParam('invoice_id'), 'invoice_id');
+		/**
+		 * TODO - we must create a fix, and refund based on Invoice ID not last allowed option!
+		 */
+		
+        $orderPayment			= $this->orderPayment;
+		$ord_trans_addit_info	= $orderPayment->getAdditionalInformation(Payment::ORDER_DATA);
+        $order					= $orderPayment->getOrder();
+		$trans_to_refund_data	= [];
+		
+		if(!empty($ord_trans_addit_info) && is_array($ord_trans_addit_info)) {
+			foreach(array_reverse($ord_trans_addit_info) as $trans) {
+				if(
+					strtolower($trans[Payment::TRANSACTION_STATUS]) == 'approved'
+					&& in_array(strtolower($trans[Payment::TRANSACTION_TYPE]), ['sale', 'settle'])
+				) {
+					$trans_to_refund_data = $trans;
+					break;
+				}
+			}
+		}
 		
 //		$orderdetails = $order->loadByIncrementId($order->getId());
 //		foreach ($orderdetails->getInvoiceCollection() as $invoice)
@@ -112,36 +123,43 @@ class Refund extends AbstractPayment implements RequestInterface
 //			$this->config->createLog($invoice->getIncrementId(), 'refund $invoice_id'); 
 //        }
 		
-        if ($transactionId === null) {
-            $msg = __('Invoice transaction id has been not provided.');
-            $this->config->createLog($msg);
-            throw new PaymentException($msg);
+        if (empty($trans_to_refund_data[Payment::TRANSACTION_ID])) {
+            $msg = 'Refund Error - Transaction ID is empty.';
+            
+			$this->config->createLog($trans_to_refund_data, $msg);
+            
+			throw new PaymentException(__($msg));
         }
 
         /** @var OrderTransaction $transaction */
         $transaction = $this->transactionRepository->getByTransactionId(
-            $transactionId,
+            $trans_to_refund_data[Payment::TRANSACTION_ID],
             $orderPayment->getId(),
             $order->getId()
         );
 
-		$sale_settle_params	= $orderPayment->getAdditionalInformation(Payment::SALE_SETTLE_PARAMS);
-		$this->config->createLog($sale_settle_params, 'Refund sale_settle_params');
+//		$sale_settle_params	= $orderPayment->getAdditionalInformation(Payment::SALE_SETTLE_PARAMS);
+//		$this->config->createLog($sale_settle_params, 'Refund sale_settle_params');
 		
-        $payment_method		= $orderPayment->getAdditionalInformation(Payment::TRANSACTION_EXTERNAL_PAYMENT_METHOD);
+        $payment_method = $orderPayment->getAdditionalInformation(Payment::TRANSACTION_EXTERNAL_PAYMENT_METHOD);
 
-        if (empty($sale_settle_params['AuthCode']) && Payment::APM_METHOD_CC == $payment_method) {
-            $msg = __('Transaction does not contain authorization code.');
-            $this->config->createLog($msg);
-            throw new PaymentException($msg);
+        if (
+			Payment::APM_METHOD_CC == $trans_to_refund_data[Payment::TRANSACTION_EXTERNAL_PAYMENT_METHOD]
+			&& empty($trans_to_refund_data[Payment::TRANSACTION_AUTH_CODE_KEY])
+		) {
+            $msg = 'Refund Error - CC Transaction does not contain authorization code.';
+            
+			$this->config->createLog($trans_to_refund_data, $msg);
+			
+            throw new PaymentException(__($msg));
         }
 
         $params = [
             'clientUniqueId'        => $order->getIncrementId(),
             'currency'              => $order->getBaseCurrencyCode(),
             'amount'                => (float)$this->amount,
-            'relatedTransactionId'    => $transactionId,
-            'authCode'              => empty($sale_settle_params['AuthCode']) ? '' : $sale_settle_params['AuthCode'],
+            'relatedTransactionId'  => $trans_to_refund_data[Payment::TRANSACTION_ID],
+            'authCode'              => $trans_to_refund_data[Payment::TRANSACTION_AUTH_CODE_KEY] ?: '',
             'comment'               => '',
             'merchant_unique_id'    => $order->getIncrementId(),
             'urlDetails'            => [
@@ -151,10 +169,10 @@ class Refund extends AbstractPayment implements RequestInterface
 
         $params = array_merge_recursive($params, parent::getParams());
 
-        $this->safechargeLogger->updateRequest(
-            $this->getRequestId(),
-            ['increment_id' => $order->getIncrementId(),]
-        );
+//        $this->logger->updateRequest(
+//            $this->getRequestId(),
+//            ['increment_id' => $order->getIncrementId(),]
+//        );
 
         return $params;
     }

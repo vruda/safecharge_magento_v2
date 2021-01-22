@@ -10,7 +10,7 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Cron:etc/crontab.xsd">
     <group id="default">
-        <job name="safecharge_delete_old_request_log"
+        <job name="nuvei_delete_old_request_log"
              instance="Nuvei\Payments\Cron\DeleteOldRequestLog"
              method="execute">
             <schedule>0 1 * * *</schedule>

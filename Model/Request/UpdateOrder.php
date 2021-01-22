@@ -6,7 +6,6 @@ use Nuvei\Payments\Lib\Http\Client\Curl;
 use Nuvei\Payments\Model\AbstractRequest;
 use Nuvei\Payments\Model\AbstractResponse;
 use Nuvei\Payments\Model\Config;
-use Nuvei\Payments\Model\Logger as SafechargeLogger;
 use Nuvei\Payments\Model\RequestInterface;
 use Nuvei\Payments\Model\Response\Factory as ResponseFactory;
 use Magento\Framework\Exception\PaymentException;
@@ -31,14 +30,13 @@ class UpdateOrder extends AbstractRequest implements RequestInterface
 	private $billingAddress;
     
     /**
-     * @param SafechargeLogger $safechargeLogger
      * @param Config           $config
      * @param Curl             $curl
      * @param ResponseFactory  $responseFactory
      * @param Factory          $requestFactory
      */
     public function __construct(
-        SafechargeLogger $safechargeLogger,
+        \Nuvei\Payments\Model\Logger $logger,
         Config $config,
         Curl $curl,
         ResponseFactory $responseFactory,
@@ -46,7 +44,7 @@ class UpdateOrder extends AbstractRequest implements RequestInterface
         \Magento\Checkout\Model\Cart $cart
     ) {
         parent::__construct(
-            $safechargeLogger,
+            $logger,
             $config,
             $curl,
             $responseFactory

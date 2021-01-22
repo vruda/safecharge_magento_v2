@@ -35,14 +35,12 @@ class Payment extends Cc implements TransparentInterface
     /**
      * Method code const.
      */
-    const METHOD_CODE = 'safecharge';
+    const METHOD_CODE	= 'nuvei';
     const MODE_LIVE     = 'live';
 
     /**
      * Additional information const.
      */
-//    const KEY_CC_SAVE           = 'cc_save';
-//    const KEY_CC_TOKEN          = 'cc_token';
     const KEY_LAST_ST           = 'last_session_token';
     const KEY_CC_TEMP_TOKEN     = 'cc_temp_token';
     const KEY_CHOSEN_APM_METHOD = 'chosen_apm_method';
@@ -51,18 +49,20 @@ class Payment extends Cc implements TransparentInterface
      * Transaction keys const.
      */
     const TRANSACTION_REQUEST_ID                = 'transaction_request_id';
-    const TRANSACTION_ORDER_ID                  = 'safecharge_order_id';
+    const TRANSACTION_ORDER_ID                  = 'nuvei_order_id';
     const TRANSACTION_AUTH_CODE_KEY             = 'authorization_code';
     const TRANSACTION_ID                        = 'transaction_id';
     const TRANSACTION_USER_PAYMENT_OPTION_ID    = 'user_payment_option_id';
     const TRANSACTION_PAYMENT_SOLUTION          = 'payment_solution';
     const TRANSACTION_EXTERNAL_PAYMENT_METHOD   = 'external_payment_method';
-    const TRANSACTION_STATUS                    = 'sc_status';
-    const TRANSACTION_TYPE                      = 'sc_transaction_type';
-    const TRANSACTION_SUBS                      = 'sc_transaction_subs';
-    const REFUND_TRANSACTION_AMOUNT             = 'sc_refund_amount';
-    const AUTH_PARAMS                           = 'sc_auth_params';
-    const SALE_SETTLE_PARAMS                    = 'sc_sale_settle_params';
+    const TRANSACTION_STATUS                    = 'status';
+    const TRANSACTION_TYPE                      = 'transaction_type';
+    const TRANSACTION_SUBS                      = 'transaction_subs';
+	const TRANSACTION_UPO_ID                    = 'upo_id';
+	const TRANSACTION_TOTAL_AMOUN               = 'total_amount';
+    const REFUND_TRANSACTION_AMOUNT             = 'refund_amount';
+    const AUTH_PARAMS                           = 'auth_params';
+    const SALE_SETTLE_PARAMS                    = 'sale_settle_params';
 	const ORDER_DATA							= 'nuvei_order_data';
 
     /**
@@ -81,7 +81,7 @@ class Payment extends Cc implements TransparentInterface
     const SOLUTION_EXTERNAL     = 'external';
     const APM_METHOD_CC         = 'cc_card';
     
-    const PAYMETNS_SUPPORT_REFUND = ['cc_card', 'apmgw_expresscheckout'];
+    const PAYMETNS_SUPPORT_REFUND = array('cc_card', 'apmgw_expresscheckout');
 
     /**
      * @var string
@@ -352,9 +352,24 @@ class Payment extends Cc implements TransparentInterface
 
     private function processPayment(InfoInterface $payment, $amount)
     {
-        $authCode = $payment->getAdditionalInformation(self::TRANSACTION_AUTH_CODE_KEY);
+		$authCode				= '';
+		$ord_trans_addit_info	= $orderPayment->getAdditionalInformation(Payment::ORDER_DATA);
+		
+		if(is_array($ord_trans_addit_info) && !empty($ord_trans_addit_info)) {
+			foreach($ord_trans_addit_info as $trans) {
+				if(
+					strtolower($trans[self::TRANSACTION_TYPE]) == 'auth'
+					&& strtolower($trans[self::TRANSACTION_STATUS]) == 'approved'
+				) {
+					$authCode = $trans[self::TRANSACTION_AUTH_CODE_KEY];
+					break;
+				}
+			}
+		}
+		
+//        $authCode = $payment->getAdditionalInformation(self::TRANSACTION_AUTH_CODE_KEY);
         
-        if ($authCode === null) {
+        if (empty($authCode)) {
             $payment->setIsTransactionPending(true); // TODO do we need this
             return $this;
         }

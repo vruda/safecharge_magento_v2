@@ -4,8 +4,6 @@ namespace Nuvei\Payments\Model\Request;
 
 use Nuvei\Payments\Model\AbstractRequest;
 use Nuvei\Payments\Model\RequestInterface;
-
-use Nuvei\Payments\Model\Logger as SafechargeLogger;
 use Nuvei\Payments\Model\Config;
 use Nuvei\Payments\Lib\Http\Client\Curl;
 
@@ -14,14 +12,14 @@ class GetPlansList extends AbstractRequest implements RequestInterface
     protected $requestFactory;
     
     public function __construct(
-        SafechargeLogger $safechargeLogger,
+        \Nuvei\Payments\Model\Logger $logger,
         Config $config,
         Curl $curl,
         \Nuvei\Payments\Model\Response\Factory $responseFactory,
         \Nuvei\Payments\Model\Request\Factory $requestFactory
     ) {
         parent::__construct(
-            $safechargeLogger,
+            $logger,
             $config,
             $curl,
             $responseFactory
