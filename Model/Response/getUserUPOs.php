@@ -21,6 +21,7 @@ class getUserUPOs extends AbstractResponse implements ResponseInterface
     /**
      * AbstractResponse constructor.
      *
+     * @param Logger $logger
      * @param Config $config
      * @param int $requestId
      * @param Curl $curl

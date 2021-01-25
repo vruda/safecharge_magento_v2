@@ -33,6 +33,7 @@ class GetMerchantPaymentMethods extends AbstractResponse implements ResponseInte
     /**
      * AbstractResponse constructor.
      *
+     * @param Logger $logger
      * @param Config $config
      * @param int $requestId
      * @param Curl $curl
