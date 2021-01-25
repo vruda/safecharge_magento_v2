@@ -45,8 +45,8 @@ class Settle extends AbstractPayment implements RequestInterface
     {
         $orderPayment			= $this->orderPayment;
         $order					= $orderPayment->getOrder();
-		$ord_trans_addit_info	= $orderPayment->getAdditionalInformation(Payment::ORDER_DATA);
-		$trans_to_settle		[];
+		$ord_trans_addit_info	= $orderPayment->getAdditionalInformation(Payment::ORDER_TRANSACTIONS_DATA);
+		$trans_to_settle		= [];
 		
 		if(!empty($ord_trans_addit_info) && is_array($ord_trans_addit_info)) {
 			foreach(array_reverse($ord_trans_addit_info) as $trans) {
@@ -64,7 +64,7 @@ class Settle extends AbstractPayment implements RequestInterface
 //		$nuvei_data		= $orderPayment->getAdditionalInformation('nuvei');
 		
         if (
-			empty($trans_to_settle[Payment::TRANSACTION_AUTH_CODE_KEY])
+			empty($trans_to_settle[Payment::TRANSACTION_AUTH_CODE])
 			|| empty($trans_to_settle[Payment::TRANSACTION_ID])
 		) {
 			$msg = 'Settle Error - Missing Auth paramters.';
@@ -90,7 +90,7 @@ class Settle extends AbstractPayment implements RequestInterface
             'amount'                    => (float)$this->amount,
             'currency'                  => $order->getBaseCurrencyCode(),
             'relatedTransactionId'      => $trans_to_settle[Payment::TRANSACTION_ID],
-            'authCode'                  => $trans_to_settle[Payment::TRANSACTION_AUTH_CODE_KEY],
+            'authCode'                  => $trans_to_settle[Payment::TRANSACTION_AUTH_CODE],
             'urlDetails'                => [
                 'notificationUrl' => $this->config->getCallbackDmnUrl($getIncrementId),
             ],

@@ -80,7 +80,7 @@ class Settle extends AbstractPayment implements ResponseInterface
         try {
             if (!empty($this->getAuthCode())) {
                 $this->orderPayment->setAdditionalInformation(
-                    Payment::TRANSACTION_AUTH_CODE_KEY,
+                    Payment::TRANSACTION_AUTH_CODE,
                     $this->getAuthCode()
                 );
             }

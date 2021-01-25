@@ -152,12 +152,20 @@ class PaymentApm extends AbstractRequest implements RequestInterface
         $reservedOrderId = $quotePayment->getAdditionalInformation(Payment::TRANSACTION_ORDER_ID)
             ?: $this->config->getReservedOrderId();
 		
-		$order_data = $quotePayment->getAdditionalInformation(Payment::ORDER_DATA);
+		$order_data = $quotePayment->getAdditionalInformation(Payment::CREATE_ORDER_DATA);
+		
+		if (empty($order_data) || empty($order_data['sessionToken'])) {
+			$msg = 'PaymentApm Error - missing Session Token.';
+			
+			$this->config->createLog($order_data, $msg);
+			
+            throw new PaymentException(__($msg));
+        }
 		
 		$this->config->createLog($order_data, 'PaymentAPM $order_data');
 		$this->config->createLog($_POST, 'PaymentAPM $_POST');
 		
-		$session_token = $order_data['sessionToken'] ?: @$tokenResponse->getToken();
+//		$session_token = $order_data['sessionToken'] ?: $tokenResponse->getToken();
 		
 //		if(empty($order_data['sessionToken'])) {
 //			$session_token = $tokenResponse->getToken();
@@ -169,7 +177,7 @@ class PaymentApm extends AbstractRequest implements RequestInterface
         $params = array_merge_recursive(
             $this->getQuoteData($quote),
             [
-                'sessionToken'          => $session_token,
+                'sessionToken'          => $order_data['sessionToken'],
                 'amount'                => (float)$quote->getGrandTotal(),
 //                'merchant_unique_id'    => $reservedOrderId,
 //				'clientUniqueId'		=> $this->config->setClientUniqueId($reservedOrderId),

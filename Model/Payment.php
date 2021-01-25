@@ -50,11 +50,11 @@ class Payment extends Cc implements TransparentInterface
      */
     const TRANSACTION_REQUEST_ID                = 'transaction_request_id';
     const TRANSACTION_ORDER_ID                  = 'nuvei_order_id';
-    const TRANSACTION_AUTH_CODE_KEY             = 'authorization_code';
+    const TRANSACTION_AUTH_CODE					= 'authorization_code';
     const TRANSACTION_ID                        = 'transaction_id';
-    const TRANSACTION_USER_PAYMENT_OPTION_ID    = 'user_payment_option_id';
+//    const TRANSACTION_USER_PAYMENT_OPTION_ID    = 'user_payment_option_id';
     const TRANSACTION_PAYMENT_SOLUTION          = 'payment_solution';
-    const TRANSACTION_EXTERNAL_PAYMENT_METHOD   = 'external_payment_method';
+    const TRANSACTION_PAYMENT_METHOD			= 'external_payment_method';
     const TRANSACTION_STATUS                    = 'status';
     const TRANSACTION_TYPE                      = 'transaction_type';
     const TRANSACTION_SUBS                      = 'transaction_subs';
@@ -63,7 +63,8 @@ class Payment extends Cc implements TransparentInterface
     const REFUND_TRANSACTION_AMOUNT             = 'refund_amount';
     const AUTH_PARAMS                           = 'auth_params';
     const SALE_SETTLE_PARAMS                    = 'sale_settle_params';
-	const ORDER_DATA							= 'nuvei_order_data';
+	const ORDER_TRANSACTIONS_DATA				= 'nuvei_order_transactions_data';
+	const CREATE_ORDER_DATA						= 'nuvei_create_order_data';
 
     /**
      * Order statuses.
@@ -353,7 +354,7 @@ class Payment extends Cc implements TransparentInterface
     private function processPayment(InfoInterface $payment, $amount)
     {
 		$authCode				= '';
-		$ord_trans_addit_info	= $orderPayment->getAdditionalInformation(Payment::ORDER_DATA);
+		$ord_trans_addit_info	= $payment->getAdditionalInformation(Payment::ORDER_TRANSACTIONS_DATA);
 		
 		if(is_array($ord_trans_addit_info) && !empty($ord_trans_addit_info)) {
 			foreach($ord_trans_addit_info as $trans) {
@@ -361,13 +362,13 @@ class Payment extends Cc implements TransparentInterface
 					strtolower($trans[self::TRANSACTION_TYPE]) == 'auth'
 					&& strtolower($trans[self::TRANSACTION_STATUS]) == 'approved'
 				) {
-					$authCode = $trans[self::TRANSACTION_AUTH_CODE_KEY];
+					$authCode = $trans[self::TRANSACTION_AUTH_CODE];
 					break;
 				}
 			}
 		}
 		
-//        $authCode = $payment->getAdditionalInformation(self::TRANSACTION_AUTH_CODE_KEY);
+//        $authCode = $payment->getAdditionalInformation(self::TRANSACTION_AUTH_CODE);
         
         if (empty($authCode)) {
             $payment->setIsTransactionPending(true); // TODO do we need this

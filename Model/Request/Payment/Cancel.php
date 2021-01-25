@@ -43,12 +43,12 @@ class Cancel extends AbstractPayment implements RequestInterface
     protected function getParams()
     {
 		// we can create Void for Settle and Auth only!!!
-		$ord_trans_addit_info = $orderPayment->getAdditionalInformation(Payment::ORDER_DATA);
-        $orderPayment       = $this->orderPayment;
-        $order              = $orderPayment->getOrder();
-		$alowed_trans_data	= [];
+        $orderPayment			= $this->orderPayment;
+		$ord_trans_addit_info	= $orderPayment->getAdditionalInformation(Payment::ORDER_TRANSACTIONS_DATA);
+        $order					= $orderPayment->getOrder();
+		$alowed_trans_data		= [];
 		
-		if(is_array($ord_trans_addit_info) && empty($ord_trans_addit_info)) {
+		if(is_array($ord_trans_addit_info) && !empty($ord_trans_addit_info)) {
 			foreach(array_reverse($ord_trans_addit_info) as $trans) {
 				if(
 					strtolower($trans[Payment::TRANSACTION_STATUS]) == 'approved'
@@ -69,7 +69,13 @@ class Cancel extends AbstractPayment implements RequestInterface
         
         if (empty($alowed_trans_data)) {
             $msg = 'Void Error - There is no approved Settle or Auth Transaction';
-            $this->config->createLog($msg);
+            $this->config->createLog(
+				[
+					'$ord_trans_addit_info'	=> $ord_trans_addit_info,
+					'$alowed_trans_data'	=> $alowed_trans_data,
+				],
+				$msg
+			);
             
             throw new PaymentException(
                 __($msg)
@@ -84,7 +90,7 @@ class Cancel extends AbstractPayment implements RequestInterface
 //            $authCode        = null;
 //
 //            if (empty($transactionDetails['authCode'])) {
-//                $authCode = $orderPayment->getAdditionalInformation(Payment::TRANSACTION_AUTH_CODE_KEY);
+//                $authCode = $orderPayment->getAdditionalInformation(Payment::TRANSACTION_AUTH_CODE);
 //            } else {
 //                $authCode = $transactionDetails['authCode'];
 //            }
@@ -104,7 +110,7 @@ class Cancel extends AbstractPayment implements RequestInterface
             $amount = $alowed_trans_data[Payment::TRANSACTION_TOTAL_AMOUN];
         }
 
-        if (empty($alowed_trans_data[Payment::TRANSACTION_AUTH_CODE_KEY])) {
+        if (empty($alowed_trans_data[Payment::TRANSACTION_AUTH_CODE])) {
 			$msg = 'Void error: Transaction does not contain authorization code.';
 			
             $this->config->createLog($alowed_trans_data, $msg);
@@ -125,7 +131,7 @@ class Cancel extends AbstractPayment implements RequestInterface
             'currency'              => $order->getBaseCurrencyCode(),
             'amount'                => $amount,
             'relatedTransactionId'  => $alowed_trans_data[Payment::TRANSACTION_ID],
-            'authCode'              => $alowed_trans_data[Payment::TRANSACTION_AUTH_CODE_KEY],
+            'authCode'              => $alowed_trans_data[Payment::TRANSACTION_AUTH_CODE],
             'comment'               => '',
             'merchant_unique_id'    => $order->getIncrementId(),
             'urlDetails'            => [

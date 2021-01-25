@@ -333,12 +333,12 @@ class DmnOld extends \Magento\Framework\App\Action\Action
 			}
 			
 			$curr_trans_info = [
-				Payment::TRANSACTION_ID							=> $params['TransactionID'],
-				Payment::TRANSACTION_AUTH_CODE_KEY				=> $params['AuthCode'] ?: '',
-				Payment::TRANSACTION_EXTERNAL_PAYMENT_METHOD	=> $params['payment_method'] ?: '',
-				Payment::TRANSACTION_STATUS						=> $params['Status'] ?: '',
-				Payment::TRANSACTION_TYPE						=> $params['transactionType'] ?: '',
-				'upo_id'										=> $params['userPaymentOptionId'] ?: '',
+				Payment::TRANSACTION_ID				=> $params['TransactionID'],
+				Payment::TRANSACTION_AUTH_CODE_KEY	=> $params['AuthCode'] ?: '',
+				Payment::TRANSACTION_PAYMENT_METHOD	=> $params['payment_method'] ?: '',
+				Payment::TRANSACTION_STATUS			=> $params['Status'] ?: '',
+				Payment::TRANSACTION_TYPE			=> $params['transactionType'] ?: '',
+				'upo_id'							=> $params['userPaymentOptionId'] ?: '',
 			];
 			// the new structure of the data END
 			
@@ -363,7 +363,7 @@ class DmnOld extends \Magento\Framework\App\Action\Action
 
             if (!empty($params['payment_method'])) {
                 $orderPayment->setAdditionalInformation(
-                    Payment::TRANSACTION_EXTERNAL_PAYMENT_METHOD,
+                    Payment::TRANSACTION_PAYMENT_METHOD,
                     $params['payment_method']
                 );
             }

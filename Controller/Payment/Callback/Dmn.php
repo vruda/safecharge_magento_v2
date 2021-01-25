@@ -245,18 +245,23 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
 			
 			$order			= $this->order;
             $orderPayment   = $order->getPayment();
+			$order_status	= '';
+			$order_tr_type	= '';
 			
 			// add data to the Payment
 			// the new structure of the data
-			$ord_trans_addit_info = $orderPayment->getAdditionalInformation(Payment::ORDER_DATA);
+			$ord_trans_addit_info = $orderPayment->getAdditionalInformation(Payment::ORDER_TRANSACTIONS_DATA);
+			
 			$this->moduleConfig->createLog($ord_trans_addit_info, '$ord_trans_addit_info');
 			
-			if(empty($ord_trans_addit_info)) {
+			if(empty($ord_trans_addit_info) || !is_array($ord_trans_addit_info)) {
 				$ord_trans_addit_info = [];
 			}
-			
-            $order_status   = end($ord_trans_addit_info[Payment::TRANSACTION_STATUS]) ?: '';
-            $order_tr_type  = end($ord_trans_addit_info[Payment::TRANSACTION_TYPE]) ?: '';
+			else {
+				$order_status   = end($ord_trans_addit_info)[Payment::TRANSACTION_STATUS] ?: '';
+				$order_tr_type	= end($ord_trans_addit_info)[Payment::TRANSACTION_TYPE] ?: '';
+			}
+            
             $tr_type_param	= strtolower($params['transactionType']);
 //			$start_subscr	= false;
             
@@ -371,13 +376,13 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
             // do not overwrite Order status END
 
 			$curr_trans_info = [
-				Payment::TRANSACTION_ID							=> $params['TransactionID'],
-				Payment::TRANSACTION_AUTH_CODE_KEY				=> $params['AuthCode'] ?: '',
-				Payment::TRANSACTION_EXTERNAL_PAYMENT_METHOD	=> $params['payment_method'] ?: '',
-				Payment::TRANSACTION_STATUS						=> $params['Status'] ?: '',
-				Payment::TRANSACTION_TYPE						=> $params['transactionType'] ?: '',
-				Payment::TRANSACTION_UPO_ID						=> $params['userPaymentOptionId'] ?: '',
-				Payment::TRANSACTION_TOTAL_AMOUN				=> $params['totalAmount'] ?: '',
+				Payment::TRANSACTION_ID				=> $params['TransactionID'],
+				Payment::TRANSACTION_AUTH_CODE		=> $params['AuthCode'] ?: '',
+				Payment::TRANSACTION_PAYMENT_METHOD	=> $params['payment_method'] ?: '',
+				Payment::TRANSACTION_STATUS			=> $params['Status'] ?: '',
+				Payment::TRANSACTION_TYPE			=> $params['transactionType'] ?: '',
+				Payment::TRANSACTION_UPO_ID			=> $params['userPaymentOptionId'] ?: '',
+				Payment::TRANSACTION_TOTAL_AMOUN	=> $params['totalAmount'] ?: '',
 			];
 			// the new structure of the data END
 			
@@ -395,14 +400,14 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
 //
 //            if (!empty($params['AuthCode'])) {
 //                $orderPayment->setAdditionalInformation(
-//                    Payment::TRANSACTION_AUTH_CODE_KEY,
+//                    Payment::TRANSACTION_AUTH_CODE,
 //                    $params['AuthCode']
 //                );
 //            }
 //
 //            if (!empty($params['payment_method'])) {
 //                $orderPayment->setAdditionalInformation(
-//                    Payment::TRANSACTION_EXTERNAL_PAYMENT_METHOD,
+//                    Payment::TRANSACTION_PAYMENT_METHOD,
 //                    $params['payment_method']
 //                );
 //            }
@@ -704,7 +709,7 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
 			$ord_trans_addit_info[] = $curr_trans_info;
 			
 			$orderPayment->setAdditionalInformation(
-				Payment::ORDER_DATA,
+				Payment::ORDER_TRANSACTIONS_DATA,
 				$ord_trans_addit_info
 			);
             

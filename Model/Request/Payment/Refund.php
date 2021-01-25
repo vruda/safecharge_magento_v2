@@ -101,7 +101,7 @@ class Refund extends AbstractPayment implements RequestInterface
 		 */
 		
         $orderPayment			= $this->orderPayment;
-		$ord_trans_addit_info	= $orderPayment->getAdditionalInformation(Payment::ORDER_DATA);
+		$ord_trans_addit_info	= $orderPayment->getAdditionalInformation(Payment::ORDER_TRANSACTIONS_DATA);
         $order					= $orderPayment->getOrder();
 		$trans_to_refund_data	= [];
 		
@@ -141,11 +141,11 @@ class Refund extends AbstractPayment implements RequestInterface
 //		$sale_settle_params	= $orderPayment->getAdditionalInformation(Payment::SALE_SETTLE_PARAMS);
 //		$this->config->createLog($sale_settle_params, 'Refund sale_settle_params');
 		
-        $payment_method = $orderPayment->getAdditionalInformation(Payment::TRANSACTION_EXTERNAL_PAYMENT_METHOD);
+        $payment_method = $orderPayment->getAdditionalInformation(Payment::TRANSACTION_PAYMENT_METHOD);
 
         if (
-			Payment::APM_METHOD_CC == $trans_to_refund_data[Payment::TRANSACTION_EXTERNAL_PAYMENT_METHOD]
-			&& empty($trans_to_refund_data[Payment::TRANSACTION_AUTH_CODE_KEY])
+			Payment::APM_METHOD_CC == $trans_to_refund_data[Payment::TRANSACTION_PAYMENT_METHOD]
+			&& empty($trans_to_refund_data[Payment::TRANSACTION_AUTH_CODE])
 		) {
             $msg = 'Refund Error - CC Transaction does not contain authorization code.';
             
@@ -159,7 +159,7 @@ class Refund extends AbstractPayment implements RequestInterface
             'currency'              => $order->getBaseCurrencyCode(),
             'amount'                => (float)$this->amount,
             'relatedTransactionId'  => $trans_to_refund_data[Payment::TRANSACTION_ID],
-            'authCode'              => $trans_to_refund_data[Payment::TRANSACTION_AUTH_CODE_KEY] ?: '',
+            'authCode'              => $trans_to_refund_data[Payment::TRANSACTION_AUTH_CODE] ?: '',
             'comment'               => '',
             'merchant_unique_id'    => $order->getIncrementId(),
             'urlDetails'            => [

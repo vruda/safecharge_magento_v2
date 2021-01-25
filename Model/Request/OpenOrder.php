@@ -79,7 +79,7 @@ class OpenOrder extends AbstractRequest implements RequestInterface
     {
 		// first try to update order
 		$quote		= $this->cart->getQuote();
-		$order_data	= $quote->getPayment()->getAdditionalInformation(Payment::ORDER_DATA);
+		$order_data	= $quote->getPayment()->getAdditionalInformation(Payment::CREATE_ORDER_DATA);
 		
 		// first try - update order
 		if(!empty($order_data)) {
@@ -102,7 +102,7 @@ class OpenOrder extends AbstractRequest implements RequestInterface
 
 		// save the session token in the Quote
 		$quote->getPayment()->setAdditionalInformation(
-            Payment::ORDER_DATA,
+            Payment::CREATE_ORDER_DATA,
             [
 				'sessionToken'		=> $req_resp['sessionToken'],
 			//	'amount'			=> $this->requestParams['amount'],
@@ -145,6 +145,8 @@ class OpenOrder extends AbstractRequest implements RequestInterface
     protected function getParams()
     {
         if (null === $this->cart || empty($this->cart)) {
+			$this->config->createLog('OpenOrder class Error - mising Cart data.');
+			
             throw new PaymentException(__('There is no Cart data.'));
         }
 		

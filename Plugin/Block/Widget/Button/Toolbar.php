@@ -42,7 +42,7 @@ class Toolbar
             $order					= $this->orderRepository->get($orderId);
 			$ord_status				= $order->getStatus();
             $orderPayment			= $order->getPayment();
-			$ord_trans_addit_info	= $orderPayment->getAdditionalInformation(Payment::ORDER_DATA);
+			$ord_trans_addit_info	= $orderPayment->getAdditionalInformation(Payment::ORDER_TRANSACTIONS_DATA);
 			$payment_method			= '';
             
             if ($orderPayment->getMethod() !== Payment::METHOD_CODE) {
@@ -51,15 +51,15 @@ class Toolbar
             
 			if(!empty($ord_trans_addit_info) && is_array($ord_trans_addit_info)) {
 				foreach($ord_trans_addit_info as $trans) {
-					if(!empty($trans[Payment::TRANSACTION_EXTERNAL_PAYMENT_METHOD])) {
-						$payment_method = $trans[Payment::TRANSACTION_EXTERNAL_PAYMENT_METHOD];
+					if(!empty($trans[Payment::TRANSACTION_PAYMENT_METHOD])) {
+						$payment_method = $trans[Payment::TRANSACTION_PAYMENT_METHOD];
 						break;
 					}
 				}
 			}
             
 //            $payment_method        = $orderPayment->getAdditionalInformation(
-//                Payment::TRANSACTION_EXTERNAL_PAYMENT_METHOD
+//                Payment::TRANSACTION_PAYMENT_METHOD
 //            );
             
             // Examples

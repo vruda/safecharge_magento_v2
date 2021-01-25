@@ -49,20 +49,20 @@ class View extends \Magento\Backend\Block\Widget\Form\Container
 			$order					= current($orderList);
             $orderPayment			= $order->getPayment();
             $ord_status				= $order->getStatus();
-			$ord_trans_addit_info	= $orderPayment->getAdditionalInformation(Payment::ORDER_DATA);
+			$ord_trans_addit_info	= $orderPayment->getAdditionalInformation(Payment::ORDER_TRANSACTIONS_DATA);
 			$payment_method			= '';
 			
 			if(!empty($ord_trans_addit_info) && is_array($ord_trans_addit_info)) {
 				foreach($ord_trans_addit_info as $trans) {
-					if(!empty($trans[Payment::TRANSACTION_EXTERNAL_PAYMENT_METHOD])) {
-						$payment_method = $trans[Payment::TRANSACTION_EXTERNAL_PAYMENT_METHOD];
+					if(!empty($trans[Payment::TRANSACTION_PAYMENT_METHOD])) {
+						$payment_method = $trans[Payment::TRANSACTION_PAYMENT_METHOD];
 						break;
 					}
 				}
 			}
 			
 //            $payment_method	= $orderPayment->getAdditionalInformation(
-//                Payment::TRANSACTION_EXTERNAL_PAYMENT_METHOD
+//                Payment::TRANSACTION_PAYMENT_METHOD
 //            );
             
             if ($orderPayment->getMethod() === Payment::METHOD_CODE) {

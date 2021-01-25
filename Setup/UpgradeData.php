@@ -70,16 +70,16 @@ class UpgradeData extends \Nuvei\Payments\Setup\InstallSchema implements Upgrade
 		// add few new Order States
         if (version_compare($context->getVersion(), '3.0.0', '<')) {
             $scVoided = $this->orderStatusFactory->create()
-                ->setData('status', 'nuvei_voided')
+                ->setData('status', 'vmes')
                 ->setData('label', 'Nuvei Voided')
                 ->save();
-            $scVoided->assignState(Order::STATE_CANCELED, false, true);
+            $scVoided->assignState(Order::STATE_PROCESSING, false, true);
 
             $scSettled = $this->orderStatusFactory->create()
                 ->setData('status', 'nuvei_settled')
                 ->setData('label', 'Nuvei Settled')
                 ->save();
-            $scSettled->assignState(Order::STATE_COMPLETE, false, true);
+            $scSettled->assignState(Order::STATE_PROCESSING, false, true);
 
 //            $scPartiallySettled = $this->orderStatusFactory->create()
 //                ->setData('status', 'nuvei_partially_settled')
@@ -103,7 +103,7 @@ class UpgradeData extends \Nuvei\Payments\Setup\InstallSchema implements Upgrade
                 ->setData('status', 'nuvei_refunded')
                 ->setData('label', 'Nuvei Refunded')
                 ->save();
-            $scRefunded->assignState(Order::STATE_COMPLETE, false, true);
+            $scRefunded->assignState(Order::STATE_PROCESSING, false, true);
         }
 		
 		/* TODO - for the subscriptions
