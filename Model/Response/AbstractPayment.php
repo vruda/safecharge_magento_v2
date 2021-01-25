@@ -6,7 +6,7 @@ use Nuvei\Payments\Lib\Http\Client\Curl;
 use Nuvei\Payments\Model\AbstractResponse;
 use Nuvei\Payments\Model\Config;
 use Magento\Sales\Model\Order\Payment as OrderPayment;
-use Magento\Sales\Model\Order\Payment\Transaction as OrderTransaction;
+use Nuvei\Payments\Model\Logger;
 
 /**
  * Nuvei Payments abstract payment response model.
@@ -21,13 +21,14 @@ abstract class AbstractPayment extends AbstractResponse
     /**
      * AbstractPayment constructor.
      *
+     * @param Logger            $logger
      * @param Config            $config
      * @param int               $requestId
      * @param Curl              $curl
      * @param OrderPayment|null $orderPayment
      */
     public function __construct(
-        \Nuvei\Payments\Model\Logger $logger,
+        Logger $logger,
         Config $config,
         $requestId,
         Curl $curl,
