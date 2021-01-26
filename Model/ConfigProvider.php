@@ -3,12 +3,10 @@
 namespace Nuvei\Payments\Model;
 
 use Magento\Customer\Model\Session as CustomerSession;
-//use Magento\Framework\Exception\PaymentException;
 use Magento\Framework\UrlInterface;
 use Magento\Payment\Helper\Data as PaymentHelper;
 use Magento\Payment\Model\CcConfig;
 use Magento\Payment\Model\CcGenericConfigProvider;
-//use Magento\Vault\Api\PaymentTokenManagementInterface;
 use Nuvei\Payments\Model\Config as ModuleConfig;
 use Nuvei\Payments\Model\Request\Factory as RequestFactory;
 
@@ -46,40 +44,41 @@ class ConfigProvider extends CcGenericConfigProvider
     private $storeManager;
     private $scopeConfig;
     private $cart;
+    private $assetRepo;
 
     /**
      * ConfigProvider constructor.
      *
-     * @param CcConfig                        $ccConfig
-     * @param PaymentHelper                   $paymentHelper
-     * @param Config                          $moduleConfig
-     * @param CustomerSession                 $customerSession
-     * @param PaymentTokenManagementInterface $paymentTokenManagement
-     * @param UrlInterface                    $urlBuilder
-     * @param RequestFactory                  $requestFactory
-     * @param array                           $methodCodes
+     * @param CcConfig			$ccConfig
+     * @param PaymentHelper		$paymentHelper
+     * @param Config			$moduleConfig
+     * @param CustomerSession	$customerSession
+     * @param UrlInterface		$urlBuilder
+     * @param RequestFactory	$requestFactory
+     * @param array				$methodCodes
+	 * @param AssetRepository	$assetRepo
      */
     public function __construct(
         CcConfig $ccConfig,
         PaymentHelper $paymentHelper,
         ModuleConfig $moduleConfig,
         CustomerSession $customerSession,
-//        PaymentTokenManagementInterface $paymentTokenManagement,
         UrlInterface $urlBuilder,
         RequestFactory $requestFactory,
         array $methodCodes,
         \Magento\Store\Model\StoreManagerInterface $storeManager,
         \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
-        \Magento\Checkout\Model\Cart $cart
+        \Magento\Checkout\Model\Cart $cart,
+		\Magento\Framework\View\Asset\Repository $assetRepo
     ) {
         $this->moduleConfig                = $moduleConfig;
         $this->customerSession            = $customerSession;
-//        $this->paymentTokenManagement    = $paymentTokenManagement;
         $this->urlBuilder                = $urlBuilder;
         $this->requestFactory            = $requestFactory;
         $this->storeManager                = $storeManager;
         $this->scopeConfig                = $scopeConfig;
         $this->cart                        = $cart;
+        $this->assetRepo                        = $assetRepo;
 
         $methodCodes = array_merge_recursive(
             $methodCodes,
@@ -121,6 +120,7 @@ class ConfigProvider extends CcGenericConfigProvider
 					'getUpdateOrderUrl'				=> $this->urlBuilder->getUrl('nuvei_payments/payment/OpenOrder'),
                     'updateQuotePM'					=> $this->urlBuilder->getUrl('nuvei_payments/payment/UpdateQuotePaymentMethod'),
                     'useUPOs'						=> $this->moduleConfig->useUPOs(),
+					'checkoutLogoUrl'				=> $this->assetRepo->getUrl("Nuvei_Payments::images/nuvei.png"),
                     // we need this for the WebSDK
                     'merchantSiteId'                => $this->moduleConfig->getMerchantSiteId(),
                     'merchantId'                    => $this->moduleConfig->getMerchantId(),

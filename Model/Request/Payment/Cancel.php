@@ -52,7 +52,7 @@ class Cancel extends AbstractPayment implements RequestInterface
 			foreach(array_reverse($ord_trans_addit_info) as $trans) {
 				if(
 					strtolower($trans[Payment::TRANSACTION_STATUS]) == 'approved'
-					&& in_array(strtolower($trans[Payment::TRANSACTION_TYPE]), ['auth', 'settle'])
+					&& in_array(strtolower($trans[Payment::TRANSACTION_TYPE]), ['auth', 'settle', 'sale'])
 				) {
 					$alowed_trans_data = $trans;
 					break;
@@ -60,13 +60,6 @@ class Cancel extends AbstractPayment implements RequestInterface
 			}
 		}
 		
-		
-//        $order_auth_data	= $orderPayment->getAdditionalInformation(Payment::AUTH_PARAMS);
-//        $transaction_id		= $orderPayment->getAdditionalInformation(Payment::TRANSACTION_ID);
-        
-//        $this->config->createLog($order_auth_data, '$order_auth_data');
-//        $this->config->createLog($transaction_id, '$transaction_id');
-        
         if (empty($alowed_trans_data)) {
             $msg = 'Void Error - There is no approved Settle or Auth Transaction';
             $this->config->createLog(
@@ -82,32 +75,11 @@ class Cancel extends AbstractPayment implements RequestInterface
             );
         }
         
-        // Settle
-//        if ($transaction_id !== $order_auth_data['TransactionID']) {
-        if (strtolower($alowed_trans_data[Payment::TRANSACTION_TYPE]) == 'settle') {
-//            $transaction    = $orderPayment->getAuthorizationTransaction();
-//            $authCode        = $orderPayment->getAdditionalInformation(Payment::TRANSACTION_ID);
-//            $authCode        = null;
-//
-//            if (empty($transactionDetails['authCode'])) {
-//                $authCode = $orderPayment->getAdditionalInformation(Payment::TRANSACTION_AUTH_CODE);
-//            } else {
-//                $authCode = $transactionDetails['authCode'];
-//            }
-            
-//            $ref_amount = $orderPayment->getAdditionalInformation(Payment::REFUND_TRANSACTION_AMOUNT);
-//
-//            if ($ref_amount) {
-//                $amount = $ref_amount;
-//            } else {
-                $amount = (float) $order->getTotalPaid();
-//            }
-            
-        }
-		else { // Auth
-//            $authCode    = $order_auth_data['AuthCode'];
-//            $amount        = $order_auth_data['totalAmount'];
+		// Auth
+		if ('auth' == $trans[Payment::TRANSACTION_TYPE]) { 
             $amount = $alowed_trans_data[Payment::TRANSACTION_TOTAL_AMOUN];
+        } else { // Settle and Sale
+			$amount = (float) $order->getTotalPaid();
         }
 
         if (empty($alowed_trans_data[Payment::TRANSACTION_AUTH_CODE])) {

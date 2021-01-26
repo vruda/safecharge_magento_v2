@@ -196,6 +196,10 @@ define(
                 return window.checkoutConfig.payment[self.getCode()].getMerchantPaymentMethodsUrl;
             },
 			
+			getNuveiIconUrl: function() {
+				return window.checkoutConfig.payment[self.getCode()].checkoutLogoUrl
+			},
+			
 			getUPOs: function() {
 				console.log('getUPOs()');
 				
