@@ -74,22 +74,22 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
 		\Magento\Sales\Model\ResourceModel\Order $orderResourceModel,
 		\Nuvei\Payments\Model\Request\Factory $requestFactory
     ) {
-        $this->moduleConfig                = $moduleConfig;
-        $this->captureCommand            = $captureCommand;
+        $this->moduleConfig             = $moduleConfig;
+        $this->captureCommand           = $captureCommand;
         $this->dataObjectFactory        = $dataObjectFactory;
-        $this->cartManagement            = $cartManagement;
+        $this->cartManagement           = $cartManagement;
         $this->jsonResultFactory        = $jsonResultFactory;
-        $this->transaction                = $transaction;
-        $this->invoiceService            = $invoiceService;
+        $this->transaction              = $transaction;
+        $this->invoiceService           = $invoiceService;
         $this->invoiceRepository        = $invoiceRepository;
-        $this->transObj                    = $transObj;
-        $this->quoteFactory                = $quoteFactory;
-        $this->request                    = $request;
-        $this->_eventManager        = $eventManager;
-		$this->orderRepo            = $orderRepo;
-        $this->searchCriteriaBuilder = $searchCriteriaBuilder;
-        $this->orderResourceModel = $orderResourceModel;
-		$this->requestFactory = $requestFactory;
+        $this->transObj                 = $transObj;
+        $this->quoteFactory             = $quoteFactory;
+        $this->request                  = $request;
+        $this->_eventManager			= $eventManager;
+		$this->orderRepo				= $orderRepo;
+        $this->searchCriteriaBuilder	= $searchCriteriaBuilder;
+        $this->orderResourceModel		= $orderResourceModel;
+		$this->requestFactory			= $requestFactory;
         
         parent::__construct($context);
     }
@@ -265,9 +265,6 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
             $tr_type_param	= strtolower($params['transactionType']);
 //			$start_subscr	= false;
             
-			$this->moduleConfig->createLog($order_status, '$order_status');
-			$this->moduleConfig->createLog($order_tr_type, '$order_tr_type');
-			
 			# Subscription transaction DMN
 			/*
 			if(
@@ -321,14 +318,6 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
 			# Subscription transaction DMN END
 			
             // do not overwrite Order status
-			$this->moduleConfig->createLog(
-				array(
-					'Order status' => $order_status,
-					'Order transaction type' => $order_tr_type,
-				),
-				'Order info'
-			);
-			
             if (strtolower($order_tr_type) == $tr_type_param
                 && strtolower($order_status) == 'approved'
                 && $order_status != $params['Status']
@@ -405,12 +394,12 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
 //                );
 //            }
 //
-//            if (!empty($params['payment_method'])) {
-//                $orderPayment->setAdditionalInformation(
-//                    Payment::TRANSACTION_PAYMENT_METHOD,
-//                    $params['payment_method']
-//                );
-//            }
+            if (!empty($params['payment_method'])) {
+                $orderPayment->setAdditionalInformation(
+                    Payment::TRANSACTION_PAYMENT_METHOD,
+                    $params['payment_method']
+                );
+            }
 //            
 //            if (!empty($params['Status'])) {
 //                $orderPayment->setAdditionalInformation(
@@ -507,24 +496,6 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
                     $sc_transaction_type	= Payment::SC_SETTLED;
                     $invCollection          = $order->getInvoiceCollection();
                     $inv_amount             = round(floatval($order->getBaseGrandTotal()), 2);
-					
-//					$orderPayment->setAdditionalInformation(
-//                        Payment::SALE_SETTLE_PARAMS,
-//                        [
-//                            'TransactionID'	=> $params['TransactionID'],
-//                            'AuthCode'      => $params['AuthCode'],
-//                            'totalAmount'   => $params['totalAmount'],
-//                        ]
-//                    );
-					
-//					$this->moduleConfig->createLog(
-//						[
-//                            'TransactionID'    => $params['TransactionID'],
-//                            'AuthCode'        => $params['AuthCode'],
-//                            'totalAmount'        => $params['totalAmount'],
-//                        ],
-//						Payment::SALE_SETTLE_PARAMS
-//					);
 					
 //					if($params['totalAmount'] > 0) {
 //						$start_subscr = true;
@@ -648,16 +619,12 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
                     $order->setData('state', Order::STATE_CLOSED);
                 }
 				elseif (in_array($tr_type_param, ['credit', 'refund'])) {
-//                    $orderPayment->setAdditionalInformation(
-//                        Payment::REFUND_TRANSACTION_AMOUNT,
-//                        $params['totalAmount']
-//                    );
-                    
                     $transactionType        = Transaction::TYPE_REFUND;
-                    $sc_transaction_type    = Payment::SC_REFUNDED;
+                    $sc_transaction_type	= Payment::SC_REFUNDED;
                     
-                    if ((!empty($params['totalAmount']) && 'cc_card' == $params["payment_method"])
-                    || false !== strpos($params["merchant_unique_id"], 'gwp')
+                    if (
+						(!empty($params['totalAmount']) && 'cc_card' == $params["payment_method"])
+						|| false !== strpos($params["merchant_unique_id"], 'gwp')
                     ) {
                         $refund_msg = '<br/>The Refunded amount is <b>'
                             . $params['totalAmount'] . ' ' . $params['currency'] . '</b>.';
@@ -708,12 +675,10 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
 			
 			$ord_trans_addit_info[] = $curr_trans_info;
 			
-			$orderPayment->setAdditionalInformation(
-				Payment::ORDER_TRANSACTIONS_DATA,
-				$ord_trans_addit_info
-			);
+			$orderPayment
+				->setAdditionalInformation(Payment::ORDER_TRANSACTIONS_DATA, $ord_trans_addit_info)
+				->save();
             
-            $orderPayment->save();
 			$this->orderResourceModel->save($order);
 			
 			$this->moduleConfig->createLog('DMN process end for order #' . $orderIncrementId);

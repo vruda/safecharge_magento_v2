@@ -146,9 +146,9 @@ class Config
         $this->httpHeader = $httpHeader;
         $this->remoteIp = $remoteIp;
 
-        $this->storeId        = $this->getStoreId();
-        $this->versionNum    = intval(str_replace('.', '', $this->productMetadata->getVersion()));
-        $this->formKey        = $formKey;
+        $this->storeId      = $this->getStoreId();
+        $this->versionNum	= intval(str_replace('.', '', $this->productMetadata->getVersion()));
+        $this->formKey      = $formKey;
         $this->directory    = $directory;
     }
 
@@ -536,25 +536,22 @@ class Config
      */
     public function getCallbackSuccessUrl()
     {
-        $quoteId	= $this->checkoutSession->getQuoteId();
-        $version	= $this->productMetadata->getVersion(); //will return the magento version
+		$params = [
+			'quote'		=> $this->checkoutSession->getQuoteId(),
+			'form_key'	=> $this->formKey->getFormKey(),
+		];
 		
         if ($this->versionNum != 0 && $this->versionNum < 220) {
             return $this->urlBuilder->getUrl(
                 'nuvei_payments/payment/callback_completeold',
-                ['quote' => $quoteId]
+                $params
             );
         }
         
         return $this->urlBuilder->getUrl(
             'nuvei_payments/payment/callback_complete',
-            [
-				'quote' => $quoteId,
-				'form_key' => $this->formKey->getFormKey(),
-			]
-        )
-//            . '?form_key=' . $this->formKey->getFormKey()
-		;
+            $params
+        );
     }
 
     /**
@@ -562,20 +559,22 @@ class Config
      */
     public function getCallbackPendingUrl()
     {
-        $quoteId = $this->checkoutSession->getQuoteId();
+        $params = [
+			'quote'		=> $this->checkoutSession->getQuoteId(),
+			'form_key'	=> $this->formKey->getFormKey(),
+		];
         
         if ($this->versionNum != 0 && $this->versionNum < 220) {
             return $this->urlBuilder->getUrl(
                 'nuvei_payments/payment/callback_completeold',
-                ['quote' => $quoteId]
+                $params
             );
         }
         
         return $this->urlBuilder->getUrl(
             'nuvei_payments/payment/callback_complete',
-            ['quote' => $quoteId]
-        )
-            . '?form_key=' . $this->formKey->getFormKey();
+            $params
+        );
     }
 
     /**
@@ -583,20 +582,22 @@ class Config
      */
     public function getCallbackErrorUrl()
     {
-        $quoteId = $this->checkoutSession->getQuoteId();
+        $params = [
+			'quote'		=> $this->checkoutSession->getQuoteId(),
+			'form_key'	=> $this->formKey->getFormKey(),
+		];
 
         if ($this->versionNum != 0 && $this->versionNum < 220) {
                 return $this->urlBuilder->getUrl(
                     'nuvei_payments/payment/callback_errorold',
-                    ['quote' => $quoteId]
+                    $params
                 );
         }
         
         return $this->urlBuilder->getUrl(
             'nuvei_payments/payment/callback_error',
-            ['quote' => $quoteId]
-        )
-           . '?form_key=' . $this->formKey->getFormKey();
+            $params
+        );
     }
 
     /**

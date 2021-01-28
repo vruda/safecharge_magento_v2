@@ -223,8 +223,23 @@ class DmnOld extends \Magento\Framework\App\Action\Action
 			
 			$order			= $this->order;
             $orderPayment   = $order->getPayment();
-            $order_status   = $orderPayment->getAdditionalInformation(Payment::TRANSACTION_STATUS);
-            $order_tr_type  = $orderPayment->getAdditionalInformation(Payment::TRANSACTION_TYPE);
+			$order_status	= '';
+			$order_tr_type	= '';
+			
+			// add data to the Payment
+			// the new structure of the data
+			$ord_trans_addit_info = $orderPayment->getAdditionalInformation(Payment::ORDER_TRANSACTIONS_DATA);
+			
+			$this->moduleConfig->createLog($ord_trans_addit_info, '$ord_trans_addit_info');
+			
+			if(empty($ord_trans_addit_info) || !is_array($ord_trans_addit_info)) {
+				$ord_trans_addit_info = [];
+			}
+			else {
+				$order_status   = end($ord_trans_addit_info)[Payment::TRANSACTION_STATUS] ?: '';
+				$order_tr_type	= end($ord_trans_addit_info)[Payment::TRANSACTION_TYPE] ?: '';
+			}
+            
             $tr_type_param	= strtolower($params['transactionType']);
 //			$start_subscr	= false;
             
@@ -281,14 +296,6 @@ class DmnOld extends \Magento\Framework\App\Action\Action
 			# Subscription transaction DMN END
 			
             // do not overwrite Order status
-			$this->moduleConfig->createLog(
-				array(
-					'Order status' => $order_status,
-					'Order transaction type' => $order_tr_type,
-				),
-				'Order info'
-			);
-			
             if (strtolower($order_tr_type) == $tr_type_param
                 && strtolower($order_status) == 'approved'
                 && $order_status != $params['Status']
@@ -304,8 +311,20 @@ class DmnOld extends \Magento\Framework\App\Action\Action
             
 			// do not override status if the Order is Voided or Refunded
             if (
-				in_array(strtolower($order_tr_type), ['void', 'refund', 'credit'])
+				'void' == strtolower($order_tr_type)
                 && strtolower($order_status) == 'approved'
+            ) {
+                $msg = 'No more actions are allowed for order #' . $order->getId();
+                
+                $this->moduleConfig->createLog($msg);
+                $jsonOutput->setData($msg);
+                return $jsonOutput;
+            }
+			
+            if (
+				in_array(strtolower($order_tr_type), ['refund', 'credit'])
+                && strtolower($order_status) == 'approved'
+				&& !in_array(strtolower($params['transactionType']), ['refund', 'credit'])
             ) {
                 $msg = 'No more actions are allowed for order #' . $order->getId();
                 
@@ -323,22 +342,14 @@ class DmnOld extends \Magento\Framework\App\Action\Action
             }
             // do not overwrite Order status END
 
-            // add data to the Payment
-			// the new structure of the data
-			$ord_trans_addit_info = $orderPayment->getAdditionalInformation('nuvei');
-			$this->moduleConfig->createLog($ord_trans_addit_info, '$ord_trans_addit_info');
-			
-			if(empty($ord_trans_addit_info)) {
-				$ord_trans_addit_info = [];
-			}
-			
 			$curr_trans_info = [
 				Payment::TRANSACTION_ID				=> $params['TransactionID'],
-				Payment::TRANSACTION_AUTH_CODE_KEY	=> $params['AuthCode'] ?: '',
+				Payment::TRANSACTION_AUTH_CODE		=> $params['AuthCode'] ?: '',
 				Payment::TRANSACTION_PAYMENT_METHOD	=> $params['payment_method'] ?: '',
 				Payment::TRANSACTION_STATUS			=> $params['Status'] ?: '',
 				Payment::TRANSACTION_TYPE			=> $params['transactionType'] ?: '',
-				'upo_id'							=> $params['userPaymentOptionId'] ?: '',
+				Payment::TRANSACTION_UPO_ID			=> $params['userPaymentOptionId'] ?: '',
+				Payment::TRANSACTION_TOTAL_AMOUN	=> $params['totalAmount'] ?: '',
 			];
 			// the new structure of the data END
 			
@@ -349,43 +360,43 @@ class DmnOld extends \Magento\Framework\App\Action\Action
                 ->setParentTransactionId($parent_trans_id)
                 ->setAuthCode($params['AuthCode']);
             
-            $orderPayment->setAdditionalInformation(
-                Payment::TRANSACTION_ID,
-                $params['TransactionID']
-            );
-
-            if (!empty($params['AuthCode'])) {
-                $orderPayment->setAdditionalInformation(
-                    Payment::TRANSACTION_AUTH_CODE_KEY,
-                    $params['AuthCode']
-                );
-            }
-
+//            $orderPayment->setAdditionalInformation(
+//                Payment::TRANSACTION_ID,
+//                $params['TransactionID']
+//            );
+//
+//            if (!empty($params['AuthCode'])) {
+//                $orderPayment->setAdditionalInformation(
+//                    Payment::TRANSACTION_AUTH_CODE,
+//                    $params['AuthCode']
+//                );
+//            }
+//
             if (!empty($params['payment_method'])) {
                 $orderPayment->setAdditionalInformation(
                     Payment::TRANSACTION_PAYMENT_METHOD,
                     $params['payment_method']
                 );
             }
-            
-            if (!empty($params['Status'])) {
-                $orderPayment->setAdditionalInformation(
-                    Payment::TRANSACTION_STATUS,
-                    $params['Status']
-                );
-            }
-            
-            $orderPayment->setAdditionalInformation(
-                Payment::TRANSACTION_TYPE,
-                $params['transactionType']
-            );
-            
-            if (!empty($params['userPaymentOptionId'])) {
-                $orderPayment->setAdditionalInformation(
-                    'upoID',
-                    $params['userPaymentOptionId']
-                );
-            }
+//            
+//            if (!empty($params['Status'])) {
+//                $orderPayment->setAdditionalInformation(
+//                    Payment::TRANSACTION_STATUS,
+//                    $params['Status']
+//                );
+//            }
+//            
+//            $orderPayment->setAdditionalInformation(
+//                Payment::TRANSACTION_TYPE,
+//                $params['transactionType']
+//            );
+//            
+//            if (!empty($params['userPaymentOptionId'])) {
+//                $orderPayment->setAdditionalInformation(
+//                    'upoID',
+//                    $params['userPaymentOptionId']
+//                );
+//            }
             
             if ($status === "pending") {
                 $order
@@ -427,14 +438,14 @@ class DmnOld extends \Magento\Framework\App\Action\Action
 //					}
                     
 					// we use this params in Void process
-					$orderPayment->setAdditionalInformation(
-                        Payment::AUTH_PARAMS,
-                        [
-                            'TransactionID'	=> $params['TransactionID'],
-                            'AuthCode'      => $params['AuthCode'],
-                            'totalAmount'   => $params['totalAmount'],
-                        ]
-                    );
+//					$orderPayment->setAdditionalInformation(
+//                        Payment::AUTH_PARAMS,
+//                        [
+//                            'TransactionID'	=> $params['TransactionID'],
+//                            'AuthCode'      => $params['AuthCode'],
+//                            'totalAmount'   => $params['totalAmount'],
+//                        ]
+//                    );
                     
                     $orderPayment
                         ->setAuthAmount($params['totalAmount'])
@@ -463,24 +474,6 @@ class DmnOld extends \Magento\Framework\App\Action\Action
                     $sc_transaction_type	= Payment::SC_SETTLED;
                     $invCollection          = $order->getInvoiceCollection();
                     $inv_amount             = round(floatval($order->getBaseGrandTotal()), 2);
-					
-					$orderPayment->setAdditionalInformation(
-                        Payment::SALE_SETTLE_PARAMS,
-                        [
-                            'TransactionID'	=> $params['TransactionID'],
-                            'AuthCode'      => $params['AuthCode'],
-                            'totalAmount'   => $params['totalAmount'],
-                        ]
-                    );
-					
-//					$this->moduleConfig->createLog(
-//						[
-//                            'TransactionID'    => $params['TransactionID'],
-//                            'AuthCode'        => $params['AuthCode'],
-//                            'totalAmount'        => $params['totalAmount'],
-//                        ],
-//						Payment::SALE_SETTLE_PARAMS
-//					);
 					
 //					if($params['totalAmount'] > 0) {
 //						$start_subscr = true;
@@ -604,16 +597,12 @@ class DmnOld extends \Magento\Framework\App\Action\Action
                     $order->setData('state', Order::STATE_CLOSED);
                 }
 				elseif (in_array($tr_type_param, ['credit', 'refund'])) {
-                    $orderPayment->setAdditionalInformation(
-                        Payment::REFUND_TRANSACTION_AMOUNT,
-                        $params['totalAmount']
-                    );
-                    
                     $transactionType        = Transaction::TYPE_REFUND;
-                    $sc_transaction_type    = Payment::SC_REFUNDED;
+                    $sc_transaction_type	= Payment::SC_REFUNDED;
                     
-                    if ((!empty($params['totalAmount']) && 'cc_card' == $params["payment_method"])
-                    || false !== strpos($params["merchant_unique_id"], 'gwp')
+                    if (
+						(!empty($params['totalAmount']) && 'cc_card' == $params["payment_method"])
+						|| false !== strpos($params["merchant_unique_id"], 'gwp')
                     ) {
                         $refund_msg = '<br/>The Refunded amount is <b>'
                             . $params['totalAmount'] . ' ' . $params['currency'] . '</b>.';
@@ -627,7 +616,7 @@ class DmnOld extends \Magento\Framework\App\Action\Action
 				if ($is_partial_settle) {
                     $order->addStatusHistoryComment(
                         __("The <b>Partial Settle</b> request for amount of ")
-                            . "<b>" . $inv_amount . ' ' . $params['currency'] . "</b>, "
+                            . "<b>" . number_format($params['totalAmount'], 2, '.', '') . ' ' . $params['currency'] . "</b>, "
                             . __("returned") . " <b>" . $params['Status'] . "</b> "
 							. __("status") . ".<br/>"
                             . __('Transaction ID: ') . $params['TransactionID'] .', '
@@ -664,12 +653,10 @@ class DmnOld extends \Magento\Framework\App\Action\Action
 			
 			$ord_trans_addit_info[] = $curr_trans_info;
 			
-			$orderPayment->setAdditionalInformation(
-				'nuvei',
-				$ord_trans_addit_info
-			);
+			$orderPayment
+				->setAdditionalInformation(Payment::ORDER_TRANSACTIONS_DATA, $ord_trans_addit_info)
+				->save();
             
-            $orderPayment->save();
 			$this->orderResourceModel->save($order);
 			
 			$this->moduleConfig->createLog('DMN process end for order #' . $orderIncrementId);
