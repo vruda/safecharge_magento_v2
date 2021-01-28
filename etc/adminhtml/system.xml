@@ -83,7 +83,7 @@
 					<validate>required-entry</validate>
 				</field>
 				
-<!--				<field id="use_upos"
+				<field id="use_upos"
 					   translate="label"
 					   type="select"
 					   sortOrder="47"
@@ -94,7 +94,7 @@
 					<label>Use UPOs</label>
 					<source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
 					<config_path>payment/nuvei/use_upos</config_path>
-				</field>-->
+				</field>
 
 				<field id="merchant_id"
 					   translate="label"

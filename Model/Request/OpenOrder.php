@@ -105,13 +105,8 @@ class OpenOrder extends AbstractRequest implements RequestInterface
             Payment::CREATE_ORDER_DATA,
             [
 				'sessionToken'		=> $req_resp['sessionToken'],
-			//	'amount'			=> $this->requestParams['amount'],
-//				'userTokenId'		=> $req_resp['userTokenId'],
 				'clientRequestId'	=> $req_resp['clientRequestId'],
 				'orderId'			=> $req_resp['orderId'],
-			//	'merchantDetails'	=> $req_resp['merchantDetails'],
-			//	'billingAddress'	=> $this->requestParams['billingAddress'],
-			//	'items'				=> '', // TODO
 			]
         );
 		$this->cart->getQuote()->save();

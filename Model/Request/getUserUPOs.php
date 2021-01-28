@@ -22,8 +22,10 @@ class getUserUPOs extends AbstractRequest implements RequestInterface
 
     protected $cart;
     protected $store;
+	protected $config;
     
     /**
+     * @param Logger           $logger
      * @param Config           $config
      * @param Curl             $curl
      * @param ResponseFactory  $responseFactory
@@ -45,9 +47,10 @@ class getUserUPOs extends AbstractRequest implements RequestInterface
             $responseFactory
         );
 
-        $this->requestFactory    = $requestFactory;
-        $this->cart                = $cart;
+        $this->requestFactory	= $requestFactory;
+        $this->cart             = $cart;
         $this->store            = $store;
+        $this->config           = $config;
     }
 
     /**
@@ -77,11 +80,11 @@ class getUserUPOs extends AbstractRequest implements RequestInterface
      */
     public function process()
     {
-        $this->sendRequest();
+        $this->sendRequest(false, true);
 
         return $this->getResponseHandler()->process();
     }
-
+	
     /**
      * {@inheritdoc}
      *
@@ -89,8 +92,11 @@ class getUserUPOs extends AbstractRequest implements RequestInterface
      */
     protected function getParams()
     {
+		$billing_address	= $this->config->getQuoteBillingAddress();
+		$email				= $billing_address['email'] ?: $this->config->getUserEmail(true);
+		
         $params = [
-            'userTokenId' => '', // logged user email
+            'userTokenId' => $email, // logged user email
         ];
 
         $params = array_merge_recursive(parent::getParams(), $params);

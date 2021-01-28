@@ -62,11 +62,11 @@ class GetMerchantPaymentMethods extends Action
     ) {
         parent::__construct($context);
 
-        $this->redirectUrlBuilder    = $redirectUrlBuilder;
-        $this->logger        = $logger;
-        $this->moduleConfig            = $moduleConfig;
+        $this->redirectUrlBuilder	= $redirectUrlBuilder;
+        $this->logger				= $logger;
+        $this->moduleConfig         = $moduleConfig;
         $this->jsonResultFactory    = $jsonResultFactory;
-        $this->requestFactory        = $requestFactory;
+        $this->requestFactory       = $requestFactory;
     }
 
     /**
@@ -85,12 +85,24 @@ class GetMerchantPaymentMethods extends Action
         }
 
 		$apmMethodsData = $this->getApmMethods();
-
+		
+		// get UPOs
+		$upos = [];
+		
+		if( $this->moduleConfig->canUseUpos()
+			&& !empty($apmMethodsData['apmMethods'])
+		) {
+			$this->moduleConfig->createLog('can use upos');
+			$upos = $this->getUpos();
+		}
+		// get UPOs END
+		
         return $result->setData([
-            "error"            => 0,
+            "error"         => 0,
             "apmMethods"    => $apmMethodsData['apmMethods'],
-            "sessionToken"    => $apmMethodsData['sessionToken'],
-            "message"        => "Success"
+            "upos"			=> $upos,
+            "sessionToken"	=> $apmMethodsData['sessionToken'],
+            "message"       => "Success"
         ]);
     }
 
@@ -113,4 +125,10 @@ class GetMerchantPaymentMethods extends Action
             'sessionToken'  => $apmMethods->getSessionToken(),
         ];
     }
+	
+	private function getUpos()
+	{
+		$request	= $this->requestFactory->create(AbstractRequest::GET_UPOS_METHOD);
+		$upos		= $request->process();
+	}
 }

@@ -20,24 +20,16 @@ class Factory
      * @var array
      */
     private $invokableClasses = [
-        AbstractResponse::TOKEN_HANDLER
-            => \Nuvei\Payments\Model\Response\Token::class,
-        AbstractResponse::PAYMENT_SETTLE_HANDLER
-            => \Nuvei\Payments\Model\Response\Payment\Settle::class,
-        AbstractResponse::CREATE_USER_HANDLER
-            => \Nuvei\Payments\Model\Response\CreateUser::class,
-        AbstractResponse::GET_USER_DETAILS_HANDLER
-            => \Nuvei\Payments\Model\Response\GetUserDetails::class,
-        AbstractResponse::PAYMENT_REFUND_HANDLER
-            => \Nuvei\Payments\Model\Response\Payment\Refund::class,
-        AbstractResponse::PAYMENT_VOID_HANDLER
-            => \Nuvei\Payments\Model\Response\Payment\Cancel::class,
-        AbstractResponse::PAYMENT_APM_HANDLER
-            => \Nuvei\Payments\Model\Response\PaymentApm::class,
-        AbstractResponse::GET_MERCHANT_PAYMENT_METHODS_HANDLER
-            => \Nuvei\Payments\Model\Response\GetMerchantPaymentMethods::class,
-        AbstractResponse::GET_MERCHANT_PAYMENT_PLANS_HANDLER
-            => \Nuvei\Payments\Model\Response\GetPlansList::class,
+        AbstractResponse::TOKEN_HANDLER							=> \Nuvei\Payments\Model\Response\Token::class,
+        AbstractResponse::PAYMENT_SETTLE_HANDLER				=> \Nuvei\Payments\Model\Response\Payment\Settle::class,
+        AbstractResponse::CREATE_USER_HANDLER					=> \Nuvei\Payments\Model\Response\CreateUser::class,
+        AbstractResponse::GET_USER_DETAILS_HANDLER				=> \Nuvei\Payments\Model\Response\GetUserDetails::class,
+        AbstractResponse::PAYMENT_REFUND_HANDLER				=> \Nuvei\Payments\Model\Response\Payment\Refund::class,
+        AbstractResponse::PAYMENT_VOID_HANDLER					=> \Nuvei\Payments\Model\Response\Payment\Cancel::class,
+        AbstractResponse::PAYMENT_APM_HANDLER					=> \Nuvei\Payments\Model\Response\PaymentApm::class,
+        AbstractResponse::GET_MERCHANT_PAYMENT_METHODS_HANDLER	=> \Nuvei\Payments\Model\Response\GetMerchantPaymentMethods::class,
+		AbstractResponse::GET_UPOS_HANDLER						=> \Nuvei\Payments\Model\Response\getUserUPOs::class,
+        AbstractResponse::GET_MERCHANT_PAYMENT_PLANS_HANDLER	=> \Nuvei\Payments\Model\Response\GetPlansList::class,
     ];
 
     /**

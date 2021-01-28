@@ -12,7 +12,7 @@ use Nuvei\Payments\Model\Redirect\Url as RedirectUrlBuilder;
 use Nuvei\Payments\Model\Request\Factory as RequestFactory;
 
 /**
- * Nuvei Payments GetMerchantPaymentMethods controller.
+ * Nuvei Payments UpdateQuotePaymentMethod controller.
  */
 class UpdateQuotePaymentMethod extends Action
 {

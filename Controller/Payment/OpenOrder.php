@@ -69,11 +69,14 @@ class OpenOrder extends Action
 			]);
         }
 		
-		$resp = $this->openOrder();
+//		$resp = $this->openOrder();
+		
+		$request	= $this->requestFactory->create(AbstractRequest::OPEN_ORDER_METHOD);
+		$resp		= $request->process();
 
         return $result->setData([
             "error"         => 0,
-            "sessionToken"	=> $resp['sessionToken'],
+            "sessionToken"	=> $resp->sessionToken,
             "message"       => "Success"
         ]);
     }
@@ -81,13 +84,13 @@ class OpenOrder extends Action
     /**
      * @return array
      */
-    private function openOrder()
-    {
-        $request	= $this->requestFactory->create(AbstractRequest::OPEN_ORDER_METHOD);
-		$resp		= $request->process();
-        
-        return [
-			'sessionToken' => $resp->sessionToken
-		];
-    }
+//    private function openOrder()
+//    {
+//        $request	= $this->requestFactory->create(AbstractRequest::OPEN_ORDER_METHOD);
+//		$resp		= $request->process();
+//        
+//        return [
+//			'sessionToken' => $resp->sessionToken
+//		];
+//    }
 }

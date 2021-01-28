@@ -112,6 +112,7 @@ class Config
     private $directory;
     private $httpHeader;
     private $remoteIp;
+    private $customerSession;
 	
 	private $clientUniqueIdPostfix = '_sandbox_apm'; // postfix for Sandbox APM payments
 
@@ -135,7 +136,8 @@ class Config
         \Magento\Framework\Data\Form\FormKey $formKey,
         \Magento\Framework\Filesystem\DirectoryList $directory,
         \Magento\Framework\HTTP\Header $httpHeader,
-        \Magento\Framework\HTTP\PhpEnvironment\RemoteAddress $remoteIp
+        \Magento\Framework\HTTP\PhpEnvironment\RemoteAddress $remoteIp,
+		\Magento\Customer\Model\Session $customerSession
     ) {
         $this->scopeConfig = $scopeConfig;
         $this->storeManager = $storeManager;
@@ -145,6 +147,7 @@ class Config
         $this->urlBuilder = $urlBuilder;
         $this->httpHeader = $httpHeader;
         $this->remoteIp = $remoteIp;
+        $this->customerSession = $customerSession;
 
         $this->storeId      = $this->getStoreId();
         $this->versionNum	= intval(str_replace('.', '', $this->productMetadata->getVersion()));
@@ -480,6 +483,15 @@ class Config
 
         return true;
     }
+	
+	public function canUseUpos()
+	{
+		if($this->customerSession->isLoggedIn() && 1 == $this->getConfigValue('use_upos')) {
+			return true;
+		}
+		
+		return false;
+	}
 
     /**
      * Return bool value depends of that if payment method debug mode
@@ -793,13 +805,18 @@ class Config
 		return $merchant_unique_id;
 	}
 	
-	public function getUserEmail() {
+	public function getUserEmail($empty_on_fail = false) {
 		$quote	= $this->checkoutSession->getQuote();
 		$email	= $quote->getBillingAddress()->getEmail();
 		
         if (empty($email)) {
             $email = $quote->getCustomerEmail();
         }
+		
+		if(empty($mail) && $empty_on_fail) {
+			return '';
+		}
+		
         if (empty($email) && !empty($_COOKIE['guestSippingMail'])) {
             $email = filter_var($_COOKIE['guestSippingMail'], FILTER_VALIDATE_EMAIL);
         }

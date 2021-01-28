@@ -24,7 +24,6 @@ abstract class AbstractRequest extends AbstractApi
     /**
      * Payment gateway methods.
      */
-    //const GET_SESSION_TOKEN_METHOD              = 'getSessionToken';
     const PAYMENT_SETTLE_METHOD                 = 'settleTransaction';
     const CREATE_USER_METHOD                    = 'createUser';
     const GET_USER_DETAILS_METHOD               = 'getUserDetails';
@@ -423,6 +422,11 @@ abstract class AbstractRequest extends AbstractApi
     }
 
     /**
+	 * Function sendRequest
+	 * 
+	 * @param bool $continue_process when is true return the response parameters to the sender
+	 * @param bool $accept_error_status when is true, do not throw exception if get error response
+	 * 
      * @return AbstractRequest
      * @throws \Magento\Framework\Exception\LocalizedException
      */

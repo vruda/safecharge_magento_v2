@@ -132,18 +132,6 @@ class PaymentApm extends AbstractRequest implements RequestInterface
         $quote			= $this->checkoutSession->getQuote();
         $quotePayment	= $quote->getPayment();
 
-//        $this->config->createLog('requestFactory GET_SESSION_TOKEN_METHOD - PaymentApm.php');
-        
-//        $tokenRequest = $this->requestFactory
-//            ->create(AbstractRequest::GET_SESSION_TOKEN_METHOD);
-//        $tokenResponse = $tokenRequest->process();
-
-//        $quotePayment->unsAdditionalInformation(Payment::TRANSACTION_SESSION_TOKEN);
-//        $quotePayment->setAdditionalInformation(
-//            Payment::TRANSACTION_SESSION_TOKEN,
-//            $tokenResponse->getToken()
-//        );
-
 		$this->config->createLog(
 			$quotePayment->getAdditionalInformation(Payment::TRANSACTION_ORDER_ID),
 			'PaymentAPM TRANSACTION_ORDER_ID'
@@ -164,15 +152,6 @@ class PaymentApm extends AbstractRequest implements RequestInterface
 		
 		$this->config->createLog($order_data, 'PaymentAPM $order_data');
 		$this->config->createLog($_POST, 'PaymentAPM $_POST');
-		
-//		$session_token = $order_data['sessionToken'] ?: $tokenResponse->getToken();
-		
-//		if(empty($order_data['sessionToken'])) {
-//			$session_token = $tokenResponse->getToken();
-//		}
-//		else {
-//			$session_token = $order_data['sessionToken'];
-//		}
 		
         $params = array_merge_recursive(
             $this->getQuoteData($quote),

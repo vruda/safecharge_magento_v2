@@ -243,6 +243,13 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
             # try to create the order
 			$this->getOrCreateOrder($params, $orderIncrementId, $jsonOutput);
 			
+			if (is_null($this->order)) {
+				$this->moduleConfig->createLog('DMN error - Order object is null.');
+                
+                $jsonOutput->setData('DMN error - Order object is null.');
+                return $jsonOutput;
+			}
+			
 			$order			= $this->order;
             $orderPayment   = $order->getPayment();
 			$order_status	= '';
@@ -736,7 +743,7 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
 			 */
 			// start Subscription plans if we need to END
 		}
-		catch (\Exception $e) {
+		catch (Exception $e) {
             $msg = $e->getMessage();
 
             $this->moduleConfig->createLog($e->getMessage() . "\n\r" . $e->getTraceAsString(), 'DMN Excception:');
@@ -811,7 +818,7 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
                     'action' => $this,
                 ]
             );
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             $this->moduleConfig->createLog($exception->getMessage(), 'DMN placeOrder Exception: ');
             
             return $result
