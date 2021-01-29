@@ -64,9 +64,9 @@ class GetMerchantPaymentMethods extends AbstractResponse implements ResponseInte
     {
         parent::process();
 
-        $body                = $this->getBody();
-        $this->sessionToken    = (string) $body['sessionToken'];
-        $langCode            = $this->getStoreLocale(true);
+        $body               = $this->getBody();
+        $this->sessionToken	= (string) $body['sessionToken'];
+        $langCode           = $this->getStoreLocale(true);
         $countryCode        = $countryCode ?: $this->config->getQuoteCountryCode();
         
         foreach ((array) $body['paymentMethods'] as $k => $method) {
@@ -181,10 +181,7 @@ class GetMerchantPaymentMethods extends AbstractResponse implements ResponseInte
         return $this;
     }
 
-    /**
-     * @return string
-     */
-    public function getScPaymentMethods()
+    public function getPaymentMethods()
     {
         return $this->scPaymentMethods;
     }

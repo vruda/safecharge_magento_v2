@@ -775,14 +775,15 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
         }
         
         try {
-            $quote = $this->quoteFactory->create()->loadByIdWithoutStore((int) $params['quote']);
+            $quote	= $this->quoteFactory->create()->loadByIdWithoutStore((int) $params['quote']);
+			$method	= $quote->getPayment()->getMethod();
 			
 			$this->moduleConfig->createLog(
 				array(
-					'quote Method' => $quote->getPayment()->getMethod(),
+					'quote Method' => $method,
 					'quote id' => $quote->getQuoteId(),
 				),
-				'$quote->getPayment()->getMethod()'
+				'$method'
 			);
 
             if (intval($quote->getIsActive()) == 0) {
@@ -793,11 +794,11 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
                     ->setData('message', 'Quote is not active.');
             }
 
-            if ($quote->getPayment()->getMethod() !== Payment::METHOD_CODE) {
+            if ($method !== Payment::METHOD_CODE) {
                 return $result
                     ->setData('error', true)
                     ->setData('message', 'Quote payment method is "'
-                        . $quote->getPayment()->getMethod() . '"');
+                        . $method . '"');
             }
 
             $params = array_merge(

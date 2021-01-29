@@ -92,8 +92,23 @@ class GetMerchantPaymentMethods extends Action
 		if( $this->moduleConfig->canUseUpos()
 			&& !empty($apmMethodsData['apmMethods'])
 		) {
-			$this->moduleConfig->createLog('can use upos');
-			$upos = $this->getUpos();
+			$upos_arr = $this->getUpos();
+			
+			if(!empty($upos_arr)) {
+				foreach($upos_arr as $upo_data) {
+					foreach($apmMethodsData['apmMethods'] as $apm_data) {
+						if ($apm_data['paymentMethod'] === $upo_data['paymentMethodName']) {
+							
+							$upo_data['logoURL'] = !empty($apm_data['logoURL']) ? $apm_data['logoURL'] : '';
+							$upo_data['name']    = !empty($apm_data['paymentMethodDisplayName'][0]['message'])
+								? $apm_data['paymentMethodDisplayName'][0]['message'] : '';
+
+							$upos[] = $upo_data;
+							break;
+						}
+					}
+				}
+			}
 		}
 		// get UPOs END
 		
@@ -114,21 +129,42 @@ class GetMerchantPaymentMethods extends Action
      */
     private function getApmMethods()
     {
-        $request = $this->requestFactory->create(AbstractRequest::GET_MERCHANT_PAYMENT_METHODS_METHOD);
+		try {
+			$request	= $this->requestFactory->create(AbstractRequest::GET_MERCHANT_PAYMENT_METHODS_METHOD);
+			$apmMethods	= $request
+				->setBillingAddress($this->getRequest()->getParam('billingAddress'))
+				->process();
 
-		$apmMethods = $request
-			->setBillingAddress($this->getRequest()->getParam('billingAddress'))
-			->process();
-        
-        return [
-            'apmMethods'	=> $apmMethods->getScPaymentMethods(),
-            'sessionToken'  => $apmMethods->getSessionToken(),
-        ];
+			return [
+				'apmMethods'	=> $apmMethods->getPaymentMethods(),
+				'sessionToken'  => $apmMethods->getSessionToken(),
+			];
+		}
+		catch(Exception $e) {
+			$this->moduleConfig->createLog($e->getMessage(), 'Get APMs exception');
+			return [
+				'apmMethods'	=> [],
+				'sessionToken'  => [],
+			];
+		}
     }
 	
 	private function getUpos()
 	{
-		$request	= $this->requestFactory->create(AbstractRequest::GET_UPOS_METHOD);
-		$upos		= $request->process();
+		try {
+			$request	= $this->requestFactory->create(AbstractRequest::GET_UPOS_METHOD);
+			$resp		= $request->process();
+			$upos		= $resp->getPaymentMethods();
+		}
+		catch(Exception $e) {
+			$this->moduleConfig->createLog($e->getMessage(), 'Get UPOs exception');
+			return [];
+		}
+		
+		if(!empty($upos)) {
+			return $upos;
+		}
+		
+		return [];
 	}
 }

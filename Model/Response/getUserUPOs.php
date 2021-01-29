@@ -67,10 +67,7 @@ class getUserUPOs extends AbstractResponse implements ResponseInterface
         return $this;
     }
 
-    /**
-     * @return string
-     */
-    public function getScPaymentMethods()
+    public function getPaymentMethods()
     {
         return $this->scPaymentMethods;
     }
