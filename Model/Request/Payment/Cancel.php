@@ -76,12 +76,12 @@ class Cancel extends AbstractPayment implements RequestInterface
         }
         
 		// Auth
-		if ('auth' == $trans[Payment::TRANSACTION_TYPE]) { 
-            $amount = $alowed_trans_data[Payment::TRANSACTION_TOTAL_AMOUN];
+		if ('auth' == strtolower($alowed_trans_data[Payment::TRANSACTION_TYPE])) { 
+            $amount = floatval($alowed_trans_data[Payment::TRANSACTION_TOTAL_AMOUN]);
         } else { // Settle and Sale
 			$amount = (float) $order->getTotalPaid();
         }
-
+		
         if (empty($alowed_trans_data[Payment::TRANSACTION_AUTH_CODE])) {
 			$msg = 'Void error: Transaction does not contain authorization code.';
 			
@@ -90,7 +90,7 @@ class Cancel extends AbstractPayment implements RequestInterface
             throw new PaymentException(__($msg));
         }
         
-        if (empty($amount)) {
+        if (empty($amount) || $amount < 0) {
 			$msg = 'Void error - Transaction does not contain total amount.';
 			
             $this->config->createLog($alowed_trans_data, $msg);
