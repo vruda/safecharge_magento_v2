@@ -23,11 +23,6 @@ class GetUpos extends Action
     private $redirectUrlBuilder;
 
     /**
-     * @var Logger
-     */
-    private $logger;
-
-    /**
      * @var ModuleConfig
      */
     private $moduleConfig;
@@ -47,7 +42,6 @@ class GetUpos extends Action
      *
      * @param Context            $context
      * @param RedirectUrlBuilder $redirectUrlBuilder
-     * @param Logger   $logger
      * @param ModuleConfig       $moduleConfig
      * @param JsonFactory        $jsonResultFactory
      * @param RequestFactory     $requestFactory
@@ -55,18 +49,16 @@ class GetUpos extends Action
     public function __construct(
         Context $context,
         RedirectUrlBuilder $redirectUrlBuilder,
-        Logger $logger,
         ModuleConfig $moduleConfig,
         JsonFactory $jsonResultFactory,
         RequestFactory $requestFactory
     ) {
         parent::__construct($context);
 
-        $this->redirectUrlBuilder    = $redirectUrlBuilder;
-        $this->logger        = $logger;
-        $this->moduleConfig            = $moduleConfig;
+        $this->redirectUrlBuilder	= $redirectUrlBuilder;
+        $this->moduleConfig         = $moduleConfig;
         $this->jsonResultFactory    = $jsonResultFactory;
-        $this->requestFactory        = $requestFactory;
+        $this->requestFactory       = $requestFactory;
     }
 
     /**
@@ -87,7 +79,7 @@ class GetUpos extends Action
         try {
             $UPOs_data = $this->getUPOs();
         } catch (PaymentException $e) {
-            $this->moduleConfig->createLog('GetUpos Controller - Error: ' . $e->getMessage());
+            $this->moduleConfig->createLog('GetUpos Controller - Exception: ' . $e->getMessage());
             
             return $result->setData([
                 "error"     => 1,

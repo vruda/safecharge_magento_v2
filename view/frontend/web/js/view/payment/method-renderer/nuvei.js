@@ -13,7 +13,8 @@ define(
         'ko',
         'Magento_Checkout/js/model/quote',
         'mage/translate',
-		'mage/validation'
+		'mage/validation',
+		'Magento_Ui/js/modal/confirm'
     ],
     function(
         $,
@@ -22,7 +23,8 @@ define(
         jqueryRedirect,
         ko,
         quote,
-        mage
+        mage,
+		confirmation
     ) {
         'use strict';
 
@@ -45,8 +47,6 @@ define(
 		var isCCDateEmpty		= true;
 		var isCCDateComplete	= false;
 		
-//		var scOOTotal			= 0;
-
 		var fieldsStyle	= {
 			base: {
 				iconColor			: "#c4f0ff",
@@ -79,6 +79,62 @@ define(
 			agreementsConfig	= checkoutConfig ? checkoutConfig.checkoutAgreements : {},
 			agreementsInputPath	= '.payment-method._active div.checkout-agreements input';
 		
+		$('body').on('click', '#nuvei_upos .action.delete', function() {
+			var upoId = $(this).attr('data-upo-id');
+
+			if(confirm($.mage.__('Are you sure, you want to delete this Preferred payment method?'))) {
+				$.ajax({
+                    dataType: "json",
+					type: 'post',
+                    url: self.getRemoveUpoUrl(),
+                    data: {
+						upoId: upoId
+					},
+                    cache: false,
+                    showLoader: true
+                })
+                .done(function(res) {
+					console.log(res);
+					
+                    if (res && res.error == 0) {
+                        self.apmMethods(res.apmMethods);
+                        self.upos(res.upos);
+                        
+						if (res.upos.length > 0) {
+							$('#nuvei_upos_title').show();
+						}
+						
+						if (res.apmMethods.length > 0) {
+                            //self.chosenApmMethod(res.apmMethods[0].paymentMethod);
+							$('#nuvei_apms_title').show();
+							
+							for(var i in res.apmMethods) {
+								if('cc_card' == res.apmMethods[i].paymentMethod) {
+									scData.sessionToken	= res.sessionToken;
+									
+									self.initFields();
+									break;
+								}
+							}
+                        }
+						else {
+							self.isPlaceOrderActionAllowed(false);
+						}
+                    }
+                    else {
+                        console.error(res);
+						self.isPlaceOrderActionAllowed(false);
+                    }
+
+					$('.loading-mask').css('display', 'none');
+                })
+                .fail(function(e) {
+                    console.error(e.responseText);
+					self.isPlaceOrderActionAllowed(false);
+                });
+			}
+		});
+		
 		$(function() {
 			console.log('document ready')
 			
@@ -87,8 +143,8 @@ define(
 				$('#cc_name_error_msg').hide();
 			});
 			
-			$('body').on('change', 'input[name="nuvei_apm_payment_method"]', function() {
-				console.log('change nuvei_apm_payment_method');
+			$('body').on('change', 'input[name="nuvei_payment_method"]', function() {
+				console.log('change nuvei_payment_method');
 				
 				self.scCleanCard();
 				
@@ -102,7 +158,7 @@ define(
             defaults: {
                 template				: 'Nuvei_Payments/payment/nuvei',
 				apmMethods				: [],
-				UPOs					: [],
+				upos					: [],
                 chosenApmMethod			: '',
                 countryId				: ''
             },
@@ -121,7 +177,7 @@ define(
                 self._super()
                     .observe([
 						'apmMethods',
-						'UPOs',
+						'upos',
                         'chosenApmMethod',
                         'countryId'
                     ]);
@@ -140,7 +196,6 @@ define(
                 quote.paymentMethod.subscribe(self.scPaymentMethodChange, this, 'change');
 				
 				self.getApmMethods();
-//				self.getUPOs();
 				
                 return self;
             },
@@ -188,6 +243,10 @@ define(
 				return window.checkoutConfig.payment[self.getCode()].getUpdateOrderUrl;
 			},
 			
+			getRemoveUpoUrl: function() {
+				return window.checkoutConfig.payment[self.getCode()].getRemoveUpoUrl;
+			},
+			
 			getUpdateQuotePM: function() {
                 return window.checkoutConfig.payment[self.getCode()].updateQuotePM;
             },
@@ -200,34 +259,8 @@ define(
 				return window.checkoutConfig.payment[self.getCode()].checkoutLogoUrl
 			},
 			
-			getUPOs: function() {
-				console.log('getUPOs()');
-				
-				if('nuvei' != self.scPaymentMethod) {
-					console.log('getUPOs() - slected payment method is not Nuvei');
-					return;
-				}
-				
-				if(
-					self.apmMethods.length == 0
-					|| window.checkoutConfig.payment[self.getCode()].useUPOs == 0
-				) {
-					return;
-				}
-				
-				$.ajax({
-                    dataType	: "json",
-                    url			: self.getUPOsUrl(),
-					cache		: false,
-                    showLoader	: true,
-                    data		: { apms: JSON.stringify(self.apmMethods) }
-                })
-					.done(function(resp) {
-						console.log(resp);
-					})
-					.fail(function(e) {
-						console.error(e.responseText);
-					});
+			removeUpo: function(_upoId) {
+				console.log('removeUpo', _upoId);
 			},
 			
             getApmMethods: function(billingAddress) {
@@ -253,14 +286,19 @@ define(
 					
                     if (res && res.error == 0) {
                         self.apmMethods(res.apmMethods);
+                        self.upos(res.upos);
                         
+						if (res.upos.length > 0) {
+							$('#nuvei_upos_title').show();
+						}
+						
 						if (res.apmMethods.length > 0) {
-                            self.chosenApmMethod(res.apmMethods[0].paymentMethod);
+                            //self.chosenApmMethod(res.apmMethods[0].paymentMethod);
+							$('#nuvei_apms_title').show();
 							
 							for(var i in res.apmMethods) {
 								if('cc_card' == res.apmMethods[i].paymentMethod) {
 									scData.sessionToken	= res.sessionToken;
-//									scOOTotal			= res.ooAmount;
 									
 									self.initFields();
 									break;
@@ -412,7 +450,7 @@ define(
 								if(!alert($.mage.__(respError))) {
 									self.scCleanCard();
 									self.getApmMethods();
-									self.getUPOs();
+//									self.getUPOs();
 									$('body').trigger('processStop');
 									
 									return;
@@ -716,7 +754,6 @@ define(
 				
 				self.scCleanCard();
 				self.getApmMethods(JSON.stringify(quote.billingAddress()));
-//				self.getUPOs();
 			},
 			
 			scTotalsChange: function() {
@@ -734,7 +771,6 @@ define(
 				
 				self.scCleanCard();
 				self.getApmMethods();
-//				self.getUPOs();
 			},
 			
 			scPaymentMethodChange: function() {
@@ -758,7 +794,7 @@ define(
 //							self.getUPOs();
 						}
 						
-						if(jQuery('input[name="nuvei_apm_payment_method"]:checked').val() == 'cc_card') {
+						if(jQuery('input[name="nuvei_payment_method"]:checked').val() == 'cc_card') {
 							self.initFields();
 						}
 					}

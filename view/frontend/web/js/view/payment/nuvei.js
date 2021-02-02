@@ -12,12 +12,10 @@ define(
     function (Component, rendererList) {
         'use strict';
         
-        rendererList.push(
-            {
-                type: 'nuvei',
-                component: 'Nuvei_Payments/js/view/payment/method-renderer/nuvei'
-            }
-        );
+        rendererList.push({
+			type: 'nuvei',
+			component: 'Nuvei_Payments/js/view/payment/method-renderer/nuvei'
+		});
 
         return Component.extend({});
     }

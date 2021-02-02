@@ -26,11 +26,6 @@ class ConfigProvider extends CcGenericConfigProvider
     private $customerSession;
 
     /**
-     * @var PaymentTokenManagementInterface
-     */
-//    private $paymentTokenManagement;
-
-    /**
      * @var UrlInterface
      */
     private $urlBuilder;
@@ -71,14 +66,14 @@ class ConfigProvider extends CcGenericConfigProvider
         \Magento\Checkout\Model\Cart $cart,
 		\Magento\Framework\View\Asset\Repository $assetRepo
     ) {
-        $this->moduleConfig                = $moduleConfig;
-        $this->customerSession            = $customerSession;
-        $this->urlBuilder                = $urlBuilder;
-        $this->requestFactory            = $requestFactory;
-        $this->storeManager                = $storeManager;
-        $this->scopeConfig                = $scopeConfig;
-        $this->cart                        = $cart;
-        $this->assetRepo                        = $assetRepo;
+        $this->moduleConfig     = $moduleConfig;
+        $this->customerSession	= $customerSession;
+        $this->urlBuilder       = $urlBuilder;
+        $this->requestFactory   = $requestFactory;
+        $this->storeManager     = $storeManager;
+        $this->scopeConfig      = $scopeConfig;
+        $this->cart             = $cart;
+        $this->assetRepo        = $assetRepo;
 
         $methodCodes = array_merge_recursive(
             $methodCodes,
@@ -120,6 +115,7 @@ class ConfigProvider extends CcGenericConfigProvider
 					'getUpdateOrderUrl'				=> $this->urlBuilder->getUrl('nuvei_payments/payment/OpenOrder'),
                     'updateQuotePM'					=> $this->urlBuilder->getUrl('nuvei_payments/payment/UpdateQuotePaymentMethod'),
                     'useUPOs'						=> $this->moduleConfig->useUPOs(),
+                    'getRemoveUpoUrl'				=> $this->moduleConfig->getRemoveUpoUrl('nuvei_payments/payment/DeleteUpo'),
 					'checkoutLogoUrl'				=> $this->assetRepo->getUrl("Nuvei_Payments::images/nuvei.png"),
                     // we need this for the WebSDK
                     'merchantSiteId'                => $this->moduleConfig->getMerchantSiteId(),

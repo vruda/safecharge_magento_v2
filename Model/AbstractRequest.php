@@ -34,6 +34,7 @@ abstract class AbstractRequest extends AbstractApi
     const PAYMENT_APM_METHOD                    = 'paymentAPM';
     const GET_MERCHANT_PAYMENT_METHODS_METHOD   = 'getMerchantPaymentMethods';
     const GET_UPOS_METHOD						= 'getUserUPOs';
+    const DELETE_UPOS_METHOD					= 'deleteUPO';
     const GET_MERCHANT_PAYMENT_PLANS_METHOD     = 'getPlansList';
 	const CREATE_SUBSCRIPTION_METHOD			= 'createSubscription';
 

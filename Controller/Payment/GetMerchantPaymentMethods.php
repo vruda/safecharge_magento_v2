@@ -99,9 +99,21 @@ class GetMerchantPaymentMethods extends Action
 					foreach($apmMethodsData['apmMethods'] as $apm_data) {
 						if ($apm_data['paymentMethod'] === $upo_data['paymentMethodName']) {
 							
-							$upo_data['logoURL'] = !empty($apm_data['logoURL']) ? $apm_data['logoURL'] : '';
-							$upo_data['name']    = !empty($apm_data['paymentMethodDisplayName'][0]['message'])
+							$upo_data['logoURL']	= !empty($apm_data['logoURL']) ? $apm_data['logoURL'] : '';
+							$upo_data['name']		= !empty($apm_data['paymentMethodDisplayName'][0]['message'])
 								? $apm_data['paymentMethodDisplayName'][0]['message'] : '';
+							
+							$label = '';
+							if ($upo_data['paymentMethodName'] == 'cc_card') {
+								if(!empty($upo_data['upoData']['ccCardNumber'])) {
+									$label = $upo_data['upoData']['ccCardNumber'];
+								}
+							}
+							elseif (!empty($upo_data['upoName'])) {
+								$label = $upo_data['upoName'];
+							}
+							
+							$upo_data['store_label'] = $label;
 
 							$upos[] = $upo_data;
 							break;

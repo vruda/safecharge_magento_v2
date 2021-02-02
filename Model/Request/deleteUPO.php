@@ -6,14 +6,13 @@ use Nuvei\Payments\Model\AbstractRequest;
 use Nuvei\Payments\Model\AbstractResponse;
 use Nuvei\Payments\Model\RequestInterface;
 
-/**
- * Nuvei Payments get user payment options request model.
- */
-class getUserUPOs extends AbstractRequest implements RequestInterface
+class deleteUPO extends AbstractRequest implements RequestInterface
 {
 	protected $config;
-    
-    /**
+	
+	private $upo_id;
+	
+	/**
      * @param Logger           $logger
      * @param Config           $config
      * @param Curl             $curl
@@ -34,40 +33,27 @@ class getUserUPOs extends AbstractRequest implements RequestInterface
 
         $this->config = $config;
     }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @return string
-     */
-    protected function getRequestMethod()
-    {
-        return self::GET_UPOS_METHOD;
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @return string
-     */
-    protected function getResponseHandlerType()
-    {
-        return AbstractResponse::GET_UPOS_HANDLER;
-    }
-
-    /**
+	
+	/**
      * @return AbstractResponse
      * @throws \Magento\Framework\Exception\LocalizedException
      * @throws PaymentException
      */
     public function process()
     {
-        $this->sendRequest(false, true);
+        $this->sendRequest(true);
 
-        return $this->getResponseHandler()->process();
+//        return $this->getResponseHandler()->process();
+        return $this;
     }
 	
-    /**
+	public function setUpoId($upo_id)
+	{
+		$this->upo_id = $upo_id;
+	}
+
+
+	/**
      * {@inheritdoc}
      *
      * @return array
@@ -78,15 +64,16 @@ class getUserUPOs extends AbstractRequest implements RequestInterface
 		$email				= $billing_address['email'] ?: $this->config->getUserEmail(true);
 		
         $params = [
-            'userTokenId' => $email, // logged user email
+            'userTokenId'			=> $email, // logged user email
+            'userPaymentOptionId'	=> $this->upo_id,
         ];
 
         $params = array_merge_recursive(parent::getParams(), $params);
         
         return $params;
     }
-
-    /**
+	
+	/**
      * {@inheritdoc}
      *
      * @return array
@@ -98,7 +85,28 @@ class getUserUPOs extends AbstractRequest implements RequestInterface
             'merchantSiteId',
             'userTokenId',
             'clientRequestId',
+            'userPaymentOptionId',
             'timeStamp',
         ];
+    }
+	
+	/**
+     * {@inheritdoc}
+     *
+     * @return string
+     */
+    protected function getRequestMethod()
+    {
+        return self::DELETE_UPOS_METHOD;
+    }
+	
+	/**
+     * {@inheritdoc}
+     *
+     * @return string
+     */
+    protected function getResponseHandlerType()
+    {
+        return AbstractResponse::GET_DELETE_UPOS_HANDLER;
     }
 }

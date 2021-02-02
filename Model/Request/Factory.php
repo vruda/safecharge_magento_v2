@@ -25,6 +25,7 @@ class Factory
         AbstractRequest::PAYMENT_APM_METHOD                     => \Nuvei\Payments\Model\Request\PaymentApm::class,
         AbstractRequest::GET_MERCHANT_PAYMENT_METHODS_METHOD	=> \Nuvei\Payments\Model\Request\GetMerchantPaymentMethods::class,
         AbstractRequest::GET_UPOS_METHOD						=> \Nuvei\Payments\Model\Request\getUserUPOs::class,
+        AbstractRequest::DELETE_UPOS_METHOD						=> \Nuvei\Payments\Model\Request\deleteUPO::class,
         AbstractRequest::GET_MERCHANT_PAYMENT_PLANS_METHOD      => \Nuvei\Payments\Model\Request\GetPlansList::class,
         AbstractRequest::CREATE_SUBSCRIPTION_METHOD				=> \Nuvei\Payments\Model\Request\CreateSubscription::class,
     ];
