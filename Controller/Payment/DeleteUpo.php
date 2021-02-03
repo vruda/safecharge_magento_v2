@@ -64,17 +64,14 @@ class DeleteUpo extends Action
         }
 		
 		try {
-			$request	= $this->requestFactory->create(AbstractRequest::GET_UPOS_METHOD);
+			$request	= $this->requestFactory->create(AbstractRequest::DELETE_UPOS_METHOD);
 			$resp		= $request
 				->setUpoId($this->getRequest()->getParam('upoId'))
 				->process();
-			
-			$this->moduleConfig->createLog($resp, 'delete upo controller resp');
-
 		} catch (Exception $ex) {
-			return $result->setData(["error" => 1]);
+			return $result->setData(["success" => 0]);
 		}
 		
-		return $result->setData(["error" => 0]);
+		return $result->setData(["success" => $resp === 'success' ? 1 : 0]);
 	}
 }

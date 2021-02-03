@@ -76,13 +76,18 @@
 					<span class="minicart-items">
 						<span class="secondary">
 							<a href="#" data-bind="attr: {
-								title: $t('Remove item'),
-								'data-upo-id': $data.userPaymentOptionId
-							}" class="action delete">
+											title: $t('Remove item'),
+											'data-upo-id': $data.userPaymentOptionId
+										}" 
+										class="action delete" 
+										click="function(data, event) { $parent.removeUpo($data.userPaymentOptionId); }">
+								
 								<span data-bind="i18n: 'Remove'"></span>
 							</a>
 						</span>
 					</span>
+					
+					
                 </label>
 			</div>
 		</div>

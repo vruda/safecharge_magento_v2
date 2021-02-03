@@ -79,61 +79,11 @@ define(
 			agreementsConfig	= checkoutConfig ? checkoutConfig.checkoutAgreements : {},
 			agreementsInputPath	= '.payment-method._active div.checkout-agreements input';
 		
-		$('body').on('click', '#nuvei_upos .action.delete', function() {
-			var upoId = $(this).attr('data-upo-id');
-
-			if(confirm($.mage.__('Are you sure, you want to delete this Preferred payment method?'))) {
-				$.ajax({
-                    dataType: "json",
-					type: 'post',
-                    url: self.getRemoveUpoUrl(),
-                    data: {
-						upoId: upoId
-					},
-                    cache: false,
-                    showLoader: true
-                })
-                .done(function(res) {
-					console.log(res);
-					
-                    if (res && res.error == 0) {
-                        self.apmMethods(res.apmMethods);
-                        self.upos(res.upos);
-                        
-						if (res.upos.length > 0) {
-							$('#nuvei_upos_title').show();
-						}
-						
-						if (res.apmMethods.length > 0) {
-                            //self.chosenApmMethod(res.apmMethods[0].paymentMethod);
-							$('#nuvei_apms_title').show();
-							
-							for(var i in res.apmMethods) {
-								if('cc_card' == res.apmMethods[i].paymentMethod) {
-									scData.sessionToken	= res.sessionToken;
-									
-									self.initFields();
-									break;
-								}
-							}
-                        }
-						else {
-							self.isPlaceOrderActionAllowed(false);
-						}
-                    }
-                    else {
-                        console.error(res);
-						self.isPlaceOrderActionAllowed(false);
-                    }
-
-					$('.loading-mask').css('display', 'none');
-                })
-                .fail(function(e) {
-                    console.error(e.responseText);
-					self.isPlaceOrderActionAllowed(false);
-                });
-			}
-		});
+//		ko.applyBindings(function vm(){
+//			this.removeUpo = function(str){
+//				console.log(str)
+//			}
+//		});
 		
 		$(function() {
 			console.log('document ready')
@@ -261,6 +211,42 @@ define(
 			
 			removeUpo: function(_upoId) {
 				console.log('removeUpo', _upoId);
+				
+				if(confirm($.mage.__('Are you sure, you want to delete this Preferred payment method?'))) {
+					$.ajax({
+	                    dataType: "json",
+						type: 'post',
+	                    url: self.getRemoveUpoUrl(),
+	                    data: { upoId: _upoId },
+	                    cache: false,
+	                    showLoader: true
+	                })
+	                .done(function(res) {
+						console.log(res);
+						
+	                    if (res && res.hasOwnProperty('success') && res.success == 1) {
+							console.log('success');
+							
+							$('body')
+								.find('#nuvei_upos input#nuvei_' + _upoId)
+								.closest('.nuvei-apm-method-container')
+								.remove();
+	                    }
+	                    else {
+	                        console.error(res);
+							self.isPlaceOrderActionAllowed(false);
+	                    }
+	
+						$('.loading-mask').css('display', 'none');
+	                })
+	                .fail(function(e) {
+	                    console.error(e.responseText);
+				
+						alert($.mage.__('Unexpected error, please try again later!'));
+				
+						$('.loading-mask').css('display', 'none');
+	                });
+				} 
 			},
 			
             getApmMethods: function(billingAddress) {
@@ -293,7 +279,6 @@ define(
 						}
 						
 						if (res.apmMethods.length > 0) {
-                            //self.chosenApmMethod(res.apmMethods[0].paymentMethod);
 							$('#nuvei_apms_title').show();
 							
 							for(var i in res.apmMethods) {
@@ -450,7 +435,6 @@ define(
 								if(!alert($.mage.__(respError))) {
 									self.scCleanCard();
 									self.getApmMethods();
-//									self.getUPOs();
 									$('body').trigger('processStop');
 									
 									return;

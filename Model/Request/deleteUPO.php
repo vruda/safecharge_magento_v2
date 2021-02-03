@@ -41,15 +41,19 @@ class deleteUPO extends AbstractRequest implements RequestInterface
      */
     public function process()
     {
-        $this->sendRequest(true);
-
-//        return $this->getResponseHandler()->process();
-        return $this;
-    }
+        $resp = $this->sendRequest(true);
+		
+		if(!empty($resp['status'])) {
+			return strtolower($resp['status']);
+		}
+		
+		return 'error';
+	}
 	
 	public function setUpoId($upo_id)
 	{
 		$this->upo_id = $upo_id;
+		return $this;
 	}
 
 
