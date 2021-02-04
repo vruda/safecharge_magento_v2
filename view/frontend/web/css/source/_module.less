@@ -94,7 +94,7 @@ input#nuvei_cc_owner::placeholder {
 	top: 0;
 }
 
-#sc_card_number, #sc_card_expiry, #sc_card_cvc {
+#sc_card_number, #sc_card_expiry, #sc_card_cvc, #nuvei_upos .sc_fields div {
 	padding-top: 7px !important;
 	padding-bottom: 1px !important;
 	padding-left: 9px !important;
@@ -142,6 +142,8 @@ input#nuvei_cc_owner::placeholder {
 	margin-top: 10px !important;
 }
 
+#nuvei_save_upo_cont { display: none; }
+
 .SfcField iframe {
 	height: 24px !important;
 }
@@ -156,7 +158,7 @@ input#nuvei_cc_owner::placeholder {
 	z-index: 9999 !important;
 }
 
-#cc_error_msg, #sc_apms .sc_error {
+#cc_error_msg, #sc_apms .sc_error, #nuvei_upos .sc_error {
 	display: none;
 	border: 1px solid #cccccc !important;
 }
@@ -165,18 +167,18 @@ input#nuvei_cc_owner::placeholder {
 	text-transform: capitalize;
 }
 
-#cc_error_msg .message.error, #sc_apms .sc_error .message.error {
+#cc_error_msg .message.error, #sc_apms .sc_error .message.error, #nuvei_upos .sc_error .message.error {
 	padding: 8px 12px 8px 45px !important;
 	font-size: 15px !important;
 }
 
-#sc_apms .sc_error {
+#sc_apms .sc_error,  #nuvei_upos .sc_error{
 	margin-bottom: 10px !important;
 	margin-right: 5px !important;
 }
 
-#sc_apms .sc_error .message.error { padding-bottom: 11px !important; }
-#sc_apms .sc_error .message.error div { padding-top: 2px !important; }
+#sc_apms .sc_error .message.error, #nuvei_upos .sc_error .message.error { padding-bottom: 11px !important; }
+#sc_apms .sc_error .message.error div, #nuvei_upos .sc_error .message.error div { padding-top: 2px !important; }
 
 @media screen and (max-width: 880px) {
 	#sc_apms #sc_card_number_holder {
@@ -186,7 +188,6 @@ input#nuvei_cc_owner::placeholder {
 	}
 
 	#sc_date_cvv_holder {
-		/*float: none;*/
 		display: block !important;
 		width: 100% !important;
 		position: relative;

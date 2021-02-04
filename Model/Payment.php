@@ -269,9 +269,6 @@ class Payment extends Cc implements TransparentInterface
 
         $additionalData = $data->getData(PaymentInterface::KEY_ADDITIONAL_DATA);
 
-//        $ccToken = !empty($additionalData[self::KEY_CC_TOKEN])
-//            ? $additionalData[self::KEY_CC_TOKEN] : null;
-
         $chosenApmMethod = !empty($additionalData[self::KEY_CHOSEN_APM_METHOD])
             ? $additionalData[self::KEY_CHOSEN_APM_METHOD] : null;
         
@@ -279,7 +276,6 @@ class Payment extends Cc implements TransparentInterface
             ? $additionalData[self::KEY_LAST_ST] : null;
 
         $info = $this->getInfoInstance();
-//        $info->setAdditionalInformation(self::KEY_CC_TOKEN, $ccToken);
         $info->setAdditionalInformation(self::KEY_LAST_ST, $lastSessionToken);
         $info->setAdditionalInformation(self::KEY_CHOSEN_APM_METHOD, $chosenApmMethod);
 

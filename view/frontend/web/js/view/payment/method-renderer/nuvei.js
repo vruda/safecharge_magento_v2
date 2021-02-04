@@ -13,8 +13,7 @@ define(
         'ko',
         'Magento_Checkout/js/model/quote',
         'mage/translate',
-		'mage/validation',
-		'Magento_Ui/js/modal/confirm'
+		'mage/validation'
     ],
     function(
         $,
@@ -23,8 +22,7 @@ define(
         jqueryRedirect,
         ko,
         quote,
-        mage,
-		confirmation
+        mage
     ) {
         'use strict';
 
@@ -35,6 +33,7 @@ define(
 		var cardNumber			= null;
 		var cardExpiry			= null;
 		var cardCvc				= null;
+		var lastCvcHolder		= ''; // the id of the last used CVC container
 		var scFields			= null;
 		var scData				= {};
 		
@@ -79,12 +78,6 @@ define(
 			agreementsConfig	= checkoutConfig ? checkoutConfig.checkoutAgreements : {},
 			agreementsInputPath	= '.payment-method._active div.checkout-agreements input';
 		
-//		ko.applyBindings(function vm(){
-//			this.removeUpo = function(str){
-//				console.log(str)
-//			}
-//		});
-		
 		$(function() {
 			console.log('document ready')
 			
@@ -94,13 +87,26 @@ define(
 			});
 			
 			$('body').on('change', 'input[name="nuvei_payment_method"]', function() {
-				console.log('change nuvei_payment_method');
+				console.log('change nuvei_payment_method', $(this).val());
 				
+				var _self = $(this);
 				self.scCleanCard();
 				
-				if($(this).val() == 'cc_card') {
+				// CC
+				if(_self.val() == 'cc_card') {
+					lastCvcHolder = '#sc_card_cvc';
 					self.initFields();
 				}
+				// UPO CC
+				else if ('cc_card' == _self.attr('data-upo-name')) {
+					lastCvcHolder = '#sc_upo_'+ _self.val() +'_cvc';
+					self.initFields();
+				}
+			});
+			
+			$('body').on('change', '#nuvei_save_upo_cont input', function() {
+				var _self = $(this);
+				_self.val(_self.is(':checked') ? 1 : 0);
 			});
 		});
 		
@@ -110,6 +116,7 @@ define(
 				apmMethods				: [],
 				upos					: [],
                 chosenApmMethod			: '',
+                typeOfChosenPayMethod	: '',
                 countryId				: ''
             },
 			
@@ -129,6 +136,7 @@ define(
 						'apmMethods',
 						'upos',
                         'chosenApmMethod',
+                        'typeOfChosenPayMethod',
                         'countryId'
                     ]);
                     
@@ -144,6 +152,8 @@ define(
                 quote.billingAddress.subscribe(self.scBillingAddrChange, this, 'change');
                 quote.totals.subscribe(self.scTotalsChange, this, 'change');
                 quote.paymentMethod.subscribe(self.scPaymentMethodChange, this, 'change');
+				// set observer when change the payment method
+				self.chosenApmMethod.subscribe(self.setChosenApmMethod, this, 'change');
 				
 				self.getApmMethods();
 				
@@ -176,6 +186,36 @@ define(
 				
                 return pmData;
             },
+			
+			setChosenApmMethod: function() {
+				console.log('setChosenApmMethod()');
+				
+				// CC
+				if(self.chosenApmMethod() == 'cc_card') {
+					self.typeOfChosenPayMethod('cc_card');
+					$('body').find('#nuvei_save_upo_cont').show();
+				}
+				// APM
+				else if(isNaN(self.chosenApmMethod())) {
+					self.typeOfChosenPayMethod('apm');
+					$('body').find('#nuvei_save_upo_cont').show();
+				}
+				// UPOs
+				else {
+					$('body').find('#nuvei_save_upo_cont').hide();
+					
+					var selectedOption = $('body').find('#nuvei_' + self.chosenApmMethod());
+					
+					if(selectedOption.attr('data-upo-name') == 'cc_card') {
+						self.typeOfChosenPayMethod('upo_cc');
+					}
+					else {
+						self.typeOfChosenPayMethod('upo_apm');
+					}
+				}
+				
+				console.log(self.typeOfChosenPayMethod());
+			},
 
             getRedirectUrl: function() {
                 return window.checkoutConfig.payment[self.getCode()].redirectUrl;
@@ -584,9 +624,10 @@ define(
                 });
 
 				if(
-					$('#sc_card_number').html() == ''
-					&& $('#sc_card_expiry').html() == ''
-					&& $('#sc_card_cvc').html() == ''
+					( $('#sc_card_number').html() == '' || typeof $('#sc_card_number').html() == 'undefined' )
+					&& ( $('#sc_card_expiry').html() == '' || typeof $('#sc_card_expiry').html() == 'undefined' )
+					&& ( $('#sc_card_cvc').html() == '' || typeof $('#sc_card_cvc').html() == 'undefined' )
+					&& lastCvcHolder !== ''
 				) {
 					self.attachFields();
 				}
@@ -603,13 +644,15 @@ define(
 					return;
 				}
 				
-				if(null === cardNumber) {
+				// CC fields only
+				if('#sc_card_cvc' === lastCvcHolder) {
+					// CC number
 					cardNumber = scFields.create('ccNumber', {
 						classes: elementClasses
 						,style: fieldsStyle
 					});
 					cardNumber.attach('#sc_card_number');
-					
+
 					// attach events listeners
 					cardNumber.on('focus', function (e) {
 						$('#sc_card_number').css('box-shadow', '0px 0 3px 1px #00699d');
@@ -619,24 +662,24 @@ define(
 					cardNumber.on('change', function (e) {
 						$('#sc_card_number').css('box-shadow', '0px 0 3px 1px #00699d');
 						$('#cc_num_error_msg').hide();
-						
+
 						if(e.hasOwnProperty('empty')) {
 							isCCNumEmpty = e.empty;
 						}
-						
+
 						if(e.hasOwnProperty('complete')) {
 							isCCNumComplete = e.complete;
 						}
 					});
-				}
-				
-				if(null === cardExpiry) {
+					// CC number END
+					
+					// CC Expiry
 					cardExpiry = scFields.create('ccExpiration', {
 						classes: elementClasses
 						,style: fieldsStyle
 					});
 					cardExpiry.attach('#sc_card_expiry');
-					
+
 					cardExpiry.on('focus', function (e) {
 						$('#sc_card_expiry').css('box-shadow', '0px 0 3px 1px #00699d');
 						$('#cc_error_msg').hide();
@@ -645,24 +688,54 @@ define(
 					cardExpiry.on('change', function (e) {
 						$('#sc_card_expiry').css('box-shadow', '0px 0 3px 1px #00699d');
 						$('#cc_error_msg').hide();
-						
+
 						if(e.hasOwnProperty('empty')) {
 							isCCDateEmpty = e.empty;
 						}
-						
+
 						if(e.hasOwnProperty('complete')) {
 							isCCDateComplete = e.complete;
 						}
 					});
+					// // CC Expiry END
+
+					// CC CVC
+//					cardCvc = scFields.create('ccCvc', {
+//						classes: elementClasses
+//						,style: fieldsStyle
+//					});
+//					cardCvc.attach(lastCvcHolder);
+//
+//					cardCvc.on('focus', function (e) {
+//						$('#sc_card_cvc').css('box-shadow', '0px 0 3px 1px #00699d');
+//						$('#cc_error_msg').hide();
+//					});
+//
+//					cardCvc.on('change', function (e) {
+//						$('#sc_card_cvc').css('box-shadow', '0px 0 3px 1px #00699d');
+//						$('#cc_error_msg').hide();
+//
+//						if(e.hasOwnProperty('empty')) {
+//							isCVVEmpty = e.empty;
+//						}
+//
+//						if(e.hasOwnProperty('complete')) {
+//							isCVVComplete = e.complete;
+//						}
+//					});
+					// CC CVC END
+					
+//					$('body').trigger('processStop');
 				}
 				
-				if(null === cardCvc) {
+				// UPO CC
+//				else if('' !== lastCvcHolder) {
 					cardCvc = scFields.create('ccCvc', {
 						classes: elementClasses
 						,style: fieldsStyle
 					});
-					cardCvc.attach('#sc_card_cvc');
-					
+					cardCvc.attach(lastCvcHolder);
+
 					cardCvc.on('focus', function (e) {
 						$('#sc_card_cvc').css('box-shadow', '0px 0 3px 1px #00699d');
 						$('#cc_error_msg').hide();
@@ -671,18 +744,18 @@ define(
 					cardCvc.on('change', function (e) {
 						$('#sc_card_cvc').css('box-shadow', '0px 0 3px 1px #00699d');
 						$('#cc_error_msg').hide();
-						
+
 						if(e.hasOwnProperty('empty')) {
 							isCVVEmpty = e.empty;
 						}
-						
+
 						if(e.hasOwnProperty('complete')) {
 							isCVVComplete = e.complete;
 						}
 					});
-				}
-				
-				$('body').trigger('processStop');
+					
+					$('body').trigger('processStop');
+//				}
 			},
 			
 			/**
@@ -716,6 +789,10 @@ define(
 				
 				cardNumber = cardExpiry = cardCvc = null;
 				$('#sc_card_number, #sc_card_expiry, #sc_card_cvc').html('');
+				
+				if(lastCvcHolder !== '') {
+					$(lastCvcHolder).html('');
+				}
 			},
 			
 			scBillingAddrChange: function() {
