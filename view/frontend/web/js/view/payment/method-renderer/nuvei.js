@@ -193,12 +193,18 @@ define(
 				// CC
 				if(self.chosenApmMethod() == 'cc_card') {
 					self.typeOfChosenPayMethod('cc_card');
-					$('body').find('#nuvei_save_upo_cont').show();
+					
+					if(self.upos().length > 0) {
+						$('body').find('#nuvei_save_upo_cont').show();
+					}
 				}
 				// APM
 				else if(isNaN(self.chosenApmMethod())) {
 					self.typeOfChosenPayMethod('apm');
-					$('body').find('#nuvei_save_upo_cont').show();
+					
+					if(self.upos().length > 0) {
+						$('body').find('#nuvei_save_upo_cont').show();
+					}
 				}
 				// UPOs
 				else {
@@ -446,6 +452,14 @@ define(
 						paymentOption		: cardNumber,
 						webMasterId			: window.checkoutConfig.payment[self.getCode()].webMasterId,
                     };
+					
+					if (
+						self.upos().length > 0
+						&& ( self.typeOfChosenPayMethod() == 'cc_card' || self.typeOfChosenPayMethod() == 'apm' )
+						&& $('body').find('#nuvei_save_upo_cont input').val() == 1
+					) {
+						payParams.userTokenId = window.checkoutConfig.payment[self.getCode()].userTokenId;
+					}
 					
                     // create payment with WebSDK
                     sfc.createPayment(payParams, function(resp){

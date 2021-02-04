@@ -126,6 +126,7 @@ class ConfigProvider extends CcGenericConfigProvider
 //                    'currency'                      => trim($this->storeManager->getStore()->getCurrentCurrencyCode()),
                     'webMasterId'                   => $this->moduleConfig->getSourcePlatformField(),
                     'sourceApplication'             => $this->moduleConfig->getSourceApplication(),
+                    'userTokenId'					=> $this->moduleConfig->getQuoteBillingAddress()['email'],
                 ],
             ],
         ];
