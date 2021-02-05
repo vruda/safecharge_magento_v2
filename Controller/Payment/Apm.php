@@ -8,24 +8,25 @@ use Magento\Framework\App\ResponseInterface;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Nuvei\Payments\Model\AbstractRequest;
 use Nuvei\Payments\Model\Config as ModuleConfig;
-use Nuvei\Payments\Model\Logger as NuveiLogger;
-use Nuvei\Payments\Model\Redirect\Url as RedirectUrlBuilder;
+//use Nuvei\Payments\Model\Logger as NuveiLogger;
+//use Nuvei\Payments\Model\Redirect\Url as RedirectUrlBuilder;
 use Nuvei\Payments\Model\Request\Factory as RequestFactory;
 
 /**
  * Nuvei Payments paymentApm controller.
+ * Combine APMs and UPO APMs payments.
  */
 class Apm extends Action
 {
     /**
      * @var RedirectUrlBuilder
      */
-    private $redirectUrlBuilder;
+//    private $redirectUrlBuilder;
 
     /**
      * @var NuveiLogger
      */
-    private $nuveiLogger;
+//    private $nuveiLogger;
 
     /**
      * @var ModuleConfig
@@ -54,19 +55,19 @@ class Apm extends Action
      */
     public function __construct(
         Context $context,
-        RedirectUrlBuilder $redirectUrlBuilder,
-        NuveiLogger $nuveiLogger,
+//        RedirectUrlBuilder $redirectUrlBuilder,
+//        NuveiLogger $nuveiLogger,
         ModuleConfig $moduleConfig,
         JsonFactory $jsonResultFactory,
         RequestFactory $requestFactory
     ) {
         parent::__construct($context);
 
-        $this->redirectUrlBuilder    = $redirectUrlBuilder;
-        $this->nuveiLogger        = $nuveiLogger;
-        $this->moduleConfig            = $moduleConfig;
+//        $this->redirectUrlBuilder	= $redirectUrlBuilder;
+//        $this->nuveiLogger			= $nuveiLogger;
+        $this->moduleConfig         = $moduleConfig;
         $this->jsonResultFactory    = $jsonResultFactory;
-        $this->requestFactory        = $requestFactory;
+        $this->requestFactory       = $requestFactory;
     }
 
     /**
@@ -88,37 +89,39 @@ class Apm extends Action
             $this->getRequest()->getPostValue()
         );
 
-        $this->moduleConfig->createLog($params, 'Apm Controller - Request:');
+        $this->moduleConfig->createLog($params, 'Apm Controller incoming params:');
 
         try {
             $request = $this->requestFactory->create(AbstractRequest::PAYMENT_APM_METHOD);
-            $request->setPaymentMethod($params["chosen_apm_method"]);
+			
+            $response = $request
+				->setPaymentMethod($params["chosen_apm_method"] ?: '')
+                ->setPaymentMethodFields(empty($params["apm_method_fields"]) ? '' : $params["apm_method_fields"])
+                ->setSavePaymentMethod($params["save_payment_method"] ?: 0)
+				->process();
             
-            if (!empty($params["apm_method_fields"])) {
-                $request->setPaymentMethodFields($params["apm_method_fields"]);
-            }
-            
-            $response = $request->process();
-            
-            $redirectUrl    = $response->getRedirectUrl();
-            $status            = $response->getResponseStatus();
-        } catch (PaymentException $e) {
+//            $redirectUrl	= $response->getRedirectUrl();
+//            $status         = $response->getResponseStatus();
+        }
+		catch (PaymentException $e) {
             $this->moduleConfig->createLog(
-                $e->getMessage() . "\n" . $e->getTraceAsString(),
-                'Apm Controller - Error:'
+                [$e->getMessage(), $e->getTraceAsString()],
+                'Apm Controller - Exception:'
             );
             
-                  return $result->setData([
-                      "error" => 1,
-                      "redirectUrl" => null,
-                      "message" => $e->getMessage()
-                  ]);
+			return $result->setData([
+				"error"		=> 1,
+				"redirectUrl"	=> null,
+				"message"		=> $e->getMessage()
+			]);
         }
         
         return $result->setData([
-            "error" => 0,
-            "redirectUrl" => $redirectUrl,
-            "message" => $status
+            "error"			=> 0,
+            "redirectUrl"	=> $response['redirectUrl'],
+//            "redirectUrl"	=> $redirectUrl,
+//            "message"		=> $status
+            "message"		=> $response['status']
         ]);
     }
 }

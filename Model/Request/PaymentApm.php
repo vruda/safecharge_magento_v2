@@ -3,7 +3,6 @@
 namespace Nuvei\Payments\Model\Request;
 
 use Magento\Checkout\Model\Session as CheckoutSession;
-use Magento\Quote\Model\Quote;
 use Nuvei\Payments\Lib\Http\Client\Curl;
 use Nuvei\Payments\Model\AbstractRequest;
 use Nuvei\Payments\Model\AbstractResponse;
@@ -18,17 +17,6 @@ use Nuvei\Payments\Model\Response\Factory as ResponseFactory;
  */
 class PaymentApm extends AbstractRequest implements RequestInterface
 {
-
-    /**
-     * @var string|null
-     */
-    protected $paymentMethod;
-    
-    /**
-     * @var array|null
-     */
-    protected $paymentMethodFields;
-
     /**
      * @var RequestFactory
      */
@@ -38,6 +26,10 @@ class PaymentApm extends AbstractRequest implements RequestInterface
      * @var CheckoutSession
      */
     private $checkoutSession;
+	
+	private $paymentMethod;
+    private $paymentMethodFields;
+    private $savePaymentMethod;
 
     /**
      * @param Config           $config
@@ -64,6 +56,48 @@ class PaymentApm extends AbstractRequest implements RequestInterface
         $this->requestFactory    = $requestFactory;
         $this->checkoutSession    = $checkoutSession;
     }
+	
+	public function process()
+    {
+        $resp = $this->sendRequest(true);
+		
+		$transactionStatus = '';
+		$return = [
+			'status' => $resp['status']
+		];
+		
+		$this->config->createLog($resp);
+		
+        if (!empty($resp['transactionStatus'])) {
+            $transactionStatus = (string) $resp['transactionStatus'];
+        }
+        
+        if (!empty($resp['redirectURL'])) {
+            $return['redirectUrl'] = (string) $resp['redirectURL'];
+        }
+		elseif(!empty($resp['paymentOption']['redirectUrl'])) {
+			$return['redirectUrl'] = (string) $resp['paymentOption']['redirectUrl'];
+		}
+		else {
+            switch ($transactionStatus) {
+                case 'APPROVED':
+                    $return['redirectUrl'] = $this->config->getCallbackSuccessUrl();
+                    break;
+                
+                case 'PENDING':
+                    $return['redirectUrl'] = $this->config->getCallbackPendingUrl();
+                    break;
+                
+                case 'DECLINED':
+                case 'ERROR':
+                default:
+                    $return['redirectUrl'] = $this->config->getCallbackErrorUrl();
+                    break;
+            }
+        }
+		
+		return $return;
+	}
 
     /**
      * @param string $paymentMethod
@@ -84,21 +118,11 @@ class PaymentApm extends AbstractRequest implements RequestInterface
         $this->paymentMethodFields = $paymentMethodFields;
         return $this;
     }
-
-    /**
-     * @return string
-     */
-    public function getPaymentMethod()
+	
+    public function setSavePaymentMethod($savePaymentMethod)
     {
-        return $this->paymentMethod;
-    }
-    
-    /**
-     * @return string
-     */
-    public function getPaymentMethodFields()
-    {
-        return $this->paymentMethodFields;
+        $this->savePaymentMethod = $savePaymentMethod;
+        return $this;
     }
 
     /**
@@ -108,7 +132,7 @@ class PaymentApm extends AbstractRequest implements RequestInterface
      */
     protected function getRequestMethod()
     {
-        return self::PAYMENT_APM_METHOD;
+        return is_numeric($this->paymentMethod) ? self::PAYMENT_UPO_APM_METHOD : self::PAYMENT_APM_METHOD;
     }
 
     /**
@@ -140,7 +164,8 @@ class PaymentApm extends AbstractRequest implements RequestInterface
         $reservedOrderId = $quotePayment->getAdditionalInformation(Payment::TRANSACTION_ORDER_ID)
             ?: $this->config->getReservedOrderId();
 		
-		$order_data = $quotePayment->getAdditionalInformation(Payment::CREATE_ORDER_DATA);
+		$order_data			= $quotePayment->getAdditionalInformation(Payment::CREATE_ORDER_DATA);
+		$billing_address	= $this->config->getQuoteBillingAddress();
 		
 		if (empty($order_data) || empty($order_data['sessionToken'])) {
 			$msg = 'PaymentApm Error - missing Session Token.';
@@ -151,15 +176,12 @@ class PaymentApm extends AbstractRequest implements RequestInterface
         }
 		
 		$this->config->createLog($order_data, 'PaymentAPM $order_data');
-		$this->config->createLog($_POST, 'PaymentAPM $_POST');
 		
         $params = array_merge_recursive(
             $this->getQuoteData($quote),
             [
                 'sessionToken'          => $order_data['sessionToken'],
                 'amount'                => (float)$quote->getGrandTotal(),
-//                'merchant_unique_id'    => $reservedOrderId,
-//				'clientUniqueId'		=> $this->config->setClientUniqueId($reservedOrderId),
                 
 				'urlDetails'            => [
                     'successUrl'        => $this->config->getCallbackSuccessUrl(),
@@ -169,17 +191,25 @@ class PaymentApm extends AbstractRequest implements RequestInterface
                     'notificationUrl'    => $this->config->getCallbackDmnUrl($reservedOrderId),
                 ],
                 
-				'paymentMethod'            => $this->getPaymentMethod(),
+				'paymentMethod'            => $this->paymentMethod,
             ]
         );
 		
 		$params['clientUniqueId'] = $this->config->setClientUniqueId($reservedOrderId);
 		
-        $pmFields = $this->getPaymentMethodFields();
-        
-        if (null !== $pmFields) {
-            $params['userAccountDetails'] = $pmFields;
-        }
+		// UPO APM
+		if(is_numeric($this->paymentMethod)) {
+			$params['paymentOption']['userPaymentOptionId'] = $this->paymentMethod;
+			$params['userTokenId'] = $billing_address['email'];
+		}
+		elseif(!empty($this->paymentMethodFields)) {
+			$params['userAccountDetails'] = $this->paymentMethodFields;
+		}
+		
+		// APM
+		if(intval($this->savePaymentMethod) === 1) {
+			$params['userTokenId'] = $billing_address['email'];
+		}
 
         $params = array_merge_recursive($params, parent::getParams());
 

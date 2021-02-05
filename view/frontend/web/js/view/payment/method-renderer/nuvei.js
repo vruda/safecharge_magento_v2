@@ -392,6 +392,12 @@ define(
 			validateOrderData: function() {
 				console.log('validateOrderData()');
 				
+				var payParams = {
+					sessionToken	: scData.sessionToken,
+					webMasterId		: window.checkoutConfig.payment[self.getCode()].webMasterId,
+				};
+				
+				// CC
 				if(self.chosenApmMethod() === 'cc_card') {
 					if($('#nuvei_cc_owner').val() == '') {
 						$('#nuvei_cc_owner').css('box-shadow', 'red 0px 0px 3px 1px');
@@ -433,7 +439,7 @@ define(
 						return;
 					}
 					
-					if(! self.validate()) {
+					if(!self.validate()) {
 						$('body').trigger('processStop');
 						return;
 					}
@@ -445,13 +451,8 @@ define(
 						return;
 					}
 					
-					// we use variable just for debug
-					var payParams = {
-						sessionToken		: scData.sessionToken,
-						cardHolderName		: document.getElementById('nuvei_cc_owner').value,
-						paymentOption		: cardNumber,
-						webMasterId			: window.checkoutConfig.payment[self.getCode()].webMasterId,
-                    };
+					payParams.paymentOption		= cardNumber;
+					payParams.cardHolderName	= document.getElementById('nuvei_cc_owner').value;
 					
 					if (
 						self.upos().length > 0
@@ -462,50 +463,89 @@ define(
 					}
 					
                     // create payment with WebSDK
-                    sfc.createPayment(payParams, function(resp){
-						console.log('create payment');
-						
-                        if(typeof resp != 'undefined' && resp.hasOwnProperty('result')) {
-                            if(resp.result == 'APPROVED' && resp.transactionId != 'undefined') {
-                                self.continueWithOrder(resp.transactionId);
-                            }
-                            else if(resp.result == 'DECLINED') {
-								if(!alert($.mage.__('Your Payment was DECLINED. Please try another payment method!'))) {
-									$('body').trigger('processStop');
-								}
-                            }
-                            else {
-                                var respError = 'Error with your Payment. Please try again later!';
-								
-								if(resp.hasOwnProperty('errorDescription') && '' != resp.errorDescription) {
-									respError = resp.errorDescription;
-								}
-								else if(resp.hasOwnProperty('reason') && '' != resp.reason) {
-									respError = resp.reason;
-								}
-								
-								console.error(resp);
-								
-								if(!alert($.mage.__(respError))) {
-									self.scCleanCard();
-									self.getApmMethods();
-									$('body').trigger('processStop');
-									
-									return;
-								}
-                            }
-                        }
-                        else {
-							if(!alert($.mage.__('Unexpected error, please try again later!'))) {
-								window.location.reload();
-								return;
-							}
-                        }
-                    });
+                    self.createPayment(payParams);
                 }
+				// in case of CC UPO
+				else if(self.typeOfChosenPayMethod() === 'upo_cc') {
+					// checks
+					if( (!isCVVEmpty && !isCVVComplete) || isCVVEmpty ) {
+						$('#sc_upo_'+ self.chosenApmMethod() +'_cvc').css('box-shadow', 'red 0px 0px 3px 1px');
+						
+						$('#sc_upo_'+ self.chosenApmMethod() +'_cvc')
+							.closest('.nuvei-apm-method-container')
+							.find('fieldset .sc_error')
+							.show();
+						
+						document.getElementById('sc_upo_'+ self.chosenApmMethod() +'_cvc').scrollIntoView();
+						$('body').trigger('processStop');
+						
+						return;
+					}
+					
+					if(!self.validate()) {
+						$('body').trigger('processStop');
+						return;
+					}
+					// checks END
+					
+					payParams.userTokenId	= window.checkoutConfig.payment[self.getCode()].userTokenId;
+					payParams.paymentOption	= {
+						userPaymentOptionId: self.chosenApmMethod(),
+						card: {
+							CVV: cardCvc
+						}
+					};
+console.log(payParams);
+					// create payment with WebSDK
+                    self.createPayment(payParams);
+				}
                 else {
                     self.continueWithOrder();
                 }
+			},
+			
+			// a repeating part of the code
+			createPayment: function(payParams) {
+				sfc.createPayment(payParams, function(resp){
+					console.log('create payment');
+
+					if(typeof resp != 'undefined' && resp.hasOwnProperty('result')) {
+						if(resp.result == 'APPROVED' && resp.transactionId != 'undefined') {
+							self.continueWithOrder(resp.transactionId);
+						}
+						else if(resp.result == 'DECLINED') {
+							if(!alert($.mage.__('Your Payment was DECLINED. Please try another payment method!'))) {
+								$('body').trigger('processStop');
+							}
+						}
+						else {
+							var respError = 'Error with your Payment. Please try again later!';
+
+							if(resp.hasOwnProperty('errorDescription') && '' != resp.errorDescription) {
+								respError = resp.errorDescription;
+							}
+							else if(resp.hasOwnProperty('reason') && '' != resp.reason) {
+								respError = resp.reason;
+							}
+
+							console.error(resp);
+
+							if(!alert($.mage.__(respError))) {
+								self.scCleanCard();
+								self.getApmMethods();
+								$('body').trigger('processStop');
+
+								return;
+							}
+						}
+					}
+					else {
+						if(!alert($.mage.__('Unexpected error, please try again later!'))) {
+							window.location.reload();
+							return;
+						}
+					}
+				});
 			},
 			
             continueWithOrder: function(transactionId) {
@@ -514,26 +554,39 @@ define(
                 if (self.validate()) {
                     self.isPlaceOrderActionAllowed(false);
 
-                    if (self.chosenApmMethod() !== 'cc_card') {
-						var apmFields = {};
-						var choosenMethod = self.chosenApmMethod();
+					// APM payments
+//                    if (self.chosenApmMethod() !== 'cc_card') {
+                    if (
+						self.typeOfChosenPayMethod() === 'apm'
+						|| self.typeOfChosenPayMethod() === 'upo_apm'
+					) {
+						console.log('continueWithOrder() apm or upo_apm');
+				
+						var choosenMethod	= self.chosenApmMethod();
+						var postData		= {
+							chosen_apm_method	: choosenMethod,
+							apm_method_fields	: {},
+							save_payment_method	: $('body').find('#nuvei_save_upo_cont input').val()
+						};
 
-						$('.fields-' + choosenMethod + ' input').each(function(){
-							var _slef = $(this);
-							apmFields[_slef.attr('name')] = _slef.val();
-						});
+						// for APMs only
+						if(self.typeOfChosenPayMethod() === 'apm') {
+							$('.fields-' + choosenMethod + ' input').each(function(){
+								var _slef = $(this);
+								postData.apm_method_fields[_slef.attr('name')] = _slef.val();
+							});
+						}
 						
                         self.selectPaymentMethod();
+						
                         setPaymentMethodAction(self.messageContainer)
 							.done(function() {
 									$('body').trigger('processStart');
 
 									$.ajax({
 										dataType: "json",
-										data: {
-											chosen_apm_method	: choosenMethod,
-											apm_method_fields	: apmFields
-										},
+										type: 'post',
+										data: postData,
 										url: self.getPaymentApmUrl(),
 										cache: false
 									})
@@ -567,8 +620,10 @@ define(
                     };
 
                     // in case we use WebSDK
-                    if(self.chosenApmMethod() === 'cc_card' && transactionId != 'undefined') {
-                        ajaxData.url += '?method=cc_card&transactionId=' + transactionId;
+//                    if(self.chosenApmMethod() === 'cc_card' && transactionId != 'undefined') {
+                    if(self.typeOfChosenPayMethod() !== 'apm' && transactionId != 'undefined') {
+//                        ajaxData.url += '?method=cc_card&transactionId=' + transactionId;
+                        ajaxData.url += '?method=web_sdk&transactionId=' + transactionId;
                     }
 
                     self.selectPaymentMethod();
@@ -579,7 +634,8 @@ define(
 								.done(function(postData) {
 									if (postData) {
 										if(
-											self.chosenApmMethod() === 'cc_card'
+//											self.chosenApmMethod() === 'cc_card'
+											self.typeOfChosenPayMethod() !== 'apm'
 											&& typeof transactionId != 'undefined'
 											&& !isNaN(transactionId)
 										) {
@@ -648,8 +704,9 @@ define(
             },
 			
 			attachFields: function() {
-				console.log('attachFields()')
-				console.log('scFields', scFields)
+				console.log('attachFields()');
+				console.log('scFields', scFields);
+				console.log('lastCvcHolder', lastCvcHolder);
 				
 				if(null === scFields) {
 					console.log('scFields is null');
@@ -714,36 +771,6 @@ define(
 					// // CC Expiry END
 
 					// CC CVC
-//					cardCvc = scFields.create('ccCvc', {
-//						classes: elementClasses
-//						,style: fieldsStyle
-//					});
-//					cardCvc.attach(lastCvcHolder);
-//
-//					cardCvc.on('focus', function (e) {
-//						$('#sc_card_cvc').css('box-shadow', '0px 0 3px 1px #00699d');
-//						$('#cc_error_msg').hide();
-//					});
-//
-//					cardCvc.on('change', function (e) {
-//						$('#sc_card_cvc').css('box-shadow', '0px 0 3px 1px #00699d');
-//						$('#cc_error_msg').hide();
-//
-//						if(e.hasOwnProperty('empty')) {
-//							isCVVEmpty = e.empty;
-//						}
-//
-//						if(e.hasOwnProperty('complete')) {
-//							isCVVComplete = e.complete;
-//						}
-//					});
-					// CC CVC END
-					
-//					$('body').trigger('processStop');
-				}
-				
-				// UPO CC
-//				else if('' !== lastCvcHolder) {
 					cardCvc = scFields.create('ccCvc', {
 						classes: elementClasses
 						,style: fieldsStyle
@@ -767,9 +794,46 @@ define(
 							isCVVComplete = e.complete;
 						}
 					});
+					// CC CVC END
 					
 					$('body').trigger('processStop');
-//				}
+				}
+				// UPO CC
+				else if('' !== lastCvcHolder) {
+					cardCvc = scFields.create('ccCvc', {
+						classes: elementClasses
+						,style: fieldsStyle
+					});
+					cardCvc.attach(lastCvcHolder);
+
+					cardCvc.on('focus', function (e) {
+						$('#sc_upo_'+ self.chosenApmMethod() +'_cvc').css('box-shadow', '0px 0 3px 1px #00699d');
+						
+						$('#sc_upo_'+ self.chosenApmMethod() +'_cvc')
+							.closest('.nuvei-apm-method-container')
+							.find('fieldset .sc_error')
+							.hide();
+					});
+
+					cardCvc.on('change', function (e) {
+						$('#sc_upo_'+ self.chosenApmMethod() +'_cvc').css('box-shadow', '0px 0 3px 1px #00699d');
+						
+						$('#sc_upo_'+ self.chosenApmMethod() +'_cvc')
+							.closest('.nuvei-apm-method-container')
+							.find('fieldset .sc_error')
+							.hide();
+
+						if(e.hasOwnProperty('empty')) {
+							isCVVEmpty = e.empty;
+						}
+
+						if(e.hasOwnProperty('complete')) {
+							isCVVComplete = e.complete;
+						}
+					});
+					
+					$('body').trigger('processStop');
+				}
 			},
 			
 			/**
@@ -810,7 +874,8 @@ define(
 			},
 			
 			scBillingAddrChange: function() {
-				console.log('scBillingAddrChange()', quote.billingAddress());
+				console.log('scBillingAddrChange()');
+//				console.log('scBillingAddrChange()', quote.billingAddress());
 				
 				if(quote.billingAddress() == null) {
 					console.log('scBillingAddrChange() - the BillingAddr is null. Stop here.');
@@ -822,7 +887,7 @@ define(
 					return;
 				}
 				
-				console.log('scBillingAddrChange()', JSON.stringify(quote.billingAddress()));
+//				console.log('scBillingAddrChange()', JSON.stringify(quote.billingAddress()));
 				
 				console.log('scBillingAddrChange() - the country was changed to', quote.billingAddress().countryId);
 				self.scBillingCountry = quote.billingAddress().countryId;
@@ -849,7 +914,8 @@ define(
 			},
 			
 			scPaymentMethodChange: function() {
-				console.log('scPaymentMethodChange()', quote.paymentMethod);
+//				console.log('scPaymentMethodChange()', quote.paymentMethod);
+				console.log('scPaymentMethodChange()');
 				
 				if(
 					quote.paymentMethod._latestValue != null
@@ -866,7 +932,6 @@ define(
 						
 						if(null == sfc) {
 							self.getApmMethods();
-//							self.getUPOs();
 						}
 						
 						if(jQuery('input[name="nuvei_payment_method"]:checked').val() == 'cc_card') {
@@ -881,8 +946,8 @@ define(
 			
 			scUpdateQuotePM: function() {
 				console.log('scUpdateQuotePM()');
-				console.log('self.scPaymentMethod', self.scPaymentMethod);
-				console.log('quote.paymentMethod._latestValue.method', quote.paymentMethod._latestValue.method);
+//				console.log('self.scPaymentMethod', self.scPaymentMethod);
+//				console.log('quote.paymentMethod._latestValue.method', quote.paymentMethod._latestValue.method);
 				
 				var scAjaxQuoteUpdateParams = {
 					dataType	: "json",

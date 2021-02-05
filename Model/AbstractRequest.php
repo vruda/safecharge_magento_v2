@@ -32,6 +32,7 @@ abstract class AbstractRequest extends AbstractApi
     const OPEN_ORDER_METHOD                     = 'openOrder';
     const UPDATE_ORDER_METHOD                   = 'updateOrder';
     const PAYMENT_APM_METHOD                    = 'paymentAPM';
+    const PAYMENT_UPO_APM_METHOD                = 'payment';
     const GET_MERCHANT_PAYMENT_METHODS_METHOD   = 'getMerchantPaymentMethods';
     const GET_UPOS_METHOD						= 'getUserUPOs';
     const DELETE_UPOS_METHOD					= 'deleteUPO';
@@ -486,64 +487,64 @@ abstract class AbstractRequest extends AbstractApi
     protected function getOrderData(Order $order)
     {
         /** @var OrderAddressInterface $billing */
-        $billing = $order->getBillingAddress();
-
-        $orderData = [
-            'userTokenId' => $order->getCustomerId() ?: $order->getCustomerEmail(),
-            'clientUniqueId' => $order->getIncrementId(),
-            'currency' => $order->getBaseCurrencyCode(),
-            'amountDetails' => [
-                'totalShipping' => (float)$order->getBaseShippingAmount(),
-                'totalHandling' => (float)0,
-                'totalDiscount' => (float)abs($order->getBaseDiscountAmount()),
-                'totalTax' => (float)$order->getBaseTaxAmount(),
-            ],
-            'items' => [],
-            'deviceDetails' => [
-                'deviceType' => 'DESKTOP',
-                'ipAddress' => $order->getRemoteIp(),
-            ],
-            'ipAddress' => $order->getRemoteIp(),
-        ];
-
-        if ($billing !== null) {
-            $state = $billing->getRegionCode();
-            if (strlen($state) > 5) {
-                $state = substr($state, 0, 2);
-            }
-            
-            $orderData['billingAddress'] = [
-                'firstName' => $billing->getFirstname(),
-                'lastName'    => $billing->getLastname(),
-                'address'    => is_array($billing->getStreet())
-                    ? implode(' ', $billing->getStreet()) : '',
-                'cell'        => '',
-                'phone'        => $billing->getTelephone(),
-                'zip'        => $billing->getPostcode(),
-                'city'        => $billing->getCity(),
-                'country'    => $billing->getCountryId(),
-                'state'        => $state,
-                'email'        => $billing->getEmail(),
-            ];
-            $orderData = array_merge($orderData, $orderData['billingAddress']);
-        }
-
-        // Add items details.
-        $orderItems = $order->getAllVisibleItems();
-        foreach ($orderItems as $orderItem) {
-            $price = (float)$orderItem->getBasePrice();
-            if (!$price) {
-                continue;
-            }
-
-            $orderData['items'][] = [
-                'name' => $orderItem->getName(),
-                'price' => $price,
-                'quantity' => (int)$orderItem->getQtyOrdered(),
-            ];
-        }
-
-        return $orderData;
+//        $billing = $order->getBillingAddress();
+//
+//        $orderData = [
+//            'userTokenId' => $order->getCustomerId() ?: $order->getCustomerEmail(),
+//            'clientUniqueId' => $order->getIncrementId(),
+//            'currency' => $order->getBaseCurrencyCode(),
+//            'amountDetails' => [
+//                'totalShipping' => (float)$order->getBaseShippingAmount(),
+//                'totalHandling' => (float)0,
+//                'totalDiscount' => (float)abs($order->getBaseDiscountAmount()),
+//                'totalTax' => (float)$order->getBaseTaxAmount(),
+//            ],
+//            'items' => [],
+//            'deviceDetails' => [
+//                'deviceType' => 'DESKTOP',
+//                'ipAddress' => $order->getRemoteIp(),
+//            ],
+//            'ipAddress' => $order->getRemoteIp(),
+//        ];
+//
+//        if ($billing !== null) {
+//            $state = $billing->getRegionCode();
+//            if (strlen($state) > 5) {
+//                $state = substr($state, 0, 2);
+//            }
+//            
+//            $orderData['billingAddress'] = [
+//                'firstName' => $billing->getFirstname(),
+//                'lastName'    => $billing->getLastname(),
+//                'address'    => is_array($billing->getStreet())
+//                    ? implode(' ', $billing->getStreet()) : '',
+//                'cell'        => '',
+//                'phone'        => $billing->getTelephone(),
+//                'zip'        => $billing->getPostcode(),
+//                'city'        => $billing->getCity(),
+//                'country'    => $billing->getCountryId(),
+//                'state'        => $state,
+//                'email'        => $billing->getEmail(),
+//            ];
+//            $orderData = array_merge($orderData, $orderData['billingAddress']);
+//        }
+//
+//        // Add items details.
+//        $orderItems = $order->getAllVisibleItems();
+//        foreach ($orderItems as $orderItem) {
+//            $price = (float)$orderItem->getBasePrice();
+//            if (!$price) {
+//                continue;
+//            }
+//
+//            $orderData['items'][] = [
+//                'name' => $orderItem->getName(),
+//                'price' => $price,
+//                'quantity' => (int)$orderItem->getQtyOrdered(),
+//            ];
+//        }
+//
+//        return $orderData;
     }
 
     /**
@@ -566,7 +567,7 @@ abstract class AbstractRequest extends AbstractApi
 
         $quoteData = [
 //            'userTokenId' => $quote->getCustomerId() ?: $quote->getCustomerEmail(),
-            'userTokenId' => $this->config->getUserEmail(),
+//            'userTokenId' => $this->config->getUserEmail(),
             'clientUniqueId' => $quote->getReservedOrderId() ?: $this->config->getReservedOrderId(),
             'currency' => $quote->getBaseCurrencyCode(),
             'amountDetails'	=> [

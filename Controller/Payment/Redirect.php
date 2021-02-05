@@ -50,13 +50,13 @@ class Redirect extends Action
     ) {
         parent::__construct($context);
 
-        $this->moduleConfig            = $moduleConfig;
+        $this->moduleConfig         = $moduleConfig;
         $this->jsonResultFactory    = $jsonResultFactory;
-        $this->request                = $request;
-        $this->dataObjectFactory    = $dataObjectFactory;
-        $this->cartManagement        = $cartManagement;
-        $this->onepageCheckout        = $onepageCheckout;
-        $this->checkoutSession        = $checkoutSession;
+        $this->request              = $request;
+        $this->dataObjectFactory	= $dataObjectFactory;
+        $this->cartManagement       = $cartManagement;
+        $this->onepageCheckout      = $onepageCheckout;
+        $this->checkoutSession      = $checkoutSession;
     }
 
     /**
@@ -79,7 +79,7 @@ class Redirect extends Action
         $postData['url'] = $this->moduleConfig->getCallbackErrorUrl();
         
         // for the WebSDK
-        if ($this->request->getParam('method') === 'cc_card' && $this->request->getParam('transactionId')) {
+        if ($this->request->getParam('method') === 'web_sdk' && $this->request->getParam('transactionId')) {
             $postData['url'] = $this->moduleConfig->getCallbackSuccessUrl();
         }
         
