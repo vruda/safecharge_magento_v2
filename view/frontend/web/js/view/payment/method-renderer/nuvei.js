@@ -194,7 +194,7 @@ define(
 				if(self.chosenApmMethod() == 'cc_card') {
 					self.typeOfChosenPayMethod('cc_card');
 					
-					if(self.upos().length > 0) {
+					if(window.checkoutConfig.payment[self.getCode()].useUPOs == 1) {
 						$('body').find('#nuvei_save_upo_cont').show();
 					}
 				}
@@ -202,12 +202,16 @@ define(
 				else if(isNaN(self.chosenApmMethod())) {
 					self.typeOfChosenPayMethod('apm');
 					
-					if(self.upos().length > 0) {
+					console.log('show checkbox');
+					
+					if(window.checkoutConfig.payment[self.getCode()].useUPOs == 1) {
 						$('body').find('#nuvei_save_upo_cont').show();
 					}
 				}
 				// UPOs
 				else {
+					console.log('hide checkbox');
+					
 					$('body').find('#nuvei_save_upo_cont').hide();
 					
 					var selectedOption = $('body').find('#nuvei_' + self.chosenApmMethod());
@@ -455,7 +459,7 @@ define(
 					payParams.cardHolderName	= document.getElementById('nuvei_cc_owner').value;
 					
 					if (
-						self.upos().length > 0
+						window.checkoutConfig.payment[self.getCode()].useUPOs == 1
 						&& ( self.typeOfChosenPayMethod() == 'cc_card' || self.typeOfChosenPayMethod() == 'apm' )
 						&& $('body').find('#nuvei_save_upo_cont input').val() == 1
 					) {
@@ -554,8 +558,7 @@ console.log(payParams);
                 if (self.validate()) {
                     self.isPlaceOrderActionAllowed(false);
 
-					// APM payments
-//                    if (self.chosenApmMethod() !== 'cc_card') {
+					// APMs and UPO APMs payments
                     if (
 						self.typeOfChosenPayMethod() === 'apm'
 						|| self.typeOfChosenPayMethod() === 'upo_apm'
@@ -565,8 +568,7 @@ console.log(payParams);
 						var choosenMethod	= self.chosenApmMethod();
 						var postData		= {
 							chosen_apm_method	: choosenMethod,
-							apm_method_fields	: {},
-							save_payment_method	: $('body').find('#nuvei_save_upo_cont input').val()
+							apm_method_fields	: {}
 						};
 
 						// for APMs only
@@ -575,6 +577,10 @@ console.log(payParams);
 								var _slef = $(this);
 								postData.apm_method_fields[_slef.attr('name')] = _slef.val();
 							});
+							
+							if(window.checkoutConfig.payment[self.getCode()].useUPOs == 1) {
+								postData.save_payment_method = $('body').find('#nuvei_save_upo_cont input').val();
+							}
 						}
 						
                         self.selectPaymentMethod();
@@ -620,9 +626,7 @@ console.log(payParams);
                     };
 
                     // in case we use WebSDK
-//                    if(self.chosenApmMethod() === 'cc_card' && transactionId != 'undefined') {
                     if(self.typeOfChosenPayMethod() !== 'apm' && transactionId != 'undefined') {
-//                        ajaxData.url += '?method=cc_card&transactionId=' + transactionId;
                         ajaxData.url += '?method=web_sdk&transactionId=' + transactionId;
                     }
 
@@ -634,7 +638,6 @@ console.log(payParams);
 								.done(function(postData) {
 									if (postData) {
 										if(
-//											self.chosenApmMethod() === 'cc_card'
 											self.typeOfChosenPayMethod() !== 'apm'
 											&& typeof transactionId != 'undefined'
 											&& !isNaN(transactionId)

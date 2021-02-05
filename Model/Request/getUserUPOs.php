@@ -62,9 +62,24 @@ class getUserUPOs extends AbstractRequest implements RequestInterface
      */
     public function process()
     {
-        $this->sendRequest(false, true);
+        $res = $this->sendRequest(true, true);
+		$pms = [];
+		
+		if(!empty($res['paymentMethods']) && is_array($res['paymentMethods'])) {
+			foreach ($res['paymentMethods'] as $k => $method) {
+				if(!empty($method['expiryDate']) && date('Ymd') > $method['expiryDate']) {
+					continue;
+				}
 
-        return $this->getResponseHandler()->process();
+				if(empty($method['upoStatus']) || $method['upoStatus'] !== 'enabled') {
+					continue;
+				}
+
+				$pms[] = $method;
+			}
+		}
+		
+		return $pms;
     }
 	
     /**
