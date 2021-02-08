@@ -499,7 +499,7 @@ define(
 							CVV: cardCvc
 						}
 					};
-console.log(payParams);
+
 					// create payment with WebSDK
                     self.createPayment(payParams);
 				}
@@ -554,6 +554,7 @@ console.log(payParams);
 			
             continueWithOrder: function(transactionId) {
 				console.log('continueWithOrder()');
+				//debugger;
 				
                 if (self.validate()) {
                     self.isPlaceOrderActionAllowed(false);

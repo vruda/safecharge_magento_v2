@@ -116,7 +116,7 @@ class ConfigProvider extends CcGenericConfigProvider
                     'updateQuotePM'					=> $this->urlBuilder->getUrl('nuvei_payments/payment/UpdateQuotePaymentMethod'),
                     'getRemoveUpoUrl'				=> $this->urlBuilder->getUrl('nuvei_payments/payment/DeleteUpo'),
 					'checkoutLogoUrl'				=> $this->assetRepo->getUrl("Nuvei_Payments::images/nuvei.png"),
-					'useUPOs'						=> $this->moduleConfig->useUPOs(),
+					'useUPOs'						=> $this->moduleConfig->canUseUpos(),
                     // we need this for the WebSDK
                     'merchantSiteId'                => $this->moduleConfig->getMerchantSiteId(),
                     'merchantId'                    => $this->moduleConfig->getMerchantId(),
