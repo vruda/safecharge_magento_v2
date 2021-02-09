@@ -221,6 +221,13 @@ class DmnOld extends \Magento\Framework\App\Action\Action
             # try to create the order
 			$this->getOrCreateOrder($params, $orderIncrementId, $jsonOutput);
 			
+			if (is_null($this->order)) {
+				$this->moduleConfig->createLog('DMN error - Order object is null.');
+                
+                $jsonOutput->setData('DMN error - Order object is null.');
+                return $jsonOutput;
+			}
+			
 			$order			= $this->order;
             $orderPayment   = $order->getPayment();
 			$order_status	= '';
@@ -714,7 +721,7 @@ class DmnOld extends \Magento\Framework\App\Action\Action
 			 */
 			// start Subscription plans if we need to END
 		}
-		catch (\Exception $e) {
+		catch (Exception $e) {
             $msg = $e->getMessage();
 
             $this->moduleConfig->createLog($e->getMessage() . "\n\r" . $e->getTraceAsString(), 'DMN Excception:');
@@ -746,14 +753,15 @@ class DmnOld extends \Magento\Framework\App\Action\Action
         }
         
         try {
-            $quote = $this->quoteFactory->create()->loadByIdWithoutStore((int) $params['quote']);
+            $quote	= $this->quoteFactory->create()->loadByIdWithoutStore((int) $params['quote']);
+			$method	= $quote->getPayment()->getMethod();
 			
 			$this->moduleConfig->createLog(
 				array(
-					'quote Method' => $quote->getPayment()->getMethod(),
+					'quote Method' => $method,
 					'quote id' => $quote->getQuoteId(),
 				),
-				'$quote->getPayment()->getMethod()'
+				'$method'
 			);
 
             if (intval($quote->getIsActive()) == 0) {
@@ -764,11 +772,11 @@ class DmnOld extends \Magento\Framework\App\Action\Action
                     ->setData('message', 'Quote is not active.');
             }
 
-            if ($quote->getPayment()->getMethod() !== Payment::METHOD_CODE) {
+            if ($method !== Payment::METHOD_CODE) {
                 return $result
                     ->setData('error', true)
                     ->setData('message', 'Quote payment method is "'
-                        . $quote->getPayment()->getMethod() . '"');
+                        . $method . '"');
             }
 
             $params = array_merge(
@@ -789,7 +797,7 @@ class DmnOld extends \Magento\Framework\App\Action\Action
                     'action' => $this,
                 ]
             );
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             $this->moduleConfig->createLog($exception->getMessage(), 'DMN placeOrder Exception: ');
             
             return $result

@@ -194,6 +194,9 @@ class Config
 				if (!empty($data['paymentMethods']) && is_array($data['paymentMethods'])) {
 					$data['paymentMethods'] = json_encode($data['paymentMethods']);
 				}
+				if (!empty($data['Response data']['paymentMethods']) && is_array($data['Response data']['paymentMethods'])) {
+					$data['Response data']['paymentMethods'] = json_encode($data['Response data']['paymentMethods']);
+				}
 				
 				if (!empty($data['plans']) && is_array($data['plans'])) {
                     $data['plans'] = json_encode($data['plans']);

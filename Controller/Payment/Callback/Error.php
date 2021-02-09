@@ -3,8 +3,6 @@
 namespace Nuvei\Payments\Controller\Payment\Callback;
 
 use Magento\Framework\Controller\ResultFactory;
-//use Magento\Framework\Controller\ResultInterface;
-
 use Magento\Framework\App\Request\InvalidRequestException;
 use Magento\Framework\App\RequestInterface;
 

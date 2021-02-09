@@ -555,7 +555,6 @@ define(
             continueWithOrder: function(transactionId) {
 				console.log('continueWithOrder()');
 				//debugger;
-				
                 if (self.validate()) {
                     self.isPlaceOrderActionAllowed(false);
 

@@ -19,7 +19,7 @@ class UpgradeData extends \Nuvei\Payments\Setup\InstallSchema implements Upgrade
     private $orderStatusFactory;
     
     private $resourceConnection;
-	private $categorySetupFactory;
+//	private $categorySetupFactory;
 	private $attributeSetFactory;
 	private $install;
 
@@ -32,14 +32,14 @@ class UpgradeData extends \Nuvei\Payments\Setup\InstallSchema implements Upgrade
         OrderStatusFactory $orderStatusFactory,
         \Magento\Framework\App\ResourceConnection $resourceConnection,
         \Magento\Eav\Setup\EavSetupFactory $eavSetupFactory,
-		\Magento\Catalog\Setup\CategorySetupFactory $categorySetupFactory,
+//		\Magento\Catalog\Setup\CategorySetupFactory $categorySetupFactory,
 		\Magento\Eav\Model\Entity\Attribute\SetFactory $attributeSetFactory,
 		\Magento\Framework\Setup\SchemaSetupInterface $install
     ) {
         $this->orderStatusFactory   = $orderStatusFactory;
         $this->resourceConnection	= $resourceConnection;
         $this->eavSetupFactory      = $eavSetupFactory;
-        $this->categorySetupFactory	= $categorySetupFactory;
+//        $this->categorySetupFactory	= $categorySetupFactory;
         $this->attributeSetFactory	= $attributeSetFactory;
         $this->install				= $install;
     }
@@ -60,7 +60,7 @@ class UpgradeData extends \Nuvei\Payments\Setup\InstallSchema implements Upgrade
         $setup->startSetup();
 		$eavSetup = $this->eavSetupFactory->create(['setup' => $setup]);
 		
-		$categorySetup = $this->categorySetupFactory->create(['setup' => $setup]);
+//		$categorySetup = $this->categorySetupFactory->create(['setup' => $setup]);
 		
 //		$eavSetup->removeAttribute(
 //			\Magento\Catalog\Model\Product::ENTITY,
@@ -70,7 +70,7 @@ class UpgradeData extends \Nuvei\Payments\Setup\InstallSchema implements Upgrade
 		// add few new Order States
         if (version_compare($context->getVersion(), '3.0.0', '<')) {
             $scVoided = $this->orderStatusFactory->create()
-                ->setData('status', 'vmes')
+                ->setData('status', 'nuvei_voided')
                 ->setData('label', 'Nuvei Voided')
                 ->save();
             $scVoided->assignState(Order::STATE_PROCESSING, false, true);
@@ -105,6 +105,23 @@ class UpgradeData extends \Nuvei\Payments\Setup\InstallSchema implements Upgrade
                 ->save();
             $scRefunded->assignState(Order::STATE_PROCESSING, false, true);
         }
+		
+		/**
+		 * example for update
+		if (version_compare($context->getVersion(), '3.0.1', '<')) {
+			$this->resourceConnection->getConnection()->query(
+				"UPDATE sales_order_status "
+				. "SET status = 'nuvei_voided' "
+				. "WHERE sales_order_status.status = 'vmes';"
+			);
+			
+			$this->resourceConnection->getConnection()->query(
+				"UPDATE sales_order_status_state "
+				. "SET status = 'nuvei_voided' "
+				. "WHERE sales_order_status_state.status = 'vmes';"
+			);
+		}
+		 */
 		
 		/* TODO - for the subscriptions
 		if (version_compare($context->getVersion(), '2.2.0', '<')) {

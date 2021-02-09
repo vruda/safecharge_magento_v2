@@ -100,8 +100,8 @@ class Complete extends \Magento\Framework\App\Action\Action implements \Magento\
         $params = $this->getRequest()->getParams();
         $this->moduleConfig->createLog($params, 'Success params:');
         
-        $resultRedirect    = $this->resultFactory->create(ResultFactory::TYPE_REDIRECT);
-        $form_key        = filter_input(INPUT_GET, 'form_key');
+        $resultRedirect	= $this->resultFactory->create(ResultFactory::TYPE_REDIRECT);
+        $form_key       = filter_input(INPUT_GET, 'form_key');
 
         try {
 //                $reservedOrderId = $this->checkoutSession->getQuote()->getReservedOrderId();
@@ -117,7 +117,7 @@ class Complete extends \Magento\Framework\App\Action\Action implements \Magento\
                     throw new PaymentException(__($result->getErrorMessage()));
                 }
             } else {
-                $this->moduleConfig->createLog('Attention - the Quote is not active! The Order was not placed.');
+                $this->moduleConfig->createLog('Attention - the Quote is not active! The Order can not be created here. May be it is already placed.');
             }
             
             if (isset($params['Status'])

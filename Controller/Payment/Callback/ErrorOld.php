@@ -15,11 +15,6 @@ use Nuvei\Payments\Model\Logger as Logger;
 class ErrorOld extends Action
 {
     /**
-     * @var NuveiLogger
-     */
-    private $logger;
-
-    /**
      * @var ModuleConfig
      */
     private $moduleConfig;
@@ -27,18 +22,15 @@ class ErrorOld extends Action
     /**
      * Error constructor.
      *
-     * @param Context          $context
-     * @param NuveiLogger $nuveiLogger
-     * @param ModuleConfig     $moduleConfig
+     * @param Context       $context
+     * @param ModuleConfig	$moduleConfig
      */
     public function __construct(
         Context $context,
-        Logger $logger,
         ModuleConfig $moduleConfig
     ) {
         parent::__construct($context);
 
-        $this->logger = $logger;
         $this->moduleConfig = $moduleConfig;
     }
     
