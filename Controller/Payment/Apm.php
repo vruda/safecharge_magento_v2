@@ -95,9 +95,9 @@ class Apm extends Action
             $request = $this->requestFactory->create(AbstractRequest::PAYMENT_APM_METHOD);
 			
             $response = $request
-				->setPaymentMethod($params["chosen_apm_method"] ?: '')
+				->setPaymentMethod(empty($params["chosen_apm_method"]) ? '' : $params["chosen_apm_method"])
                 ->setPaymentMethodFields(empty($params["apm_method_fields"]) ? '' : $params["apm_method_fields"])
-                ->setSavePaymentMethod($params["save_payment_method"] ?: 0)
+                ->setSavePaymentMethod(empty($params["save_payment_method"]) ? 0 : $params["save_payment_method"])
 				->process();
             
 //            $redirectUrl	= $response->getRedirectUrl();

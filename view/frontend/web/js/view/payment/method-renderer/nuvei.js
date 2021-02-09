@@ -937,7 +937,7 @@ define(
 							self.getApmMethods();
 						}
 						
-						if(jQuery('input[name="nuvei_payment_method"]:checked').val() == 'cc_card') {
+						if('cc_card' == self.typeOfChosenPayMethod() || 'upo_cc' == self.typeOfChosenPayMethod()) {
 							self.initFields();
 						}
 					}
