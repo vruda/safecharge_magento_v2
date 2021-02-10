@@ -15,7 +15,7 @@ class PaymentPlansOptions extends \Magento\Eav\Model\Entity\Attribute\Source\Abs
         \Magento\Framework\Filesystem\DirectoryList $directory,
         \Nuvei\Payments\Model\Config $config,
         \Magento\Framework\Filesystem\Io\File $file,
-        \Magento\Framework\Filesystem\DriverInterface $driverManager
+        \Magento\Framework\Filesystem\Driver\File $driverManager
     ) {
         $this->directory        = $directory;
         $this->config           = $config;

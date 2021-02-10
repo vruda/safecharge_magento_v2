@@ -10,7 +10,7 @@ use Magento\Framework\Logger\Handler\Base;
 class Handler extends Base
 {
     public function __construct(
-        \Magento\Framework\Filesystem\DriverInterface $filesystem,
+        \Magento\Framework\Filesystem\Driver\File $filesystem,
         $filePath = null,
         $fileName = null
     ) {

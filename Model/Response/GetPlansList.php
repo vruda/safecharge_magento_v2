@@ -6,14 +6,11 @@ class GetPlansList extends \Nuvei\Payments\Model\AbstractResponse implements \Nu
 {
     protected $config;
     
-    private $file;
-    
     public function __construct(
         \Nuvei\Payments\Model\Logger $logger,
         \Nuvei\Payments\Model\Config $config,
         $requestId,
-        \Nuvei\Payments\Lib\Http\Client\Curl $curl,
-        \Magento\Framework\Filesystem\Io\File $file
+        \Nuvei\Payments\Lib\Http\Client\Curl $curl
     ) {
         parent::__construct(
             $logger,
@@ -22,8 +19,7 @@ class GetPlansList extends \Nuvei\Payments\Model\AbstractResponse implements \Nu
             $curl
         );
         
-        $this->config   = $config;
-        $this->file     = $file;
+        $this->config = $config;
     }
     
     /**
@@ -50,7 +46,7 @@ class GetPlansList extends \Nuvei\Payments\Model\AbstractResponse implements \Nu
 
             $this->config->createLog('response process');
             
-            $this->file->write(
+            file_put_contents(
                 $tempPath. DIRECTORY_SEPARATOR . \Nuvei\Payments\Model\Config::PAYMENT_PLANS_FILE_NAME,
                 json_encode($body)
             );

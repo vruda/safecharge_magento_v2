@@ -114,8 +114,6 @@ class Config
     private $remoteIp;
     private $customerSession;
     private $cookie;
-    private $file;
-    private $driverManager;
     
     private $clientUniqueIdPostfix = '_sandbox_apm'; // postfix for Sandbox APM payments
 
@@ -141,9 +139,7 @@ class Config
         \Magento\Framework\HTTP\Header $httpHeader,
         \Magento\Framework\HTTP\PhpEnvironment\RemoteAddress $remoteIp,
         \Magento\Customer\Model\Session $customerSession,
-        \Magento\Framework\Stdlib\CookieManagerInterface $cookie,
-        \Magento\Framework\Filesystem\Io\File $file,
-        \Magento\Framework\Filesystem\DriverInterface $driverManager
+        \Magento\Framework\Stdlib\CookieManagerInterface $cookie
     ) {
         $this->scopeConfig = $scopeConfig;
         $this->storeManager = $storeManager;
@@ -160,8 +156,6 @@ class Config
         $this->formKey          = $formKey;
         $this->directory        = $directory;
         $this->cookie           = $cookie;
-        $this->file             = $file;
-        $this->driverManager    = $driverManager;
     }
 
     /**
@@ -251,7 +245,8 @@ class Config
                 case 1: // save both files
                     $log_file_name = 'Nuvei';
                     
-                    $this->file->write(
+//                    \Magento\Framework\Filesystem\Driver\file_put_contents(
+                    file_put_contents(
                         $logsPath . DIRECTORY_SEPARATOR . 'Nuvei-' . date('Y-m-d') . '.txt',
                         date('H:i:s', time()) . ': ' . $string,
                         FILE_APPEND
@@ -262,8 +257,8 @@ class Config
                     return;
             }
             
-            if ($this->driverManager->isDirectory($logsPath)) {
-                return $this->file->write(
+            if (is_dir($logsPath)) {
+                return file_put_contents(
                     $logsPath . DIRECTORY_SEPARATOR . $log_file_name . '.txt',
                     date('H:i:s', time()) . ': ' . $string,
                     FILE_APPEND
