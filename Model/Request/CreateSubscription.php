@@ -2,28 +2,39 @@
 
 namespace Nuvei\Payments\Model\Request;
 
+use Nuvei\Payments\Lib\Http\Client\Curl;
 use Nuvei\Payments\Model\AbstractRequest;
 use Nuvei\Payments\Model\AbstractResponse;
+use Nuvei\Payments\Model\Config;
+use Nuvei\Payments\Model\Request\Factory as RequestFactory;
 use Nuvei\Payments\Model\RequestInterface;
+use Nuvei\Payments\Model\Response\Factory as ResponseFactory;
 
 /**
  * Nuvei Payments get user payment options request model.
  */
-class getUserUPOs extends AbstractRequest implements RequestInterface
+class CreateSubscription extends AbstractRequest implements RequestInterface
 {
-	protected $config;
-    
     /**
-     * @param Logger           $logger
+     * @var RequestFactory
+     */
+    protected $requestFactory;
+    
+    protected $plan_id;
+    protected $upo_id;
+
+    /**
      * @param Config           $config
      * @param Curl             $curl
      * @param ResponseFactory  $responseFactory
+     * @param Factory          $requestFactory
      */
     public function __construct(
         \Nuvei\Payments\Model\Logger $logger,
-        \Nuvei\Payments\Model\Config $config,
-        \Nuvei\Payments\Lib\Http\Client\Curl $curl,
-        \Nuvei\Payments\Model\Response\Factory $responseFactory
+        Config $config,
+        Curl $curl,
+        ResponseFactory $responseFactory,
+        RequestFactory $requestFactory
     ) {
         parent::__construct(
             $logger,
@@ -32,7 +43,18 @@ class getUserUPOs extends AbstractRequest implements RequestInterface
             $responseFactory
         );
 
-        $this->config = $config;
+        $this->requestFactory = $requestFactory;
+    }
+    
+    // by default 1 -> no plan
+    public function setPlanId($plan_id = 1)
+    {
+        $this->plan_id = $plan_id;
+    }
+    
+    public function setUpoId($upo_id = 0)
+    {
+        $this->upo_id = $upo_id;
     }
 
     /**
@@ -42,7 +64,7 @@ class getUserUPOs extends AbstractRequest implements RequestInterface
      */
     protected function getRequestMethod()
     {
-        return self::GET_UPOS_METHOD;
+        return self::CREATE_SUBSCRIPTION;
     }
 
     /**
@@ -52,7 +74,7 @@ class getUserUPOs extends AbstractRequest implements RequestInterface
      */
     protected function getResponseHandlerType()
     {
-        return AbstractResponse::GET_UPOS_HANDLER;
+        return AbstractResponse::CREATE_SUBSCRIPTION_HANDLER;
     }
 
     /**
@@ -62,26 +84,11 @@ class getUserUPOs extends AbstractRequest implements RequestInterface
      */
     public function process()
     {
-        $res = $this->sendRequest(true, true);
-		$pms = [];
-		
-		if(!empty($res['paymentMethods']) && is_array($res['paymentMethods'])) {
-			foreach ($res['paymentMethods'] as $k => $method) {
-				if(!empty($method['expiryDate']) && date('Ymd') > $method['expiryDate']) {
-					continue;
-				}
+        $this->sendRequest();
 
-				if(empty($method['upoStatus']) || $method['upoStatus'] !== 'enabled') {
-					continue;
-				}
-
-				$pms[] = $method;
-			}
-		}
-		
-		return $pms;
+        return $this->getResponseHandler()->process();
     }
-	
+
     /**
      * {@inheritdoc}
      *
@@ -89,11 +96,10 @@ class getUserUPOs extends AbstractRequest implements RequestInterface
      */
     protected function getParams()
     {
-		$billing_address	= $this->config->getQuoteBillingAddress();
-		$email				= $billing_address['email'] ?: $this->config->getUserEmail(true);
-		
         $params = [
-            'userTokenId' => $email, // logged user email
+            'planId'                => $this->plan_id,
+            'userPaymentOptionId'    => $this->upo_id,
+            'initialAmount'            => '0.00',
         ];
 
         $params = array_merge_recursive(parent::getParams(), $params);
@@ -112,7 +118,9 @@ class getUserUPOs extends AbstractRequest implements RequestInterface
             'merchantId',
             'merchantSiteId',
             'userTokenId',
-            'clientRequestId',
+            'planId',
+            'userPaymentOptionId',
+            'initialAmount',
             'timeStamp',
         ];
     }

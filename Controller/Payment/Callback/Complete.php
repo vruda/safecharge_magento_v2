@@ -100,24 +100,28 @@ class Complete extends \Magento\Framework\App\Action\Action implements \Magento\
         $params = $this->getRequest()->getParams();
         $this->moduleConfig->createLog($params, 'Success params:');
         
-        $resultRedirect	= $this->resultFactory->create(ResultFactory::TYPE_REDIRECT);
+        $resultRedirect    = $this->resultFactory->create(ResultFactory::TYPE_REDIRECT);
         $form_key       = filter_input(INPUT_GET, 'form_key');
 
         try {
 //                $reservedOrderId = $this->checkoutSession->getQuote()->getReservedOrderId();
 //                $this->moduleConfig->createLog($reservedOrderId, '$reservedOrderId');
                 
-            if (intval($this->checkoutSession->getQuote()->getIsActive()) === 1) {
+            if ((int) $this->checkoutSession->getQuote()->getIsActive() === 1) {
                 // if the option for save the order in the Redirect is ON, skip placeOrder !!!
                 $result = $this->placeOrder();
 
                 if ($result->getSuccess() !== true) {
-                    $this->moduleConfig->createLog($result->getMessage(), 'Complete Callback error - place order error');
+                    $this->moduleConfig->createLog(
+                        $result->getMessage(),
+                        'Complete Callback error - place order error'
+                    );
 
                     throw new PaymentException(__($result->getErrorMessage()));
                 }
             } else {
-                $this->moduleConfig->createLog('Attention - the Quote is not active! The Order can not be created here. May be it is already placed.');
+                $this->moduleConfig->createLog('Attention - the Quote is not active! '
+                    . 'The Order can not be created here. May be it is already placed.');
             }
             
             if (isset($params['Status'])
@@ -179,7 +183,8 @@ class Complete extends \Magento\Framework\App\Action\Action implements \Magento\
                 ->setData('error', true)
                 ->setData(
                     'message',
-                    __('An error occurred on the server. Please check your Order History and if the Order is not there, try to place it again!')
+                    __('An error occurred on the server. '
+                        . 'Please check your Order History and if the Order is not there, try to place it again!')
                 );
         }
 

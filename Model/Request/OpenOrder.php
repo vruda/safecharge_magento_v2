@@ -30,7 +30,7 @@ class OpenOrder extends AbstractRequest implements RequestInterface
     
     private $billingAddress; // array
     private $countryCode; // string
-	private $requestParams = [];
+    private $requestParams = [];
 
     /**
      * OpenOrder constructor.
@@ -56,7 +56,7 @@ class OpenOrder extends AbstractRequest implements RequestInterface
             $responseFactory
         );
 
-        $this->requestFactory	= $requestFactory;
+        $this->requestFactory    = $requestFactory;
         $this->cart             = $cart;
     }
 
@@ -77,49 +77,49 @@ class OpenOrder extends AbstractRequest implements RequestInterface
      */
     public function process()
     {
-		// first try to update order
-		$quote		= $this->cart->getQuote();
-		$order_data	= $quote->getPayment()->getAdditionalInformation(Payment::CREATE_ORDER_DATA);
-		
-		// first try - update order
-		if(!empty($order_data)) {
-			$update_order_request = $this->requestFactory->create(AbstractRequest::UPDATE_ORDER_METHOD);
+        // first try to update order
+        $quote        = $this->cart->getQuote();
+        $order_data    = $quote->getPayment()->getAdditionalInformation(Payment::CREATE_ORDER_DATA);
+        
+        // first try - update order
+        if (!empty($order_data)) {
+            $update_order_request = $this->requestFactory->create(AbstractRequest::UPDATE_ORDER_METHOD);
 
-			$req_resp = $update_order_request
-				->setOrderData($order_data)
-				->setBillingAddress($this->billingAddress)
-				->process();
-		}
-		
-		// if UpdateOrder fails - continue with OpenOrder
-		if(empty($req_resp['status']) || 'success' != strtolower($req_resp['status'])) {
-			$req_resp = $this->sendRequest(true);
-		}
-		
-		$this->orderId      = $req_resp['orderId'];
+            $req_resp = $update_order_request
+                ->setOrderData($order_data)
+                ->setBillingAddress($this->billingAddress)
+                ->process();
+        }
+        
+        // if UpdateOrder fails - continue with OpenOrder
+        if (empty($req_resp['status']) || 'success' != strtolower($req_resp['status'])) {
+            $req_resp = $this->sendRequest(true);
+        }
+        
+        $this->orderId      = $req_resp['orderId'];
         $this->sessionToken = $req_resp['sessionToken'];
         $this->ooAmount     = $req_resp['merchantDetails']['customField1'];
 
-		// save the session token in the Quote
-		$quote->getPayment()->setAdditionalInformation(
+        // save the session token in the Quote
+        $quote->getPayment()->setAdditionalInformation(
             Payment::CREATE_ORDER_DATA,
             [
-				'sessionToken'		=> $req_resp['sessionToken'],
-				'clientRequestId'	=> $req_resp['clientRequestId'],
-				'orderId'			=> $req_resp['orderId'],
-			]
+                'sessionToken'        => $req_resp['sessionToken'],
+                'clientRequestId'    => $req_resp['clientRequestId'],
+                'orderId'            => $req_resp['orderId'],
+            ]
         );
-		$this->cart->getQuote()->save();
-		
+        $this->cart->getQuote()->save();
+        
         return $this;
     }
-	
-	public function setBillingAddress($billingAddress)
-	{
-		$this->billingAddress = $billingAddress;
-		
-		return $this;
-	}
+    
+    public function setBillingAddress($billingAddress)
+    {
+        $this->billingAddress = $billingAddress;
+        
+        return $this;
+    }
     
     /**
      * {@inheritdoc}
@@ -140,90 +140,95 @@ class OpenOrder extends AbstractRequest implements RequestInterface
     protected function getParams()
     {
         if (null === $this->cart || empty($this->cart)) {
-			$this->config->createLog('OpenOrder class Error - mising Cart data.');
-			
+            $this->config->createLog('OpenOrder class Error - mising Cart data.');
+            
             throw new PaymentException(__('There is no Cart data.'));
         }
-		
-		$quote		= $this->cart->getQuote();
-		$items		= $quote->getItems();
-		$items_data	= [];
-		
-		// check in the cart for Nuvei Payment Plan
-		$subs_data	= [];
-		
-		// iterate over Items and search for Subscriptions
-		if(is_array($items)) {
-			foreach($items as $item) {
-				$items_data[$item->getId()] = [
-					'quantity'	=> $item->getQty(),
-					'price'		=> $item->getPrice(),
-				];
-
-				/*
-				$product	= $item->getProduct();
-				$attributes	= $product->getAttributes();
-
-				// if subscription is not enabled continue witht the next product
-				if($item->getProduct()->getData(\Nuvei\Payments\Model\Config::PAYMENT_SUBS_ENABLE) != 1) {
-					continue;
-				}
-
-				// mandatory data
-				$subs_data[$product->getId()] = array(
-					'planId' => $item->getProduct()->getData(\Nuvei\Payments\Model\Config::PAYMENT_PLANS_ATTR_NAME),
-
-					'initialAmount' => number_format($item->getProduct()
-						->getData(\Nuvei\Payments\Model\Config::PAYMENT_SUBS_INTIT_AMOUNT), 2, '.', ''),
-
-					'recurringAmount' => number_format($item->getProduct()
-						->getData(\Nuvei\Payments\Model\Config::PAYMENT_SUBS_REC_AMOUNT), 2, '.', ''),
-				);
-
-				$this->config->createLog($subs_data, '$subs_data');
-
-				# optional data
-				$recurr_unit = $item->getProduct()->getData(\Nuvei\Payments\Model\Config::PAYMENT_SUBS_RECURR_UNITS);
-				$recurr_period = $item->getProduct()->getData(\Nuvei\Payments\Model\Config::PAYMENT_SUBS_RECURR_PERIOD);
-				$subs_data[$product->getId()]['recurringPeriod'][strtolower($recurr_unit)] = $recurr_period;
-
-				$trial_unit = $item->getProduct()->getData(\Nuvei\Payments\Model\Config::PAYMENT_SUBS_TRIAL_UNITS);
-				$trial_period = $item->getProduct()->getData(\Nuvei\Payments\Model\Config::PAYMENT_SUBS_TRIAL_PERIOD);
-				$subs_data[$product->getId()]['startAfter'][strtolower($trial_unit)] = $trial_period;
-
-				$end_after_unit = $item->getProduct()->getData(\Nuvei\Payments\Model\Config::PAYMENT_SUBS_END_AFTER_UNITS);
-				$end_after_period = $item->getProduct()->getData(\Nuvei\Payments\Model\Config::PAYMENT_SUBS_END_AFTER_PERIOD);
-				$subs_data[$product->getId()]['endAfter'][strtolower($end_after_unit)] = $end_after_period;
-				# optional data END
-				 */
-			}
-		}
-		
-		$this->config->setNuveiUseCcOnly(!empty($subs_data) ? true : false);
-		
-		$billing_address = $this->config->getQuoteBillingAddress();
-		if(!empty($this->billingAddress)) {
-			$billing_address['firstName']	= $this->billingAddress['firstname'] ?: $billing_address['firstName'];
-			$billing_address['lastName']	= $this->billingAddress['lastname'] ?: $billing_address['lastName'];
-			
-			if(is_array($this->billingAddress['street']) && !empty($this->billingAddress['street'])) {
-				$billing_address['address'] = implode(' ', $this->billingAddress['street']);
-			}
-			
-			$billing_address['phone']	= $this->billingAddress['telephone'] ?: $billing_address['phone'];
-			$billing_address['zip']		= $this->billingAddress['postcode'] ?: $billing_address['zip'];
-			$billing_address['city']	= $this->billingAddress['city'] ?: $billing_address['city'];
-			$billing_address['country']	= $this->billingAddress['countryId'] ?: $billing_address['country'];
-		}
         
-		$currency = $quote->getOrderCurrencyCode();
-		if(empty($currency)) {
-			$currency = $quote->getStoreCurrencyCode();
-		}
-		if(empty($currency)) {
-			$currency = $this->config->getQuoteBaseCurrency();
-		}
-		
+        $quote        = $this->cart->getQuote();
+        $items        = $quote->getItems();
+        $items_data    = [];
+        
+        // check in the cart for Nuvei Payment Plan
+        $subs_data    = [];
+        
+        // iterate over Items and search for Subscriptions
+        if (is_array($items)) {
+            foreach ($items as $item) {
+                $items_data[$item->getId()] = [
+                    'quantity'    => $item->getQty(),
+                    'price'        => $item->getPrice(),
+                ];
+
+                /*
+                $product    = $item->getProduct();
+                $attributes    = $product->getAttributes();
+
+                // if subscription is not enabled continue witht the next product
+                if($item->getProduct()->getData(\Nuvei\Payments\Model\Config::PAYMENT_SUBS_ENABLE) != 1) {
+                    continue;
+                }
+
+                // mandatory data
+                $subs_data[$product->getId()] = array(
+                    'planId' => $item->getProduct()->getData(\Nuvei\Payments\Model\Config::PAYMENT_PLANS_ATTR_NAME),
+
+                    'initialAmount' => number_format($item->getProduct()
+                        ->getData(\Nuvei\Payments\Model\Config::PAYMENT_SUBS_INTIT_AMOUNT), 2, '.', ''),
+
+                    'recurringAmount' => number_format($item->getProduct()
+                        ->getData(\Nuvei\Payments\Model\Config::PAYMENT_SUBS_REC_AMOUNT), 2, '.', ''),
+                );
+
+                $this->config->createLog($subs_data, '$subs_data');
+
+                # optional data
+                $recurr_unit = $item->getProduct()->getData(\Nuvei\Payments\Model\Config::PAYMENT_SUBS_RECURR_UNITS);
+                $recurr_period = $item->getProduct()->getData(\Nuvei\Payments\Model\Config::PAYMENT_SUBS_RECURR_PERIOD);
+                $subs_data[$product->getId()]['recurringPeriod'][strtolower($recurr_unit)] = $recurr_period;
+
+                $trial_unit = $item->getProduct()->getData(\Nuvei\Payments\Model\Config::PAYMENT_SUBS_TRIAL_UNITS);
+                $trial_period = $item->getProduct()->getData(\Nuvei\Payments\Model\Config::PAYMENT_SUBS_TRIAL_PERIOD);
+                $subs_data[$product->getId()]['startAfter'][strtolower($trial_unit)] = $trial_period;
+
+                $end_after_unit = $item
+                    ->getProduct()
+                    ->getData(\Nuvei\Payments\Model\Config::PAYMENT_SUBS_END_AFTER_UNITS);
+                $end_after_period = $item
+                    ->getProduct()
+                    ->getData(\Nuvei\Payments\Model\Config::PAYMENT_SUBS_END_AFTER_PERIOD);
+
+                $subs_data[$product->getId()]['endAfter'][strtolower($end_after_unit)] = $end_after_period;
+                # optional data END
+                 */
+            }
+        }
+        
+        $this->config->setNuveiUseCcOnly(!empty($subs_data) ? true : false);
+        
+        $billing_address = $this->config->getQuoteBillingAddress();
+        if (!empty($this->billingAddress)) {
+            $billing_address['firstName']    = $this->billingAddress['firstname'] ?: $billing_address['firstName'];
+            $billing_address['lastName']    = $this->billingAddress['lastname'] ?: $billing_address['lastName'];
+            
+            if (is_array($this->billingAddress['street']) && !empty($this->billingAddress['street'])) {
+                $billing_address['address'] = implode(' ', $this->billingAddress['street']);
+            }
+            
+            $billing_address['phone']    = $this->billingAddress['telephone'] ?: $billing_address['phone'];
+            $billing_address['zip']        = $this->billingAddress['postcode'] ?: $billing_address['zip'];
+            $billing_address['city']    = $this->billingAddress['city'] ?: $billing_address['city'];
+            $billing_address['country']    = $this->billingAddress['countryId'] ?: $billing_address['country'];
+        }
+        
+        $currency = $quote->getOrderCurrencyCode();
+        if (empty($currency)) {
+            $currency = $quote->getStoreCurrencyCode();
+        }
+        if (empty($currency)) {
+            $currency = $this->config->getQuoteBaseCurrency();
+        }
+        
         $this->requestParams = array_merge_recursive(
             [
                 'clientUniqueId'    => $this->config->getCheckoutSession()->getQuoteId(),
@@ -247,9 +252,9 @@ class OpenOrder extends AbstractRequest implements RequestInterface
                 'merchantDetails'    => [
                     'customField1' => (string) number_format($quote->getGrandTotal(), 2, '.', ''), // pass amount
                     'customField2' => json_encode($subs_data), // subscription data
-				//	'customField3' => 'Magento v.' . $this->config->getMagentoVersion(), // pass it in AbstractRequest
-					'customField4' => time(), // time when we create the request
-					'customField5' => json_encode($items_data), // list of Order items
+                //    'customField3' => 'Magento v.' . $this->config->getMagentoVersion(), // pass it in AbstractRequest
+                    'customField4' => time(), // time when we create the request
+                    'customField5' => json_encode($items_data), // list of Order items
                 ],
             ],
             parent::getParams()
@@ -276,8 +281,8 @@ class OpenOrder extends AbstractRequest implements RequestInterface
             'timeStamp',
         ];
     }
-	
-	/**
+    
+    /**
      * Get attribute options
      *
      * @param \Magento\Eav\Api\Data\AttributeInterface $attribute

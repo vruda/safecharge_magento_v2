@@ -7,8 +7,10 @@
 
 namespace Nuvei\Payments\Plugin;
 
-class ZeroTotal {
-	public function afterIsApplicable($subject, $result) {
+class ZeroTotal
+{
+    public function afterIsApplicable($subject, $result)
+    {
         return true;
     }
 }

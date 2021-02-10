@@ -27,7 +27,7 @@ use Nuvei\Payments\Model\Request\Payment\Factory as PaymentRequestFactory;
 
 /**
  * Nuvei Payments payment model.
- * 
+ *
  * * TODO - Cc class is deprecated. Use \Magento\Payment\Model\MethodInterface instead.
  */
 class Payment extends Cc implements TransparentInterface
@@ -35,7 +35,7 @@ class Payment extends Cc implements TransparentInterface
     /**
      * Method code const.
      */
-    const METHOD_CODE	= 'nuvei';
+    const METHOD_CODE    = 'nuvei';
     const MODE_LIVE     = 'live';
 
     /**
@@ -50,21 +50,21 @@ class Payment extends Cc implements TransparentInterface
      */
     const TRANSACTION_REQUEST_ID                = 'transaction_request_id';
     const TRANSACTION_ORDER_ID                  = 'nuvei_order_id';
-    const TRANSACTION_AUTH_CODE					= 'authorization_code';
+    const TRANSACTION_AUTH_CODE                    = 'authorization_code';
     const TRANSACTION_ID                        = 'transaction_id';
 //    const TRANSACTION_USER_PAYMENT_OPTION_ID    = 'user_payment_option_id';
     const TRANSACTION_PAYMENT_SOLUTION          = 'payment_solution';
-    const TRANSACTION_PAYMENT_METHOD			= 'external_payment_method';
+    const TRANSACTION_PAYMENT_METHOD            = 'external_payment_method';
     const TRANSACTION_STATUS                    = 'status';
     const TRANSACTION_TYPE                      = 'transaction_type';
     const TRANSACTION_SUBS                      = 'transaction_subs';
-	const TRANSACTION_UPO_ID                    = 'upo_id';
-	const TRANSACTION_TOTAL_AMOUN               = 'total_amount';
+    const TRANSACTION_UPO_ID                    = 'upo_id';
+    const TRANSACTION_TOTAL_AMOUN               = 'total_amount';
     const REFUND_TRANSACTION_AMOUNT             = 'refund_amount';
     const AUTH_PARAMS                           = 'auth_params';
     const SALE_SETTLE_PARAMS                    = 'sale_settle_params';
-	const ORDER_TRANSACTIONS_DATA				= 'nuvei_order_transactions_data';
-	const CREATE_ORDER_DATA						= 'nuvei_create_order_data';
+    const ORDER_TRANSACTIONS_DATA                = 'nuvei_order_transactions_data';
+    const CREATE_ORDER_DATA                        = 'nuvei_create_order_data';
 
     /**
      * Order statuses.
@@ -76,13 +76,13 @@ class Payment extends Cc implements TransparentInterface
     const SC_REFUNDED           = 'nuvei_refunded';
     const SC_PROCESSING         = 'nuvei_processing';
     const SC_SUBSCRT_STARTED    = 'nuvei_subscr_started';
-    const SC_SUBSCRT_ENDED		= 'nuvei_subscr_ended';
+    const SC_SUBSCRT_ENDED        = 'nuvei_subscr_ended';
 
     const SOLUTION_INTERNAL     = 'internal';
     const SOLUTION_EXTERNAL     = 'external';
     const APM_METHOD_CC         = 'cc_card';
     
-    const PAYMETNS_SUPPORT_REFUND = array('cc_card', 'apmgw_expresscheckout');
+    const PAYMETNS_SUPPORT_REFUND = ['cc_card', 'apmgw_expresscheckout'];
 
     /**
      * @var string
@@ -224,7 +224,7 @@ class Payment extends Cc implements TransparentInterface
         ModuleListInterface $moduleList,
         TimezoneInterface $localeDate,
         PaymentRequestFactory $paymentRequestFactory,
-//        PaymentTokenManagementInterface $paymentTokenManagement,
+        //        PaymentTokenManagementInterface $paymentTokenManagement,
         CustomerSession $customerSession,
         ModuleConfig $moduleConfig,
         PrivateDataKeysProvider $privateDataKeysProvider,
@@ -335,8 +335,8 @@ class Payment extends Cc implements TransparentInterface
      * @throws \Magento\Framework\Exception\LocalizedException
      *
      * @api
-	 * 
-	 * TODO this method create the request too early. Use invoice observer, so can get the Invoice ID.
+     *
+     * TODO this method create the request too early. Use invoice observer, so can get the Invoice ID.
      */
     public function capture(InfoInterface $payment, $amount)
     {
@@ -349,21 +349,20 @@ class Payment extends Cc implements TransparentInterface
 
     private function processPayment(InfoInterface $payment, $amount)
     {
-		$authCode				= '';
-		$ord_trans_addit_info	= $payment->getAdditionalInformation(Payment::ORDER_TRANSACTIONS_DATA);
-		
-		if(is_array($ord_trans_addit_info) && !empty($ord_trans_addit_info)) {
-			foreach($ord_trans_addit_info as $trans) {
-				if(
-					strtolower($trans[self::TRANSACTION_TYPE]) == 'auth'
-					&& strtolower($trans[self::TRANSACTION_STATUS]) == 'approved'
-				) {
-					$authCode = $trans[self::TRANSACTION_AUTH_CODE];
-					break;
-				}
-			}
-		}
-		
+        $authCode                = '';
+        $ord_trans_addit_info    = $payment->getAdditionalInformation(Payment::ORDER_TRANSACTIONS_DATA);
+        
+        if (is_array($ord_trans_addit_info) && !empty($ord_trans_addit_info)) {
+            foreach ($ord_trans_addit_info as $trans) {
+                if (strtolower($trans[self::TRANSACTION_TYPE]) == 'auth'
+                    && strtolower($trans[self::TRANSACTION_STATUS]) == 'approved'
+                ) {
+                    $authCode = $trans[self::TRANSACTION_AUTH_CODE];
+                    break;
+                }
+            }
+        }
+        
 //        $authCode = $payment->getAdditionalInformation(self::TRANSACTION_AUTH_CODE);
         
         if (empty($authCode)) {
@@ -465,8 +464,8 @@ class Payment extends Cc implements TransparentInterface
     {
         return $this;
     }
-	
-	/**
+    
+    /**
      * Check void availability
      * @return bool
      * @internal param \Magento\Framework\DataObject $payment

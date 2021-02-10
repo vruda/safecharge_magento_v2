@@ -8,13 +8,19 @@ class PaymentPlansOptions extends \Magento\Eav\Model\Entity\Attribute\Source\Abs
     
     private $directory;
     private $config;
+    private $file;
+    private $driverManager;
     
     public function __construct(
         \Magento\Framework\Filesystem\DirectoryList $directory,
-        \Nuvei\Payments\Model\Config $config
+        \Nuvei\Payments\Model\Config $config,
+        \Magento\Framework\Filesystem\Io\File $file,
+        \Magento\Framework\Filesystem\DriverInterface $driverManager
     ) {
-        $this->directory = $directory;
-        $this->config = $config;
+        $this->directory        = $directory;
+        $this->config           = $config;
+        $this->file             = $file;
+        $this->driverManager    = $driverManager;
     }
     
     public function getAllOptions()
@@ -27,13 +33,11 @@ class PaymentPlansOptions extends \Magento\Eav\Model\Entity\Attribute\Source\Abs
         
         # json version
         $file_name = $this->directory->getPath('tmp') . DIRECTORY_SEPARATOR
-			. \Nuvei\Payments\Model\Config::PAYMENT_PLANS_FILE_NAME;
+            . \Nuvei\Payments\Model\Config::PAYMENT_PLANS_FILE_NAME;
         
-        if (is_readable($file_name)) {
+        if ($this->driverManager->isReadable($file_name)) {
             try {
-                $fp = fopen($file_name, "r");
-                $cont = json_decode(fread($fp, filesize($file_name)), true);
-                fclose($fp);
+                $cont = json_decode($this->file->read($file_name), true);
 
                 if (!empty($cont['plans']) && is_array($cont['plans'])) {
                     foreach ($cont['plans'] as $data) {
@@ -47,7 +51,7 @@ class PaymentPlansOptions extends \Magento\Eav\Model\Entity\Attribute\Source\Abs
             } catch (Exception $e) {
                 $this->config->createLog($e->getMessage(), 'PaymentPlansOptions Exception');
             }
-        } elseif (file_exists($file_name)) {
+        } elseif ($this->file->fileExists($file_name)) {
             $this->config->createLog('PaymentPlansOptions Error - ' . $file_name . ' exists, but is not readable.');
         } else {
             $this->config->createLog('PaymentPlansOption - ' . $file_name . ' does not exists.');

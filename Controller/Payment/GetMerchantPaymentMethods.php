@@ -61,56 +61,19 @@ class GetMerchantPaymentMethods extends Action
         if (!$this->moduleConfig->isActive()) {
             $this->moduleConfig->createLog('Nuvei payments module is not active at the moment!');
             
-			return $result->setData([
-				'error_message' => __('Nuvei payments module is not active at the moment!')
-			]);
+            return $result->setData([
+                'error_message' => __('Nuvei payments module is not active at the moment!')
+            ]);
         }
 
-		$apmMethodsData = $this->getApmMethods();
-		
-		// get UPOs
-		$upos = [];
-		
-		if( $this->moduleConfig->canUseUpos()
-			&& !empty($apmMethodsData['apmMethods'])
-		) {
-			$upos_arr = $this->getUpos();
-			
-			if(!empty($upos_arr)) {
-				foreach($upos_arr as $upo_data) {
-					foreach($apmMethodsData['apmMethods'] as $apm_data) {
-						if ($apm_data['paymentMethod'] === $upo_data['paymentMethodName']) {
-							
-							$upo_data['logoURL']	= !empty($apm_data['logoURL']) ? $apm_data['logoURL'] : '';
-							$upo_data['name']		= !empty($apm_data['paymentMethodDisplayName'][0]['message'])
-								? $apm_data['paymentMethodDisplayName'][0]['message'] : '';
-							
-							$label = '';
-							if ($upo_data['paymentMethodName'] == 'cc_card') {
-								if(!empty($upo_data['upoData']['ccCardNumber'])) {
-									$label = $upo_data['upoData']['ccCardNumber'];
-								}
-							}
-							elseif (!empty($upo_data['upoName'])) {
-								$label = $upo_data['upoName'];
-							}
-							
-							$upo_data['store_label'] = $label;
-
-							$upos[] = $upo_data;
-							break;
-						}
-					}
-				}
-			}
-		}
-		// get UPOs END
-		
+        $apmMethodsData = $this->getApmMethods();
+        $upos           = $this->getUpos($apmMethodsData);
+        
         return $result->setData([
             "error"         => 0,
             "apmMethods"    => $apmMethodsData['apmMethods'],
-            "upos"			=> $upos,
-            "sessionToken"	=> $apmMethodsData['sessionToken'],
+            "upos"          => $upos,
+            "sessionToken"  => $apmMethodsData['sessionToken'],
             "message"       => "Success"
         ]);
     }
@@ -123,41 +86,69 @@ class GetMerchantPaymentMethods extends Action
      */
     private function getApmMethods()
     {
-		try {
-			$request	= $this->requestFactory->create(AbstractRequest::GET_MERCHANT_PAYMENT_METHODS_METHOD);
-			$apmMethods	= $request
-				->setBillingAddress($this->getRequest()->getParam('billingAddress'))
-				->process();
+        try {
+            $request    = $this->requestFactory->create(AbstractRequest::GET_MERCHANT_PAYMENT_METHODS_METHOD);
+            $apmMethods    = $request
+                ->setBillingAddress($this->getRequest()->getParam('billingAddress'))
+                ->process();
 
-			return [
-				'apmMethods'	=> $apmMethods->getPaymentMethods(),
-				'sessionToken'  => $apmMethods->getSessionToken(),
-			];
-		}
-		catch(Exception $e) {
-			$this->moduleConfig->createLog($e->getMessage(), 'Get APMs exception');
-			return [
-				'apmMethods'	=> [],
-				'sessionToken'  => [],
-			];
-		}
+            return [
+                'apmMethods'    => $apmMethods->getPaymentMethods(),
+                'sessionToken'  => $apmMethods->getSessionToken(),
+            ];
+        } catch (Exception $e) {
+            $this->moduleConfig->createLog($e->getMessage(), 'Get APMs exception');
+            return [
+                'apmMethods'    => [],
+                'sessionToken'  => [],
+            ];
+        }
     }
-	
-	private function getUpos()
-	{
-		try {
-			$request	= $this->requestFactory->create(AbstractRequest::GET_UPOS_METHOD);
-			$resp		= $request->process();
-			
-			if(empty($resp) || !is_array($resp)) {
-				return [];
-			}
+    
+    private function getUpos($apmMethodsData)
+    {
+        $upos = [];
+        
+        if (!$this->moduleConfig->canUseUpos() || empty($apmMethodsData['apmMethods'])) {
+            return $upos;
+        }
+        
+        try {
+            $request    = $this->requestFactory->create(AbstractRequest::GET_UPOS_METHOD);
+            $resp       = $request->process();
+        } catch (Exception $e) {
+            $this->moduleConfig->createLog($e->getMessage(), 'Get UPOs exception');
+        }
+        
+        if (empty($resp) || !is_array($resp)) {
+            return $upos;
+        }
 
-			return $resp;
-		}
-		catch(Exception $e) {
-			$this->moduleConfig->createLog($e->getMessage(), 'Get UPOs exception');
-			return [];
-		}
-	}
+        foreach ($resp as $upo_data) {
+            foreach ($apmMethodsData['apmMethods'] as $apm_data) {
+                if ($apm_data['paymentMethod'] === $upo_data['paymentMethodName']) {
+
+                    $upo_data['logoURL']    = !empty($apm_data['logoURL']) ? $apm_data['logoURL'] : '';
+                    $upo_data['name']        = !empty($apm_data['paymentMethodDisplayName'][0]['message'])
+                        ? $apm_data['paymentMethodDisplayName'][0]['message'] : '';
+
+                    $label = '';
+                    if ($upo_data['paymentMethodName'] == 'cc_card') {
+                        if (!empty($upo_data['upoData']['ccCardNumber'])) {
+                            $label = $upo_data['upoData']['ccCardNumber'];
+                        }
+                    } elseif (!empty($upo_data['upoName'])) {
+                        $label = $upo_data['upoName'];
+                    }
+
+                    $upo_data['store_label'] = $label;
+
+                    $upos[] = $upo_data;
+                    break;
+                }
+            }
+        }
+        
+        return $upos;
+    }
 }

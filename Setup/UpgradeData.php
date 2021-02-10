@@ -19,9 +19,8 @@ class UpgradeData extends \Nuvei\Payments\Setup\InstallSchema implements Upgrade
     private $orderStatusFactory;
     
     private $resourceConnection;
-//	private $categorySetupFactory;
-	private $attributeSetFactory;
-	private $install;
+    private $attributeSetFactory;
+    private $install;
 
     /**
      * Object constructor.
@@ -32,16 +31,14 @@ class UpgradeData extends \Nuvei\Payments\Setup\InstallSchema implements Upgrade
         OrderStatusFactory $orderStatusFactory,
         \Magento\Framework\App\ResourceConnection $resourceConnection,
         \Magento\Eav\Setup\EavSetupFactory $eavSetupFactory,
-//		\Magento\Catalog\Setup\CategorySetupFactory $categorySetupFactory,
-		\Magento\Eav\Model\Entity\Attribute\SetFactory $attributeSetFactory,
-		\Magento\Framework\Setup\SchemaSetupInterface $install
+        \Magento\Eav\Model\Entity\Attribute\SetFactory $attributeSetFactory,
+        \Magento\Framework\Setup\SchemaSetupInterface $install
     ) {
         $this->orderStatusFactory   = $orderStatusFactory;
-        $this->resourceConnection	= $resourceConnection;
+        $this->resourceConnection    = $resourceConnection;
         $this->eavSetupFactory      = $eavSetupFactory;
-//        $this->categorySetupFactory	= $categorySetupFactory;
-        $this->attributeSetFactory	= $attributeSetFactory;
-        $this->install				= $install;
+        $this->attributeSetFactory    = $attributeSetFactory;
+        $this->install                = $install;
     }
 
     /**
@@ -53,21 +50,22 @@ class UpgradeData extends \Nuvei\Payments\Setup\InstallSchema implements Upgrade
      * @return void
      * @throws \Exception
      */
-    public function upgrade(ModuleDataSetupInterface $setup, ModuleContextInterface $context) {
-		// try to add main plugin table if not exists, and remove old plugin table if exists
-		$this->install($this->install, $context);
-		
+    public function upgrade(ModuleDataSetupInterface $setup, ModuleContextInterface $context)
+    {
+        // try to add main plugin table if not exists, and remove old plugin table if exists
+        $this->install($this->install, $context);
+        
         $setup->startSetup();
-		$eavSetup = $this->eavSetupFactory->create(['setup' => $setup]);
-		
-//		$categorySetup = $this->categorySetupFactory->create(['setup' => $setup]);
-		
-//		$eavSetup->removeAttribute(
-//			\Magento\Catalog\Model\Product::ENTITY,
-//			\Nuvei\Payments\Model\Config::PAYMENT_SUBS_INTIT_AMOUNT
-//		);
-		
-		// add few new Order States
+        $eavSetup = $this->eavSetupFactory->create(['setup' => $setup]);
+        
+//        $categorySetup = $this->categorySetupFactory->create(['setup' => $setup]);
+        
+//        $eavSetup->removeAttribute(
+//            \Magento\Catalog\Model\Product::ENTITY,
+//            \Nuvei\Payments\Model\Config::PAYMENT_SUBS_INTIT_AMOUNT
+//        );
+        
+        // add few new Order States
         if (version_compare($context->getVersion(), '3.0.0', '<')) {
             $scVoided = $this->orderStatusFactory->create()
                 ->setData('status', 'nuvei_voided')
@@ -105,33 +103,33 @@ class UpgradeData extends \Nuvei\Payments\Setup\InstallSchema implements Upgrade
                 ->save();
             $scRefunded->assignState(Order::STATE_PROCESSING, false, true);
         }
-		
-		/**
-		 * example for update
-		if (version_compare($context->getVersion(), '3.0.1', '<')) {
-			$this->resourceConnection->getConnection()->query(
-				"UPDATE sales_order_status "
-				. "SET status = 'nuvei_voided' "
-				. "WHERE sales_order_status.status = 'vmes';"
-			);
-			
-			$this->resourceConnection->getConnection()->query(
-				"UPDATE sales_order_status_state "
-				. "SET status = 'nuvei_voided' "
-				. "WHERE sales_order_status_state.status = 'vmes';"
-			);
-		}
-		 */
-		
-		/* TODO - for the subscriptions
-		if (version_compare($context->getVersion(), '2.2.0', '<')) {
-			$eavSetup->removeAttribute(
-				\Magento\Catalog\Model\Product::ENTITY,
-				\Nuvei\Payments\Model\Config::PAYMENT_SUBS_ENABLE
-			);
-			
-			// Enable subscription
-			$eavSetup->addAttribute(
+        
+        /**
+         * example for update
+        if (version_compare($context->getVersion(), '3.0.1', '<')) {
+            $this->resourceConnection->getConnection()->query(
+                "UPDATE sales_order_status "
+                . "SET status = 'nuvei_voided' "
+                . "WHERE sales_order_status.status = 'vmes';"
+            );
+
+            $this->resourceConnection->getConnection()->query(
+                "UPDATE sales_order_status_state "
+                . "SET status = 'nuvei_voided' "
+                . "WHERE sales_order_status_state.status = 'vmes';"
+            );
+        }
+         */
+        
+        /* TODO - for the subscriptions
+        if (version_compare($context->getVersion(), '2.2.0', '<')) {
+            $eavSetup->removeAttribute(
+                \Magento\Catalog\Model\Product::ENTITY,
+                \Nuvei\Payments\Model\Config::PAYMENT_SUBS_ENABLE
+            );
+
+            // Enable subscription
+            $eavSetup->addAttribute(
                 \Magento\Catalog\Model\Product::ENTITY,
                 \Nuvei\Payments\Model\Config::PAYMENT_SUBS_ENABLE,
                 [
@@ -148,15 +146,15 @@ class UpgradeData extends \Nuvei\Payments\Setup\InstallSchema implements Upgrade
                     'filterable' => true,
                     'visible_on_front' => false,
                     'used_in_product_listing' => true,
-					'group' => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
-					'sort_order' => 10,
-					'class' => 'sc_enable_subscr',
-					'note' => 'note',
+                    'group' => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
+                    'sort_order' => 10,
+                    'class' => 'sc_enable_subscr',
+                    'note' => 'note',
                 ]
             );
-			
-			// Plan IDs
-			$eavSetup->addAttribute(
+
+            // Plan IDs
+            $eavSetup->addAttribute(
                 \Magento\Catalog\Model\Product::ENTITY,
                 \Nuvei\Payments\Model\Config::PAYMENT_PLANS_ATTR_NAME,
                 [
@@ -177,12 +175,12 @@ class UpgradeData extends \Nuvei\Payments\Setup\InstallSchema implements Upgrade
                     'option' => [
                         'values' => [],
                     ],
-					'sort_order' => 20,
+                    'sort_order' => 20,
                 ]
             );
-			
-			// Initial Amount
-			$eavSetup->addAttribute(
+
+            // Initial Amount
+            $eavSetup->addAttribute(
                 \Magento\Catalog\Model\Product::ENTITY,
                 \Nuvei\Payments\Model\Config::PAYMENT_SUBS_INTIT_AMOUNT,
                 [
@@ -199,12 +197,12 @@ class UpgradeData extends \Nuvei\Payments\Setup\InstallSchema implements Upgrade
                     'visible_on_front' => false,
                     'used_in_product_listing' => true,
                     'group' => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
-					'sort_order' => 30,
+                    'sort_order' => 30,
                 ]
             );
-			
-			// Recurring Amount
-			$eavSetup->addAttribute(
+
+            // Recurring Amount
+            $eavSetup->addAttribute(
                 \Magento\Catalog\Model\Product::ENTITY,
                 \Nuvei\Payments\Model\Config::PAYMENT_SUBS_REC_AMOUNT,
                 [
@@ -221,12 +219,12 @@ class UpgradeData extends \Nuvei\Payments\Setup\InstallSchema implements Upgrade
                     'visible_on_front' => false,
                     'used_in_product_listing' => true,
                     'group' => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
-					'sort_order' => 40,
+                    'sort_order' => 40,
                 ]
             );
-			
-			// Recurring Units
-			$eavSetup->addAttribute(
+
+            // Recurring Units
+            $eavSetup->addAttribute(
                 \Magento\Catalog\Model\Product::ENTITY,
                 \Nuvei\Payments\Model\Config::PAYMENT_SUBS_RECURR_UNITS,
                 [
@@ -234,7 +232,7 @@ class UpgradeData extends \Nuvei\Payments\Setup\InstallSchema implements Upgrade
                     'label' => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_RECURR_UNITS_LABEL,
                     'input' => 'select',
                     'global' => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
-					'source' => 'Nuvei\Payments\Model\Config\Source\SubscriptionUnits',
+                    'source' => 'Nuvei\Payments\Model\Config\Source\SubscriptionUnits',
                     'visible' => true,
                     'required' => false,
                     'user_defined' => false,
@@ -244,15 +242,15 @@ class UpgradeData extends \Nuvei\Payments\Setup\InstallSchema implements Upgrade
                     'visible_on_front' => false,
                     'used_in_product_listing' => false,
                     'group' => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
-					'option' => [
+                    'option' => [
                         'values' => [],
                     ],
-					'sort_order' => 50,
+                    'sort_order' => 50,
                 ]
             );
-			
-			// Recurring Period
-			$eavSetup->addAttribute(
+
+            // Recurring Period
+            $eavSetup->addAttribute(
                 \Magento\Catalog\Model\Product::ENTITY,
                 \Nuvei\Payments\Model\Config::PAYMENT_SUBS_RECURR_PERIOD,
                 [
@@ -269,12 +267,12 @@ class UpgradeData extends \Nuvei\Payments\Setup\InstallSchema implements Upgrade
                     'visible_on_front' => false,
                     'used_in_product_listing' => false,
                     'group' => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
-					'sort_order' => 60,
+                    'sort_order' => 60,
                 ]
             );
-			
-			// Trial Units
-			$eavSetup->addAttribute(
+
+            // Trial Units
+            $eavSetup->addAttribute(
                 \Magento\Catalog\Model\Product::ENTITY,
                 \Nuvei\Payments\Model\Config::PAYMENT_SUBS_TRIAL_UNITS,
                 [
@@ -282,7 +280,7 @@ class UpgradeData extends \Nuvei\Payments\Setup\InstallSchema implements Upgrade
                     'label' => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_TRIAL_UNITS_LABEL,
                     'input' => 'select',
                     'global' => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
-					'source' => 'Nuvei\Payments\Model\Config\Source\SubscriptionUnits',
+                    'source' => 'Nuvei\Payments\Model\Config\Source\SubscriptionUnits',
                     'visible' => true,
                     'required' => false,
                     'user_defined' => false,
@@ -292,15 +290,15 @@ class UpgradeData extends \Nuvei\Payments\Setup\InstallSchema implements Upgrade
                     'visible_on_front' => false,
                     'used_in_product_listing' => false,
                     'group' => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
-					'option' => [
+                    'option' => [
                         'values' => [],
                     ],
-					'sort_order' => 70,
+                    'sort_order' => 70,
                 ]
             );
-			
-			// Trial Period
-			$eavSetup->addAttribute(
+
+            // Trial Period
+            $eavSetup->addAttribute(
                 \Magento\Catalog\Model\Product::ENTITY,
                 \Nuvei\Payments\Model\Config::PAYMENT_SUBS_TRIAL_PERIOD,
                 [
@@ -317,12 +315,12 @@ class UpgradeData extends \Nuvei\Payments\Setup\InstallSchema implements Upgrade
                     'visible_on_front' => false,
                     'used_in_product_listing' => false,
                     'group' => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
-					'sort_order' => 80,
+                    'sort_order' => 80,
                 ]
             );
-			
-			// End After Units
-			$eavSetup->addAttribute(
+
+            // End After Units
+            $eavSetup->addAttribute(
                 \Magento\Catalog\Model\Product::ENTITY,
                 \Nuvei\Payments\Model\Config::PAYMENT_SUBS_END_AFTER_UNITS,
                 [
@@ -330,7 +328,7 @@ class UpgradeData extends \Nuvei\Payments\Setup\InstallSchema implements Upgrade
                     'label' => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_END_AFTER_UNITS_LABEL,
                     'input' => 'select',
                     'global' => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
-					'source' => 'Nuvei\Payments\Model\Config\Source\SubscriptionUnits',
+                    'source' => 'Nuvei\Payments\Model\Config\Source\SubscriptionUnits',
                     'visible' => true,
                     'required' => false,
                     'user_defined' => false,
@@ -340,15 +338,15 @@ class UpgradeData extends \Nuvei\Payments\Setup\InstallSchema implements Upgrade
                     'visible_on_front' => false,
                     'used_in_product_listing' => false,
                     'group' => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
-					'option' => [
+                    'option' => [
                         'values' => [],
                     ],
-					'sort_order' => 90,
+                    'sort_order' => 90,
                 ]
             );
-			
-			// End After Period
-			$eavSetup->addAttribute(
+
+            // End After Period
+            $eavSetup->addAttribute(
                 \Magento\Catalog\Model\Product::ENTITY,
                 \Nuvei\Payments\Model\Config::PAYMENT_SUBS_END_AFTER_PERIOD,
                 [
@@ -365,12 +363,12 @@ class UpgradeData extends \Nuvei\Payments\Setup\InstallSchema implements Upgrade
                     'visible_on_front' => false,
                     'used_in_product_listing' => false,
                     'group' => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
-					'sort_order' => 100,
+                    'sort_order' => 100,
                 ]
             );
-			
-			// description of the Subscription for the store
-			$eavSetup->addAttribute(
+
+            // description of the Subscription for the store
+            $eavSetup->addAttribute(
                 \Magento\Catalog\Model\Product::ENTITY,
                 \Nuvei\Payments\Model\Config::PAYMENT_SUBS_STORE_DESCR,
                 [
@@ -387,24 +385,24 @@ class UpgradeData extends \Nuvei\Payments\Setup\InstallSchema implements Upgrade
                     'visible_on_front' => true,
                     'used_in_product_listing' => true,
                     'group' => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
-					'sort_order' => 110,
+                    'sort_order' => 110,
                 ]
             );
-			
-			// Add two new statuses for the Subscriptions
-			$scSubscrStarted = $this->orderStatusFactory->create()
+
+            // Add two new statuses for the Subscriptions
+            $scSubscrStarted = $this->orderStatusFactory->create()
                 ->setData('status', 'sc_subscr_started')
                 ->setData('label', 'Nuvei Subscription Started')
                 ->save();
             $scSubscrStarted->assignState(Order::STATE_PROCESSING, false, true);
-			
-			$scSubscrEnded = $this->orderStatusFactory->create()
+
+            $scSubscrEnded = $this->orderStatusFactory->create()
                 ->setData('status', 'sc_subscr_ended')
                 ->setData('label', 'Nuvei Subscription Ended')
                 ->save();
             $scSubscrEnded->assignState(Order::STATE_PROCESSING, false, true);
-		}
-		 */
+        }
+         */
         
         $setup->endSetup();
     }

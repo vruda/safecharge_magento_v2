@@ -18,16 +18,18 @@ class Factory
      * @var array
      */
     private $invokableClasses = [
-        AbstractRequest::CREATE_USER_METHOD                     => \Nuvei\Payments\Model\Request\CreateUser::class,
-        AbstractRequest::GET_USER_DETAILS_METHOD                => \Nuvei\Payments\Model\Request\GetUserDetails::class,
-        AbstractRequest::OPEN_ORDER_METHOD                      => \Nuvei\Payments\Model\Request\OpenOrder::class,
-        AbstractRequest::UPDATE_ORDER_METHOD                    => \Nuvei\Payments\Model\Request\UpdateOrder::class,
-        AbstractRequest::PAYMENT_APM_METHOD                     => \Nuvei\Payments\Model\Request\PaymentApm::class,
-        AbstractRequest::GET_MERCHANT_PAYMENT_METHODS_METHOD	=> \Nuvei\Payments\Model\Request\GetMerchantPaymentMethods::class,
-        AbstractRequest::GET_UPOS_METHOD						=> \Nuvei\Payments\Model\Request\getUserUPOs::class,
-        AbstractRequest::DELETE_UPOS_METHOD						=> \Nuvei\Payments\Model\Request\deleteUPO::class,
-        AbstractRequest::GET_MERCHANT_PAYMENT_PLANS_METHOD      => \Nuvei\Payments\Model\Request\GetPlansList::class,
-        AbstractRequest::CREATE_SUBSCRIPTION_METHOD				=> \Nuvei\Payments\Model\Request\CreateSubscription::class,
+        AbstractRequest::GET_MERCHANT_PAYMENT_METHODS_METHOD
+            => \Nuvei\Payments\Model\Request\GetMerchantPaymentMethods::class,
+        AbstractRequest::CREATE_SUBSCRIPTION_METHOD
+            => \Nuvei\Payments\Model\Request\CreateSubscription::class,
+        
+        AbstractRequest::GET_USER_DETAILS_METHOD            => \Nuvei\Payments\Model\Request\GetUserDetails::class,
+        AbstractRequest::OPEN_ORDER_METHOD                  => \Nuvei\Payments\Model\Request\OpenOrder::class,
+        AbstractRequest::UPDATE_ORDER_METHOD                => \Nuvei\Payments\Model\Request\UpdateOrder::class,
+        AbstractRequest::PAYMENT_APM_METHOD                 => \Nuvei\Payments\Model\Request\PaymentApm::class,
+        AbstractRequest::GET_UPOS_METHOD                    => \Nuvei\Payments\Model\Request\GetUserUPOs::class,
+        AbstractRequest::DELETE_UPOS_METHOD                 => \Nuvei\Payments\Model\Request\DeleteUPO::class,
+        AbstractRequest::GET_MERCHANT_PAYMENT_PLANS_METHOD  => \Nuvei\Payments\Model\Request\GetPlansList::class,
     ];
 
     /**

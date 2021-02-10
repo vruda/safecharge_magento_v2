@@ -27,9 +27,9 @@ class GetMerchantPaymentMethods extends AbstractRequest implements RequestInterf
     
     protected $cart;
     protected $store;
-	
-	private $billing_address;
-	
+    
+    private $billing_address;
+    
     /**
      * @param Logger $logger
      * @param Config           $config
@@ -53,7 +53,7 @@ class GetMerchantPaymentMethods extends AbstractRequest implements RequestInterf
             $responseFactory
         );
 
-        $this->requestFactory	= $requestFactory;
+        $this->requestFactory    = $requestFactory;
         $this->cart             = $cart;
         $this->store            = $store;
     }
@@ -91,13 +91,13 @@ class GetMerchantPaymentMethods extends AbstractRequest implements RequestInterf
             ->getResponseHandler()
             ->process();
     }
-	
-	public function setBillingAddress($billing_address)
-	{
-		$this->billing_address = json_decode($billing_address, true);
-		
-		return $this;
-	}
+    
+    public function setBillingAddress($billing_address)
+    {
+        $this->billing_address = json_decode($billing_address, true);
+        
+        return $this;
+    }
 
     /**
      * {@inheritdoc}
@@ -106,33 +106,32 @@ class GetMerchantPaymentMethods extends AbstractRequest implements RequestInterf
      */
     protected function getParams()
     {
-		$tokenRequest = $this->requestFactory->create(AbstractRequest::OPEN_ORDER_METHOD);
-		
-		$tokenResponse = $tokenRequest
-			->setBillingAddress($this->billing_address)
-			->process();
+        $tokenRequest = $this->requestFactory->create(AbstractRequest::OPEN_ORDER_METHOD);
         
-		$languageCode = 'en';
-		if ($this->store && $this->store->getLocaleCode()) {
+        $tokenResponse = $tokenRequest
+            ->setBillingAddress($this->billing_address)
+            ->process();
+        
+        $languageCode = 'en';
+        if ($this->store && $this->store->getLocaleCode()) {
             $languageCode = $this->store->getLocaleCode();
         }
         
-		$country_code = $this->billing_address['countryId'] ?: '';
-		if(empty($country_code)) {
-			$country_code = $this->config->getQuoteCountryCode();
-		}
-		
+        $country_code = $this->billing_address['countryId'] ?: '';
+        if (empty($country_code)) {
+            $country_code = $this->config->getQuoteCountryCode();
+        }
+        
         $currencyCode = $this->config->getQuoteBaseCurrency();
-        if (
-			(empty($currencyCode) || is_null($currencyCode))
+        if ((empty($currencyCode) || null === $currencyCode)
             && $this->cart
         ) {
             $currencyCode = empty($this->cart->getQuote()->getOrderCurrencyCode())
                 ? $this->cart->getQuote()->getStoreCurrencyCode() : $this->cart->getQuote()->getOrderCurrencyCode();
         }
-		
+        
         $params = [
-            'sessionToken'	=> $tokenResponse->sessionToken,
+            'sessionToken'  => $tokenResponse->sessionToken,
             "currencyCode"  => $currencyCode,
             "countryCode"   => $country_code,
             "languageCode"  => $languageCode,

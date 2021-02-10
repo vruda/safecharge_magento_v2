@@ -26,19 +26,20 @@ class Refund extends AbstractPayment implements RequestInterface
      * @var TransactionRepositoryInterface
      */
     private $transactionRepository;
-	private $request;
+    private $request;
 
     /**
      * Refund constructor.
      *
-     * @param Config                         $config
-     * @param Curl                           $curl
-     * @param RequestFactory                 $requestFactory
-     * @param Factory                        $paymentRequestFactory
-     * @param ResponseFactory                $responseFactory
-     * @param OrderPayment                   $orderPayment
-     * @param TransactionRepositoryInterface $transactionRepository
-     * @param float                          $amount
+     * @param Config                            $config
+     * @param Curl                              $curl
+     * @param RequestFactory                    $requestFactory
+     * @param Factory                           $paymentRequestFactory
+     * @param ResponseFactory                   $responseFactory
+     * @param OrderPayment                      $orderPayment
+     * @param TransactionRepositoryInterface    $transactionRepository
+     * @param Http                              $request
+     * @param float                             $amount
      */
     public function __construct(
         \Nuvei\Payments\Model\Logger $logger,
@@ -49,8 +50,8 @@ class Refund extends AbstractPayment implements RequestInterface
         ResponseFactory $responseFactory,
         OrderPayment $orderPayment,
         TransactionRepositoryInterface $transactionRepository,
-        $amount = 0.0,
-		\Magento\Framework\App\Request\Http $request
+        \Magento\Framework\App\Request\Http $request,
+        $amount = 0.0
     ) {
         parent::__construct(
             $logger,
@@ -63,8 +64,8 @@ class Refund extends AbstractPayment implements RequestInterface
             $amount
         );
 
-        $this->transactionRepository	= $transactionRepository;
-        $this->request					= $request;
+        $this->transactionRepository    = $transactionRepository;
+        $this->request                  = $request;
     }
 
     /**
@@ -96,39 +97,38 @@ class Refund extends AbstractPayment implements RequestInterface
      */
     protected function getParams()
     {
-		/**
-		 * TODO - we must create a fix, and refund based on Invoice ID not last allowed option!
-		 */
-		
-        $orderPayment			= $this->orderPayment;
-		$ord_trans_addit_info	= $orderPayment->getAdditionalInformation(Payment::ORDER_TRANSACTIONS_DATA);
-        $order					= $orderPayment->getOrder();
-		$trans_to_refund_data	= [];
-		
-		if(!empty($ord_trans_addit_info) && is_array($ord_trans_addit_info)) {
-			foreach(array_reverse($ord_trans_addit_info) as $trans) {
-				if(
-					strtolower($trans[Payment::TRANSACTION_STATUS]) == 'approved'
-					&& in_array(strtolower($trans[Payment::TRANSACTION_TYPE]), ['sale', 'settle'])
-				) {
-					$trans_to_refund_data = $trans;
-					break;
-				}
-			}
-		}
-		
-//		$orderdetails = $order->loadByIncrementId($order->getId());
-//		foreach ($orderdetails->getInvoiceCollection() as $invoice)
+        /**
+         * TODO - we must create a fix, and refund based on Invoice ID not last allowed option!
+         */
+        
+        $orderPayment            = $this->orderPayment;
+        $ord_trans_addit_info    = $orderPayment->getAdditionalInformation(Payment::ORDER_TRANSACTIONS_DATA);
+        $order                    = $orderPayment->getOrder();
+        $trans_to_refund_data    = [];
+        
+        if (!empty($ord_trans_addit_info) && is_array($ord_trans_addit_info)) {
+            foreach (array_reverse($ord_trans_addit_info) as $trans) {
+                if (strtolower($trans[Payment::TRANSACTION_STATUS]) == 'approved'
+                    && in_array(strtolower($trans[Payment::TRANSACTION_TYPE]), ['sale', 'settle'])
+                ) {
+                    $trans_to_refund_data = $trans;
+                    break;
+                }
+            }
+        }
+        
+//        $orderdetails = $order->loadByIncrementId($order->getId());
+//        foreach ($orderdetails->getInvoiceCollection() as $invoice)
 //        {
-//			$this->config->createLog($invoice->getIncrementId(), 'refund $invoice_id'); 
+//            $this->config->createLog($invoice->getIncrementId(), 'refund $invoice_id');
 //        }
-		
+        
         if (empty($trans_to_refund_data[Payment::TRANSACTION_ID])) {
             $msg = 'Refund Error - Transaction ID is empty.';
             
-			$this->config->createLog($trans_to_refund_data, $msg);
+            $this->config->createLog($trans_to_refund_data, $msg);
             
-			throw new PaymentException(__($msg));
+            throw new PaymentException(__($msg));
         }
 
         /** @var OrderTransaction $transaction */
@@ -138,19 +138,18 @@ class Refund extends AbstractPayment implements RequestInterface
             $order->getId()
         );
 
-//		$sale_settle_params	= $orderPayment->getAdditionalInformation(Payment::SALE_SETTLE_PARAMS);
-//		$this->config->createLog($sale_settle_params, 'Refund sale_settle_params');
-		
+//        $sale_settle_params    = $orderPayment->getAdditionalInformation(Payment::SALE_SETTLE_PARAMS);
+//        $this->config->createLog($sale_settle_params, 'Refund sale_settle_params');
+        
         $payment_method = $orderPayment->getAdditionalInformation(Payment::TRANSACTION_PAYMENT_METHOD);
 
-        if (
-			Payment::APM_METHOD_CC == $trans_to_refund_data[Payment::TRANSACTION_PAYMENT_METHOD]
-			&& empty($trans_to_refund_data[Payment::TRANSACTION_AUTH_CODE])
-		) {
+        if (Payment::APM_METHOD_CC == $trans_to_refund_data[Payment::TRANSACTION_PAYMENT_METHOD]
+            && empty($trans_to_refund_data[Payment::TRANSACTION_AUTH_CODE])
+        ) {
             $msg = 'Refund Error - CC Transaction does not contain authorization code.';
             
-			$this->config->createLog($trans_to_refund_data, $msg);
-			
+            $this->config->createLog($trans_to_refund_data, $msg);
+            
             throw new PaymentException(__($msg));
         }
 

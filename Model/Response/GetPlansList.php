@@ -2,21 +2,18 @@
 
 namespace Nuvei\Payments\Model\Response;
 
-use Nuvei\Payments\Model\Config;
-use Nuvei\Payments\Lib\Http\Client\Curl;
-
-/**
- * Nuvei Payments open order response model.
- */
 class GetPlansList extends \Nuvei\Payments\Model\AbstractResponse implements \Nuvei\Payments\Model\ResponseInterface
 {
     protected $config;
     
+    private $file;
+    
     public function __construct(
         \Nuvei\Payments\Model\Logger $logger,
-        Config $config,
+        \Nuvei\Payments\Model\Config $config,
         $requestId,
-        Curl $curl
+        \Nuvei\Payments\Lib\Http\Client\Curl $curl,
+        \Magento\Framework\Filesystem\Io\File $file
     ) {
         parent::__construct(
             $logger,
@@ -25,7 +22,8 @@ class GetPlansList extends \Nuvei\Payments\Model\AbstractResponse implements \Nu
             $curl
         );
         
-        $this->config = $config;
+        $this->config   = $config;
+        $this->file     = $file;
     }
     
     /**
@@ -43,22 +41,19 @@ class GetPlansList extends \Nuvei\Payments\Model\AbstractResponse implements \Nu
             $tempPath    = $this->config->getTempPath();
 
             if (empty($body['status']) || $body['status'] != 'SUCCESS'
-                || empty($body['total']) || intval($body['total']) < 1
+                || empty($body['total']) || (int) $body['total'] < 1
             ) {
-                $this->config->createLog('GetPlansList error - status error or missing plans. Check the response above!');
+                $this->config->createLog('GetPlansList error - status error or missing plans. '
+                    . 'Check the response above!');
                 return $this;
             }
 
             $this->config->createLog('response process');
             
-            $fp = fopen(
-				$tempPath. DIRECTORY_SEPARATOR
-					. \Nuvei\Payments\Model\Config::PAYMENT_PLANS_FILE_NAME,
-				'w'
-			);
-			
-            fwrite($fp, json_encode($body));
-            fclose($fp);
+            $this->file->write(
+                $tempPath. DIRECTORY_SEPARATOR . \Nuvei\Payments\Model\Config::PAYMENT_PLANS_FILE_NAME,
+                json_encode($body)
+            );
         } catch (Exception $e) {
             $this->config->createLog($e->getMessage(), 'GetPlansList Exception');
         }

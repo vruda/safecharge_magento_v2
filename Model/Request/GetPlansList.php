@@ -51,9 +51,9 @@ class GetPlansList extends AbstractRequest implements RequestInterface
     {
         $params = array_merge_recursive(
             [
-				'planStatus'	=> 'ACTIVE',
-				'currency'		=> '',
-			],
+                'planStatus'    => 'ACTIVE',
+                'currency'        => '',
+            ],
             parent::getParams()
         );
         

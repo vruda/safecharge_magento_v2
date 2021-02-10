@@ -7,9 +7,6 @@ use Magento\Framework\Api\AbstractSimpleObject;
 
 /**
  * Nuvei Payments request log data object.
- *
- * @category Nuvei
- * @package  Nuvei_Payments
  */
 class RequestLog extends AbstractSimpleObject implements RequestLogInterface
 {

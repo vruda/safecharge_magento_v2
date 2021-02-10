@@ -44,14 +44,14 @@ class ConfigProvider extends CcGenericConfigProvider
     /**
      * ConfigProvider constructor.
      *
-     * @param CcConfig			$ccConfig
-     * @param PaymentHelper		$paymentHelper
-     * @param Config			$moduleConfig
-     * @param CustomerSession	$customerSession
-     * @param UrlInterface		$urlBuilder
-     * @param RequestFactory	$requestFactory
-     * @param array				$methodCodes
-	 * @param AssetRepository	$assetRepo
+     * @param CcConfig            $ccConfig
+     * @param PaymentHelper        $paymentHelper
+     * @param Config            $moduleConfig
+     * @param CustomerSession    $customerSession
+     * @param UrlInterface        $urlBuilder
+     * @param RequestFactory    $requestFactory
+     * @param array                $methodCodes
+     * @param AssetRepository    $assetRepo
      */
     public function __construct(
         CcConfig $ccConfig,
@@ -64,10 +64,10 @@ class ConfigProvider extends CcGenericConfigProvider
         \Magento\Store\Model\StoreManagerInterface $storeManager,
         \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
         \Magento\Checkout\Model\Cart $cart,
-		\Magento\Framework\View\Asset\Repository $assetRepo
+        \Magento\Framework\View\Asset\Repository $assetRepo
     ) {
         $this->moduleConfig     = $moduleConfig;
-        $this->customerSession	= $customerSession;
+        $this->customerSession    = $customerSession;
         $this->urlBuilder       = $urlBuilder;
         $this->requestFactory   = $requestFactory;
         $this->storeManager     = $storeManager;
@@ -110,23 +110,27 @@ class ConfigProvider extends CcGenericConfigProvider
                     'countryId'                     => $this->moduleConfig->getQuoteCountryCode(),
                     'redirectUrl'                   => $this->urlBuilder->getUrl('nuvei_payments/payment/redirect'),
                     'paymentApmUrl'                 => $this->urlBuilder->getUrl('nuvei_payments/payment/apm'),
-                    'getMerchantPaymentMethodsUrl'  => $this->urlBuilder->getUrl('nuvei_payments/payment/GetMerchantPaymentMethods'),
-                    'getUPOsUrl'					=> $this->urlBuilder->getUrl('nuvei_payments/payment/GetUpos'),
-					'getUpdateOrderUrl'				=> $this->urlBuilder->getUrl('nuvei_payments/payment/OpenOrder'),
-                    'updateQuotePM'					=> $this->urlBuilder->getUrl('nuvei_payments/payment/UpdateQuotePaymentMethod'),
-                    'getRemoveUpoUrl'				=> $this->urlBuilder->getUrl('nuvei_payments/payment/DeleteUpo'),
-					'checkoutLogoUrl'				=> $this->assetRepo->getUrl("Nuvei_Payments::images/nuvei.png"),
-					'useUPOs'						=> $this->moduleConfig->canUseUpos(),
+                    'getMerchantPaymentMethodsUrl'  => $this->urlBuilder
+                        ->getUrl('nuvei_payments/payment/GetMerchantPaymentMethods'),
+                    'getUPOsUrl'                    => $this->urlBuilder->getUrl('nuvei_payments/payment/GetUpos'),
+                    'getUpdateOrderUrl'             => $this->urlBuilder->getUrl('nuvei_payments/payment/OpenOrder'),
+                    'updateQuotePM'                 => $this->urlBuilder
+                        ->getUrl('nuvei_payments/payment/UpdateQuotePaymentMethod'),
+                    'getRemoveUpoUrl'               => $this->urlBuilder->getUrl('nuvei_payments/payment/DeleteUpo'),
+                    'checkoutLogoUrl'               => $this->assetRepo->getUrl("Nuvei_Payments::images/nuvei.png"),
+                    'useUPOs'                       => $this->moduleConfig->canUseUpos(),
                     // we need this for the WebSDK
                     'merchantSiteId'                => $this->moduleConfig->getMerchantSiteId(),
                     'merchantId'                    => $this->moduleConfig->getMerchantId(),
                     'isTestMode'                    => $this->moduleConfig->isTestModeEnabled(),
                     'locale'                        => substr($locale, 0, 2),
-//                    'total'                         => (string) number_format($this->cart->getQuote()->getGrandTotal(), 2, '.', ''),
-//                    'currency'                      => trim($this->storeManager->getStore()->getCurrentCurrencyCode()),
+//                    'total'                         => (string) number_format(
+//                          $this->cart->getQuote()->getGrandTotal(), 2, '.', ''),
+//                    'currency'                      => trim($this->storeManager
+//                          ->getStore()->getCurrentCurrencyCode()),
                     'webMasterId'                   => $this->moduleConfig->getSourcePlatformField(),
                     'sourceApplication'             => $this->moduleConfig->getSourceApplication(),
-                    'userTokenId'					=> $this->moduleConfig->getQuoteBillingAddress()['email'],
+                    'userTokenId'                    => $this->moduleConfig->getQuoteBillingAddress()['email'],
                 ],
             ],
         ];

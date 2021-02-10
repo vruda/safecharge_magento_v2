@@ -14,7 +14,7 @@ class Button extends \Magento\Config\Block\System\Config\Form\Field
     
     public function __construct(
         Context $context,
-		Config $config,
+        Config $config,
         array $data = []
     ) {
         parent::__construct($context, $data);
@@ -41,9 +41,9 @@ class Button extends \Magento\Config\Block\System\Config\Form\Field
     public function getButtonHtml()
     {
         $button = $this->getLayout()
-            ->createBlock('Magento\Backend\Block\Widget\Button')
+            ->createBlock(\Magento\Backend\Block\Widget\Button::class)
             ->setData([
-                'id' => 'get_plans_button',
+                'id'    => 'get_plans_button',
                 'label' => __('Collect Plans'),
             ]);
         

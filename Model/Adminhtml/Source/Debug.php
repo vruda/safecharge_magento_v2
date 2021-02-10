@@ -18,9 +18,9 @@ class Debug implements ArrayInterface
     {
         return [
             3 => __('Split the log by days'),
-			2 => __('Save in single file'),
-			1 => __('Save both files'),
-			0 => __('No'),
+            2 => __('Save in single file'),
+            1 => __('Save both files'),
+            0 => __('No'),
         ];
     }
 }

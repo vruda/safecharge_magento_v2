@@ -23,7 +23,7 @@ class ErrorOld extends Action
      * Error constructor.
      *
      * @param Context       $context
-     * @param ModuleConfig	$moduleConfig
+     * @param ModuleConfig    $moduleConfig
      */
     public function __construct(
         Context $context,

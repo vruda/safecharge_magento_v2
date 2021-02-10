@@ -22,10 +22,11 @@ class InstallSchema implements InstallSchemaInterface
      * @return void
      * @throws \Zend_Db_Exception
      */
-    public function install(SchemaSetupInterface $setup, ModuleContextInterface $context) {
+    public function install(SchemaSetupInterface $setup, ModuleContextInterface $context)
+    {
         $setup->startSetup();
 
-		// add plugin table
+        // add plugin table
         if (!$setup->tableExists('nuvei_payments_api_request_log')) {
             $table = $setup->getConnection()
                 ->newTable(
@@ -186,7 +187,7 @@ class InstallSchema implements InstallSchemaInterface
                     AdapterInterface::INDEX_TYPE_INDEX
                 );
         }
-		
+        
         $setup->endSetup();
     }
 }

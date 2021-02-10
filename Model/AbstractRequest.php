@@ -25,7 +25,6 @@ abstract class AbstractRequest extends AbstractApi
      * Payment gateway methods.
      */
     const PAYMENT_SETTLE_METHOD                 = 'settleTransaction';
-    const CREATE_USER_METHOD                    = 'createUser';
     const GET_USER_DETAILS_METHOD               = 'getUserDetails';
     const PAYMENT_REFUND_METHOD                 = 'refundTransaction';
     const PAYMENT_VOID_METHOD                   = 'voidTransaction';
@@ -34,10 +33,10 @@ abstract class AbstractRequest extends AbstractApi
     const PAYMENT_APM_METHOD                    = 'paymentAPM';
     const PAYMENT_UPO_APM_METHOD                = 'payment';
     const GET_MERCHANT_PAYMENT_METHODS_METHOD   = 'getMerchantPaymentMethods';
-    const GET_UPOS_METHOD						= 'getUserUPOs';
-    const DELETE_UPOS_METHOD					= 'deleteUPO';
+    const GET_UPOS_METHOD                       = 'GetUserUPOs';
+    const DELETE_UPOS_METHOD                    = 'DeleteUPO';
     const GET_MERCHANT_PAYMENT_PLANS_METHOD     = 'getPlansList';
-	const CREATE_SUBSCRIPTION_METHOD			= 'createSubscription';
+    const CREATE_SUBSCRIPTION_METHOD            = 'createSubscription';
 
     /**
      * @var Curl
@@ -278,12 +277,12 @@ abstract class AbstractRequest extends AbstractApi
             'clientRequestId'   => (string)$this->getRequestId(),
             'timeStamp'         => date('YmdHis'),
             'webMasterId'       => $this->config->getSourcePlatformField(),
-			'sourceApplication'	=> $this->config->getSourceApplication(),
+            'sourceApplication'    => $this->config->getSourceApplication(),
             'encoding'            => 'UTF-8',
-			'merchantDetails'   => [
-				'customField3' => 'Magento v.' . $this->config->getMagentoVersion(), // Magento version
-			],
-			
+            'merchantDetails'   => [
+                'customField3' => 'Magento v.' . $this->config->getMagentoVersion(), // Magento version
+            ],
+            
         ];
 
         return $params;
@@ -368,7 +367,11 @@ abstract class AbstractRequest extends AbstractApi
                             $this->config->createLog($key2, 'Limit');
                         }
 
-                        $params[$key1][$key2] = str_replace('\\', ' ', filter_var($new_val, $this->params_validation[$key2]['flag']));
+                        $params[$key1][$key2] = str_replace(
+                            '\\',
+                            ' ',
+                            filter_var($new_val, $this->params_validation[$key2]['flag'])
+                        );
                     }
                 }
             }
@@ -424,34 +427,34 @@ abstract class AbstractRequest extends AbstractApi
     }
 
     /**
-	 * Function sendRequest
-	 * 
-	 * @param bool $continue_process when is true return the response parameters to the sender
-	 * @param bool $accept_error_status when is true, do not throw exception if get error response
-	 * 
+     * Function sendRequest
+     *
+     * @param bool $continue_process when is true return the response parameters to the sender
+     * @param bool $accept_error_status when is true, do not throw exception if get error response
+     *
      * @return AbstractRequest
      * @throws \Magento\Framework\Exception\LocalizedException
      */
     protected function sendRequest($continue_process = false, $accept_error_status = false)
     {
-        $endpoint	= $this->getEndpoint();
+        $endpoint    = $this->getEndpoint();
         $headers    = $this->getHeaders();
         $params     = $this->prepareParams();
 
         $this->curl->setHeaders($headers);
 
         $this->config->createLog([
-			'Request Endpoint'	=> $endpoint,
-			'Request params'	=> $params
-		]);
-		
+            'Request Endpoint'    => $endpoint,
+            'Request params'    => $params
+        ]);
+        
         $this->curl->post($endpoint, $params);
-		
-		if($continue_process) {
-			// if success return array with the response parameters
-			return $this->checkResponse($accept_error_status);
-		}
-		
+        
+        if ($continue_process) {
+            // if success return array with the response parameters
+            return $this->checkResponse($accept_error_status);
+        }
+        
         return $this;
     }
 
@@ -484,68 +487,69 @@ abstract class AbstractRequest extends AbstractApi
      *
      * @return array
      */
+    /*
     protected function getOrderData(Order $order)
     {
-        /** @var OrderAddressInterface $billing */
-//        $billing = $order->getBillingAddress();
-//
-//        $orderData = [
-//            'userTokenId' => $order->getCustomerId() ?: $order->getCustomerEmail(),
-//            'clientUniqueId' => $order->getIncrementId(),
-//            'currency' => $order->getBaseCurrencyCode(),
-//            'amountDetails' => [
-//                'totalShipping' => (float)$order->getBaseShippingAmount(),
-//                'totalHandling' => (float)0,
-//                'totalDiscount' => (float)abs($order->getBaseDiscountAmount()),
-//                'totalTax' => (float)$order->getBaseTaxAmount(),
-//            ],
-//            'items' => [],
-//            'deviceDetails' => [
-//                'deviceType' => 'DESKTOP',
-//                'ipAddress' => $order->getRemoteIp(),
-//            ],
-//            'ipAddress' => $order->getRemoteIp(),
-//        ];
-//
-//        if ($billing !== null) {
-//            $state = $billing->getRegionCode();
-//            if (strlen($state) > 5) {
-//                $state = substr($state, 0, 2);
-//            }
-//            
-//            $orderData['billingAddress'] = [
-//                'firstName' => $billing->getFirstname(),
-//                'lastName'    => $billing->getLastname(),
-//                'address'    => is_array($billing->getStreet())
-//                    ? implode(' ', $billing->getStreet()) : '',
-//                'cell'        => '',
-//                'phone'        => $billing->getTelephone(),
-//                'zip'        => $billing->getPostcode(),
-//                'city'        => $billing->getCity(),
-//                'country'    => $billing->getCountryId(),
-//                'state'        => $state,
-//                'email'        => $billing->getEmail(),
-//            ];
-//            $orderData = array_merge($orderData, $orderData['billingAddress']);
-//        }
-//
-//        // Add items details.
-//        $orderItems = $order->getAllVisibleItems();
-//        foreach ($orderItems as $orderItem) {
-//            $price = (float)$orderItem->getBasePrice();
-//            if (!$price) {
-//                continue;
-//            }
-//
-//            $orderData['items'][] = [
-//                'name' => $orderItem->getName(),
-//                'price' => $price,
-//                'quantity' => (int)$orderItem->getQtyOrdered(),
-//            ];
-//        }
-//
-//        return $orderData;
+        $billing = $order->getBillingAddress();
+
+        $orderData = [
+            'userTokenId' => $order->getCustomerId() ?: $order->getCustomerEmail(),
+            'clientUniqueId' => $order->getIncrementId(),
+            'currency' => $order->getBaseCurrencyCode(),
+            'amountDetails' => [
+                'totalShipping' => (float)$order->getBaseShippingAmount(),
+                'totalHandling' => (float)0,
+                'totalDiscount' => (float)abs($order->getBaseDiscountAmount()),
+                'totalTax' => (float)$order->getBaseTaxAmount(),
+            ],
+            'items' => [],
+            'deviceDetails' => [
+                'deviceType' => 'DESKTOP',
+                'ipAddress' => $order->getRemoteIp(),
+            ],
+            'ipAddress' => $order->getRemoteIp(),
+        ];
+
+        if ($billing !== null) {
+            $state = $billing->getRegionCode();
+            if (strlen($state) > 5) {
+                $state = substr($state, 0, 2);
+            }
+
+            $orderData['billingAddress'] = [
+                'firstName' => $billing->getFirstname(),
+                'lastName'    => $billing->getLastname(),
+                'address'    => is_array($billing->getStreet())
+                    ? implode(' ', $billing->getStreet()) : '',
+                'cell'        => '',
+                'phone'        => $billing->getTelephone(),
+                'zip'        => $billing->getPostcode(),
+                'city'        => $billing->getCity(),
+                'country'    => $billing->getCountryId(),
+                'state'        => $state,
+                'email'        => $billing->getEmail(),
+            ];
+            $orderData = array_merge($orderData, $orderData['billingAddress']);
+        }
+
+        // Add items details.
+        $orderItems = $order->getAllVisibleItems();
+        foreach ($orderItems as $orderItem) {
+            $price = (float)$orderItem->getBasePrice();
+            if (!$price) {
+                continue;
+            }
+
+            $orderData['items'][] = [
+                'name' => $orderItem->getName(),
+                'price' => $price,
+                'quantity' => (int)$orderItem->getQtyOrdered(),
+            ];
+        }
+
+        return $orderData;
     }
+     */
 
     /**
      * @param Quote $quote
@@ -570,7 +574,7 @@ abstract class AbstractRequest extends AbstractApi
 //            'userTokenId' => $this->config->getUserEmail(),
             'clientUniqueId' => $quote->getReservedOrderId() ?: $this->config->getReservedOrderId(),
             'currency' => $quote->getBaseCurrencyCode(),
-            'amountDetails'	=> [
+            'amountDetails'    => [
                 'totalShipping' => (float)$shipping,
                 'totalHandling' => (float)0,
                 'totalDiscount' => (float)abs($quote->getBaseSubtotal() - $quote->getBaseSubtotalWithDiscount()),
@@ -623,43 +627,43 @@ abstract class AbstractRequest extends AbstractApi
 
         return $quoteData;
     }
-	
-	protected function checkResponse($accept_error_status)
+    
+    protected function checkResponse($accept_error_status)
     {
-		$resp_body		= json_decode($this->curl->getBody(), true);
-		$requestStatus	= $this->getResponseStatus($resp_body);
-		
+        $resp_body        = json_decode($this->curl->getBody(), true);
+        $requestStatus    = $this->getResponseStatus($resp_body);
+        
         $this->config->createLog([
-			'Request Status'	=> $requestStatus,
-			'Response data'		=> $resp_body
-		]);
+            'Request Status'    => $requestStatus,
+            'Response data'        => $resp_body
+        ]);
 
-		// we do not want exception when UpdateOrder return Error
+        // we do not want exception when UpdateOrder return Error
         if ($accept_error_status === false && $requestStatus === false) {
             throw new PaymentException($this->getErrorMessage(
                 !empty($resp_body['reason']) ? $resp_body['reason'] : ''
             ));
         }
-		
-		if(empty($resp_body['status'])) {
-			$this->config->createLog('Mising response status!');
+        
+        if (empty($resp_body['status'])) {
+            $this->config->createLog('Mising response status!');
             
             throw new PaymentException(__('Mising response status!'));
-		}
+        }
 
         return $resp_body;
     }
-	
-	private function getResponseStatus($body = [])
+    
+    private function getResponseStatus($body = [])
     {
-		$httpStatus = $this->curl->getStatus();
-		
+        $httpStatus = $this->curl->getStatus();
+        
         if ($httpStatus !== 200 && $httpStatus !== 100) {
             return false;
         }
-		
-        $responseStatus                = strtolower(!empty($body['status']) ? $body['status'] : '');
-        $responseTransactionStatus    = strtolower(!empty($body['transactionStatus']) ? $body['transactionStatus'] : '');
+        
+        $responseStatus             = strtolower(!empty($body['status']) ? $body['status'] : '');
+        $responseTransactionStatus  = strtolower(!empty($body['transactionStatus']) ? $body['transactionStatus'] : '');
         $responseTransactionType    = strtolower(!empty($body['transactionType']) ? $body['transactionType'] : '');
 
         if (!(
@@ -678,8 +682,8 @@ abstract class AbstractRequest extends AbstractApi
 
         return true;
     }
-	
-	/**
+    
+    /**
      * @return \Magento\Framework\Phrase
      */
     private function getErrorMessage($msg = '')
@@ -693,18 +697,17 @@ abstract class AbstractRequest extends AbstractApi
         
         return __('Request to payment gateway failed.');
     }
-	
-	/**
+    
+    /**
      * @return bool|string
      */
-	protected function getErrorReason()
+    protected function getErrorReason()
     {
         $body = $this->curl->getBody();
-		
+        
         if (!empty($body['gwErrorReason'])) {
             return $body['gwErrorReason'];
         }
         return false;
     }
-	
 }

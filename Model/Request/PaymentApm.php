@@ -26,8 +26,8 @@ class PaymentApm extends AbstractRequest implements RequestInterface
      * @var CheckoutSession
      */
     private $checkoutSession;
-	
-	private $paymentMethod;
+    
+    private $paymentMethod;
     private $paymentMethodFields;
     private $savePaymentMethod;
 
@@ -56,29 +56,27 @@ class PaymentApm extends AbstractRequest implements RequestInterface
         $this->requestFactory    = $requestFactory;
         $this->checkoutSession    = $checkoutSession;
     }
-	
-	public function process()
+    
+    public function process()
     {
         $resp = $this->sendRequest(true);
-		
-		$transactionStatus = '';
-		$return = [
-			'status' => $resp['status']
-		];
-		
-		$this->config->createLog($resp);
-		
+        
+        $transactionStatus = '';
+        $return = [
+            'status' => $resp['status']
+        ];
+        
+        $this->config->createLog($resp);
+        
         if (!empty($resp['transactionStatus'])) {
             $transactionStatus = (string) $resp['transactionStatus'];
         }
         
         if (!empty($resp['redirectURL'])) {
             $return['redirectUrl'] = (string) $resp['redirectURL'];
-        }
-		elseif(!empty($resp['paymentOption']['redirectUrl'])) {
-			$return['redirectUrl'] = (string) $resp['paymentOption']['redirectUrl'];
-		}
-		else {
+        } elseif (!empty($resp['paymentOption']['redirectUrl'])) {
+            $return['redirectUrl'] = (string) $resp['paymentOption']['redirectUrl'];
+        } else {
             switch ($transactionStatus) {
                 case 'APPROVED':
                     $return['redirectUrl'] = $this->config->getCallbackSuccessUrl();
@@ -95,9 +93,9 @@ class PaymentApm extends AbstractRequest implements RequestInterface
                     break;
             }
         }
-		
-		return $return;
-	}
+        
+        return $return;
+    }
 
     /**
      * @param string $paymentMethod
@@ -118,7 +116,7 @@ class PaymentApm extends AbstractRequest implements RequestInterface
         $this->paymentMethodFields = $paymentMethodFields;
         return $this;
     }
-	
+    
     public function setSavePaymentMethod($savePaymentMethod)
     {
         $this->savePaymentMethod = $savePaymentMethod;
@@ -153,37 +151,37 @@ class PaymentApm extends AbstractRequest implements RequestInterface
      */
     protected function getParams()
     {
-        $quote			= $this->checkoutSession->getQuote();
-        $quotePayment	= $quote->getPayment();
+        $quote            = $this->checkoutSession->getQuote();
+        $quotePayment    = $quote->getPayment();
 
-		$this->config->createLog(
-			$quotePayment->getAdditionalInformation(Payment::TRANSACTION_ORDER_ID),
-			'PaymentAPM TRANSACTION_ORDER_ID'
-		);
-		
+        $this->config->createLog(
+            $quotePayment->getAdditionalInformation(Payment::TRANSACTION_ORDER_ID),
+            'PaymentAPM TRANSACTION_ORDER_ID'
+        );
+        
         $reservedOrderId = $quotePayment->getAdditionalInformation(Payment::TRANSACTION_ORDER_ID)
             ?: $this->config->getReservedOrderId();
-		
-		$order_data			= $quotePayment->getAdditionalInformation(Payment::CREATE_ORDER_DATA);
-		$billing_address	= $this->config->getQuoteBillingAddress();
-		
-		if (empty($order_data) || empty($order_data['sessionToken'])) {
-			$msg = 'PaymentApm Error - missing Session Token.';
-			
-			$this->config->createLog($order_data, $msg);
-			
+        
+        $order_data            = $quotePayment->getAdditionalInformation(Payment::CREATE_ORDER_DATA);
+        $billing_address    = $this->config->getQuoteBillingAddress();
+        
+        if (empty($order_data) || empty($order_data['sessionToken'])) {
+            $msg = 'PaymentApm Error - missing Session Token.';
+            
+            $this->config->createLog($order_data, $msg);
+            
             throw new PaymentException(__($msg));
         }
-		
-		$this->config->createLog($order_data, 'PaymentAPM $order_data');
-		
+        
+        $this->config->createLog($order_data, 'PaymentAPM $order_data');
+        
         $params = array_merge_recursive(
             $this->getQuoteData($quote),
             [
                 'sessionToken'          => $order_data['sessionToken'],
                 'amount'                => (float)$quote->getGrandTotal(),
                 
-				'urlDetails'            => [
+                'urlDetails'            => [
                     'successUrl'        => $this->config->getCallbackSuccessUrl(),
                     'failureUrl'        => $this->config->getCallbackErrorUrl(),
                     'pendingUrl'        => $this->config->getCallbackPendingUrl(),
@@ -191,25 +189,24 @@ class PaymentApm extends AbstractRequest implements RequestInterface
                     'notificationUrl'    => $this->config->getCallbackDmnUrl($reservedOrderId),
                 ],
                 
-				'paymentMethod'            => $this->paymentMethod,
+                'paymentMethod'            => $this->paymentMethod,
             ]
         );
-		
-		$params['clientUniqueId'] = $this->config->setClientUniqueId($reservedOrderId);
-		
-		// UPO APM
-		if(is_numeric($this->paymentMethod)) {
-			$params['paymentOption']['userPaymentOptionId'] = $this->paymentMethod;
-			$params['userTokenId'] = $billing_address['email'];
-		}
-		elseif(!empty($this->paymentMethodFields)) {
-			$params['userAccountDetails'] = $this->paymentMethodFields;
-		}
-		
-		// APM
-		if(intval($this->savePaymentMethod) === 1) {
-			$params['userTokenId'] = $billing_address['email'];
-		}
+        
+        $params['clientUniqueId'] = $this->config->setClientUniqueId($reservedOrderId);
+        
+        // UPO APM
+        if (is_numeric($this->paymentMethod)) {
+            $params['paymentOption']['userPaymentOptionId'] = $this->paymentMethod;
+            $params['userTokenId'] = $billing_address['email'];
+        } elseif (!empty($this->paymentMethodFields)) {
+            $params['userAccountDetails'] = $this->paymentMethodFields;
+        }
+        
+        // APM
+        if ((int) $this->savePaymentMethod === 1) {
+            $params['userTokenId'] = $billing_address['email'];
+        }
 
         $params = array_merge_recursive($params, parent::getParams());
 

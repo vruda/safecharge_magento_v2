@@ -43,46 +43,44 @@ class Settle extends AbstractPayment implements RequestInterface
      */
     protected function getParams()
     {
-        $orderPayment			= $this->orderPayment;
-        $order					= $orderPayment->getOrder();
-		$ord_trans_addit_info	= $orderPayment->getAdditionalInformation(Payment::ORDER_TRANSACTIONS_DATA);
-		$trans_to_settle		= [];
-		
-		if(!empty($ord_trans_addit_info) && is_array($ord_trans_addit_info)) {
-			foreach(array_reverse($ord_trans_addit_info) as $trans) {
-				if(
-					strtolower($trans[Payment::TRANSACTION_STATUS]) == 'approved'
-					&& strtolower($trans[Payment::TRANSACTION_TYPE]) == 'auth'
-				) {
-					$trans_to_settle = $trans;
-					break;
-				}
-			}
-		}
-		
+        $orderPayment            = $this->orderPayment;
+        $order                    = $orderPayment->getOrder();
+        $ord_trans_addit_info    = $orderPayment->getAdditionalInformation(Payment::ORDER_TRANSACTIONS_DATA);
+        $trans_to_settle        = [];
+        
+        if (!empty($ord_trans_addit_info) && is_array($ord_trans_addit_info)) {
+            foreach (array_reverse($ord_trans_addit_info) as $trans) {
+                if (strtolower($trans[Payment::TRANSACTION_STATUS]) == 'approved'
+                    && strtolower($trans[Payment::TRANSACTION_TYPE]) == 'auth'
+                ) {
+                    $trans_to_settle = $trans;
+                    break;
+                }
+            }
+        }
+        
 //        $auth_data      = $orderPayment->getAdditionalInformation(Payment::AUTH_PARAMS);
-//		$nuvei_data		= $orderPayment->getAdditionalInformation('nuvei');
-		
-        if (
-			empty($trans_to_settle[Payment::TRANSACTION_AUTH_CODE])
-			|| empty($trans_to_settle[Payment::TRANSACTION_ID])
-		) {
-			$msg = 'Settle Error - Missing Auth paramters.';
-			
+//        $nuvei_data        = $orderPayment->getAdditionalInformation('nuvei');
+        
+        if (empty($trans_to_settle[Payment::TRANSACTION_AUTH_CODE])
+            || empty($trans_to_settle[Payment::TRANSACTION_ID])
+        ) {
+            $msg = 'Settle Error - Missing Auth paramters.';
+            
             $this->config->createLog($trans_to_settle, $msg);
             
             throw new PaymentException(__($msg));
         }
-		
-//		$invCollection	= $order->getInvoiceCollection();
-//		$inv_ids		= [];
-//		
-//		if(!empty($invCollection) && is_array($invCollection)) {
-//			foreach ($invCollection as $invoice) {
-//				$inv_ids[] = $invoice->getId();
-//			}
-//		}
-		
+        
+//        $invCollection    = $order->getInvoiceCollection();
+//        $inv_ids        = [];
+//
+//        if(!empty($invCollection) && is_array($invCollection)) {
+//            foreach ($invCollection as $invoice) {
+//                $inv_ids[] = $invoice->getId();
+//            }
+//        }
+        
         $getIncrementId = $order->getIncrementId();
 
         $params = [

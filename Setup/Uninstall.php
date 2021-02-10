@@ -8,13 +8,13 @@ use Magento\Framework\Setup\ModuleContextInterface;
 
 class Uninstall implements UninstallInterface
 {
-	public function uninstall(SchemaSetupInterface $setup, ModuleContextInterface $context)
-	{
-		$installer = $setup;
-		$installer->startSetup();
+    public function uninstall(SchemaSetupInterface $setup, ModuleContextInterface $context)
+    {
+        $installer = $setup;
+        $installer->startSetup();
 
-		$installer->getConnection()->dropTable($installer->getTable('nuvei_payments_api_request_log'));
+        $installer->getConnection()->dropTable($installer->getTable('nuvei_payments_api_request_log'));
 
-		$installer->endSetup();
-	}
+        $installer->endSetup();
+    }
 }

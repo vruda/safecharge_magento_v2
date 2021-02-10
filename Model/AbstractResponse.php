@@ -22,13 +22,13 @@ abstract class AbstractResponse extends AbstractApi
     const PAYMENT_VOID_HANDLER                  = 'payment_void';
     const PAYMENT_APM_HANDLER                   = 'payment_apm';
     const GET_MERCHANT_PAYMENT_METHODS_HANDLER  = 'get_merchant_payment_methods';
-    const GET_UPOS_HANDLER						= 'get_user_upos';
+    const GET_UPOS_HANDLER                      = 'get_user_upos';
     const GET_MERCHANT_PAYMENT_PLANS_HANDLER    = 'get_plans_list';
 
     /**
      * Response result const.
      */
-    const STATUS_SUCCESS	= 1;
+    const STATUS_SUCCESS    = 1;
     const STATUS_FAILED     = 2;
 
     /**
@@ -143,8 +143,8 @@ abstract class AbstractResponse extends AbstractApi
 
         $body = $this->getBody();
 
-        $responseStatus                = strtolower(!empty($body['status']) ? $body['status'] : '');
-        $responseTransactionStatus    = strtolower(!empty($body['transactionStatus']) ? $body['transactionStatus'] : '');
+        $responseStatus             = strtolower(!empty($body['status']) ? $body['status'] : '');
+        $responseTransactionStatus  = strtolower(!empty($body['transactionStatus']) ? $body['transactionStatus'] : '');
         $responseTransactionType    = strtolower(!empty($body['transactionType']) ? $body['transactionType'] : '');
 
         if (!(

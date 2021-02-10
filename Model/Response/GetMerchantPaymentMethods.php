@@ -65,7 +65,7 @@ class GetMerchantPaymentMethods extends AbstractResponse implements ResponseInte
         parent::process();
 
         $body               = $this->getBody();
-        $this->sessionToken	= (string) $body['sessionToken'];
+        $this->sessionToken    = (string) $body['sessionToken'];
         $langCode           = $this->getStoreLocale(true);
         $countryCode        = $countryCode ?: $this->config->getQuoteCountryCode();
         
@@ -73,19 +73,19 @@ class GetMerchantPaymentMethods extends AbstractResponse implements ResponseInte
             if (!$countryCode && isset($method["paymentMethod"]) && $method["paymentMethod"] !== 'cc_card') {
                 continue;
             }
-			
-			// when we have product with a Payment plan, skip all APMs
-			/*
-			if(
-				$this->config->getNuveiUseCcOnly()
-				&& !empty($method["paymentMethod"])
-				&& $method["paymentMethod"] !== 'cc_card'
-			) {
-				continue;
-			}
-			 */
             
-            $default_dnames	= [];
+            // when we have product with a Payment plan, skip all APMs
+            /*
+            if(
+                $this->config->getNuveiUseCcOnly()
+                && !empty($method["paymentMethod"])
+                && $method["paymentMethod"] !== 'cc_card'
+            ) {
+                continue;
+            }
+             */
+            
+            $default_dnames    = [];
             $locale_dnames  = [];
             $pm             = $method;
             
@@ -158,22 +158,21 @@ class GetMerchantPaymentMethods extends AbstractResponse implements ResponseInte
             } elseif (!empty($method["logoURL"])) {
                 $pm["logoURL"] = preg_replace('/\.svg\.svg$/', '.svg', $method["logoURL"]);
             }
-			
-			// fix for the Neteller field
-			if (
-				'apmgw_Neteller' == $method["paymentMethod"]
-				&& 1 == count($method['fields'])
-				&& 'nettelerAccount' == $method['fields'][0]['name']
-			) {
-				$pm['fields'][0]['name'] = 'Neteller Account';
-				$pm['fields'][0]['type'] = 'email';
-			}
+            
+            // fix for the Neteller field
+            if ('apmgw_Neteller' == $method["paymentMethod"]
+                && 1 == count($method['fields'])
+                && 'nettelerAccount' == $method['fields'][0]['name']
+            ) {
+                $pm['fields'][0]['name'] = 'Neteller Account';
+                $pm['fields'][0]['type'] = 'email';
+            }
             
             if (!empty($locale_dnames)) {
-                $pm["paymentMethodDisplayName"]	= $locale_dnames;
-                $this->scPaymentMethods[]		= $pm;
+                $pm["paymentMethodDisplayName"]    = $locale_dnames;
+                $this->scPaymentMethods[]        = $pm;
             } elseif (!empty($default_dnames)) {
-                $pm["paymentMethodDisplayName"]	= $default_dnames;
+                $pm["paymentMethodDisplayName"]    = $default_dnames;
                 $this->scPaymentMethods[]       = $pm;
             }
         }

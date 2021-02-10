@@ -17,7 +17,7 @@ class Mode implements ArrayInterface
     public function toOptionArray()
     {
         return [
-			''			=> __('Please, select an option...'),
+            ''            => __('Please, select an option...'),
             'live'      => __('Live'),
             'sandbox'    => __('Sandbox'),
         ];

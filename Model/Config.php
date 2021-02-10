@@ -15,37 +15,37 @@ use Magento\Store\Model\StoreManagerInterface;
  */
 class Config
 {
-    const MODULE_NAME						= 'Nuvei_Payments';
-	
-    const PAYMENT_PLANS_ATTR_NAME			= 'nuvei_payment_plans';
-    const PAYMENT_PLANS_ATTR_LABEL			= 'Nuvei Payment Plans';
-	const PAYMENT_PLANS_FILE_NAME			= 'nuvei_payment_plans.json';
-	
-	const PAYMENT_SUBS_GROUP				= 'Nuvei Subscription';
-    const PAYMENT_SUBS_ENABLE_LABEL			= 'Enable Subscription';
-    const PAYMENT_SUBS_ENABLE				= 'nuvei_sub_enabled';
-    const PAYMENT_SUBS_INTIT_AMOUNT_LABEL	= 'Initial Amount';
-    const PAYMENT_SUBS_INTIT_AMOUNT			= 'nuvei_sub_init_amount';
-	const PAYMENT_SUBS_REC_AMOUNT_LABEL		= 'Recurring Amount';
-	const PAYMENT_SUBS_REC_AMOUNT			= 'nuvei_sub_rec_amount';
-	
-	const PAYMENT_SUBS_RECURR_UNITS			= 'nuvei_sub_recurr_units';
-	const PAYMENT_SUBS_RECURR_UNITS_LABEL	= 'Recurring Units';
-	const PAYMENT_SUBS_RECURR_PERIOD		= 'nuvei_sub_recurr_period';
-	const PAYMENT_SUBS_RECURR_PERIOD_LABEL	= 'Recurring Period';
-	
-	const PAYMENT_SUBS_TRIAL_UNITS			= 'nuvei_sub_trial_units';
-	const PAYMENT_SUBS_TRIAL_UNITS_LABEL	= 'Trial Units';
-	const PAYMENT_SUBS_TRIAL_PERIOD			= 'nuvei_sub_trial_period';
-	const PAYMENT_SUBS_TRIAL_PERIOD_LABEL	= 'Trial Period';
-	
-	const PAYMENT_SUBS_END_AFTER_UNITS			= 'nuvei_sub_end_after_units';
-	const PAYMENT_SUBS_END_AFTER_UNITS_LABEL	= 'End After Units';
-	const PAYMENT_SUBS_END_AFTER_PERIOD			= 'nuvei_sub_end_after_period';
-	const PAYMENT_SUBS_END_AFTER_PERIOD_LABEL	= 'End After Period';
-	
-	const PAYMENT_SUBS_STORE_DESCR			= 'nuvei_sub_store_decr';
-	const PAYMENT_SUBS_STORE_DESCR_LABEL	= 'Subscription details';
+    const MODULE_NAME                        = 'Nuvei_Payments';
+    
+    const PAYMENT_PLANS_ATTR_NAME            = 'nuvei_payment_plans';
+    const PAYMENT_PLANS_ATTR_LABEL            = 'Nuvei Payment Plans';
+    const PAYMENT_PLANS_FILE_NAME            = 'nuvei_payment_plans.json';
+    
+    const PAYMENT_SUBS_GROUP                = 'Nuvei Subscription';
+    const PAYMENT_SUBS_ENABLE_LABEL            = 'Enable Subscription';
+    const PAYMENT_SUBS_ENABLE                = 'nuvei_sub_enabled';
+    const PAYMENT_SUBS_INTIT_AMOUNT_LABEL    = 'Initial Amount';
+    const PAYMENT_SUBS_INTIT_AMOUNT            = 'nuvei_sub_init_amount';
+    const PAYMENT_SUBS_REC_AMOUNT_LABEL        = 'Recurring Amount';
+    const PAYMENT_SUBS_REC_AMOUNT            = 'nuvei_sub_rec_amount';
+    
+    const PAYMENT_SUBS_RECURR_UNITS            = 'nuvei_sub_recurr_units';
+    const PAYMENT_SUBS_RECURR_UNITS_LABEL    = 'Recurring Units';
+    const PAYMENT_SUBS_RECURR_PERIOD        = 'nuvei_sub_recurr_period';
+    const PAYMENT_SUBS_RECURR_PERIOD_LABEL    = 'Recurring Period';
+    
+    const PAYMENT_SUBS_TRIAL_UNITS            = 'nuvei_sub_trial_units';
+    const PAYMENT_SUBS_TRIAL_UNITS_LABEL    = 'Trial Units';
+    const PAYMENT_SUBS_TRIAL_PERIOD            = 'nuvei_sub_trial_period';
+    const PAYMENT_SUBS_TRIAL_PERIOD_LABEL    = 'Trial Period';
+    
+    const PAYMENT_SUBS_END_AFTER_UNITS            = 'nuvei_sub_end_after_units';
+    const PAYMENT_SUBS_END_AFTER_UNITS_LABEL    = 'End After Units';
+    const PAYMENT_SUBS_END_AFTER_PERIOD            = 'nuvei_sub_end_after_period';
+    const PAYMENT_SUBS_END_AFTER_PERIOD_LABEL    = 'End After Period';
+    
+    const PAYMENT_SUBS_STORE_DESCR            = 'nuvei_sub_store_decr';
+    const PAYMENT_SUBS_STORE_DESCR_LABEL    = 'Subscription details';
     
     /**
      * Scope config object.
@@ -113,8 +113,11 @@ class Config
     private $httpHeader;
     private $remoteIp;
     private $customerSession;
-	
-	private $clientUniqueIdPostfix = '_sandbox_apm'; // postfix for Sandbox APM payments
+    private $cookie;
+    private $file;
+    private $driverManager;
+    
+    private $clientUniqueIdPostfix = '_sandbox_apm'; // postfix for Sandbox APM payments
 
     /**
      * Object initialization.
@@ -137,7 +140,10 @@ class Config
         \Magento\Framework\Filesystem\DirectoryList $directory,
         \Magento\Framework\HTTP\Header $httpHeader,
         \Magento\Framework\HTTP\PhpEnvironment\RemoteAddress $remoteIp,
-		\Magento\Customer\Model\Session $customerSession
+        \Magento\Customer\Model\Session $customerSession,
+        \Magento\Framework\Stdlib\CookieManagerInterface $cookie,
+        \Magento\Framework\Filesystem\Io\File $file,
+        \Magento\Framework\Filesystem\DriverInterface $driverManager
     ) {
         $this->scopeConfig = $scopeConfig;
         $this->storeManager = $storeManager;
@@ -149,10 +155,13 @@ class Config
         $this->remoteIp = $remoteIp;
         $this->customerSession = $customerSession;
 
-        $this->storeId      = $this->getStoreId();
-        $this->versionNum	= intval(str_replace('.', '', $this->productMetadata->getVersion()));
-        $this->formKey      = $formKey;
-        $this->directory    = $directory;
+        $this->storeId          = $this->getStoreId();
+        $this->versionNum       = (int) str_replace('.', '', $this->productMetadata->getVersion());
+        $this->formKey          = $formKey;
+        $this->directory        = $directory;
+        $this->cookie           = $cookie;
+        $this->file             = $file;
+        $this->driverManager    = $driverManager;
     }
 
     /**
@@ -170,91 +179,91 @@ class Config
         if (! $this->isDebugEnabled()) {
             return;
         }
-		
-		$logsPath	= $this->directory->getPath('log');
-		$d			= $data;
-		$string		= '';
-		
+        
+        $logsPath    = $this->directory->getPath('log');
+        $d            = $data;
+        $string        = '';
+        
         if (!empty($data)) {
             if (is_array($data)) {
-				// do not log accounts if on prod
-				if (!$this->isTestModeEnabled()) {
-					if (isset($data['userAccountDetails']) && is_array($data['userAccountDetails'])) {
-						$data['userAccountDetails'] = 'account details';
-					}
-					if (isset($data['userPaymentOption']) && is_array($data['userPaymentOption'])) {
-						$data['userPaymentOption'] = 'user payment options details';
-					}
-					if (isset($data['paymentOption']) && is_array($data['paymentOption'])) {
-						$data['paymentOption'] = 'payment options details';
-					}
-				}
-				// do not log accounts if on prod
-				
-				if (!empty($data['paymentMethods']) && is_array($data['paymentMethods'])) {
-					$data['paymentMethods'] = json_encode($data['paymentMethods']);
-				}
-				if (!empty($data['Response data']['paymentMethods']) && is_array($data['Response data']['paymentMethods'])) {
-					$data['Response data']['paymentMethods'] = json_encode($data['Response data']['paymentMethods']);
-				}
-				
-				if (!empty($data['plans']) && is_array($data['plans'])) {
+                // do not log accounts if on prod
+                if (!$this->isTestModeEnabled()) {
+                    if (isset($data['userAccountDetails']) && is_array($data['userAccountDetails'])) {
+                        $data['userAccountDetails'] = 'account details';
+                    }
+                    if (isset($data['userPaymentOption']) && is_array($data['userPaymentOption'])) {
+                        $data['userPaymentOption'] = 'user payment options details';
+                    }
+                    if (isset($data['paymentOption']) && is_array($data['paymentOption'])) {
+                        $data['paymentOption'] = 'payment options details';
+                    }
+                }
+                // do not log accounts if on prod
+                
+                if (!empty($data['paymentMethods']) && is_array($data['paymentMethods'])) {
+                    $data['paymentMethods'] = json_encode($data['paymentMethods']);
+                }
+                if (!empty($data['Response data']['paymentMethods'])
+                    && is_array($data['Response data']['paymentMethods'])
+                ) {
+                    $data['Response data']['paymentMethods'] = json_encode($data['Response data']['paymentMethods']);
+                }
+                
+                if (!empty($data['plans']) && is_array($data['plans'])) {
                     $data['plans'] = json_encode($data['plans']);
                 }
 
-				$d = $this->isTestModeEnabled() ? print_r($data, true) : json_encode($data);
-            } 
-			elseif(is_object($data)) {
-				$d = $this->isTestModeEnabled() ? print_r($data, true) : json_encode($data);
-			}
-			elseif (is_bool($data)) {
+                $d = $this->isTestModeEnabled() ? print_r($data, true) : json_encode($data);
+            } elseif (is_object($data)) {
+                $d = $this->isTestModeEnabled() ? print_r($data, true) : json_encode($data);
+            } elseif (is_bool($data)) {
                 $d = $data ? 'true' : 'false';
             }
         } else {
             $d = 'Data is Empty.';
         }
-		
-		$string .= '[v.' . $this->moduleList->getOne(self::MODULE_NAME)['setup_version'] . '] | ';
-		
-		if (!empty($title)) {
-			if (is_string($title)) {
-				$string .= $title;
-			} else {
-				$string .= "\r\n" . ( $this->isTestModeEnabled()
-					? json_encode($title, JSON_PRETTY_PRINT) : json_encode($title) );
-			}
-			
-			$string .= "\r\n";
-		}
+        
+        $string .= '[v.' . $this->moduleList->getOne(self::MODULE_NAME)['setup_version'] . '] | ';
+        
+        if (!empty($title)) {
+            if (is_string($title)) {
+                $string .= $title;
+            } else {
+                $string .= "\r\n" . ( $this->isTestModeEnabled()
+                    ? json_encode($title, JSON_PRETTY_PRINT) : json_encode($title) );
+            }
+            
+            $string .= "\r\n";
+        }
 
-		$string .= $d . "\r\n\r\n";
+        $string .= $d . "\r\n\r\n";
         
         try {
-			switch ($this->isDebugEnabled(true)) {
-				case 3: // save log file per days
-					$log_file_name = 'Nuvei-' . date('Y-m-d');
-					break;
-				
-				case 2: // save single log file
-					$log_file_name = 'Nuvei';
-					break;
-				
-				case 1: // save both files
-					$log_file_name = 'Nuvei';
-					
-					file_put_contents(
-						$logsPath . DIRECTORY_SEPARATOR . 'Nuvei-' . date('Y-m-d') . '.txt',
-						date('H:i:s', time()) . ': ' . $string,
-						FILE_APPEND
-					);
-					break;
-				
-				default:
-					return;
-			}
-			
-            if (is_dir($logsPath)) {
-                return file_put_contents(
+            switch ($this->isDebugEnabled(true)) {
+                case 3: // save log file per days
+                    $log_file_name = 'Nuvei-' . date('Y-m-d');
+                    break;
+                
+                case 2: // save single log file
+                    $log_file_name = 'Nuvei';
+                    break;
+                
+                case 1: // save both files
+                    $log_file_name = 'Nuvei';
+                    
+                    $this->file->write(
+                        $logsPath . DIRECTORY_SEPARATOR . 'Nuvei-' . date('Y-m-d') . '.txt',
+                        date('H:i:s', time()) . ': ' . $string,
+                        FILE_APPEND
+                    );
+                    break;
+                
+                default:
+                    return;
+            }
+            
+            if ($this->driverManager->isDirectory($logsPath)) {
+                return $this->file->write(
                     $logsPath . DIRECTORY_SEPARATOR . $log_file_name . '.txt',
                     date('H:i:s', time()) . ': ' . $string,
                     FILE_APPEND
@@ -290,9 +299,11 @@ class Config
      */
     public function getDeviceDetails()
     {
-        $SC_DEVICES            = ['iphone', 'ipad', 'android', 'silk', 'blackberry', 'touch', 'linux', 'windows', 'mac'];
-        $SC_BROWSERS        = ['ucbrowser', 'firefox', 'chrome', 'opera', 'msie', 'edge', 'safari', 'blackberry', 'trident'];
-        $SC_DEVICES_TYPES    = ['macintosh', 'tablet', 'mobile', 'tv', 'windows', 'linux', 'tv', 'smarttv', 'googletv', 'appletv', 'hbbtv', 'pov_tv', 'netcast.tv', 'bluray'];
+        $SC_DEVICES         = ['iphone', 'ipad', 'android', 'silk', 'blackberry', 'touch', 'linux', 'windows', 'mac'];
+        $SC_BROWSERS        = ['ucbrowser', 'firefox', 'chrome', 'opera', 'msie', 'edge', 'safari',
+            'blackberry', 'trident'];
+        $SC_DEVICES_TYPES   = ['macintosh', 'tablet', 'mobile', 'tv', 'windows', 'linux', 'tv', 'smarttv',
+            'googletv', 'appletv', 'hbbtv', 'pov_tv', 'netcast.tv', 'bluray'];
         $SC_DEVICES_OS        = ['android', 'windows', 'linux', 'mac os'];
         
         $device_details = [
@@ -486,50 +497,50 @@ class Config
 
         return true;
     }
-	
-	public function canUseUpos()
-	{
-		if($this->customerSession->isLoggedIn() && 1 == $this->getConfigValue('use_upos')) {
-			return true;
-		}
-		
-		return false;
-	}
+    
+    public function canUseUpos()
+    {
+        if ($this->customerSession->isLoggedIn() && 1 == $this->getConfigValue('use_upos')) {
+            return true;
+        }
+        
+        return false;
+    }
 
     /**
      * Return bool value depends of that if payment method debug mode
      * is enabled or not.
      *
-	 * @param bool $return_value - by default is false, set true to get int value
+     * @param bool $return_value - by default is false, set true to get int value
      * @return bool
      */
     public function isDebugEnabled($return_value = false)
     {
-        if($return_value) {
-			return intval($this->getConfigValue('debug'));
-		}
-		
-		if(intval($this->getConfigValue('debug')) == 0) {
-			return false;
-		}
+        if ($return_value) {
+            return (int) $this->getConfigValue('debug');
+        }
         
-		return true;
+        if ((int) $this->getConfigValue('debug') == 0) {
+            return false;
+        }
+        
+        return true;
     }
-	
-	public function useUPOs()
-	{
-		return (bool)$this->getConfigValue('use_upos');
-	}
+    
+    public function useUPOs()
+    {
+        return (bool)$this->getConfigValue('use_upos');
+    }
 
     public function getSourcePlatformField()
     {
         return "Magento Plugin {$this->moduleList->getOne(self::MODULE_NAME)['setup_version']}";
     }
-	
-	public function getMagentoVersion()
-	{
-		return $this->productMetadata->getVersion();
-	}
+    
+    public function getMagentoVersion()
+    {
+        return $this->productMetadata->getVersion();
+    }
 
     /**
      * Return full endpoint;
@@ -551,11 +562,11 @@ class Config
      */
     public function getCallbackSuccessUrl()
     {
-		$params = [
-			'quote'		=> $this->checkoutSession->getQuoteId(),
-			'form_key'	=> $this->formKey->getFormKey(),
-		];
-		
+        $params = [
+            'quote'        => $this->checkoutSession->getQuoteId(),
+            'form_key'    => $this->formKey->getFormKey(),
+        ];
+        
         if ($this->versionNum != 0 && $this->versionNum < 220) {
             return $this->urlBuilder->getUrl(
                 'nuvei_payments/payment/callback_completeold',
@@ -575,9 +586,9 @@ class Config
     public function getCallbackPendingUrl()
     {
         $params = [
-			'quote'		=> $this->checkoutSession->getQuoteId(),
-			'form_key'	=> $this->formKey->getFormKey(),
-		];
+            'quote'        => $this->checkoutSession->getQuoteId(),
+            'form_key'    => $this->formKey->getFormKey(),
+        ];
         
         if ($this->versionNum != 0 && $this->versionNum < 220) {
             return $this->urlBuilder->getUrl(
@@ -598,9 +609,9 @@ class Config
     public function getCallbackErrorUrl()
     {
         $params = [
-			'quote'		=> $this->checkoutSession->getQuoteId(),
-			'form_key'	=> $this->formKey->getFormKey(),
-		];
+            'quote'        => $this->checkoutSession->getQuoteId(),
+            'form_key'    => $this->formKey->getFormKey(),
+        ];
 
         if ($this->versionNum != 0 && $this->versionNum < 220) {
                 return $this->urlBuilder->getUrl(
@@ -622,21 +633,16 @@ class Config
     {
         $quoteId    = $this->checkoutSession->getQuoteId();
         $url        =  $this->getStoreManager()
-            ->getStore((is_null($incrementId)) ? $this->storeId : $storeId)
+            ->getStore(null === $incrementId ? $this->storeId : $storeId)
             ->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_WEB);
+        $order_id   = null === $incrementId ? $this->getReservedOrderId() : $incrementId;
         
         if ($this->versionNum != 0 && $this->versionNum < 220) {
-            return $url
-                . 'nuvei_payments/payment/callback_dmnold/order/'
-                . (is_null($incrementId) ? $this->getReservedOrderId() : $incrementId)
-                . '?quote=' . $quoteId;
+            return $url . 'nuvei_payments/payment/callback_dmnold/order/' . $order_id . '?quote=' . $quoteId;
         }
         
-        return $url
-            . 'nuvei_payments/payment/callback_dmn/order/'
-            . (is_null($incrementId) ? $this->getReservedOrderId() : $incrementId)
-            . '?form_key=' . $this->formKey->getFormKey()
-            . '&quote=' . $quoteId;
+        return $url . 'nuvei_payments/payment/callback_dmn/order/' . $order_id
+            . '?form_key=' . $this->formKey->getFormKey() . '&quote=' . $quoteId;
     }
 
     /**
@@ -656,7 +662,7 @@ class Config
     {
         return (($quote = $this->checkoutSession->getQuote())) ? $quote->getId() : null;
     }
-	
+    
     public function getReservedOrderId()
     {
         $reservedOrderId = $this->checkoutSession->getQuote()->getReservedOrderId();
@@ -678,155 +684,160 @@ class Config
 
     public function getQuoteCountryCode()
     {
-        $quote			= $this->checkoutSession->getQuote();
-        $billing		= ($quote) ? $quote->getBillingAddress() : null;
-        $countryCode	= ($billing) ? $billing->getCountryId() : null;
+        $quote            = $this->checkoutSession->getQuote();
+        $billing        = ($quote) ? $quote->getBillingAddress() : null;
+        $countryCode    = ($billing) ? $billing->getCountryId() : null;
         
-		if (!$countryCode) {
-            $shipping		= ($quote) ? $quote->getShippingAddress() : null;
-            $countryCode	= ($shipping && $shipping->getSameAsBilling()) ? $shipping->getCountryId() : null;
+        if (!$countryCode) {
+            $shipping        = ($quote) ? $quote->getShippingAddress() : null;
+            $countryCode    = ($shipping && $shipping->getSameAsBilling()) ? $shipping->getCountryId() : null;
         }
-		
-		if (!$countryCode) {
-			$countryCode = $this->getDefaultCountry();
-		}
         
-		return $countryCode;
+        if (!$countryCode) {
+            $countryCode = $this->getDefaultCountry();
+        }
+        
+        return $countryCode;
     }
 
     public function getQuoteBaseCurrency()
     {
         $quote = $this->checkoutSession->getQuote()->getBaseCurrencyCode();
     }
-	
-	public function getQuoteBillingAddress() {
-		$quote			= $this->checkoutSession->getQuote();
-		$billingAddress	= $quote->getBillingAddress();
-			
-		$b_f_name = $billingAddress->getFirstname();
+    
+    public function getQuoteBillingAddress()
+    {
+        $quote            = $this->checkoutSession->getQuote();
+        $billingAddress    = $quote->getBillingAddress();
+            
+        $b_f_name = $billingAddress->getFirstname();
         if (empty($b_f_name)) {
             $b_f_name = $quote->getCustomerFirstname();
         }
-		
-		$b_l_name = $billingAddress->getLastname();
+        
+        $b_l_name = $billingAddress->getLastname();
         if (empty($b_l_name)) {
             $b_l_name = $quote->getCustomerLastname();
         }
-		
-		$billing_country = $billingAddress->getCountry();
+        
+        $billing_country = $billingAddress->getCountry();
         if (empty($billing_country)) {
             $billing_country = $this->getQuoteCountryCode();
         }
         if (empty($billing_country)) {
             $billing_country = $this->getDefaultCountry();
         }
-		
-		return [
-			"firstName"	=> $b_f_name,
-			"lastName"  => $b_l_name,
-			"address"   => $billingAddress->getStreetFull(),
-			"phone"     => $billingAddress->getTelephone(),
-			"zip"       => $billingAddress->getPostcode(),
-			"city"      => $billingAddress->getCity(),
-			'country'   => $billing_country,
-			'email'     => $this->getUserEmail(),
-		];
-	}
-	
-	public function getQuoteShippingAddress() {
-		$shipping_address	= $this->checkoutSession->getQuote()->getShippingAddress();
-        $shipping_email		= $shipping_address->getEmail();
-		
+        
+        return [
+            "firstName"    => $b_f_name,
+            "lastName"  => $b_l_name,
+            "address"   => $billingAddress->getStreetFull(),
+            "phone"     => $billingAddress->getTelephone(),
+            "zip"       => $billingAddress->getPostcode(),
+            "city"      => $billingAddress->getCity(),
+            'country'   => $billing_country,
+            'email'     => $this->getUserEmail(),
+        ];
+    }
+    
+    public function getQuoteShippingAddress()
+    {
+        $shipping_address    = $this->checkoutSession->getQuote()->getShippingAddress();
+        $shipping_email        = $shipping_address->getEmail();
+        
         if (empty($shipping_email)) {
             $shipping_email = $this->getUserEmail();
         }
-		
-		return [
-			"firstName"	=> $shipping_address->getFirstname(),
-			"lastName"  => $shipping_address->getLastname(),
-			"address"   => $shipping_address->getStreetFull(),
-			"phone"     => $shipping_address->getTelephone(),
-			"zip"		=> $shipping_address->getPostcode(),
-			"city"      => $shipping_address->getCity(),
-			'country'   => $shipping_address->getCountry(),
-			'email'     => $shipping_email,
-		];
-	}
-	
-	public function getNuveiUseCcOnly()
-	{
-		return $this->checkoutSession->getNuveiUseCcOnly();
-	}
-	
-	public function setNuveiUseCcOnly($val)
-	{
-		$this->checkoutSession->setNuveiUseCcOnly($val);
-	}
-	
-	public function setQuotePaymentMethod($method)
-	{
-		$quote = $this->checkoutSession->getQuote();
-		$quote->getPayment()->setMethod($method);
-		$quote->save();
-	}
-	
-	/**
-	 * Function setClientUniqueId
-	 * 
-	 * Set client unique id.
-	 * We change it only for Sandbox (test) mode.
-	 * 
-	 * @param int $order_id - cart or order id
-	 * @return int|string
-	 */
-	public function setClientUniqueId($order_id) {
-		if(!$this->isDebugEnabled()) {
-			return (int)$order_id;
-		}
-		
-		return $order_id . '_' . time() . $this->clientUniqueIdPostfix;
-	}
-	
-	/**
-	 * Function getCuid
-	 * 
-	 * Get client unique id.
-	 * We change it only for Sandbox (test) mode.
-	 * 
-	 * @param string|int $merchant_unique_id
-	 * @return int|string
-	 */
-	public function getClientUniqueId($merchant_unique_id) {
-		if(!$this->isDebugEnabled()) {
-			return $merchant_unique_id;
-		}
-		
-		if(strpos($merchant_unique_id, $this->clientUniqueIdPostfix) !== false) {
-			return current(explode('_', $merchant_unique_id));
-		}
-		
-		return $merchant_unique_id;
-	}
-	
-	public function getUserEmail($empty_on_fail = false) {
-		$quote	= $this->checkoutSession->getQuote();
-		$email	= $quote->getBillingAddress()->getEmail();
-		
+        
+        return [
+            "firstName"    => $shipping_address->getFirstname(),
+            "lastName"  => $shipping_address->getLastname(),
+            "address"   => $shipping_address->getStreetFull(),
+            "phone"     => $shipping_address->getTelephone(),
+            "zip"        => $shipping_address->getPostcode(),
+            "city"      => $shipping_address->getCity(),
+            'country'   => $shipping_address->getCountry(),
+            'email'     => $shipping_email,
+        ];
+    }
+    
+    public function getNuveiUseCcOnly()
+    {
+        return $this->checkoutSession->getNuveiUseCcOnly();
+    }
+    
+    public function setNuveiUseCcOnly($val)
+    {
+        $this->checkoutSession->setNuveiUseCcOnly($val);
+    }
+    
+    public function setQuotePaymentMethod($method)
+    {
+        $quote = $this->checkoutSession->getQuote();
+        $quote->getPayment()->setMethod($method);
+        $quote->save();
+    }
+    
+    /**
+     * Function setClientUniqueId
+     *
+     * Set client unique id.
+     * We change it only for Sandbox (test) mode.
+     *
+     * @param int $order_id - cart or order id
+     * @return int|string
+     */
+    public function setClientUniqueId($order_id)
+    {
+        if (!$this->isDebugEnabled()) {
+            return (int)$order_id;
+        }
+        
+        return $order_id . '_' . time() . $this->clientUniqueIdPostfix;
+    }
+    
+    /**
+     * Function getCuid
+     *
+     * Get client unique id.
+     * We change it only for Sandbox (test) mode.
+     *
+     * @param string|int $merchant_unique_id
+     * @return int|string
+     */
+    public function getClientUniqueId($merchant_unique_id)
+    {
+        if (!$this->isDebugEnabled()) {
+            return $merchant_unique_id;
+        }
+        
+        if (strpos($merchant_unique_id, $this->clientUniqueIdPostfix) !== false) {
+            return current(explode('_', $merchant_unique_id));
+        }
+        
+        return $merchant_unique_id;
+    }
+    
+    public function getUserEmail($empty_on_fail = false)
+    {
+        $quote    = $this->checkoutSession->getQuote();
+        $email    = $quote->getBillingAddress()->getEmail();
+        
         if (empty($email)) {
             $email = $quote->getCustomerEmail();
         }
-		
-		if(empty($mail) && $empty_on_fail) {
-			return '';
-		}
-		
-        if (empty($email) && !empty($_COOKIE['guestSippingMail'])) {
-            $email = filter_var($_COOKIE['guestSippingMail'], FILTER_VALIDATE_EMAIL);
+        
+        if (empty($mail) && $empty_on_fail) {
+            return '';
+        }
+        
+        if (empty($email) && !empty($this->cookie->getCookie('guestSippingMail'))) {
+            $email = $this->cookie->getCookie('guestSippingMail');
         }
         if (empty($email)) {
             $email = 'quoteID_' . $quote->getId() . '@magentoMerchant.com';
         }
-		
-		return $email;
-	}
+        
+        return $email;
+    }
 }

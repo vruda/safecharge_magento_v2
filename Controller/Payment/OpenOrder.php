@@ -64,19 +64,19 @@ class OpenOrder extends Action
         if (!$this->moduleConfig->isActive()) {
             $this->moduleConfig->createLog('Nuvei payments module is not active at the moment!');
             
-			return $result->setData([
-				'error_message' => __('Nuvei payments module is not active at the moment!')
-			]);
+            return $result->setData([
+                'error_message' => __('Nuvei payments module is not active at the moment!')
+            ]);
         }
-		
-//		$resp = $this->openOrder();
-		
-		$request	= $this->requestFactory->create(AbstractRequest::OPEN_ORDER_METHOD);
-		$resp		= $request->process();
+        
+//        $resp = $this->openOrder();
+        
+        $request    = $this->requestFactory->create(AbstractRequest::OPEN_ORDER_METHOD);
+        $resp        = $request->process();
 
         return $result->setData([
             "error"         => 0,
-            "sessionToken"	=> $resp->sessionToken,
+            "sessionToken"    => $resp->sessionToken,
             "message"       => "Success"
         ]);
     }
@@ -86,11 +86,11 @@ class OpenOrder extends Action
      */
 //    private function openOrder()
 //    {
-//        $request	= $this->requestFactory->create(AbstractRequest::OPEN_ORDER_METHOD);
-//		$resp		= $request->process();
-//        
+//        $request    = $this->requestFactory->create(AbstractRequest::OPEN_ORDER_METHOD);
+//        $resp        = $request->process();
+//
 //        return [
-//			'sessionToken' => $resp->sessionToken
-//		];
+//            'sessionToken' => $resp->sessionToken
+//        ];
 //    }
 }

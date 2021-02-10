@@ -17,8 +17,8 @@ class Hash implements ArrayInterface
     public function toOptionArray()
     {
         return [
-			''			=> __('Please, select an option...'),
-            'sha256'	=> 'SHA 256',
+            ''            => __('Please, select an option...'),
+            'sha256'    => 'SHA 256',
             'md5'       => 'MD 5',
         ];
     }

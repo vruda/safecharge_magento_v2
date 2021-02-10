@@ -42,57 +42,56 @@ class Cancel extends AbstractPayment implements RequestInterface
      */
     protected function getParams()
     {
-		// we can create Void for Settle and Auth only!!!
-        $orderPayment			= $this->orderPayment;
-		$ord_trans_addit_info	= $orderPayment->getAdditionalInformation(Payment::ORDER_TRANSACTIONS_DATA);
-        $order					= $orderPayment->getOrder();
-		$alowed_trans_data		= [];
-		
-		if(is_array($ord_trans_addit_info) && !empty($ord_trans_addit_info)) {
-			foreach(array_reverse($ord_trans_addit_info) as $trans) {
-				if(
-					strtolower($trans[Payment::TRANSACTION_STATUS]) == 'approved'
-					&& in_array(strtolower($trans[Payment::TRANSACTION_TYPE]), ['auth', 'settle', 'sale'])
-				) {
-					$alowed_trans_data = $trans;
-					break;
-				}
-			}
-		}
-		
+        // we can create Void for Settle and Auth only!!!
+        $orderPayment            = $this->orderPayment;
+        $ord_trans_addit_info    = $orderPayment->getAdditionalInformation(Payment::ORDER_TRANSACTIONS_DATA);
+        $order                    = $orderPayment->getOrder();
+        $alowed_trans_data        = [];
+        
+        if (is_array($ord_trans_addit_info) && !empty($ord_trans_addit_info)) {
+            foreach (array_reverse($ord_trans_addit_info) as $trans) {
+                if (strtolower($trans[Payment::TRANSACTION_STATUS]) == 'approved'
+                    && in_array(strtolower($trans[Payment::TRANSACTION_TYPE]), ['auth', 'settle', 'sale'])
+                ) {
+                    $alowed_trans_data = $trans;
+                    break;
+                }
+            }
+        }
+        
         if (empty($alowed_trans_data)) {
             $msg = 'Void Error - There is no approved Settle or Auth Transaction';
             $this->config->createLog(
-				[
-					'$ord_trans_addit_info'	=> $ord_trans_addit_info,
-					'$alowed_trans_data'	=> $alowed_trans_data,
-				],
-				$msg
-			);
+                [
+                    '$ord_trans_addit_info'    => $ord_trans_addit_info,
+                    '$alowed_trans_data'    => $alowed_trans_data,
+                ],
+                $msg
+            );
             
             throw new PaymentException(
                 __($msg)
             );
         }
         
-		// Auth
-		if ('auth' == strtolower($alowed_trans_data[Payment::TRANSACTION_TYPE])) { 
+        // Auth
+        if ('auth' == strtolower($alowed_trans_data[Payment::TRANSACTION_TYPE])) {
             $amount = floatval($alowed_trans_data[Payment::TRANSACTION_TOTAL_AMOUN]);
         } else { // Settle and Sale
-			$amount = (float) $order->getTotalPaid();
+            $amount = (float) $order->getTotalPaid();
         }
-		
+        
         if (empty($alowed_trans_data[Payment::TRANSACTION_AUTH_CODE])) {
-			$msg = 'Void error: Transaction does not contain authorization code.';
-			
+            $msg = 'Void error: Transaction does not contain authorization code.';
+            
             $this->config->createLog($alowed_trans_data, $msg);
             
             throw new PaymentException(__($msg));
         }
         
         if (empty($amount) || $amount < 0) {
-			$msg = 'Void error - Transaction does not contain total amount.';
-			
+            $msg = 'Void error - Transaction does not contain total amount.';
+            
             $this->config->createLog($alowed_trans_data, $msg);
             
             throw new PaymentException(__($msg));

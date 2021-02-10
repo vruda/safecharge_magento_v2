@@ -38,25 +38,25 @@ class Toolbar
         }
         
         try {
-            $orderId				= $this->request->getParam('order_id');
-            $order					= $this->orderRepository->get($orderId);
-			$ord_status				= $order->getStatus();
-            $orderPayment			= $order->getPayment();
-			$ord_trans_addit_info	= $orderPayment->getAdditionalInformation(Payment::ORDER_TRANSACTIONS_DATA);
-			$payment_method			= '';
+            $orderId                = $this->request->getParam('order_id');
+            $order                    = $this->orderRepository->get($orderId);
+            $ord_status                = $order->getStatus();
+            $orderPayment            = $order->getPayment();
+            $ord_trans_addit_info    = $orderPayment->getAdditionalInformation(Payment::ORDER_TRANSACTIONS_DATA);
+            $payment_method            = '';
             
             if ($orderPayment->getMethod() !== Payment::METHOD_CODE) {
                 return [$context, $buttonList];
             }
             
-			if(!empty($ord_trans_addit_info) && is_array($ord_trans_addit_info)) {
-				foreach($ord_trans_addit_info as $trans) {
-					if(!empty($trans[Payment::TRANSACTION_PAYMENT_METHOD])) {
-						$payment_method = $trans[Payment::TRANSACTION_PAYMENT_METHOD];
-						break;
-					}
-				}
-			}
+            if (!empty($ord_trans_addit_info) && is_array($ord_trans_addit_info)) {
+                foreach ($ord_trans_addit_info as $trans) {
+                    if (!empty($trans[Payment::TRANSACTION_PAYMENT_METHOD])) {
+                        $payment_method = $trans[Payment::TRANSACTION_PAYMENT_METHOD];
+                        break;
+                    }
+                }
+            }
             
 //            $payment_method        = $orderPayment->getAdditionalInformation(
 //                Payment::TRANSACTION_PAYMENT_METHOD
@@ -90,18 +90,19 @@ class Toolbar
                 || in_array($ord_status, [Payment::SC_REFUNDED, Payment::SC_PROCESSING, Payment::SC_VOIDED, 'closed'])
             ) {
                 $buttonList->remove('void_payment');
-            } elseif(!isset($buttonList->getItems()[0]['void_payment'])) {
-				// workaround in case of missing Void button on Sale transaction
-				$message = __('Are you sure you want to void the payment?');
-				$url = $context->getUrl('sales/*/voidPayment', ['order_id' => $orderId]);
+            } elseif (!isset($buttonList->getItems()[0]['void_payment'])) {
+                // workaround in case of missing Void button on Sale transaction
+                $message = __('Are you sure you want to void the payment?');
+                $url = $context->getUrl('sales/*/voidPayment', ['order_id' => $orderId]);
 
-				$buttonList->add('void_payment',
-					[
-						'label' => __('Void'),
-						'onclick' => "confirmSetLocation('{$message}', '{$url}')"
-					]
-				);
-			}
+                $buttonList->add(
+                    'void_payment',
+                    [
+                        'label' => __('Void'),
+                        'onclick' => "confirmSetLocation('{$message}', '{$url}')"
+                    ]
+                );
+            }
         } catch (Exception $e) {
             $this->config->createLog($e->getMessage(), 'Class Toolbar exception:');
             return [$context, $buttonList];

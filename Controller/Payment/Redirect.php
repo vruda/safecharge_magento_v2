@@ -53,7 +53,7 @@ class Redirect extends Action
         $this->moduleConfig         = $moduleConfig;
         $this->jsonResultFactory    = $jsonResultFactory;
         $this->request              = $request;
-        $this->dataObjectFactory	= $dataObjectFactory;
+        $this->dataObjectFactory    = $dataObjectFactory;
         $this->cartManagement       = $cartManagement;
         $this->onepageCheckout      = $onepageCheckout;
         $this->checkoutSession      = $checkoutSession;
@@ -124,8 +124,8 @@ class Redirect extends Action
      * Place order.
      *
      * @return DataObject
-	 * 
-	 * TODO - do we use this?
+     *
+     * TODO - do we use this?
      */
     private function placeOrder()
     {
