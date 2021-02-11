@@ -174,9 +174,9 @@ class Config
             return;
         }
         
-        $logsPath    = $this->directory->getPath('log');
-        $d            = $data;
-        $string        = '';
+        $logsPath	= $this->directory->getPath('log');
+        $d			= $data;
+        $string		= '';
         
         if (!empty($data)) {
             if (is_array($data)) {
