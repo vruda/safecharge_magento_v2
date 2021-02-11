@@ -4,6 +4,7 @@
 
 ### 2.1.2.x
 ```
+	* Added Uninstall script.
 	* Fix for the late load of quote in the checkout JS.
 ```
 
