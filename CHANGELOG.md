@@ -4,6 +4,7 @@
 
 ### 3.0.1.x
 ```
+	* Fix for the correct Refund based on the Invoice ID.
 	* The Settle logic was moved form Payment class to After Save Invoice Observer. In Register Invoice Observer we set the Invoice status to Pending. Whem the DMN come, we change this status to Paid or Canceld.
 ```
 
