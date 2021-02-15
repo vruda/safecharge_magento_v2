@@ -90,18 +90,6 @@ class UpdateOrder extends AbstractRequest implements RequestInterface
     {
         $req_resp = $this->sendRequest(true, true);
         
-//        $this->orderId      = $req_resp['orderId'];
-//        $this->sessionToken = $req_resp['sessionToken'];
-//        $this->ooAmount     = $req_resp['merchantDetails']['customField1'];
-
-        // save the session token in the Quote
-//        $this->cart->getQuote()->getPayment()->unsAdditionalInformation('nuvei_session_token');
-//        $this->cart->getQuote()->getPayment()->setAdditionalInformation(
-//            'nuvei_session_token',
-//            $req_resp['sessionToken']
-//        );
-//        $this->cart->getQuote()->save();
-        
         return $req_resp;
     }
     
@@ -241,7 +229,6 @@ class UpdateOrder extends AbstractRequest implements RequestInterface
         $params['userDetails']        = $params['billingAddress'];
         $params['sessionToken']        = $this->orderData['sessionToken'];
         $params['orderId']            = $this->orderData['orderId'] ?: '';
-//        $params['userTokenId']        = $this->orderData['userTokenId'] ?: '';
         $params['clientRequestId']    = $this->orderData['clientRequestId'] ?: '';
         
         $params['checksum'] = hash(

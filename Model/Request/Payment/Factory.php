@@ -4,7 +4,6 @@ namespace Nuvei\Payments\Model\Request\Payment;
 
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\ObjectManagerInterface;
-use Magento\Sales\Model\Order\Payment as OrderPayment;
 use Nuvei\Payments\Model\AbstractRequest;
 use Nuvei\Payments\Model\RequestInterface;
 
@@ -19,7 +18,7 @@ class Factory
      * @var array
      */
     private $invokableClasses = [
-        AbstractRequest::PAYMENT_SETTLE_METHOD    => \Nuvei\Payments\Model\Request\Payment\Settle::class,
+        AbstractRequest::PAYMENT_SETTLE_METHOD	=> \Nuvei\Payments\Model\Request\Payment\Settle::class,
         AbstractRequest::PAYMENT_REFUND_METHOD  => \Nuvei\Payments\Model\Request\Payment\Refund::class,
         AbstractRequest::PAYMENT_VOID_METHOD    => \Nuvei\Payments\Model\Request\Payment\Cancel::class,
     ];
@@ -36,22 +35,27 @@ class Factory
      *
      * @param \Magento\Framework\ObjectManagerInterface $objectManager
      */
-    public function __construct(ObjectManagerInterface $objectManager)
+    public function __construct(
+		ObjectManagerInterface $objectManager,
+		\Nuvei\Payments\Model\Config $config
+	)
     {
         $this->objectManager = $objectManager;
+        $this->config = $config;
     }
 
     /**
      * Create request model.
      *
-     * @param string       $method
-     * @param OrderPayment $orderPayment
-     * @param float        $amount
+     * @param string		$method
+     * @param OrderPayment	$orderPayment
+     * @param float			$amount
+     * @param int			$invoice_id
      *
      * @return RequestInterface
      * @throws LocalizedException
      */
-    public function create($method, $orderPayment, $amount = 0.0)
+    public function create($method, $orderPayment, $amount = 0.0, $invoice_id = 0)
     {
         $className = !empty($this->invokableClasses[$method])
             ? $this->invokableClasses[$method]
@@ -66,8 +70,9 @@ class Factory
         $model = $this->objectManager->create(
             $className,
             [
-                'orderPayment' => $orderPayment,
-                'amount' => $amount,
+                'orderPayment'	=> $orderPayment,
+                'amount'		=> $amount,
+				'invoiceId'		=> $invoice_id
             ]
         );
         

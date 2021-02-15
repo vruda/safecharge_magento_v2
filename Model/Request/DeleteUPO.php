@@ -63,8 +63,8 @@ class DeleteUPO extends AbstractRequest implements RequestInterface
      */
     protected function getParams()
     {
-        $billing_address    = $this->config->getQuoteBillingAddress();
-        $email                = $billing_address['email'] ?: $this->config->getUserEmail(true);
+        $billing_address	= $this->config->getQuoteBillingAddress();
+        $email              = $billing_address['email'] ?: $this->config->getUserEmail(true);
         
         $params = [
             'userTokenId'            => $email, // logged user email
@@ -110,6 +110,6 @@ class DeleteUPO extends AbstractRequest implements RequestInterface
      */
     protected function getResponseHandlerType()
     {
-        return AbstractResponse::GET_DELETE_UPOS_HANDLER;
+        return;
     }
 }

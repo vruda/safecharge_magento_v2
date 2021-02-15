@@ -37,6 +37,7 @@ abstract class AbstractRequest extends AbstractApi
     const DELETE_UPOS_METHOD                    = 'deleteUPO';
     const GET_MERCHANT_PAYMENT_PLANS_METHOD     = 'getPlansList';
     const CREATE_SUBSCRIPTION_METHOD            = 'createSubscription';
+    const SETTLE_METHOD							= 'settleTransaction';
 
     /**
      * @var Curl
@@ -437,14 +438,14 @@ abstract class AbstractRequest extends AbstractApi
      */
     protected function sendRequest($continue_process = false, $accept_error_status = false)
     {
-        $endpoint    = $this->getEndpoint();
+        $endpoint	= $this->getEndpoint();
         $headers    = $this->getHeaders();
         $params     = $this->prepareParams();
 
-        $this->curl->setHeaders($headers);
+		$this->curl->setHeaders($headers);
 
         $this->config->createLog([
-            'Request Endpoint'    => $endpoint,
+            'Request Endpoint'	=> $endpoint,
             'Request params'    => $params
         ]);
         
@@ -483,75 +484,6 @@ abstract class AbstractRequest extends AbstractApi
     }
 
     /**
-     * @param Order $order
-     *
-     * @return array
-     */
-    /*
-    protected function getOrderData(Order $order)
-    {
-        $billing = $order->getBillingAddress();
-
-        $orderData = [
-            'userTokenId' => $order->getCustomerId() ?: $order->getCustomerEmail(),
-            'clientUniqueId' => $order->getIncrementId(),
-            'currency' => $order->getBaseCurrencyCode(),
-            'amountDetails' => [
-                'totalShipping' => (float)$order->getBaseShippingAmount(),
-                'totalHandling' => (float)0,
-                'totalDiscount' => (float)abs($order->getBaseDiscountAmount()),
-                'totalTax' => (float)$order->getBaseTaxAmount(),
-            ],
-            'items' => [],
-            'deviceDetails' => [
-                'deviceType' => 'DESKTOP',
-                'ipAddress' => $order->getRemoteIp(),
-            ],
-            'ipAddress' => $order->getRemoteIp(),
-        ];
-
-        if ($billing !== null) {
-            $state = $billing->getRegionCode();
-            if (strlen($state) > 5) {
-                $state = substr($state, 0, 2);
-            }
-
-            $orderData['billingAddress'] = [
-                'firstName' => $billing->getFirstname(),
-                'lastName'    => $billing->getLastname(),
-                'address'    => is_array($billing->getStreet())
-                    ? implode(' ', $billing->getStreet()) : '',
-                'cell'        => '',
-                'phone'        => $billing->getTelephone(),
-                'zip'        => $billing->getPostcode(),
-                'city'        => $billing->getCity(),
-                'country'    => $billing->getCountryId(),
-                'state'        => $state,
-                'email'        => $billing->getEmail(),
-            ];
-            $orderData = array_merge($orderData, $orderData['billingAddress']);
-        }
-
-        // Add items details.
-        $orderItems = $order->getAllVisibleItems();
-        foreach ($orderItems as $orderItem) {
-            $price = (float)$orderItem->getBasePrice();
-            if (!$price) {
-                continue;
-            }
-
-            $orderData['items'][] = [
-                'name' => $orderItem->getName(),
-                'price' => $price,
-                'quantity' => (int)$orderItem->getQtyOrdered(),
-            ];
-        }
-
-        return $orderData;
-    }
-     */
-
-    /**
      * @param Quote $quote
      *
      * @return array
@@ -570,8 +502,6 @@ abstract class AbstractRequest extends AbstractApi
         }
 
         $quoteData = [
-//            'userTokenId' => $quote->getCustomerId() ?: $quote->getCustomerEmail(),
-//            'userTokenId' => $this->config->getUserEmail(),
             'clientUniqueId' => $quote->getReservedOrderId() ?: $this->config->getReservedOrderId(),
             'currency' => $quote->getBaseCurrencyCode(),
             'amountDetails'    => [
@@ -595,17 +525,17 @@ abstract class AbstractRequest extends AbstractApi
             }
             
             $quoteData['billingAddress'] = [
-                'firstName' => $billing->getFirstname(),
-                'lastName'    => $billing->getLastname(),
-                'address'    => is_array($billing->getStreet())
+                'firstName'	=> $billing->getFirstname(),
+                'lastName'  => $billing->getLastname(),
+                'address'   => is_array($billing->getStreet())
                     ? implode(' ', $billing->getStreet()) : '',
-                'cell'        => '',
-                'phone'        => $billing->getTelephone(),
-                'zip'        => $billing->getPostcode(),
-                'city'        => $billing->getCity(),
-                'country'    => $billing->getCountryId(),
-                'state'        => $state,
-                'email'        => $billing->getEmail(),
+                'cell'      => '',
+                'phone'     => $billing->getTelephone(),
+                'zip'       => $billing->getPostcode(),
+                'city'      => $billing->getCity(),
+                'country'   => $billing->getCountryId(),
+                'state'     => $state,
+                'email'     => $billing->getEmail(),
             ];
             $quoteData = array_merge($quoteData, $quoteData['billingAddress']);
         }
@@ -619,9 +549,9 @@ abstract class AbstractRequest extends AbstractApi
             }
 
             $quoteData['items'][] = [
-                'name' => $quoteItem->getName(),
-                'price' => $price,
-                'quantity' => (int)$quoteItem->getQty(),
+                'name'		=> $quoteItem->getName(),
+                'price'		=> $price,
+                'quantity'	=> (int)$quoteItem->getQty(),
             ];
         }
 
@@ -634,8 +564,8 @@ abstract class AbstractRequest extends AbstractApi
         $requestStatus    = $this->getResponseStatus($resp_body);
         
         $this->config->createLog([
-            'Request Status'    => $requestStatus,
-            'Response data'        => $resp_body
+            'Request Status'	=> $requestStatus,
+            'Response data'     => $resp_body
         ]);
 
         // we do not want exception when UpdateOrder return Error

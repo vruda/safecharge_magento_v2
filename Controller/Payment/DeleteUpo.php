@@ -45,7 +45,7 @@ class DeleteUpo extends Action
     ) {
         parent::__construct($context);
 
-        $this->redirectUrlBuilder    = $redirectUrlBuilder;
+        $this->redirectUrlBuilder   = $redirectUrlBuilder;
         $this->moduleConfig         = $moduleConfig;
         $this->jsonResultFactory    = $jsonResultFactory;
         $this->requestFactory       = $requestFactory;

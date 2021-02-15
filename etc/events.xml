@@ -18,10 +18,21 @@
                   instance="Nuvei\Payments\Observer\Sales\Order\Invoice\Register"/>
     </event>
     
-    <event name="sales_order_invoice_pay">
+<!--    <event name="sales_order_invoice_pay">
         <observer name="nuvei_invoice_pay"
                   instance="Nuvei\Payments\Observer\Sales\Order\Invoice\Pay"/>
+    </event>-->
+	
+    <event name="sales_order_invoice_save_after">
+        <observer name="nuvei_invoice_pay"
+                  instance="Nuvei\Payments\Observer\Sales\Order\Invoice\AfterSave"/>
     </event>
+	
+	
+	
+	
+	
+	
     
     <event name="sales_order_payment_void">
         <observer name="nuvei_void_order_status_update"

@@ -21,7 +21,6 @@ use Magento\Payment\Model\Method\Cc;
 use Magento\Payment\Model\Method\Logger as PaymentLogger;
 use Magento\Payment\Model\Method\TransparentInterface;
 use Magento\Quote\Api\Data\PaymentInterface;
-//use Magento\Vault\Api\PaymentTokenManagementInterface;
 use Nuvei\Payments\Model\Config as ModuleConfig;
 use Nuvei\Payments\Model\Request\Payment\Factory as PaymentRequestFactory;
 
@@ -35,7 +34,7 @@ class Payment extends Cc implements TransparentInterface
     /**
      * Method code const.
      */
-    const METHOD_CODE    = 'nuvei';
+    const METHOD_CODE	= 'nuvei';
     const MODE_LIVE     = 'live';
 
     /**
@@ -50,7 +49,7 @@ class Payment extends Cc implements TransparentInterface
      */
     const TRANSACTION_REQUEST_ID                = 'transaction_request_id';
     const TRANSACTION_ORDER_ID                  = 'nuvei_order_id';
-    const TRANSACTION_AUTH_CODE                    = 'authorization_code';
+    const TRANSACTION_AUTH_CODE                 = 'authorization_code';
     const TRANSACTION_ID                        = 'transaction_id';
 //    const TRANSACTION_USER_PAYMENT_OPTION_ID    = 'user_payment_option_id';
     const TRANSACTION_PAYMENT_SOLUTION          = 'payment_solution';
@@ -63,8 +62,8 @@ class Payment extends Cc implements TransparentInterface
     const REFUND_TRANSACTION_AMOUNT             = 'refund_amount';
     const AUTH_PARAMS                           = 'auth_params';
     const SALE_SETTLE_PARAMS                    = 'sale_settle_params';
-    const ORDER_TRANSACTIONS_DATA                = 'nuvei_order_transactions_data';
-    const CREATE_ORDER_DATA                        = 'nuvei_create_order_data';
+    const ORDER_TRANSACTIONS_DATA               = 'nuvei_order_transactions_data';
+    const CREATE_ORDER_DATA                     = 'nuvei_create_order_data';
 
     /**
      * Order statuses.
@@ -76,7 +75,7 @@ class Payment extends Cc implements TransparentInterface
     const SC_REFUNDED           = 'nuvei_refunded';
     const SC_PROCESSING         = 'nuvei_processing';
     const SC_SUBSCRT_STARTED    = 'nuvei_subscr_started';
-    const SC_SUBSCRT_ENDED        = 'nuvei_subscr_ended';
+    const SC_SUBSCRT_ENDED      = 'nuvei_subscr_ended';
 
     const SOLUTION_INTERNAL     = 'internal';
     const SOLUTION_EXTERNAL     = 'external';
@@ -122,14 +121,14 @@ class Payment extends Cc implements TransparentInterface
      *
      * @var bool
      */
-    protected $_canCapture = true;
+    protected $_canCapture = false;
 
     /**
      * Payment Method feature.
      *
      * @var bool
      */
-    protected $_canCapturePartial = true;
+    protected $_canCapturePartial = false;
 
     /**
      * Payment Method feature.
@@ -172,11 +171,6 @@ class Payment extends Cc implements TransparentInterface
     private $paymentRequestFactory;
 
     /**
-     * @var PaymentTokenManagementInterface
-     */
-//    private $paymentTokenManagement;
-
-    /**
      * @var CustomerSession
      */
     private $customerSession;
@@ -204,7 +198,6 @@ class Payment extends Cc implements TransparentInterface
      * @param ModuleListInterface             $moduleList
      * @param TimezoneInterface               $localeDate
      * @param PaymentRequestFactory           $paymentRequestFactory
-     * @param PaymentTokenManagementInterface $paymentTokenManagement
      * @param CustomerSession                 $customerSession
      * @param ModuleConfig                    $moduleConfig
      * @param PrivateDataKeysProvider         $privateDataKeysProvider
@@ -224,7 +217,6 @@ class Payment extends Cc implements TransparentInterface
         ModuleListInterface $moduleList,
         TimezoneInterface $localeDate,
         PaymentRequestFactory $paymentRequestFactory,
-        //        PaymentTokenManagementInterface $paymentTokenManagement,
         CustomerSession $customerSession,
         ModuleConfig $moduleConfig,
         PrivateDataKeysProvider $privateDataKeysProvider,
@@ -248,11 +240,10 @@ class Payment extends Cc implements TransparentInterface
             $data
         );
 
-        $this->paymentRequestFactory = $paymentRequestFactory;
-//        $this->paymentTokenManagement = $paymentTokenManagement;
-        $this->customerSession = $customerSession;
-        $this->moduleConfig = $moduleConfig;
-        $this->checkoutSession = $checkoutSession;
+        $this->paymentRequestFactory	= $paymentRequestFactory;
+        $this->customerSession			= $customerSession;
+        $this->moduleConfig				= $moduleConfig;
+        $this->checkoutSession			= $checkoutSession;
     }
 
     /**
@@ -328,6 +319,11 @@ class Payment extends Cc implements TransparentInterface
     /**
      * Capture payment method.
      *
+	 * This method create the request too early.
+	 * We use invoice observer, to create settle request.
+	 * This method is not used at the moment because _canCapture and
+	 * _canCapturePartial are set to false.
+	 * 
      * @param InfoInterface $payment
      * @param float         $amount
      *
@@ -335,13 +331,11 @@ class Payment extends Cc implements TransparentInterface
      * @throws \Magento\Framework\Exception\LocalizedException
      *
      * @api
-     *
-     * TODO this method create the request too early. Use invoice observer, so can get the Invoice ID.
      */
     public function capture(InfoInterface $payment, $amount)
     {
         parent::capture($payment, $amount);
-
+		
         $this->processPayment($payment, $amount);
 
         return $this;
@@ -350,7 +344,7 @@ class Payment extends Cc implements TransparentInterface
     private function processPayment(InfoInterface $payment, $amount)
     {
         $authCode                = '';
-        $ord_trans_addit_info    = $payment->getAdditionalInformation(Payment::ORDER_TRANSACTIONS_DATA);
+        $ord_trans_addit_info    = $payment->getAdditionalInformation(self::ORDER_TRANSACTIONS_DATA);
         
         if (is_array($ord_trans_addit_info) && !empty($ord_trans_addit_info)) {
             foreach ($ord_trans_addit_info as $trans) {
@@ -363,13 +357,11 @@ class Payment extends Cc implements TransparentInterface
             }
         }
         
-//        $authCode = $payment->getAdditionalInformation(self::TRANSACTION_AUTH_CODE);
-        
         if (empty($authCode)) {
             $payment->setIsTransactionPending(true); // TODO do we need this
             return $this;
         }
-
+		
         $method = AbstractRequest::PAYMENT_SETTLE_METHOD;
 
         /** @var RequestInterface $request */

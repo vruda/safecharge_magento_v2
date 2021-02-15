@@ -14,13 +14,11 @@ class PaymentPlansOptions extends \Magento\Eav\Model\Entity\Attribute\Source\Abs
     public function __construct(
         \Magento\Framework\Filesystem\DirectoryList $directory,
         \Nuvei\Payments\Model\Config $config,
-        \Magento\Framework\Filesystem\Io\File $file,
-        \Magento\Framework\Filesystem\Driver\File $driverManager
+        \Magento\Framework\Filesystem\Io\File $file
     ) {
         $this->directory        = $directory;
         $this->config           = $config;
         $this->file             = $file;
-        $this->driverManager    = $driverManager;
     }
     
     public function getAllOptions()
@@ -35,7 +33,7 @@ class PaymentPlansOptions extends \Magento\Eav\Model\Entity\Attribute\Source\Abs
         $file_name = $this->directory->getPath('tmp') . DIRECTORY_SEPARATOR
             . \Nuvei\Payments\Model\Config::PAYMENT_PLANS_FILE_NAME;
         
-        if ($this->driverManager->isReadable($file_name)) {
+        if (is_readable($file_name)) {
             try {
                 $cont = json_decode($this->file->read($file_name), true);
 
