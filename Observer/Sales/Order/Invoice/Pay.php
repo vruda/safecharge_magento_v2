@@ -28,14 +28,12 @@ class Pay implements ObserverInterface
      */
     public function execute(Observer $observer)
     {
-		$this->config->createLog('Invoice Pay Observer');
-		
+        $this->config->createLog('Invoice Pay Observer');
+        
         /** @var Invoice $invoice */
         $invoice = $observer->getInvoice();
-		$invoice->setState(Invoice::STATE_OPEN);
-		
-		$this->config->createLog(@$invoice->getId());
-
+        $invoice->setState(Invoice::STATE_OPEN);
+        
         /** @var Order $order */
         $order = $invoice->getOrder();
 

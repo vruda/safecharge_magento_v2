@@ -11,9 +11,9 @@ use Magento\Sales\Model\Order\Payment as OrderPayment;
 
 /**
  * Nuvei Payments sales order invoice register observer.
- * 
+ *
  * Here we just set status to pending, and will wait for the DMN to confirm the payment.
- * 
+ *
  */
 class Register implements ObserverInterface
 {
@@ -25,28 +25,28 @@ class Register implements ObserverInterface
     }
     
     /**
-	 * Function execute
-	 * 
+     * Function execute
+     *
      * @param Observer $observer
      * @return Register
      */
     public function execute(Observer $observer)
     {
-		$this->config->createLog('Invoice Register Observer.');
-		
+        $this->config->createLog('Invoice Register Observer.');
+        
         /** @var Order $order */
         $order = $observer->getOrder();
-		
-		if(!is_object($order)) {
-			return $this;
-		}
+        
+        if (!is_object($order)) {
+            return $this;
+        }
 
         /** @var OrderPayment $payment */
         $payment = $order->getPayment();
-		
-		if(!is_object($payment)) {
-			return $this;
-		}
+        
+        if (!is_object($payment)) {
+            return $this;
+        }
 
         if ($payment->getMethod() !== Payment::METHOD_CODE) {
             $this->config->createLog($payment->getMethod(), 'Invoice Register Observer Error - payment method is');
@@ -56,14 +56,14 @@ class Register implements ObserverInterface
 
         /** @var Invoice $invoice */
         $invoice = $observer->getInvoice();
-		$invoice->setState(Invoice::STATE_OPEN); // we will set it to Paid when get the DMN
-		
-//		$this->config->createLog(@$invoice->getId());
-//		$this->config->createLog(@$invoice->getState());
+        $invoice->setState(Invoice::STATE_OPEN); // we will set it to Paid when get the DMN
+        
+//        $this->config->createLog(@$invoice->getId());
+//        $this->config->createLog(@$invoice->getState());
 
 //        if ($invoice->getState() !== Invoice::STATE_PAID) {
 //            $this->config->createLog($invoice->getState(), 'Invoice Register Observer Error - $invoice state is');
-//            
+//
 //            return $this;
 //        }
 

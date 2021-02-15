@@ -51,15 +51,15 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
     private $orderResourceModel;
     private $requestFactory;
     private $httpRequest;
-	
-	// variables for the DMN process
+    
+    // variables for the DMN process
     private $order;
     private $orderPayment;
     private $transactionType;
     private $sc_transaction_type;
-    private $start_subscr		= false;
-    private $is_partial_settle	= false;
-	private $curr_trans_info	= []; // collect the info for the current transaction (action)
+    private $start_subscr       = false;
+    private $is_partial_settle  = false;
+    private $curr_trans_info    = []; // collect the info for the current transaction (action)
 
     /**
      * Object constructor.
@@ -82,7 +82,7 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
         \Magento\Framework\Api\SearchCriteriaBuilder $searchCriteriaBuilder,
         \Magento\Sales\Model\ResourceModel\Order $orderResourceModel,
         \Nuvei\Payments\Model\Request\Factory $requestFactory,
-		\Magento\Framework\App\Request\Http $httpRequest
+        \Magento\Framework\App\Request\Http $httpRequest
     ) {
         $this->moduleConfig             = $moduleConfig;
         $this->captureCommand           = $captureCommand;
@@ -100,7 +100,7 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
         $this->searchCriteriaBuilder    = $searchCriteriaBuilder;
         $this->orderResourceModel       = $orderResourceModel;
         $this->requestFactory           = $requestFactory;
-        $this->httpRequest				= $httpRequest;
+        $this->httpRequest                = $httpRequest;
         
         parent::__construct($context);
     }
@@ -248,9 +248,9 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
                 return $jsonOutput;
             }
             
-            $this->orderPayment	= $this->order->getPayment();
-            $order_status		= '';
-            $order_tr_type		= '';
+            $this->orderPayment    = $this->order->getPayment();
+            $order_status        = '';
+            $order_tr_type        = '';
             
             // add data to the Payment
             // the new structure of the data
@@ -261,13 +261,13 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
             if (empty($ord_trans_addit_info) || !is_array($ord_trans_addit_info)) {
                 $ord_trans_addit_info = [];
             } else {
-				$last_record	= end($ord_trans_addit_info);
-				
-                $order_status   = !empty($last_record[Payment::TRANSACTION_STATUS])
-					? $last_record[Payment::TRANSACTION_STATUS] : '';
+                $last_record    = end($ord_trans_addit_info);
                 
-				$order_tr_type	= !empty($last_record[Payment::TRANSACTION_TYPE])
-					? $last_record[Payment::TRANSACTION_TYPE] : '';
+                $order_status   = !empty($last_record[Payment::TRANSACTION_STATUS])
+                    ? $last_record[Payment::TRANSACTION_STATUS] : '';
+                
+                $order_tr_type    = !empty($last_record[Payment::TRANSACTION_TYPE])
+                    ? $last_record[Payment::TRANSACTION_TYPE] : '';
             }
             
             $tr_type_param = strtolower($params['transactionType']);
@@ -336,7 +336,7 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
                 $this->moduleConfig->createLog($msg);
                 $jsonOutput->setData($msg);
                 
-				return $jsonOutput;
+                return $jsonOutput;
             }
             
             // do not override status if the Order is Voided or Refunded
@@ -348,7 +348,7 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
                 $this->moduleConfig->createLog($msg);
                 $jsonOutput->setData($msg);
                 
-				return $jsonOutput;
+                return $jsonOutput;
             }
             
             if (in_array(strtolower($order_tr_type), ['refund', 'credit'])
@@ -360,7 +360,7 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
                 $this->moduleConfig->createLog($msg);
                 $jsonOutput->setData($msg);
                 
-				return $jsonOutput;
+                return $jsonOutput;
             }
             
             if ($tr_type_param === 'auth' && strtolower($order_tr_type) === 'settle') {
@@ -369,14 +369,14 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
                 $this->moduleConfig->createLog($msg);
                 $jsonOutput->setData($msg);
                 
-				return $jsonOutput;
+                return $jsonOutput;
             }
             // do not overwrite Order status END
 
             $this->curr_trans_info = [
                 Payment::TRANSACTION_ID             => $params['TransactionID'],
                 Payment::TRANSACTION_AUTH_CODE      => $params['AuthCode'] ?: '',
-                Payment::TRANSACTION_PAYMENT_METHOD	=> $params['payment_method'] ?: '',
+                Payment::TRANSACTION_PAYMENT_METHOD    => $params['payment_method'] ?: '',
                 Payment::TRANSACTION_STATUS         => $params['Status'] ?: '',
                 Payment::TRANSACTION_TYPE           => $params['transactionType'] ?: '',
                 Payment::TRANSACTION_UPO_ID         => $params['userPaymentOptionId'] ?: '',
@@ -405,7 +405,7 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
             }
             
             // compare them later
-            $order_total	= round(floatval($this->order->getBaseGrandTotal()), 2);
+            $order_total    = round(floatval($this->order->getBaseGrandTotal()), 2);
             $dmn_total      = round(floatval($params['totalAmount']), 2);
             
             // APPROVED TRANSACTION
@@ -414,38 +414,34 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
                     ->captureCommand
                     ->execute($this->orderPayment, $this->order->getBaseGrandTotal(), $this->order);
                 
-                $this->sc_transaction_type	= Payment::SC_PROCESSING;
+                $this->sc_transaction_type    = Payment::SC_PROCESSING;
 //                $is_closed              = false;
                 $refund_msg             = '';
                 
-				// AUTH
+                // AUTH
                 if ($tr_type_param == 'auth') {
-					$this->processAuthDmn($params, $order_total, $dmn_total, $message);
-                }
-				// SALE and SETTLE
-				elseif (in_array($tr_type_param, ['sale', 'settle']) && !isset($params['dmnType']) ) {
-					$this->processSaleAndSettleDMN($params, $order_total, $dmn_total, $tr_type_param);
-                }
-				// VOID
-				elseif (in_array($tr_type_param, ['void', 'voidcredit'])) {
+                    $this->processAuthDmn($params, $order_total, $dmn_total, $message);
+                } elseif (in_array($tr_type_param, ['sale', 'settle'])
+                    && !isset($params['dmnType'])
+                ) { // SALE and SETTLE
+                    $this->processSaleAndSettleDMN($params, $order_total, $dmn_total, $tr_type_param);
+                } elseif (in_array($tr_type_param, ['void', 'voidcredit'])) { // VOID
                     $this->transactionType        = Transaction::TYPE_VOID;
                     $this->sc_transaction_type    = Payment::SC_VOIDED;
                     
                     $this->order->setData('state', Order::STATE_CLOSED);
-                }
-				// REFUND / CREDIT
-				elseif (in_array($tr_type_param, ['credit', 'refund'])) {
+                } elseif (in_array($tr_type_param, ['credit', 'refund'])) { // REFUND / CREDIT
                     $this->transactionType        = Transaction::TYPE_REFUND;
                     $this->sc_transaction_type    = Payment::SC_REFUNDED;
                     
                     if ((!empty($params['totalAmount']) && 'cc_card' == $params["payment_method"])
-						|| false !== strpos($params["merchant_unique_id"], 'gwp')
+                        || false !== strpos($params["merchant_unique_id"], 'gwp')
                     ) {
                         $refund_msg = '<br/>The Refunded amount is <b>'
                             . $params['totalAmount'] . ' ' . $params['currency'] . '</b>.';
                     }
-					
-					$this->curr_trans_info['invoice_id'] = $this->httpRequest->getParam('invoice_id');
+                    
+                    $this->curr_trans_info['invoice_id'] = $this->httpRequest->getParam('invoice_id');
                     
                     $this->order->setData('state', Order::STATE_PROCESSING);
                 }
@@ -473,13 +469,11 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
                         $this->sc_transaction_type
                     );
                 }
-            }
-			// DECLINED/ERROR TRANSACTION
-			elseif (in_array($status, ['declined', 'error'])) {
-				$this->processDeclinedSaleOrSettleDmn();
-				
-                $params['ErrCode']		= (isset($params['ErrCode'])) ? $params['ErrCode'] : "Unknown";
-                $params['ExErrCode']	= (isset($params['ExErrCode'])) ? $params['ExErrCode'] : "Unknown";
+            } elseif (in_array($status, ['declined', 'error'])) { // DECLINED/ERROR TRANSACTION
+                $this->processDeclinedSaleOrSettleDmn();
+                
+                $params['ErrCode']        = (isset($params['ErrCode'])) ? $params['ErrCode'] : "Unknown";
+                $params['ExErrCode']    = (isset($params['ExErrCode'])) ? $params['ExErrCode'] : "Unknown";
                 
                 $this->order->addStatusHistoryComment(
                     '<b>' . $params['transactionType'] . '</b> '
@@ -487,9 +481,7 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
                     . __('Code: ') . $params['ErrCode'] . ', '
                     . __('Reason: ') . $params['ExErrCode'] . '.'
                 );
-            }
-			// UNKNOWN DMN
-			else {
+            } else { // UNKNOWN DMN
                 $this->moduleConfig->createLog('DMN for Order #' . $orderIncrementId . ' was not recognized.');
                 $jsonOutput->setData('DMN for Order #' . $orderIncrementId . ' was not recognized.');
             }
@@ -566,237 +558,230 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
 
         return $jsonOutput;
     }
-	
-	/**
-	 * @param array		$params
-	 * @param float		$order_total
-	 * @param float		$dmn_total
-	 * @param string	$message
-	 */
-	private function processAuthDmn($params, $order_total, $dmn_total, $message)
-	{
-		$this->sc_transaction_type = Payment::SC_AUTH;
-
-		// amount check
-		if ($order_total != $dmn_total) {
-			$this->sc_transaction_type = 'fraud';
-
-			$this->order->addStatusHistoryComment(
-				__('<b>Attention!</b> - There is a problem with the Order. The Order amount is ')
-					. $this->order->getOrderCurrencyCode() . ' '
-					. $order_total . ', ' . __('but the Authorized amount is ')
-					. $params['currency'] . ' ' . $dmn_total,
-				$this->sc_transaction_type
-			);
-		}
-
-//                    if(0 == $params['totalAmount']) {
-//                        $this->start_subscr = true;
-//                    }
-
-		$this->orderPayment
-			->setAuthAmount($params['totalAmount'])
-			->setIsTransactionPending(true)
-			->setIsTransactionClosed(0);
-
-		// set transaction
-		$transaction = $this->transObj->setPayment($this->orderPayment)
-			->setOrder($this->order)
-			->setTransactionId($params['TransactionID'])
-			->setFailSafe(true)
-			->build(Transaction::TYPE_AUTH);
-
-		$transaction->save();
-
-		$tr_type    = $this->orderPayment->addTransaction(Transaction::TYPE_AUTH);
-		$msg        = $this->orderPayment->prependMessage($message);
-
-		$this->orderPayment->addTransactionCommentsToOrder($tr_type, $msg);
-	}
     
-	/**
-	 * @param array		$params
-	 * @param float		$order_total
-	 * @param float		$dmn_total
-	 * @param string	$tr_type_param
-	 */
-	private function processSaleAndSettleDMN($params, $order_total, $dmn_total, $tr_type_param)
-	{
-		$this->sc_transaction_type	= Payment::SC_SETTLED;
-		$invCollection				= $this->order->getInvoiceCollection();
-		$inv_amount					= round(floatval($this->order->getBaseGrandTotal()), 2);
-		$dmn_inv_id					= $this->httpRequest->getParam('invoice_id');
+    /**
+     * @param array        $params
+     * @param float        $order_total
+     * @param float        $dmn_total
+     * @param string    $message
+     */
+    private function processAuthDmn($params, $order_total, $dmn_total, $message)
+    {
+        $this->sc_transaction_type = Payment::SC_AUTH;
 
-//                    if($params['totalAmount'] > 0) {
-//                        $this->start_subscr = true;
-//                    }
+        // amount check
+        if ($order_total != $dmn_total) {
+            $this->sc_transaction_type = 'fraud';
 
-		// add Partial Settle flag
-		if ('settle' == $tr_type_param) {
-			if(($inv_amount - round(floatval($params['totalAmount']), 2) > 0.00)) {
-				$this->is_partial_settle = true;
-			}
-		}
-		// amount check for Sale only
-		elseif ($order_total != $dmn_total) {
-			$this->sc_transaction_type = 'fraud';
+            $this->order->addStatusHistoryComment(
+                __('<b>Attention!</b> - There is a problem with the Order. The Order amount is ')
+                    . $this->order->getOrderCurrencyCode() . ' '
+                    . $order_total . ', ' . __('but the Authorized amount is ')
+                    . $params['currency'] . ' ' . $dmn_total,
+                $this->sc_transaction_type
+            );
+        }
 
-			$this->order->addStatusHistoryComment(
-				__('<b>Attention!</b> - There is a problem with the Order. The Order amount is ')
-				. $this->order->getOrderCurrencyCode() . ' '
-				. $order_total . ', ' . __('but the Paid amount is ')
-				. $params['currency'] . ' ' . $dmn_total,
-				$this->sc_transaction_type
-			);
-		}
+   //                    if(0 == $params['totalAmount']) {
+   //                        $this->start_subscr = true;
+   //                    }
 
-		$this->orderPayment->setSaleSettleAmount($inv_amount);
+        $this->orderPayment
+            ->setAuthAmount($params['totalAmount'])
+            ->setIsTransactionPending(true)
+            ->setIsTransactionClosed(0);
 
-		// there are invoices
-		if (count($invCollection) > 0) {
-			$invoices = [];
+        // set transaction
+        $transaction = $this->transObj->setPayment($this->orderPayment)
+            ->setOrder($this->order)
+            ->setTransactionId($params['TransactionID'])
+            ->setFailSafe(true)
+            ->build(Transaction::TYPE_AUTH);
 
-			foreach ($this->order->getInvoiceCollection() as $invoice) {
-				// Sale
-//				if(0 == $dmn_inv_id) {
-//					$this->curr_trans_info['invoice_id'][] = $invoice->getId();
-//					
-//					$invoice
-//						->setTransactionId($params['TransactionID'])
-//						->setState(Invoice::STATE_PAID)
-//						->pay()
-//						->save();
-//				}
-				// Settle
-//				else
-				if($dmn_inv_id == $invoice->getId()) {
-					$this->curr_trans_info['invoice_id'] = $invoice->getId();
+        $transaction->save();
 
-					$invoice
-						->setTransactionId($params['TransactionID'])
-						->setState(Invoice::STATE_PAID)
-						->pay()
-						->save();
-					
-					break;
-				}
-			}
-		}
-		// there are not invoices, but we can create
-		elseif ($this->order->canInvoice()
-			&& (
-				'sale' == $tr_type_param // Sale flow
-				|| ( // APMs flow
-					$params["order"] == $params["merchant_unique_id"]
-					&& $params["payment_method"] != 'cc_card'
-				)
-				|| ( // CPanel Settle
-					!empty($params["merchant_unique_id"])
-					&& $params["merchant_unique_id"] != $params["order"]
-				)
-			)
-		) {
-			$this->moduleConfig->createLog('We can create Invoice');
+        $tr_type    = $this->orderPayment->addTransaction(Transaction::TYPE_AUTH);
+        $msg        = $this->orderPayment->prependMessage($message);
 
-			// create Invoicees and Transactions for non-Magento actions
-			// Prepare the invoice
-			$invoice = $this->invoiceService->prepareInvoice($this->order);
-			$invoice
-				->setRequestedCaptureCase(Invoice::CAPTURE_ONLINE)
-				->setTransactionId($params['TransactionID'])
-				->setState(Invoice::STATE_PAID)
-				->setBaseGrandTotal($inv_amount);
+        $this->orderPayment->addTransactionCommentsToOrder($tr_type, $msg);
+    }
+    
+    /**
+     * @param array        $params
+     * @param float        $order_total
+     * @param float        $dmn_total
+     * @param string    $tr_type_param
+     */
+    private function processSaleAndSettleDMN($params, $order_total, $dmn_total, $tr_type_param)
+    {
+        $this->sc_transaction_type    = Payment::SC_SETTLED;
+        $invCollection                = $this->order->getInvoiceCollection();
+        $inv_amount                    = round(floatval($this->order->getBaseGrandTotal()), 2);
+        $dmn_inv_id                    = $this->httpRequest->getParam('invoice_id');
 
-			$invoice->register();
-			$invoice->getOrder()->setIsInProcess(true);
-			$invoice->pay();
+   //                    if($params['totalAmount'] > 0) {
+   //                        $this->start_subscr = true;
+   //                    }
 
-			// Create the transaction
-			$transactionSave = $this->transaction
-				->addObject($invoice)
-				->addObject($invoice->getOrder());
-			
-			$transactionSave->save();
+        // add Partial Settle flag
+        if ('settle' == $tr_type_param) {
+            if (($inv_amount - round(floatval($params['totalAmount']), 2) > 0.00)) {
+                $this->is_partial_settle = true;
+            }
+        } elseif ($order_total != $dmn_total) { // amount check for Sale only
+            $this->sc_transaction_type = 'fraud';
 
-			// Update the order
-			$this->order->setTotalPaid($inv_amount);
-			$this->order->setBaseTotalPaid($inv_amount);
+            $this->order->addStatusHistoryComment(
+                __('<b>Attention!</b> - There is a problem with the Order. The Order amount is ')
+                . $this->order->getOrderCurrencyCode() . ' '
+                . $order_total . ', ' . __('but the Paid amount is ')
+                . $params['currency'] . ' ' . $dmn_total,
+                $this->sc_transaction_type
+            );
+        }
 
-			// for sale ONLY
-			if ('sale' == $tr_type_param && $params["payment_method"] == 'cc_card') {
-				$invoice->setCanVoidFlag(true);
-				$this->order->setCanVoidPayment(true);
-				$this->orderPayment->setCanVoid(true);
-			}
+        $this->orderPayment->setSaleSettleAmount($inv_amount);
 
-			$this->curr_trans_info['invoice_id'] = $invoice->getId();
+        // there are invoices
+        if (count($invCollection) > 0) {
+            $invoices = [];
 
-			// Save the invoice
-			$this->invoiceRepository->save($invoice);
+            foreach ($this->order->getInvoiceCollection() as $invoice) {
+                // Sale
+//                if(0 == $dmn_inv_id) {
+//                    $this->curr_trans_info['invoice_id'][] = $invoice->getId();
+//
+//                    $invoice
+//                        ->setTransactionId($params['TransactionID'])
+//                        ->setState(Invoice::STATE_PAID)
+//                        ->pay()
+//                        ->save();
+//                }
+                // Settle
+//                else
+                if ($dmn_inv_id == $invoice->getId()) {
+                    $this->curr_trans_info['invoice_id'] = $invoice->getId();
 
-			$this->orderPayment
-				->setIsTransactionPending(0)
-				->setIsTransactionClosed(0);
+                    $invoice
+                        ->setTransactionId($params['TransactionID'])
+                        ->setState(Invoice::STATE_PAID)
+                        ->pay()
+                        ->save();
+                    
+                    break;
+                }
+            }
+        } elseif ($this->order->canInvoice()
+            && (
+                'sale' == $tr_type_param // Sale flow
+                || ( // APMs flow
+                    $params["order"] == $params["merchant_unique_id"]
+                    && $params["payment_method"] != 'cc_card'
+                )
+                || ( // CPanel Settle
+                    !empty($params["merchant_unique_id"])
+                    && $params["merchant_unique_id"] != $params["order"]
+                )
+            )
+        ) { // there are not invoices, but we can create
+            $this->moduleConfig->createLog('We can create Invoice');
 
-			// set transaction
-			$transaction = $this->transObj
-				->setPayment($this->orderPayment)
-				->setOrder($this->order)
-				->setTransactionId($params['TransactionID'])
-				->setFailSafe(true)
-				->build(Transaction::TYPE_CAPTURE);
+            // create Invoicees and Transactions for non-Magento actions
+            // Prepare the invoice
+            $invoice = $this->invoiceService->prepareInvoice($this->order);
+            $invoice
+                ->setRequestedCaptureCase(Invoice::CAPTURE_ONLINE)
+                ->setTransactionId($params['TransactionID'])
+                ->setState(Invoice::STATE_PAID)
+                ->setBaseGrandTotal($inv_amount);
 
-			$transaction->save();
+            $invoice->register();
+            $invoice->getOrder()->setIsInProcess(true);
+            $invoice->pay();
 
-			$tr_type	= $this->orderPayment->addTransaction(Transaction::TYPE_CAPTURE);
-			$msg        = $this->orderPayment->prependMessage($message);
+            // Create the transaction
+            $transactionSave = $this->transaction
+                ->addObject($invoice)
+                ->addObject($invoice->getOrder());
+            
+            $transactionSave->save();
 
-			$this->orderPayment->addTransactionCommentsToOrder($tr_type, $msg);
-		}
-		elseif (!$this->order->canInvoice()) {
-			$this->moduleConfig->createLog('We can NOT create invoice.');
-		}
-	}
-	
-	private function processDeclinedSaleOrSettleDmn()
-	{
-		$invCollection				= $this->order->getInvoiceCollection();
-		$inv_amount					= round(floatval($this->order->getBaseGrandTotal()), 2);
-		$dmn_inv_id					= 0;
-		
-		// there are invoices
-		if (count($invCollection) > 0) {
-			$this->moduleConfig->createLog(count($invCollection), 'The Invoices count is');
+            // Update the order
+            $this->order->setTotalPaid($inv_amount);
+            $this->order->setBaseTotalPaid($inv_amount);
 
-			$invoices = [];
+            // for sale ONLY
+            if ('sale' == $tr_type_param && $params["payment_method"] == 'cc_card') {
+                $invoice->setCanVoidFlag(true);
+                $this->order->setCanVoidPayment(true);
+                $this->orderPayment->setCanVoid(true);
+            }
 
-			foreach ($this->order->getInvoiceCollection() as $invoice) {
-				// Sale
-				if(0 == $dmn_inv_id) {
-					$this->curr_trans_info['invoice_id'][] = $invoice->getId();
-					
-					$invoice
-						->setTransactionId($params['TransactionID'])
-						->setState(Invoice::STATE_CANCELED)
-						->pay()
-						->save();
-				}
-				// Settle
-				elseif($dmn_inv_id == $invoice->getId()) {
-					$this->curr_trans_info['invoice_id'] = $invoice->getId();
+            $this->curr_trans_info['invoice_id'] = $invoice->getId();
 
-					$invoice
-						->setTransactionId($params['TransactionID'])
-						->setState(Invoice::STATE_CANCELED)
-						->pay()
-						->save();
-					
-					break;
-				}
-			}
-		}
-	}
-	
+            // Save the invoice
+            $this->invoiceRepository->save($invoice);
+
+            $this->orderPayment
+                ->setIsTransactionPending(0)
+                ->setIsTransactionClosed(0);
+
+            // set transaction
+            $transaction = $this->transObj
+                ->setPayment($this->orderPayment)
+                ->setOrder($this->order)
+                ->setTransactionId($params['TransactionID'])
+                ->setFailSafe(true)
+                ->build(Transaction::TYPE_CAPTURE);
+
+            $transaction->save();
+
+            $tr_type    = $this->orderPayment->addTransaction(Transaction::TYPE_CAPTURE);
+            $msg        = $this->orderPayment->prependMessage($message);
+
+            $this->orderPayment->addTransactionCommentsToOrder($tr_type, $msg);
+        } elseif (!$this->order->canInvoice()) {
+            $this->moduleConfig->createLog('We can NOT create invoice.');
+        }
+    }
+    
+    private function processDeclinedSaleOrSettleDmn()
+    {
+        $invCollection                = $this->order->getInvoiceCollection();
+        $inv_amount                    = round(floatval($this->order->getBaseGrandTotal()), 2);
+        $dmn_inv_id                    = 0;
+        
+        // there are invoices
+        if (count($invCollection) > 0) {
+            $this->moduleConfig->createLog(count($invCollection), 'The Invoices count is');
+
+            $invoices = [];
+
+            foreach ($this->order->getInvoiceCollection() as $invoice) {
+                // Sale
+                if (0 == $dmn_inv_id) {
+                    $this->curr_trans_info['invoice_id'][] = $invoice->getId();
+                    
+                    $invoice
+                        ->setTransactionId($params['TransactionID'])
+                        ->setState(Invoice::STATE_CANCELED)
+                        ->pay()
+                        ->save();
+                } elseif ($dmn_inv_id == $invoice->getId()) { // Settle
+                    $this->curr_trans_info['invoice_id'] = $invoice->getId();
+
+                    $invoice
+                        ->setTransactionId($params['TransactionID'])
+                        ->setState(Invoice::STATE_CANCELED)
+                        ->pay()
+                        ->save();
+                    
+                    break;
+                }
+            }
+        }
+    }
+    
     /**
      * Place order.
      */

@@ -45,7 +45,7 @@ class Settle extends AbstractPayment implements RequestInterface
     {
         $orderPayment           = $this->orderPayment;
         $order                  = $orderPayment->getOrder();
-        $ord_trans_addit_info	= $orderPayment->getAdditionalInformation(Payment::ORDER_TRANSACTIONS_DATA);
+        $ord_trans_addit_info    = $orderPayment->getAdditionalInformation(Payment::ORDER_TRANSACTIONS_DATA);
         $trans_to_settle        = [];
         
         if (!empty($ord_trans_addit_info) && is_array($ord_trans_addit_info)) {

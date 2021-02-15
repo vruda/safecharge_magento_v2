@@ -12,7 +12,7 @@ class SettleTransaction extends AbstractRequest implements RequestInterface
 {
     protected $config;
     protected $amount;
-	protected $payment;
+    protected $payment;
     
     private $invoice_id;
     
@@ -46,27 +46,30 @@ class SettleTransaction extends AbstractRequest implements RequestInterface
     public function process()
     {
         $resp = $this->sendRequest(true);
-		
+        
         return $resp;
     }
-	
-	public function setInvoiceId($invoice_id) {
-		$this->invoice_id = $invoice_id;
-		
-		return $this;
-	}
-	
-	public function setInvoiceAmount($ivoice_amount) {
-		$this->amount = $ivoice_amount;
-		
-		return $this;
-	}
-	
-	public function setPayment($payment) {
-		$this->payment	= $payment;
-		
-		return $this;
-	}
+    
+    public function setInvoiceId($invoice_id)
+    {
+        $this->invoice_id = $invoice_id;
+        
+        return $this;
+    }
+    
+    public function setInvoiceAmount($ivoice_amount)
+    {
+        $this->amount = $ivoice_amount;
+        
+        return $this;
+    }
+    
+    public function setPayment($payment)
+    {
+        $this->payment = $payment;
+        
+        return $this;
+    }
     
     /**
      * {@inheritdoc}
@@ -76,10 +79,10 @@ class SettleTransaction extends AbstractRequest implements RequestInterface
     protected function getParams()
     {
         $order                  = $this->payment->getOrder();
-        $ord_trans_addit_info	= $this->payment->getAdditionalInformation(Payment::ORDER_TRANSACTIONS_DATA);
+        $ord_trans_addit_info   = $this->payment->getAdditionalInformation(Payment::ORDER_TRANSACTIONS_DATA);
         $trans_to_settle        = [];
-		
-		$this->config->createLog($ord_trans_addit_info, 'getParams');
+        
+        $this->config->createLog($ord_trans_addit_info, 'getParams');
         
         if (!empty($ord_trans_addit_info) && is_array($ord_trans_addit_info)) {
             foreach (array_reverse($ord_trans_addit_info) as $trans) {
@@ -112,13 +115,10 @@ class SettleTransaction extends AbstractRequest implements RequestInterface
             'authCode'                  => $trans_to_settle[Payment::TRANSACTION_AUTH_CODE],
             'urlDetails'                => [
                 'notificationUrl' => $this->config
-					->getCallbackDmnUrl($getIncrementId, null, ['invoice_id' => $this->invoice_id]), 
+                    ->getCallbackDmnUrl($getIncrementId, null, ['invoice_id' => $this->invoice_id]),
             ],
-//			'merchantDetails'			=> [
-//				'customField6' => $this->invoice_id
-//			],
         ];
-		
+        
         $params = array_merge_recursive(parent::getParams(), $params);
 
         return $params;
@@ -162,6 +162,6 @@ class SettleTransaction extends AbstractRequest implements RequestInterface
      */
     protected function getResponseHandlerType()
     {
-        return;
+        return '';
     }
 }

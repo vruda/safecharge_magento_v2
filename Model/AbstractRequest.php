@@ -37,7 +37,7 @@ abstract class AbstractRequest extends AbstractApi
     const DELETE_UPOS_METHOD                    = 'deleteUPO';
     const GET_MERCHANT_PAYMENT_PLANS_METHOD     = 'getPlansList';
     const CREATE_SUBSCRIPTION_METHOD            = 'createSubscription';
-    const SETTLE_METHOD							= 'settleTransaction';
+    const SETTLE_METHOD                            = 'settleTransaction';
 
     /**
      * @var Curl
@@ -438,14 +438,14 @@ abstract class AbstractRequest extends AbstractApi
      */
     protected function sendRequest($continue_process = false, $accept_error_status = false)
     {
-        $endpoint	= $this->getEndpoint();
+        $endpoint    = $this->getEndpoint();
         $headers    = $this->getHeaders();
         $params     = $this->prepareParams();
 
-		$this->curl->setHeaders($headers);
+        $this->curl->setHeaders($headers);
 
         $this->config->createLog([
-            'Request Endpoint'	=> $endpoint,
+            'Request Endpoint'    => $endpoint,
             'Request params'    => $params
         ]);
         
@@ -525,7 +525,7 @@ abstract class AbstractRequest extends AbstractApi
             }
             
             $quoteData['billingAddress'] = [
-                'firstName'	=> $billing->getFirstname(),
+                'firstName'    => $billing->getFirstname(),
                 'lastName'  => $billing->getLastname(),
                 'address'   => is_array($billing->getStreet())
                     ? implode(' ', $billing->getStreet()) : '',
@@ -549,9 +549,9 @@ abstract class AbstractRequest extends AbstractApi
             }
 
             $quoteData['items'][] = [
-                'name'		=> $quoteItem->getName(),
-                'price'		=> $price,
-                'quantity'	=> (int)$quoteItem->getQty(),
+                'name'        => $quoteItem->getName(),
+                'price'        => $price,
+                'quantity'    => (int)$quoteItem->getQty(),
             ];
         }
 
@@ -564,7 +564,7 @@ abstract class AbstractRequest extends AbstractApi
         $requestStatus    = $this->getResponseStatus($resp_body);
         
         $this->config->createLog([
-            'Request Status'	=> $requestStatus,
+            'Request Status'    => $requestStatus,
             'Response data'     => $resp_body
         ]);
 

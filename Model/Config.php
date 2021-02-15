@@ -174,9 +174,9 @@ class Config
             return;
         }
         
-        $logsPath	= $this->directory->getPath('log');
-        $d			= $data;
-        $string		= '';
+        $logsPath    = $this->directory->getPath('log');
+        $d            = $data;
+        $string        = '';
         
         if (!empty($data)) {
             if (is_array($data)) {
@@ -622,10 +622,10 @@ class Config
     }
 
     /**
-	 * @param int	$incrementId
-	 * @param int	$storeId
-	 * @param array	$url_params
-	 * 
+     * @param int    $incrementId
+     * @param int    $storeId
+     * @param array    $url_params
+     *
      * @return string
      */
     public function getCallbackDmnUrl($incrementId = null, $storeId = null, $url_params = [])
@@ -634,26 +634,26 @@ class Config
             ->getStore(null === $incrementId ? $this->storeId : $storeId)
             ->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_WEB);
         
-		$params = [
+        $params = [
             'order'     => null === $incrementId ? $this->getReservedOrderId() : $incrementId,
-			'form_key'	=> $this->formKey->getFormKey(),
+            'form_key'    => $this->formKey->getFormKey(),
             'quote'     => $this->checkoutSession->getQuoteId(),
         ];
-		
-		$params_str = '';
-		
-		if(!empty($url_params) && is_array($url_params)) {
-			$params = array_merge($params, $url_params);
-		}
-		
-		foreach($params as $key => $val) {
-			if(empty($val)) {
-				continue;
-			}
-			
-			$params_str .= $key . '/' . $val . '/';
-		}
-		
+        
+        $params_str = '';
+        
+        if (!empty($url_params) && is_array($url_params)) {
+            $params = array_merge($params, $url_params);
+        }
+        
+        foreach ($params as $key => $val) {
+            if (empty($val)) {
+                continue;
+            }
+            
+            $params_str .= $key . '/' . $val . '/';
+        }
+        
         if ($this->versionNum != 0 && $this->versionNum < 220) {
             return $url . 'nuvei_payments/payment/callback_dmnold/' . $params_str;
         }

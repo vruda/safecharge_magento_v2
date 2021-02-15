@@ -34,7 +34,7 @@ class Payment extends Cc implements TransparentInterface
     /**
      * Method code const.
      */
-    const METHOD_CODE	= 'nuvei';
+    const METHOD_CODE    = 'nuvei';
     const MODE_LIVE     = 'live';
 
     /**
@@ -240,10 +240,10 @@ class Payment extends Cc implements TransparentInterface
             $data
         );
 
-        $this->paymentRequestFactory	= $paymentRequestFactory;
-        $this->customerSession			= $customerSession;
-        $this->moduleConfig				= $moduleConfig;
-        $this->checkoutSession			= $checkoutSession;
+        $this->paymentRequestFactory    = $paymentRequestFactory;
+        $this->customerSession            = $customerSession;
+        $this->moduleConfig                = $moduleConfig;
+        $this->checkoutSession            = $checkoutSession;
     }
 
     /**
@@ -319,11 +319,11 @@ class Payment extends Cc implements TransparentInterface
     /**
      * Capture payment method.
      *
-	 * This method create the request too early.
-	 * We use invoice observer, to create settle request.
-	 * This method is not used at the moment because _canCapture and
-	 * _canCapturePartial are set to false.
-	 * 
+     * This method create the request too early.
+     * We use invoice observer, to create settle request.
+     * This method is not used at the moment because _canCapture and
+     * _canCapturePartial are set to false.
+     *
      * @param InfoInterface $payment
      * @param float         $amount
      *
@@ -335,7 +335,7 @@ class Payment extends Cc implements TransparentInterface
     public function capture(InfoInterface $payment, $amount)
     {
         parent::capture($payment, $amount);
-		
+        
         $this->processPayment($payment, $amount);
 
         return $this;
@@ -361,7 +361,7 @@ class Payment extends Cc implements TransparentInterface
             $payment->setIsTransactionPending(true); // TODO do we need this
             return $this;
         }
-		
+        
         $method = AbstractRequest::PAYMENT_SETTLE_METHOD;
 
         /** @var RequestInterface $request */

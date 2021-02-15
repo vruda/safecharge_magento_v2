@@ -30,7 +30,7 @@ class Factory
         AbstractRequest::GET_UPOS_METHOD                    => \Nuvei\Payments\Model\Request\GetUserUPOs::class,
         AbstractRequest::DELETE_UPOS_METHOD                 => \Nuvei\Payments\Model\Request\DeleteUPO::class,
         AbstractRequest::GET_MERCHANT_PAYMENT_PLANS_METHOD  => \Nuvei\Payments\Model\Request\GetPlansList::class,
-		AbstractRequest::SETTLE_METHOD						=> \Nuvei\Payments\Model\Request\Settle::class,
+        AbstractRequest::SETTLE_METHOD                        => \Nuvei\Payments\Model\Request\Settle::class,
     ];
 
     /**

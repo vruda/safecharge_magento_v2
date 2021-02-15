@@ -98,18 +98,18 @@ class Refund extends AbstractPayment implements RequestInterface
     protected function getParams()
     {
         $orderPayment           = $this->orderPayment;
-        $ord_trans_addit_info	= $orderPayment->getAdditionalInformation(Payment::ORDER_TRANSACTIONS_DATA);
+        $ord_trans_addit_info    = $orderPayment->getAdditionalInformation(Payment::ORDER_TRANSACTIONS_DATA);
         $order                  = $orderPayment->getOrder();
         $trans_to_refund_data   = [];
-		$inv_id					= $this->request->getParam('invoice_id');
+        $inv_id                    = $this->request->getParam('invoice_id');
         
         if (!empty($ord_trans_addit_info) && is_array($ord_trans_addit_info)) {
             foreach (array_reverse($ord_trans_addit_info) as $trans) {
-				$tans_inv_id = !empty($trans['invoice_id']) ? $trans['invoice_id'] : 0;
-				
+                $tans_inv_id = !empty($trans['invoice_id']) ? $trans['invoice_id'] : 0;
+                
                 if (strtolower($trans[Payment::TRANSACTION_STATUS]) == 'approved'
                     && in_array(strtolower($trans[Payment::TRANSACTION_TYPE]), ['sale', 'settle'])
-					&& $tans_inv_id == $inv_id
+                    && $tans_inv_id == $inv_id
                 ) {
                     $trans_to_refund_data = $trans;
                     break;
@@ -147,11 +147,11 @@ class Refund extends AbstractPayment implements RequestInterface
             'merchant_unique_id'    => $order->getIncrementId(),
             'urlDetails'            => [
                 'notificationUrl' => $this->config
-					->getCallbackDmnUrl(
-						$order->getIncrementId(),
-						$order->getStoreId(),
-						['invoice_id' => $inv_id]
-					),
+                    ->getCallbackDmnUrl(
+                        $order->getIncrementId(),
+                        $order->getStoreId(),
+                        ['invoice_id' => $inv_id]
+                    ),
             ],
         ];
 
