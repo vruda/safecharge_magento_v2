@@ -433,17 +433,19 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
                     
                     $this->order->setData('state', Order::STATE_CLOSED);
                 }
-				// REFUND
+				// REFUND / CREDIT
 				elseif (in_array($tr_type_param, ['credit', 'refund'])) {
                     $this->transactionType        = Transaction::TYPE_REFUND;
                     $this->sc_transaction_type    = Payment::SC_REFUNDED;
                     
                     if ((!empty($params['totalAmount']) && 'cc_card' == $params["payment_method"])
-                    || false !== strpos($params["merchant_unique_id"], 'gwp')
+						|| false !== strpos($params["merchant_unique_id"], 'gwp')
                     ) {
                         $refund_msg = '<br/>The Refunded amount is <b>'
                             . $params['totalAmount'] . ' ' . $params['currency'] . '</b>.';
                     }
+					
+					$this->curr_trans_info['invoice_id'] = $this->httpRequest->getParam('invoice_id');
                     
                     $this->order->setData('state', Order::STATE_PROCESSING);
                 }
@@ -652,15 +654,9 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
 
 		// there are invoices
 		if (count($invCollection) > 0) {
-			$this->moduleConfig->createLog(count($invCollection), 'The Invoices count is');
-			$this->moduleConfig->createLog($params['invoice_id'], 'The invoice_id');
-			$this->moduleConfig->createLog($dmn_inv_id, '$dmn_inv_id');
-
 			$invoices = [];
 
 			foreach ($this->order->getInvoiceCollection() as $invoice) {
-				$this->moduleConfig->createLog($invoice->getId(), 'in getInvoiceCollection foreach The Invoices id');
-				
 				// Sale
 //				if(0 == $dmn_inv_id) {
 //					$this->curr_trans_info['invoice_id'][] = $invoice->getId();

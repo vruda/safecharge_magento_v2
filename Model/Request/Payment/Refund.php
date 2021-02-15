@@ -97,31 +97,25 @@ class Refund extends AbstractPayment implements RequestInterface
      */
     protected function getParams()
     {
-        /**
-         * TODO - we must create a fix, and refund based on Invoice ID not last allowed option!
-         */
-        
-        $orderPayment            = $this->orderPayment;
-        $ord_trans_addit_info    = $orderPayment->getAdditionalInformation(Payment::ORDER_TRANSACTIONS_DATA);
-        $order                    = $orderPayment->getOrder();
-        $trans_to_refund_data    = [];
+        $orderPayment           = $this->orderPayment;
+        $ord_trans_addit_info	= $orderPayment->getAdditionalInformation(Payment::ORDER_TRANSACTIONS_DATA);
+        $order                  = $orderPayment->getOrder();
+        $trans_to_refund_data   = [];
+		$inv_id					= $this->request->getParam('invoice_id');
         
         if (!empty($ord_trans_addit_info) && is_array($ord_trans_addit_info)) {
             foreach (array_reverse($ord_trans_addit_info) as $trans) {
+				$tans_inv_id = !empty($trans['invoice_id']) ? $trans['invoice_id'] : 0;
+				
                 if (strtolower($trans[Payment::TRANSACTION_STATUS]) == 'approved'
                     && in_array(strtolower($trans[Payment::TRANSACTION_TYPE]), ['sale', 'settle'])
+					&& $tans_inv_id == $inv_id
                 ) {
                     $trans_to_refund_data = $trans;
                     break;
                 }
             }
         }
-        
-//        $orderdetails = $order->loadByIncrementId($order->getId());
-//        foreach ($orderdetails->getInvoiceCollection() as $invoice)
-//        {
-//            $this->config->createLog($invoice->getIncrementId(), 'refund $invoice_id');
-//        }
         
         if (empty($trans_to_refund_data[Payment::TRANSACTION_ID])) {
             $msg = 'Refund Error - Transaction ID is empty.';
@@ -131,16 +125,6 @@ class Refund extends AbstractPayment implements RequestInterface
             throw new PaymentException(__($msg));
         }
 
-        /** @var OrderTransaction $transaction */
-        $transaction = $this->transactionRepository->getByTransactionId(
-            $trans_to_refund_data[Payment::TRANSACTION_ID],
-            $orderPayment->getId(),
-            $order->getId()
-        );
-
-//        $sale_settle_params    = $orderPayment->getAdditionalInformation(Payment::SALE_SETTLE_PARAMS);
-//        $this->config->createLog($sale_settle_params, 'Refund sale_settle_params');
-        
         $payment_method = $orderPayment->getAdditionalInformation(Payment::TRANSACTION_PAYMENT_METHOD);
 
         if (Payment::APM_METHOD_CC == $trans_to_refund_data[Payment::TRANSACTION_PAYMENT_METHOD]
@@ -162,7 +146,12 @@ class Refund extends AbstractPayment implements RequestInterface
             'comment'               => '',
             'merchant_unique_id'    => $order->getIncrementId(),
             'urlDetails'            => [
-                'notificationUrl' => $this->config->getCallbackDmnUrl($order->getIncrementId(), $order->getStoreId()),
+                'notificationUrl' => $this->config
+					->getCallbackDmnUrl(
+						$order->getIncrementId(),
+						$order->getStoreId(),
+						['invoice_id' => $inv_id]
+					),
             ],
         ];
 
