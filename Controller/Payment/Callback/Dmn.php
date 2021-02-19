@@ -143,6 +143,11 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
             
             $this->moduleConfig->createLog($params, 'DMN params:');
             
+//            $jsonOutput->setData('DMN manually stopped.');
+//            return $jsonOutput;
+            
+            
+            
             $status = !empty($params['Status']) ? strtolower($params['Status']) : null;
             
             // modify it because of the PayPal Sandbox problem with duplicate Orders IDs
@@ -342,6 +347,8 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
             // do not override status if the Order is Voided or Refunded
             if ('void' == strtolower($order_tr_type)
                 && strtolower($order_status) == 'approved'
+                && (strtolower($params['transactionType']) != 'void'
+                    || 'approved' != $status)
             ) {
                 $msg = 'No more actions are allowed for order #' . $this->order->getId();
                 
@@ -429,6 +436,32 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
                     $this->transactionType        = Transaction::TYPE_VOID;
                     $this->sc_transaction_type    = Payment::SC_VOIDED;
                     
+                    // set the Canceld Invoice
+                    $this->curr_trans_info['invoice_id'] = $this->httpRequest->getParam('invoice_id');
+                    
+                    // mark the Order Invoice as Canceld
+                    $invCollection = $this->order->getInvoiceCollection();
+                    
+                    $this->moduleConfig->createLog($this->curr_trans_info['invoice_id'], 'invoice_id');
+                    $this->moduleConfig->createLog(count($invCollection), '$invCollection');
+                    
+                    if (!empty($invCollection)) {
+                        foreach ($invCollection as $invoice) {
+                            $this->moduleConfig->createLog($invoice->getId(), 'Invoice');
+                            
+                            
+                            if ($invoice->getId() == $this->curr_trans_info['invoice_id']) {
+                                $this->moduleConfig->createLog($invoice->getId(), 'Invoice to be Canceld');
+                                
+                                $invoice->setState(Invoice::STATE_CANCELED);
+                                $this->invoiceRepository->save($invoice);
+
+                                break;
+                            }
+                        }
+                    }
+                    // mark the Order Invoice as Canceld END
+                    
                     $this->order->setData('state', Order::STATE_CLOSED);
                 } elseif (in_array($tr_type_param, ['credit', 'refund'])) { // REFUND / CREDIT
                     $this->transactionType        = Transaction::TYPE_REFUND;
@@ -448,27 +481,34 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
                 
                 $this->order->setStatus($this->sc_transaction_type);
                 
-                if ($this->is_partial_settle) {
+//                if ($this->is_partial_settle === true) {
+//                    $this->order->addStatusHistoryComment(
+//                        __("The <b>Partial Settle</b> request for amount of ")
+//                            . "<b>" . number_format($params['totalAmount'], 2, '.', '') . ' '
+//                            . $params['currency'] . "</b>, "
+//                            . __("returned") . " <b>" . $params['Status'] . "</b> "
+//                            . __("status") . ".<br/>"
+//                            . __('Transaction ID: ') . $params['TransactionID'] .', '
+//                            . __('Related Transaction ID: ')
+//                            . $params['relatedTransactionId'] . $refund_msg,
+//                        $this->sc_transaction_type
+//                    );
+//                } else {
+                
+                    $msg_transaction = '<b>'
+                        . ($this->is_partial_settle === true ? 'Partial ' : '')
+                        . $params['transactionType'] . '</b> ';
+                    
                     $this->order->addStatusHistoryComment(
-                        __("The <b>Partial Settle</b> request for amount of ")
-                            . "<b>" . number_format($params['totalAmount'], 2, '.', '') . ' '
-                            . $params['currency'] . "</b>, "
-                            . __("returned") . " <b>" . $params['Status'] . "</b> "
-                            . __("status") . ".<br/>"
-                            . __('Transaction ID: ') . $params['TransactionID'] .', '
-                            . __('Related Transaction ID: ')
-                            . $params['relatedTransactionId'] . $refund_msg,
-                        $this->sc_transaction_type
-                    );
-                } else {
-                    $this->order->addStatusHistoryComment(
-                        '<b>' . $params['transactionType'] . '</b> '
+                        $msg_transaction 
                         . __("request, response status is") . ' <b>' . $params['Status'] . '</b>.<br/>'
                         . __('Transaction ID: ') . $params['TransactionID'] .', '
-                        . __('Related Transaction ID: ') . $params['relatedTransactionId'] . $refund_msg,
+                        . __('Related Transaction ID: ') . $params['relatedTransactionId'] .', '
+                        . __('Transaction Amount: ') . number_format($params['totalAmount'], 2, '.', '')
+                        . ' ' . $params['currency'] . ' <br/>' . $refund_msg,
                         $this->sc_transaction_type
                     );
-                }
+//                }
             } elseif (in_array($status, ['declined', 'error'])) { // DECLINED/ERROR TRANSACTION
                 $this->processDeclinedSaleOrSettleDmn();
                 
@@ -600,10 +640,10 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
 
         $transaction->save();
 
-        $tr_type    = $this->orderPayment->addTransaction(Transaction::TYPE_AUTH);
-        $msg        = $this->orderPayment->prependMessage($message);
-
-        $this->orderPayment->addTransactionCommentsToOrder($tr_type, $msg);
+//        $tr_type    = $this->orderPayment->addTransaction(Transaction::TYPE_AUTH);
+//        $msg        = $this->orderPayment->prependMessage($message);
+//
+//        $this->orderPayment->addTransactionCommentsToOrder($tr_type, $msg);
     }
     
     /**
@@ -614,20 +654,33 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
      */
     private function processSaleAndSettleDMN($params, $order_total, $dmn_total, $tr_type_param)
     {
-        $this->sc_transaction_type    = Payment::SC_SETTLED;
-        $invCollection                = $this->order->getInvoiceCollection();
-        $inv_amount                    = round(floatval($this->order->getBaseGrandTotal()), 2);
-        $dmn_inv_id                    = $this->httpRequest->getParam('invoice_id');
+        $this->sc_transaction_type  = Payment::SC_SETTLED;
+        $invCollection              = $this->order->getInvoiceCollection();
+        $inv_amount                 = round(floatval($this->order->getBaseGrandTotal()), 2);
+        $dmn_inv_id                 = $this->httpRequest->getParam('invoice_id');
+        $is_cpanel_settle           = false;
+        
+        if(!empty($params["merchant_unique_id"])
+            && $params["merchant_unique_id"] != $params["order"]
+//            && (float) $params['totalAmount'] < $inv_amount
+        ) {
+            $is_cpanel_settle = true;
+        }
 
    //                    if($params['totalAmount'] > 0) {
    //                        $this->start_subscr = true;
    //                    }
 
+        if ($params["payment_method"] == 'cc_card') {
+            $this->order->setCanVoidPayment(true);
+            $this->orderPayment->setCanVoid(true);
+        }
+        
         // add Partial Settle flag
-        if ('settle' == $tr_type_param) {
-            if (($inv_amount - round(floatval($params['totalAmount']), 2) > 0.00)) {
-                $this->is_partial_settle = true;
-            }
+        if ('settle' == $tr_type_param
+            && ($inv_amount - round(floatval($params['totalAmount']), 2) > 0.00)
+        ) {
+            $this->is_partial_settle = true;
         } elseif ($order_total != $dmn_total) { // amount check for Sale only
             $this->sc_transaction_type = 'fraud';
 
@@ -640,91 +693,94 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
             );
         }
 
-        $this->orderPayment->setSaleSettleAmount($inv_amount);
-
         // there are invoices
-        if (count($invCollection) > 0) {
-            $invoices = [];
-
+        if (count($invCollection) > 0 && !$is_cpanel_settle) {
+            $this->moduleConfig->createLog('There are Invoices');
+            
             foreach ($this->order->getInvoiceCollection() as $invoice) {
-                // Sale
-//                if(0 == $dmn_inv_id) {
-//                    $this->curr_trans_info['invoice_id'][] = $invoice->getId();
-//
-//                    $invoice
-//                        ->setTransactionId($params['TransactionID'])
-//                        ->setState(Invoice::STATE_PAID)
-//                        ->pay()
-//                        ->save();
-//                }
                 // Settle
-//                else
                 if ($dmn_inv_id == $invoice->getId()) {
                     $this->curr_trans_info['invoice_id'] = $invoice->getId();
 
+                    $this->moduleConfig->createLog([
+                        '$dmn_inv_id' => $dmn_inv_id,
+                        '$invoice->getId()' => $invoice->getId()
+                    ]);
+                    
+                    $invoice->setCanVoidFlag(true);
                     $invoice
                         ->setTransactionId($params['TransactionID'])
                         ->setState(Invoice::STATE_PAID)
-                        ->pay()
-                        ->save();
+                        ->pay();
                     
-                    break;
+                    $this->invoiceRepository->save($invoice);
+                    
+                    return;
                 }
             }
-        } elseif ($this->order->canInvoice()
-            && (
+            
+            return;
+        }
+        
+        // Force Invoice creation when we have CPanel Partial Settle
+        if (!$this->order->canInvoice() && !$is_cpanel_settle) {
+            $this->moduleConfig->createLog('We can NOT create invoice.');
+            return;
+        }
+        
+        $this->moduleConfig->createLog('There are no Invoices');
+        
+        
+        
+        // there are not invoices, but we can create
+        if (
+//            ( $this->order->canInvoice() || $is_cpanel_settle )
+//            && (
+            (
                 'sale' == $tr_type_param // Sale flow
                 || ( // APMs flow
                     $params["order"] == $params["merchant_unique_id"]
                     && $params["payment_method"] != 'cc_card'
                 )
-                || ( // CPanel Settle
-                    !empty($params["merchant_unique_id"])
-                    && $params["merchant_unique_id"] != $params["order"]
-                )
+                || $is_cpanel_settle
             )
-        ) { // there are not invoices, but we can create
+        ) {
             $this->moduleConfig->createLog('We can create Invoice');
-
-            // create Invoicees and Transactions for non-Magento actions
-            // Prepare the invoice
+            
+            $this->orderPayment
+                ->setIsTransactionPending(0)
+                ->setIsTransactionClosed(0);
+            
             $invoice = $this->invoiceService->prepareInvoice($this->order);
+            $invoice->setCanVoidFlag(true);
+            
             $invoice
                 ->setRequestedCaptureCase(Invoice::CAPTURE_ONLINE)
                 ->setTransactionId($params['TransactionID'])
-                ->setState(Invoice::STATE_PAID)
-                ->setBaseGrandTotal($inv_amount);
-
+                ->setState(Invoice::STATE_PAID);
+            
+            // in case of Cpanel Partial Settle
+            if($is_cpanel_settle && (float) $params['totalAmount'] < $inv_amount) {
+                $inv_amount = round((float) $params['totalAmount'], 2);
+            }
+            
+            $invoice
+                ->setSubtotal($inv_amount)
+                ->setBaseSubtotal($inv_amount)
+                ->setBaseGrandTotal($inv_amount)
+                ->setGrandTotal($inv_amount);
+            
             $invoice->register();
             $invoice->getOrder()->setIsInProcess(true);
             $invoice->pay();
-
-            // Create the transaction
+            
             $transactionSave = $this->transaction
                 ->addObject($invoice)
                 ->addObject($invoice->getOrder());
             
             $transactionSave->save();
 
-            // Update the order
-            $this->order->setTotalPaid($inv_amount);
-            $this->order->setBaseTotalPaid($inv_amount);
-
-            // for sale ONLY
-            if ('sale' == $tr_type_param && $params["payment_method"] == 'cc_card') {
-                $invoice->setCanVoidFlag(true);
-                $this->order->setCanVoidPayment(true);
-                $this->orderPayment->setCanVoid(true);
-            }
-
             $this->curr_trans_info['invoice_id'] = $invoice->getId();
-
-            // Save the invoice
-            $this->invoiceRepository->save($invoice);
-
-            $this->orderPayment
-                ->setIsTransactionPending(0)
-                ->setIsTransactionClosed(0);
 
             // set transaction
             $transaction = $this->transObj
@@ -736,12 +792,12 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
 
             $transaction->save();
 
-            $tr_type    = $this->orderPayment->addTransaction(Transaction::TYPE_CAPTURE);
-            $msg        = $this->orderPayment->prependMessage($message);
-
-            $this->orderPayment->addTransactionCommentsToOrder($tr_type, $msg);
-        } elseif (!$this->order->canInvoice()) {
-            $this->moduleConfig->createLog('We can NOT create invoice.');
+//            $tr_type    = $this->orderPayment->addTransaction(Transaction::TYPE_CAPTURE);
+//            $msg        = $this->orderPayment->prependMessage($message);
+//
+//            $this->orderPayment->addTransactionCommentsToOrder($tr_type, $msg);
+            
+            return;
         }
     }
     
@@ -754,8 +810,6 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
         // there are invoices
         if (count($invCollection) > 0) {
             $this->moduleConfig->createLog(count($invCollection), 'The Invoices count is');
-
-            $invoices = [];
 
             foreach ($this->order->getInvoiceCollection() as $invoice) {
                 // Sale

@@ -15,6 +15,46 @@ use Nuvei\Payments\Model\RequestInterface;
 class Cancel extends AbstractPayment implements RequestInterface
 {
     /**
+     * Refund constructor.
+     *
+     * @param Config                            $config
+     * @param Curl                              $curl
+     * @param RequestFactory                    $requestFactory
+     * @param Factory                           $paymentRequestFactory
+     * @param ResponseFactory                   $responseFactory
+     * @param OrderPayment                      $orderPayment
+     * @param TransactionRepositoryInterface    $transactionRepository
+     * @param Http                              $request
+     * @param float                             $amount
+     */
+    public function __construct(
+        \Nuvei\Payments\Model\Logger $logger,
+        \Nuvei\Payments\Model\Config $config,
+        \Nuvei\Payments\Lib\Http\Client\Curl $curl,
+        \Nuvei\Payments\Model\Request\Factory $requestFactory,
+        \Nuvei\Payments\Model\Request\Payment\Factory $paymentRequestFactory,
+        \Nuvei\Payments\Model\Response\Factory $responseFactory,
+        \Magento\Sales\Model\Order\Payment $orderPayment,
+        \Magento\Sales\Api\TransactionRepositoryInterface $transactionRepository,
+        \Magento\Framework\App\Request\Http $request,
+        $amount = 0.0
+    ) {
+        parent::__construct(
+            $logger,
+            $config,
+            $curl,
+            $requestFactory,
+            $paymentRequestFactory,
+            $responseFactory,
+            $orderPayment,
+            $amount
+        );
+
+        $this->transactionRepository    = $transactionRepository;
+        $this->request                  = $request;
+    }
+    
+    /**
      * {@inheritdoc}
      *
      * @return string
@@ -43,70 +83,86 @@ class Cancel extends AbstractPayment implements RequestInterface
     protected function getParams()
     {
         // we can create Void for Settle and Auth only!!!
-        $orderPayment            = $this->orderPayment;
-        $ord_trans_addit_info    = $orderPayment->getAdditionalInformation(Payment::ORDER_TRANSACTIONS_DATA);
-        $order                    = $orderPayment->getOrder();
-        $alowed_trans_data        = [];
+        $orderPayment           = $this->orderPayment;
+        $ord_trans_addit_info   = $orderPayment->getAdditionalInformation(Payment::ORDER_TRANSACTIONS_DATA);
+        $order                  = $orderPayment->getOrder();
+        $inv_id                 = $this->request->getParam('invoice_id');
+        $trans_to_void_data     = [];
+        $last_voidable          = [];
         
         if (is_array($ord_trans_addit_info) && !empty($ord_trans_addit_info)) {
-            foreach (array_reverse($ord_trans_addit_info) as $trans) {
+            
+            foreach (array_reverse($ord_trans_addit_info) as $key => $trans) {
                 if (strtolower($trans[Payment::TRANSACTION_STATUS]) == 'approved'
                     && in_array(strtolower($trans[Payment::TRANSACTION_TYPE]), ['auth', 'settle', 'sale'])
                 ) {
-                    $alowed_trans_data = $trans;
-                    break;
+                    if(0 == $key) {
+                        $last_voidable = $trans;
+                    }
+                    
+                    // settle
+                    if (!empty($trans['invoice_id'])
+                        && !empty($inv_id)
+                        && $trans['invoice_id'] == $inv_id
+                    ) { 
+                        $trans_to_void_data = $trans;
+                        break;
+                    }
                 }
             }
         }
         
-        if (empty($alowed_trans_data)) {
-            $msg = 'Void Error - There is no approved Settle or Auth Transaction';
+        /**
+         * there was not settle Transaction, or we can not find transaction
+         * based on Invoice ID. In this case use last voidable transaction.
+         */
+        if(empty($trans_to_void_data)) {
+            $trans_to_void_data = $last_voidable;
+        }
+        
+        if (empty($trans_to_void_data)) {
             $this->config->createLog(
                 [
-                    '$ord_trans_addit_info'    => $ord_trans_addit_info,
-                    '$alowed_trans_data'    => $alowed_trans_data,
+                    '$ord_trans_addit_info' => $ord_trans_addit_info,
+                    '$trans_to_void_data'    => $trans_to_void_data,
                 ],
-                $msg
+                'Void Error - Missing mandatory data for the Void.'
             );
             
-            throw new PaymentException(
-                __($msg)
-            );
+            throw new PaymentException(__('Void Error - Missing mandatory data for the Void.'));
         }
         
-        // Auth
-        if ('auth' == strtolower($alowed_trans_data[Payment::TRANSACTION_TYPE])) {
-            $amount = floatval($alowed_trans_data[Payment::TRANSACTION_TOTAL_AMOUN]);
-        } else { // Settle and Sale
-            $amount = (float) $order->getTotalPaid();
-        }
+        $this->config->createLog($trans_to_void_data, 'Transaction to Cancel');
         
-        if (empty($alowed_trans_data[Payment::TRANSACTION_AUTH_CODE])) {
-            $msg = 'Void error: Transaction does not contain authorization code.';
-            
-            $this->config->createLog($alowed_trans_data, $msg);
-            
-            throw new PaymentException(__($msg));
-        }
+        $amount     = floatval($trans_to_void_data[Payment::TRANSACTION_TOTAL_AMOUN]);
+        $auth_code  = !empty($trans_to_refund_data[Payment::TRANSACTION_AUTH_CODE])
+            ? $trans_to_refund_data[Payment::TRANSACTION_AUTH_CODE] : '';
+        
+        $this->config->createLog($auth_code, '$auth_code');
         
         if (empty($amount) || $amount < 0) {
-            $msg = 'Void error - Transaction does not contain total amount.';
+            $this->config->createLog(
+                $trans_to_void_data,
+                'Void error - Transaction does not contain total amount.'
+            );
             
-            $this->config->createLog($alowed_trans_data, $msg);
-            
-            throw new PaymentException(__($msg));
+            throw new PaymentException(__('Void error - Transaction does not contain total amount.'));
         }
         
         $params = [
             'clientUniqueId'        => $order->getIncrementId(),
             'currency'              => $order->getBaseCurrencyCode(),
             'amount'                => $amount,
-            'relatedTransactionId'  => $alowed_trans_data[Payment::TRANSACTION_ID],
-            'authCode'              => $alowed_trans_data[Payment::TRANSACTION_AUTH_CODE],
+            'relatedTransactionId'  => $trans_to_void_data[Payment::TRANSACTION_ID],
+            'authCode'              => $auth_code,
             'comment'               => '',
             'merchant_unique_id'    => $order->getIncrementId(),
             'urlDetails'            => [
-                'notificationUrl' => $this->config->getCallbackDmnUrl($order->getIncrementId(), $order->getStoreId()),
+                'notificationUrl' => $this->config->getCallbackDmnUrl(
+                                        $order->getIncrementId(),
+                                        $order->getStoreId(),
+                                        ['invoice_id' => $inv_id]
+                                    ),
             ],
         ];
 

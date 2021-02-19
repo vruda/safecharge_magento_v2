@@ -90,19 +90,20 @@ class Toolbar
                 || in_array($ord_status, [Payment::SC_REFUNDED, Payment::SC_PROCESSING, Payment::SC_VOIDED, 'closed'])
             ) {
                 $buttonList->remove('void_payment');
-            } elseif (!isset($buttonList->getItems()[0]['void_payment'])) {
-                // workaround in case of missing Void button on Sale transaction
-                $message = __('Are you sure you want to void the payment?');
-                $url = $context->getUrl('sales/*/voidPayment', ['order_id' => $orderId]);
-
-                $buttonList->add(
-                    'void_payment',
-                    [
-                        'label' => __('Void'),
-                        'onclick' => "confirmSetLocation('{$message}', '{$url}')"
-                    ]
-                );
             }
+//            elseif (!isset($buttonList->getItems()[0]['void_payment'])) {
+//                // workaround in case of missing Void button on Sale transaction
+//                $message = __('Are you sure you want to void the payment?');
+//                $url = $context->getUrl('sales/*/voidPayment', ['order_id' => $orderId]);
+//
+//                $buttonList->add(
+//                    'void_payment',
+//                    [
+//                        'label' => __('Void'),
+//                        'onclick' => "confirmSetLocation('{$message}', '{$url}')"
+//                    ]
+//                );
+//            }
         } catch (Exception $e) {
             $this->config->createLog($e->getMessage(), 'Class Toolbar exception:');
             return [$context, $buttonList];

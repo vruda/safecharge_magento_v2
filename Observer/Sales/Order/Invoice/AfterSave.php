@@ -30,9 +30,9 @@ class AfterSave implements ObserverInterface
         \Magento\Framework\ObjectManagerInterface $objectManager,
         \Magento\Framework\Controller\Result\JsonFactory $jsonResultFactory
     ) {
-        $this->config                    = $config;
+        $this->config                   = $config;
         $this->paymentRequestFactory    = $paymentRequestFactory;
-        $this->requestFactory            = $requestFactory;
+        $this->requestFactory           = $requestFactory;
         $this->objectManager            = $objectManager;
         $this->jsonResultFactory        = $jsonResultFactory;
     }
@@ -54,8 +54,12 @@ class AfterSave implements ObserverInterface
             }
             
             // if the invoice is Paid, we already made Settle request.
-            if ($invoice->getState() === Invoice::STATE_PAID) {
-                $this->config->createLog($invoice->getId(), 'Invoice AfterSave Observer - the invoice already paid.');
+            if (in_array($invoice->getState(), [Invoice::STATE_PAID, Invoice::STATE_CANCELED])) {
+                $this->config->createLog(
+                    $invoice->getId(),
+                    'Invoice AfterSave Observer - the invoice already paid or canceld.'
+                );
+                
                 return $this;
             }
 
@@ -76,7 +80,10 @@ class AfterSave implements ObserverInterface
             }
 
             if ($payment->getMethod() !== Payment::METHOD_CODE) {
-                $this->config->createLog($payment->getMethod(), 'Invoice AfterSave Observer Error - payment method is');
+                $this->config->createLog(
+                    $payment->getMethod(),
+                    'Invoice AfterSave Observer Error - payment method is'
+                );
 
                 return $this;
             }
@@ -85,11 +92,23 @@ class AfterSave implements ObserverInterface
             $authCode                = '';
             $ord_trans_addit_info    = $payment->getAdditionalInformation(Payment::ORDER_TRANSACTIONS_DATA);
             
-            if (is_array($ord_trans_addit_info) && !empty($ord_trans_addit_info)) {
-                foreach ($ord_trans_addit_info as $trans) {
-                    if (strtolower($trans[Payment::TRANSACTION_TYPE]) == 'auth'
-                        && strtolower($trans[Payment::TRANSACTION_STATUS]) == 'approved'
-                    ) {
+            // probably a Sale
+            if (!is_array($ord_trans_addit_info)
+                || empty($ord_trans_addit_info)
+                || count($ord_trans_addit_info) < 1
+            ) {
+                return $this;
+            }
+            
+            foreach ($ord_trans_addit_info as $trans) {
+                if(strtolower($trans[Payment::TRANSACTION_STATUS]) == 'approved') {
+                    if (strtolower($trans[Payment::TRANSACTION_TYPE]) == 'sale') {
+                        $this->config->createLog('After Save Invoice observer - Sale');
+                        return $this;
+                    }
+
+                    if (strtolower($trans[Payment::TRANSACTION_TYPE]) == 'auth') {
+                        $this->config->createLog('After Save Invoice observer - Auth');
                         $authCode = $trans[Payment::TRANSACTION_AUTH_CODE];
                         break;
                     }
@@ -97,14 +116,15 @@ class AfterSave implements ObserverInterface
             }
             
             if (empty($authCode)) {
-                $this->config->createLog('Invoice AfterSave Observer - $authCode is empty.');
+                $this->config->createLog(
+                    $ord_trans_addit_info,
+                    'Invoice AfterSave Observer - $authCode is empty.'
+                );
                 
                 $payment->setIsTransactionPending(true); // TODO do we need this
                 return $this;
             }
             
-//                $request = $this->requestFactory->create(\Nuvei\Payments\Model\AbstractRequest::SETTLE_METHOD);
-//                $request = $this->objectManager->create(\Nuvei\Payments\Model\AbstractRequest::SETTLE_METHOD);
             $request = $this->objectManager->create(\Nuvei\Payments\Model\Request\SettleTransaction::class);
 
             $resp = $request
@@ -112,23 +132,6 @@ class AfterSave implements ObserverInterface
                 ->setInvoiceId($invoice->getId())
                 ->setInvoiceAmount($invoice->getGrandTotal())
                 ->process();
-
-            /** @var RequestInterface $request */
-//            $request = $this->paymentRequestFactory->create(
-//                \Nuvei\Payments\Model\AbstractRequest::PAYMENT_SETTLE_METHOD
-//                ,$payment
-////                ,$invoice->getGrandTotal()
-////                ,$invoice->getId()
-//            );
-//
-//            $response = $request
-//                ->setInvoiceId($invoice->getId())
-//                ->setInvoiceAmount($invoice->getGrandTotal())
-//                ->process();
-            
-//            if ($authCode === null) {
-//                $this->checkoutSession->setRedirectUrl($response->getRedirectUrl());
-//            }
             // Settle request END
         } catch (Exception $e) {
             $this->config->createLog($e->getMessage(), 'Invoice AfterSave Exception');

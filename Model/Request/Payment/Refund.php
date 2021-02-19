@@ -3,19 +3,12 @@
 namespace Nuvei\Payments\Model\Request\Payment;
 
 use Magento\Framework\Exception\PaymentException;
-use Magento\Sales\Api\TransactionRepositoryInterface;
-use Magento\Sales\Model\Order\Payment as OrderPayment;
-use Magento\Sales\Model\Order\Payment\Transaction as OrderTransaction;
-use Nuvei\Payments\Lib\Http\Client\Curl;
+//use Magento\Sales\Model\Order\Payment\Transaction as OrderTransaction;
 use Nuvei\Payments\Model\AbstractRequest;
 use Nuvei\Payments\Model\AbstractResponse;
-use Nuvei\Payments\Model\Config;
 use Nuvei\Payments\Model\Payment;
 use Nuvei\Payments\Model\Request\AbstractPayment;
-use Nuvei\Payments\Model\Request\Factory as RequestFactory;
-use Nuvei\Payments\Model\Request\Payment\Factory as PaymentRequestFactory;
 use Nuvei\Payments\Model\RequestInterface;
-use Nuvei\Payments\Model\Response\Factory as ResponseFactory;
 
 /**
  * Nuvei Payments refund payment request model.
@@ -43,13 +36,13 @@ class Refund extends AbstractPayment implements RequestInterface
      */
     public function __construct(
         \Nuvei\Payments\Model\Logger $logger,
-        Config $config,
-        Curl $curl,
-        RequestFactory $requestFactory,
-        PaymentRequestFactory $paymentRequestFactory,
-        ResponseFactory $responseFactory,
-        OrderPayment $orderPayment,
-        TransactionRepositoryInterface $transactionRepository,
+        \Nuvei\Payments\Model\Config $config,
+        \Nuvei\Payments\Lib\Http\Client\Curl $curl,
+        \Nuvei\Payments\Model\Request\Factory $requestFactory,
+        \Nuvei\Payments\Model\Request\Payment\Factory $paymentRequestFactory,
+        \Nuvei\Payments\Model\Response\Factory $responseFactory,
+        \Magento\Sales\Model\Order\Payment $orderPayment,
+        \Magento\Sales\Api\TransactionRepositoryInterface $transactionRepository,
         \Magento\Framework\App\Request\Http $request,
         $amount = 0.0
     ) {
@@ -98,31 +91,41 @@ class Refund extends AbstractPayment implements RequestInterface
     protected function getParams()
     {
         $orderPayment           = $this->orderPayment;
-        $ord_trans_addit_info    = $orderPayment->getAdditionalInformation(Payment::ORDER_TRANSACTIONS_DATA);
+        $ord_trans_addit_info   = $orderPayment->getAdditionalInformation(Payment::ORDER_TRANSACTIONS_DATA);
         $order                  = $orderPayment->getOrder();
         $trans_to_refund_data   = [];
-        $inv_id                    = $this->request->getParam('invoice_id');
+        $inv_id                 = $this->request->getParam('invoice_id');
         
         if (!empty($ord_trans_addit_info) && is_array($ord_trans_addit_info)) {
             foreach (array_reverse($ord_trans_addit_info) as $trans) {
-                $tans_inv_id = !empty($trans['invoice_id']) ? $trans['invoice_id'] : 0;
-                
                 if (strtolower($trans[Payment::TRANSACTION_STATUS]) == 'approved'
                     && in_array(strtolower($trans[Payment::TRANSACTION_TYPE]), ['sale', 'settle'])
-                    && $tans_inv_id == $inv_id
                 ) {
-                    $trans_to_refund_data = $trans;
-                    break;
+                    // sale
+                    if(strtolower($trans[Payment::TRANSACTION_TYPE]) == 'sale') {
+                        $trans_to_refund_data = $trans;
+                        break;
+                    } elseif (!empty($trans['invoice_id'])
+                        && !empty($inv_id)
+                        && $trans['invoice_id'] == $inv_id
+                    ) { // settle
+                        $trans_to_refund_data = $trans;
+                        break;
+                    }
                 }
             }
         }
         
         if (empty($trans_to_refund_data[Payment::TRANSACTION_ID])) {
-            $msg = 'Refund Error - Transaction ID is empty.';
+            $this->config->createLog(
+                [
+                    '$ord_trans_addit_info' => $ord_trans_addit_info,
+                    '$trans_to_refund_data' =>$trans_to_refund_data
+                ],
+                'Refund Error - Transaction ID is empty.'
+            );
             
-            $this->config->createLog($trans_to_refund_data, $msg);
-            
-            throw new PaymentException(__($msg));
+            throw new PaymentException(__('Refund Error - Transaction ID is empty.'));
         }
 
         $payment_method = $orderPayment->getAdditionalInformation(Payment::TRANSACTION_PAYMENT_METHOD);
@@ -136,13 +139,16 @@ class Refund extends AbstractPayment implements RequestInterface
             
             throw new PaymentException(__($msg));
         }
+        
+        $auth_code = !empty($trans_to_refund_data[Payment::TRANSACTION_AUTH_CODE])
+            ? $trans_to_refund_data[Payment::TRANSACTION_AUTH_CODE] : '';
 
         $params = [
             'clientUniqueId'        => $order->getIncrementId(),
             'currency'              => $order->getBaseCurrencyCode(),
             'amount'                => (float)$this->amount,
             'relatedTransactionId'  => $trans_to_refund_data[Payment::TRANSACTION_ID],
-            'authCode'              => $trans_to_refund_data[Payment::TRANSACTION_AUTH_CODE] ?: '',
+            'authCode'              => $auth_code,
             'comment'               => '',
             'merchant_unique_id'    => $order->getIncrementId(),
             'urlDetails'            => [

@@ -121,14 +121,14 @@ class Payment extends Cc implements TransparentInterface
      *
      * @var bool
      */
-    protected $_canCapture = false;
+    protected $_canCapture = true;
 
     /**
      * Payment Method feature.
      *
      * @var bool
      */
-    protected $_canCapturePartial = false;
+    protected $_canCapturePartial = true;
 
     /**
      * Payment Method feature.
@@ -321,8 +321,6 @@ class Payment extends Cc implements TransparentInterface
      *
      * This method create the request too early.
      * We use invoice observer, to create settle request.
-     * This method is not used at the moment because _canCapture and
-     * _canCapturePartial are set to false.
      *
      * @param InfoInterface $payment
      * @param float         $amount
@@ -332,11 +330,12 @@ class Payment extends Cc implements TransparentInterface
      *
      * @api
      */
+    /*
     public function capture(InfoInterface $payment, $amount)
     {
         parent::capture($payment, $amount);
         
-        $this->processPayment($payment, $amount);
+//        $this->processPayment($payment, $amount);
 
         return $this;
     }
@@ -364,7 +363,6 @@ class Payment extends Cc implements TransparentInterface
         
         $method = AbstractRequest::PAYMENT_SETTLE_METHOD;
 
-        /** @var RequestInterface $request */
         $request = $this->paymentRequestFactory->create(
             $method,
             $payment,
@@ -379,6 +377,7 @@ class Payment extends Cc implements TransparentInterface
 
         return $this;
     }
+     */
 
     /**
      * Refund payment method.

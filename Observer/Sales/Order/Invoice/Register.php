@@ -55,29 +55,18 @@ class Register implements ObserverInterface
         }
 
         /** @var Invoice $invoice */
-        $invoice = $observer->getInvoice();
-        $invoice->setState(Invoice::STATE_OPEN); // we will set it to Paid when get the DMN
+        $invoice    = $observer->getInvoice();
+        $inv_state  = Invoice::STATE_OPEN; // in case of auth we will change it when DMN come
         
-//        $this->config->createLog(@$invoice->getId());
-//        $this->config->createLog(@$invoice->getState());
-
-//        if ($invoice->getState() !== Invoice::STATE_PAID) {
-//            $this->config->createLog($invoice->getState(), 'Invoice Register Observer Error - $invoice state is');
-//
-//            return $this;
-//        }
-
-        /*
-        $status = Payment::SC_SETTLED;
-
-        $totalDue = $order->getBaseTotalDue();
-        if ((float)$totalDue > 0.0) {
-            $status = Payment::SC_PARTIALLY_SETTLED;
+        $ord_trans_addit_info = $payment->getAdditionalInformation(Payment::ORDER_TRANSACTIONS_DATA);
+        
+        // in case of Sale
+        if(!is_array($ord_trans_addit_info) || count($ord_trans_addit_info) < 1) {
+            $inv_state  = Invoice::STATE_PAID;
         }
-
-        $order->setStatus($status);
-         */
-
+        
+        $invoice->setState($inv_state);
+        
         return $this;
     }
 }
