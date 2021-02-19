@@ -267,7 +267,7 @@
 					<comment model="Nuvei\Payments\Block\System\Config\GetNotifyUrl" />
 				</field>
 				
-<!--				<field id="getPlans"
+				<field id="getPlans"
 					   translate="label"
 					   type="button"
 					   sortOrder="170"
@@ -277,7 +277,7 @@
 					<label>Get Payment Plans</label>
 					<frontend_model>Nuvei\Payments\Block\System\Config\Button</frontend_model>
 					<comment model="Nuvei\Payments\Block\System\Config\ShowLastDownloadTime" />
-				</field>-->
+				</field>
             </group>
         </section>
     </system>

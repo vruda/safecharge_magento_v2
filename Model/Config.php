@@ -15,37 +15,39 @@ use Magento\Store\Model\StoreManagerInterface;
  */
 class Config
 {
-    const MODULE_NAME                        = 'Nuvei_Payments';
+    const MODULE_NAME                           = 'Nuvei_Payments';
     
-    const PAYMENT_PLANS_ATTR_NAME            = 'nuvei_payment_plans';
-    const PAYMENT_PLANS_ATTR_LABEL            = 'Nuvei Payment Plans';
-    const PAYMENT_PLANS_FILE_NAME            = 'nuvei_payment_plans.json';
+    const PAYMENT_PLANS_ATTR_NAME               = 'nuvei_payment_plans';
+    const PAYMENT_PLANS_ATTR_LABEL              = 'Nuvei Payment Plans';
+    const PAYMENT_PLANS_FILE_NAME               = 'nuvei_payment_plans.json';
     
-    const PAYMENT_SUBS_GROUP                = 'Nuvei Subscription';
-    const PAYMENT_SUBS_ENABLE_LABEL            = 'Enable Subscription';
-    const PAYMENT_SUBS_ENABLE                = 'nuvei_sub_enabled';
-    const PAYMENT_SUBS_INTIT_AMOUNT_LABEL    = 'Initial Amount';
-    const PAYMENT_SUBS_INTIT_AMOUNT            = 'nuvei_sub_init_amount';
-    const PAYMENT_SUBS_REC_AMOUNT_LABEL        = 'Recurring Amount';
-    const PAYMENT_SUBS_REC_AMOUNT            = 'nuvei_sub_rec_amount';
+    const PAYMENT_SUBS_GROUP                    = 'Nuvei Subscription';
     
-    const PAYMENT_SUBS_RECURR_UNITS            = 'nuvei_sub_recurr_units';
-    const PAYMENT_SUBS_RECURR_UNITS_LABEL    = 'Recurring Units';
-    const PAYMENT_SUBS_RECURR_PERIOD        = 'nuvei_sub_recurr_period';
-    const PAYMENT_SUBS_RECURR_PERIOD_LABEL    = 'Recurring Period';
+    const PAYMENT_SUBS_ENABLE_LABEL             = 'Enable Subscription';
+    const PAYMENT_SUBS_ENABLE                   = 'nuvei_sub_enabled';
     
-    const PAYMENT_SUBS_TRIAL_UNITS            = 'nuvei_sub_trial_units';
-    const PAYMENT_SUBS_TRIAL_UNITS_LABEL    = 'Trial Units';
-    const PAYMENT_SUBS_TRIAL_PERIOD            = 'nuvei_sub_trial_period';
-    const PAYMENT_SUBS_TRIAL_PERIOD_LABEL    = 'Trial Period';
+    const PAYMENT_SUBS_INTIT_AMOUNT_LABEL       = 'Initial Amount';
+    const PAYMENT_SUBS_INTIT_AMOUNT             = 'nuvei_sub_init_amount';
+    const PAYMENT_SUBS_REC_AMOUNT_LABEL         = 'Recurring Amount';
+    const PAYMENT_SUBS_REC_AMOUNT               = 'nuvei_sub_rec_amount';
     
-    const PAYMENT_SUBS_END_AFTER_UNITS            = 'nuvei_sub_end_after_units';
+    const PAYMENT_SUBS_RECURR_UNITS             = 'nuvei_sub_recurr_units';
+    const PAYMENT_SUBS_RECURR_UNITS_LABEL       = 'Recurring Units';
+    const PAYMENT_SUBS_RECURR_PERIOD            = 'nuvei_sub_recurr_period';
+    const PAYMENT_SUBS_RECURR_PERIOD_LABEL      = 'Recurring Period';
+    
+    const PAYMENT_SUBS_TRIAL_UNITS              = 'nuvei_sub_trial_units';
+    const PAYMENT_SUBS_TRIAL_UNITS_LABEL        = 'Trial Units';
+    const PAYMENT_SUBS_TRIAL_PERIOD             = 'nuvei_sub_trial_period';
+    const PAYMENT_SUBS_TRIAL_PERIOD_LABEL       = 'Trial Period';
+    
+    const PAYMENT_SUBS_END_AFTER_UNITS          = 'nuvei_sub_end_after_units';
     const PAYMENT_SUBS_END_AFTER_UNITS_LABEL    = 'End After Units';
-    const PAYMENT_SUBS_END_AFTER_PERIOD            = 'nuvei_sub_end_after_period';
-    const PAYMENT_SUBS_END_AFTER_PERIOD_LABEL    = 'End After Period';
+    const PAYMENT_SUBS_END_AFTER_PERIOD         = 'nuvei_sub_end_after_period';
+    const PAYMENT_SUBS_END_AFTER_PERIOD_LABEL   = 'End After Period';
     
-    const PAYMENT_SUBS_STORE_DESCR            = 'nuvei_sub_store_decr';
-    const PAYMENT_SUBS_STORE_DESCR_LABEL    = 'Subscription details';
+    const PAYMENT_SUBS_STORE_DESCR              = 'nuvei_sub_store_decr';
+    const PAYMENT_SUBS_STORE_DESCR_LABEL        = 'Subscription details';
     
     /**
      * Scope config object.
@@ -705,7 +707,7 @@ class Config
         $countryCode    = ($billing) ? $billing->getCountryId() : null;
         
         if (!$countryCode) {
-            $shipping        = ($quote) ? $quote->getShippingAddress() : null;
+            $shipping       = ($quote) ? $quote->getShippingAddress() : null;
             $countryCode    = ($shipping && $shipping->getSameAsBilling()) ? $shipping->getCountryId() : null;
         }
         
@@ -723,8 +725,8 @@ class Config
     
     public function getQuoteBillingAddress()
     {
-        $quote            = $this->checkoutSession->getQuote();
-        $billingAddress    = $quote->getBillingAddress();
+        $quote          = $this->checkoutSession->getQuote();
+        $billingAddress = $quote->getBillingAddress();
             
         $b_f_name = $billingAddress->getFirstname();
         if (empty($b_f_name)) {

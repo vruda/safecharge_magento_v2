@@ -5,26 +5,26 @@ namespace Nuvei\Payments\Block\System\Config;
 class ShowLastDownloadTime implements \Magento\Config\Model\Config\CommentInterface
 {
     private $config;
-    private $file;
+	private $directory;
     
     public function __construct(
         \Nuvei\Payments\Model\Config $config,
-        \Magento\Framework\Filesystem\Io\File $file
+		\Magento\Framework\Filesystem\DirectoryList $directory
     ) {
-        $this->config       = $config;
-        $this->file         = $file;
+		$this->config       = $config;
+		$this->directory    = $directory;
     }
 
-    public function getCommentText($elementValue)  //the method has to be named getCommentText
+    public function getCommentText($elementValue) 
     {
-        $text       = '';
-        $file       = $this->directory->getPath('tmp') . DIRECTORY_SEPARATOR . $this->config::PAYMENT_PLANS_FILE_NAME;
-        $file_data  = $this->file->ls($file);
+		$text = '';
+		$file = $this->directory->getPath('tmp') . DIRECTORY_SEPARATOR
+            . $this->config::PAYMENT_PLANS_FILE_NAME;
         
-        if ($this->file->fileExists($file)) {
-            $text = __('Last download: ') . json_encode($file_data);
-        }
-        
+		if(file_exists($file)) {
+			$text = __('Last download: ') . date('Y-m-d H:i:s', filectime($file));
+		}
+		
         return $text;
     }
 }

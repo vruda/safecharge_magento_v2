@@ -21,7 +21,7 @@
                     if (xhr.status > 200) {
                         resultText = xhr.statusText;
                     } else {
-                        resultText = 'Success';
+                        resultText = 'success' == statusText ? 'Success' : 'Error';
                         jQuery('#loading_span .loaded').show();
                     }
 

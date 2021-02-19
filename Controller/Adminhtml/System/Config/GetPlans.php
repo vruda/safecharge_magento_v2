@@ -3,7 +3,6 @@
 namespace Nuvei\Payments\Controller\Adminhtml\System\Config;
 
 use Nuvei\Payments\Model\AbstractRequest;
-use Nuvei\Payments\Model\Request\Factory as RequestFactory;
 
 class GetPlans extends \Magento\Backend\App\Action
 {
@@ -16,18 +15,19 @@ class GetPlans extends \Magento\Backend\App\Action
         \Magento\Backend\App\Action\Context $context,
         \Magento\Framework\Controller\Result\JsonFactory $jsonResultFactory,
         \Nuvei\Payments\Model\Config $moduleConfig,
-        RequestFactory $requestFactory
+        \Nuvei\Payments\Model\Request\Factory $requestFactory
     ) {
         parent::__construct($context);
         
         $this->jsonResultFactory    = $jsonResultFactory;
-        $this->moduleConfig            = $moduleConfig;
-        $this->requestFactory        = $requestFactory;
+        $this->moduleConfig         = $moduleConfig;
+        $this->requestFactory       = $requestFactory;
     }
     
     public function execute()
     {
-        $result = $this->jsonResultFactory->create()->setHttpResponseCode(\Magento\Framework\Webapi\Response::HTTP_OK);
+        $result = $this->jsonResultFactory->create()
+            ->setHttpResponseCode(\Magento\Framework\Webapi\Response::HTTP_OK);
 
         if (!$this->moduleConfig->isActive()) {
             $this->moduleConfig->createLog('Nuvei payments module is not active at the moment!');
@@ -40,16 +40,16 @@ class GetPlans extends \Magento\Backend\App\Action
         $request = $this->requestFactory->create(AbstractRequest::GET_MERCHANT_PAYMENT_PLANS_METHOD);
 
         try {
-            $plans = $request->process();
+            $resp = $request->process();
         } catch (PaymentException $e) {
             return $result->setData([
-             "error"     => 1,
-             "message"    => "Error"
+             "success"  => 0,
+             "message"  => "Error"
             ]);
         }
         
         return $result->setData([
-            "success" => 1,
+            "success" => $resp ? 1 : 0,
             "message" => "Success"
         ]);
     }

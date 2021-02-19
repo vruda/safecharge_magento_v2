@@ -2,9 +2,7 @@
 
 namespace Nuvei\Payments\Block\System\Config;
 
-use Magento\Backend\Block\Template\Context;
 use Magento\Framework\Data\Form\Element\AbstractElement;
-use Nuvei\Payments\Model\Config;
 
 class Button extends \Magento\Config\Block\System\Config\Form\Field
 {
@@ -13,8 +11,8 @@ class Button extends \Magento\Config\Block\System\Config\Form\Field
     private $config;
     
     public function __construct(
-        Context $context,
-        Config $config,
+        \Magento\Backend\Block\Template\Context $context,
+        \Nuvei\Payments\Model\Config $config,
         array $data = []
     ) {
         parent::__construct($context, $data);

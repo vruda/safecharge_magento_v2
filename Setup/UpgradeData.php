@@ -112,44 +112,33 @@ class UpgradeData extends \Nuvei\Payments\Setup\InstallSchema implements Upgrade
                 . "SET status = 'nuvei_voided' "
                 . "WHERE sales_order_status.status = 'vmes';"
             );
-
-            $this->resourceConnection->getConnection()->query(
-                "UPDATE sales_order_status_state "
-                . "SET status = 'nuvei_voided' "
-                . "WHERE sales_order_status_state.status = 'vmes';"
-            );
         }
          */
         
-        /* TODO - for the subscriptions
-        if (version_compare($context->getVersion(), '2.2.0', '<')) {
-            $eavSetup->removeAttribute(
-                \Magento\Catalog\Model\Product::ENTITY,
-                \Nuvei\Payments\Model\Config::PAYMENT_SUBS_ENABLE
-            );
-
+        if (version_compare($context->getVersion(), '3.0.2', '<')) {
             // Enable subscription
             $eavSetup->addAttribute(
                 \Magento\Catalog\Model\Product::ENTITY,
                 \Nuvei\Payments\Model\Config::PAYMENT_SUBS_ENABLE,
                 [
-                    'type' => 'int',
-                    'label' => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_ENABLE_LABEL,
-                    'input' => 'boolean',
-                    'global' => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
-                    'source'   => 'Magento\Eav\Model\Entity\Attribute\Source\Boolean',
-                    'visible' => true,
-                    'required' => false,
-                    'user_defined' => true,
-                    'default' => '',
-                    'searchable' => true,
-                    'filterable' => true,
-                    'visible_on_front' => false,
-                    'used_in_product_listing' => true,
-                    'group' => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
-                    'sort_order' => 10,
-                    'class' => 'sc_enable_subscr',
-                    'note' => 'note',
+                    'label'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_ENABLE_LABEL,
+                    'global'    => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
+                    'source'    => 'Magento\Eav\Model\Entity\Attribute\Source\Boolean',
+                    'group'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
+                    
+                    'type'                      => 'int',
+                    'input'                     => 'boolean',
+                    'visible'                   => true,
+                    'required'                  => false,
+                    'user_defined'              => true,
+                    'default'                   => '',
+                    'searchable'                => true,
+                    'filterable'                => true,
+                    'visible_on_front'          => false,
+                    'used_in_product_listing'   => true,
+                    'sort_order'                => 10,
+                    'class'                     => 'sc_enable_subscr',
+                    'note'                      => 'note',
                 ]
             );
 
@@ -158,68 +147,68 @@ class UpgradeData extends \Nuvei\Payments\Setup\InstallSchema implements Upgrade
                 \Magento\Catalog\Model\Product::ENTITY,
                 \Nuvei\Payments\Model\Config::PAYMENT_PLANS_ATTR_NAME,
                 [
-                    'type' => 'int',
-                    'label' => \Nuvei\Payments\Model\Config::PAYMENT_PLANS_ATTR_LABEL,
-                    'input' => 'select',
-                    'source' => 'Nuvei\Payments\Model\Config\Source\PaymentPlansOptions',
-                    'global' => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
-                    'visible' => true,
-                    'required' => false,
-                    'user_defined' => false,
-                    'default' => '',
-                    'searchable' => true,
-                    'filterable' => true,
-                    'visible_on_front' => false,
-                    'used_in_product_listing' => true,
-                    'group' => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
-                    'option' => [
-                        'values' => [],
-                    ],
-                    'sort_order' => 20,
+                    'label'     => \Nuvei\Payments\Model\Config::PAYMENT_PLANS_ATTR_LABEL,
+                    'global'    => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
+                    'source'    => 'Nuvei\Payments\Model\Config\Source\PaymentPlansOptions',
+                    'group'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
+                    
+                    'type'                      => 'int',
+                    'input'                     => 'select',
+                    'visible'                   => true,
+                    'required'                  => false,
+                    'user_defined'              => false,
+                    'default'                   => '',
+                    'searchable'                => true,
+                    'filterable'                => true,
+                    'visible_on_front'          => false,
+                    'used_in_product_listing'   => true,
+                    'option'                    => ['values' => []],
+                    'sort_order'                => 20,
                 ]
             );
 
             // Initial Amount
-            $eavSetup->addAttribute(
-                \Magento\Catalog\Model\Product::ENTITY,
-                \Nuvei\Payments\Model\Config::PAYMENT_SUBS_INTIT_AMOUNT,
-                [
-                    'type' => 'decimal',
-                    'label' => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_INTIT_AMOUNT_LABEL,
-                    'input' => 'price',
-                    'global' => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
-                    'visible' => true,
-                    'required' => false,
-                    'user_defined' => true,
-                    'default' => '0',
-                    'searchable' => true,
-                    'filterable' => true,
-                    'visible_on_front' => false,
-                    'used_in_product_listing' => true,
-                    'group' => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
-                    'sort_order' => 30,
-                ]
-            );
+//            $eavSetup->addAttribute(
+//                \Magento\Catalog\Model\Product::ENTITY,
+//                \Nuvei\Payments\Model\Config::PAYMENT_SUBS_INTIT_AMOUNT,
+//                [
+//                    'type' => 'decimal',
+//                    'label' => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_INTIT_AMOUNT_LABEL,
+//                    'input' => 'price',
+//                    'global' => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
+//                    'visible' => true,
+//                    'required' => false,
+//                    'user_defined' => true,
+//                    'default' => '0',
+//                    'searchable' => true,
+//                    'filterable' => true,
+//                    'visible_on_front' => false,
+//                    'used_in_product_listing' => true,
+//                    'group' => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
+//                    'sort_order' => 30,
+//                ]
+//            );
 
             // Recurring Amount
             $eavSetup->addAttribute(
                 \Magento\Catalog\Model\Product::ENTITY,
                 \Nuvei\Payments\Model\Config::PAYMENT_SUBS_REC_AMOUNT,
                 [
-                    'type' => 'decimal',
-                    'label' => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_REC_AMOUNT_LABEL,
-                    'input' => 'price',
-                    'global' => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
-                    'visible' => true,
-                    'required' => false,
-                    'user_defined' => true,
-                    'default' => '0',
-                    'searchable' => true,
-                    'filterable' => true,
-                    'visible_on_front' => false,
-                    'used_in_product_listing' => true,
-                    'group' => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
-                    'sort_order' => 40,
+                    'label'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_REC_AMOUNT_LABEL,
+                    'global'    => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
+                    'group'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
+                    
+                    'type'                      => 'decimal',
+                    'input'                     => 'price',
+                    'visible'                   => true,
+                    'required'                  => false,
+                    'user_defined'              => true,
+                    'default'                   => '0',
+                    'searchable'                => true,
+                    'filterable'                => true,
+                    'visible_on_front'          => false,
+                    'used_in_product_listing'   => true,
+                    'sort_order'                => 40,
                 ]
             );
 
@@ -228,24 +217,23 @@ class UpgradeData extends \Nuvei\Payments\Setup\InstallSchema implements Upgrade
                 \Magento\Catalog\Model\Product::ENTITY,
                 \Nuvei\Payments\Model\Config::PAYMENT_SUBS_RECURR_UNITS,
                 [
-                    'type' => 'text',
-                    'label' => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_RECURR_UNITS_LABEL,
-                    'input' => 'select',
-                    'global' => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
-                    'source' => 'Nuvei\Payments\Model\Config\Source\SubscriptionUnits',
-                    'visible' => true,
-                    'required' => false,
-                    'user_defined' => false,
-                    'default' => 'day',
-                    'searchable' => false,
-                    'filterable' => false,
-                    'visible_on_front' => false,
-                    'used_in_product_listing' => false,
-                    'group' => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
-                    'option' => [
-                        'values' => [],
-                    ],
-                    'sort_order' => 50,
+                    'label'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_RECURR_UNITS_LABEL,
+                    'global'    => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
+                    'source'    => 'Nuvei\Payments\Model\Config\Source\SubscriptionUnits',
+                    'group'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
+                    
+                    'type'                      => 'text',
+                    'input'                     => 'select',
+                    'visible'                   => true,
+                    'required'                  => false,
+                    'user_defined'              => false,
+                    'default'                   => 'day',
+                    'searchable'                => false,
+                    'filterable'                => false,
+                    'visible_on_front'          => false,
+                    'used_in_product_listing'   => false,
+                    'option'                    => ['values' => []],
+                    'sort_order'                => 50,
                 ]
             );
 
@@ -254,20 +242,21 @@ class UpgradeData extends \Nuvei\Payments\Setup\InstallSchema implements Upgrade
                 \Magento\Catalog\Model\Product::ENTITY,
                 \Nuvei\Payments\Model\Config::PAYMENT_SUBS_RECURR_PERIOD,
                 [
-                    'type' => 'int',
-                    'label' => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_RECURR_PERIOD_LABEL,
-                    'input' => 'text',
-                    'global' => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
-                    'visible' => true,
-                    'required' => false,
-                    'user_defined' => false,
-                    'default' => '',
-                    'searchable' => false,
-                    'filterable' => false,
-                    'visible_on_front' => false,
-                    'used_in_product_listing' => false,
-                    'group' => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
-                    'sort_order' => 60,
+                    'label'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_RECURR_PERIOD_LABEL,
+                    'global'    => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
+                    'group'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
+                    
+                    'type'                      => 'int',
+                    'input'                     => 'text',
+                    'visible'                   => true,
+                    'required'                  => false,
+                    'user_defined'              => false,
+                    'default'                   => '',
+                    'searchable'                => false,
+                    'filterable'                => false,
+                    'visible_on_front'          => false,
+                    'used_in_product_listing'   => false,
+                    'sort_order'                => 60,
                 ]
             );
 
@@ -276,24 +265,23 @@ class UpgradeData extends \Nuvei\Payments\Setup\InstallSchema implements Upgrade
                 \Magento\Catalog\Model\Product::ENTITY,
                 \Nuvei\Payments\Model\Config::PAYMENT_SUBS_TRIAL_UNITS,
                 [
-                    'type' => 'text',
-                    'label' => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_TRIAL_UNITS_LABEL,
-                    'input' => 'select',
-                    'global' => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
-                    'source' => 'Nuvei\Payments\Model\Config\Source\SubscriptionUnits',
-                    'visible' => true,
-                    'required' => false,
-                    'user_defined' => false,
-                    'default' => 'day',
-                    'searchable' => false,
-                    'filterable' => false,
-                    'visible_on_front' => false,
-                    'used_in_product_listing' => false,
-                    'group' => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
-                    'option' => [
-                        'values' => [],
-                    ],
-                    'sort_order' => 70,
+                    'label'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_TRIAL_UNITS_LABEL,
+                    'global'    => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
+                    'source'    => 'Nuvei\Payments\Model\Config\Source\SubscriptionUnits',
+                    'group'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
+                    
+                    'type'                      => 'text',
+                    'input'                     => 'select',
+                    'visible'                   => true,
+                    'required'                  => false,
+                    'user_defined'              => false,
+                    'default'                   => 'day',
+                    'searchable'                => false,
+                    'filterable'                => false,
+                    'visible_on_front'          => false,
+                    'used_in_product_listing'   => false,
+                    'option'                    => ['values' => []],
+                    'sort_order'                => 70,
                 ]
             );
 
@@ -302,20 +290,21 @@ class UpgradeData extends \Nuvei\Payments\Setup\InstallSchema implements Upgrade
                 \Magento\Catalog\Model\Product::ENTITY,
                 \Nuvei\Payments\Model\Config::PAYMENT_SUBS_TRIAL_PERIOD,
                 [
-                    'type' => 'int',
-                    'label' => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_TRIAL_PERIOD_LABEL,
-                    'input' => 'text',
-                    'global' => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
-                    'visible' => true,
-                    'required' => false,
-                    'user_defined' => false,
-                    'default' => '',
-                    'searchable' => false,
-                    'filterable' => false,
-                    'visible_on_front' => false,
-                    'used_in_product_listing' => false,
-                    'group' => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
-                    'sort_order' => 80,
+                    'label'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_TRIAL_PERIOD_LABEL,
+                    'global'    => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
+                    'group'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
+                    
+                    'type'                      => 'int',
+                    'input'                     => 'text',
+                    'visible'                   => true,
+                    'required'                  => false,
+                    'user_defined'              => false,
+                    'default'                   => '',
+                    'searchable'                => false,
+                    'filterable'                => false,
+                    'visible_on_front'          => false,
+                    'used_in_product_listing'   => false,
+                    'sort_order'                => 80,
                 ]
             );
 
@@ -324,24 +313,23 @@ class UpgradeData extends \Nuvei\Payments\Setup\InstallSchema implements Upgrade
                 \Magento\Catalog\Model\Product::ENTITY,
                 \Nuvei\Payments\Model\Config::PAYMENT_SUBS_END_AFTER_UNITS,
                 [
-                    'type' => 'text',
-                    'label' => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_END_AFTER_UNITS_LABEL,
-                    'input' => 'select',
-                    'global' => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
-                    'source' => 'Nuvei\Payments\Model\Config\Source\SubscriptionUnits',
-                    'visible' => true,
-                    'required' => false,
-                    'user_defined' => false,
-                    'default' => 'day',
-                    'searchable' => false,
-                    'filterable' => false,
-                    'visible_on_front' => false,
-                    'used_in_product_listing' => false,
-                    'group' => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
-                    'option' => [
-                        'values' => [],
-                    ],
-                    'sort_order' => 90,
+                    'label'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_END_AFTER_UNITS_LABEL,
+                    'global'    => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
+                    'source'    => 'Nuvei\Payments\Model\Config\Source\SubscriptionUnits',
+                    'group'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
+                    
+                    'type'                      => 'text',
+                    'input'                     => 'select',
+                    'visible'                   => true,
+                    'required'                  => false,
+                    'user_defined'              => false,
+                    'default'                   => 'day',
+                    'searchable'                => false,
+                    'filterable'                => false,
+                    'visible_on_front'          => false,
+                    'used_in_product_listing'   => false,
+                    'option'                    => ['values' => []],
+                    'sort_order'                => 90,
                 ]
             );
 
@@ -350,20 +338,21 @@ class UpgradeData extends \Nuvei\Payments\Setup\InstallSchema implements Upgrade
                 \Magento\Catalog\Model\Product::ENTITY,
                 \Nuvei\Payments\Model\Config::PAYMENT_SUBS_END_AFTER_PERIOD,
                 [
-                    'type' => 'int',
-                    'label' => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_END_AFTER_PERIOD_LABEL,
-                    'input' => 'text',
-                    'global' => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
-                    'visible' => true,
-                    'required' => false,
-                    'user_defined' => false,
-                    'default' => '',
-                    'searchable' => false,
-                    'filterable' => false,
-                    'visible_on_front' => false,
-                    'used_in_product_listing' => false,
-                    'group' => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
-                    'sort_order' => 100,
+                    'label'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_END_AFTER_PERIOD_LABEL,
+                    'global'    => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
+                    'group'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
+                    
+                    'type'                      => 'int',
+                    'input'                     => 'text',
+                    'visible'                   => true,
+                    'required'                  => false,
+                    'user_defined'              => false,
+                    'default'                   => '',
+                    'searchable'                => false,
+                    'filterable'                => false,
+                    'visible_on_front'          => false,
+                    'used_in_product_listing'   => false,
+                    'sort_order'                => 100,
                 ]
             );
 
@@ -372,37 +361,24 @@ class UpgradeData extends \Nuvei\Payments\Setup\InstallSchema implements Upgrade
                 \Magento\Catalog\Model\Product::ENTITY,
                 \Nuvei\Payments\Model\Config::PAYMENT_SUBS_STORE_DESCR,
                 [
-                    'type' => 'text',
-                    'label' => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_STORE_DESCR_LABEL,
-                    'input' => 'textarea',
-                    'global' => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
-                    'visible' => true,
-                    'required' => false,
-                    'user_defined' => true,
-                    'default' => '0',
-                    'searchable' => false,
-                    'filterable' => true,
-                    'visible_on_front' => true,
-                    'used_in_product_listing' => true,
-                    'group' => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
-                    'sort_order' => 110,
+                    'label'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_STORE_DESCR_LABEL,
+                    'global'    => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
+                    'group'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
+                    
+                    'type'                      => 'text',
+                    'input'                     => 'textarea',
+                    'visible'                   => true,
+                    'required'                  => false,
+                    'user_defined'              => true,
+                    'default'                   => '0',
+                    'searchable'                => false,
+                    'filterable'                => true,
+                    'visible_on_front'          => true,
+                    'used_in_product_listing'   => true,
+                    'sort_order'                => 110,
                 ]
             );
-
-            // Add two new statuses for the Subscriptions
-            $scSubscrStarted = $this->orderStatusFactory->create()
-                ->setData('status', 'sc_subscr_started')
-                ->setData('label', 'Nuvei Subscription Started')
-                ->save();
-            $scSubscrStarted->assignState(Order::STATE_PROCESSING, false, true);
-
-            $scSubscrEnded = $this->orderStatusFactory->create()
-                ->setData('status', 'sc_subscr_ended')
-                ->setData('label', 'Nuvei Subscription Ended')
-                ->save();
-            $scSubscrEnded->assignState(Order::STATE_PROCESSING, false, true);
         }
-         */
         
         $setup->endSetup();
     }
