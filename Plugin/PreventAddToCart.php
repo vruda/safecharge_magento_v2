@@ -21,23 +21,23 @@ class PreventAddToCart
         \Magento\Framework\Message\ManagerInterface $messanger,
         \Magento\Catalog\Model\Product $product_obj
     ) {
-        $this->config        = $config;
-        $this->request        = $request;
+        $this->config       = $config;
+        $this->request      = $request;
         $this->messanger    = $messanger;
-        $this->product_obj        = $product_obj;
+        $this->product_obj  = $product_obj;
     }
 
     public function beforeAddProduct(\Magento\Checkout\Model\Cart $subject, $productInfo, $requestInfo = null)
     {
         try {
-            $cartItemsCount    = $subject->getQuote()->getItemsCount();
-            $error_msg_1    = 'You can not add product to product with a Payment Plan.';
-            $error_msg_2    = 'You can not add product with a Payment Plan to another products.';
+            $cartItemsCount = $subject->getQuote()->getItemsCount();
+            $error_msg_1    = 'You can not add this product to product with a Payment Plan.';
+            $error_msg_2    = 'You can not add a product with Payment Plan to another products.';
             
             if ($cartItemsCount > 0) {
-                $sc_label        = \Nuvei\Payments\Model\Config::PAYMENT_PLANS_ATTR_LABEL;
-                $main_product    = $this->request->getParam('product', false);
-                $product_opt_id    = $this->request->getParam('selected_configurable_option', false);
+                $sc_label       = \Nuvei\Payments\Model\Config::PAYMENT_PLANS_ATTR_LABEL;
+                $main_product   = $this->request->getParam('product', false);
+                $product_opt_id = $this->request->getParam('selected_configurable_option', false);
                 
                 # 1. first search for SC plan in the items in the cart
                 $items = $subject->getItems();
@@ -60,8 +60,6 @@ class PreventAddToCart
 //                                && isset($data['option_value'])
 //                                && intval($data['option_value']) > 1
 //                            ) {
-//                                $this->config->createLog($options, $error_msg_1);
-//                                $this->messanger->addError(__($error_msg_1));
 //                                throw new \Magento\Framework\Exception\LocalizedException(__($error_msg_1));
 //                            }
 //                        }
@@ -77,9 +75,6 @@ class PreventAddToCart
                         $this->config->createLog($prod_custom_attr, 'simple product $prod_custom_attr');
                         
                         if (!empty($prod_custom_attr) && $prod_custom_attr->getValue() > 0) {
-                            $this->config->createLog($options, $error_msg_1);
-                            
-                            $this->messanger->addError(__($error_msg_1));
                             throw new \Magento\Framework\Exception\LocalizedException(__($error_msg_1));
                         }
                     }
@@ -97,7 +92,6 @@ class PreventAddToCart
                         && is_numeric($payment_enabled)
                         && (int) $payment_enabled > 1
                     ) {
-                        $this->messanger->addError(__($error_msg_2));
                         throw new \Magento\Framework\Exception\LocalizedException(__($error_msg_2));
                         
                     }
@@ -106,7 +100,6 @@ class PreventAddToCart
                     $payment_enabled = $product->getCustomAttribute(\Nuvei\Payments\Model\Config::PAYMENT_SUBS_ENABLE);
 
                     if (!empty($payment_enabled) && $payment_enabled->getValue() > 0) {
-                        $this->messanger->addError(__($error_msg_2));
                         throw new \Magento\Framework\Exception\LocalizedException(__($error_msg_2));
                     }
                     

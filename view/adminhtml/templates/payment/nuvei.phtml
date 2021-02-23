@@ -2,13 +2,12 @@
 /**
  * @var Magento\Payment\Block\Adminhtml\Transparent\Form $block
  */
-?>
-<?php
-$code = $block->escapeHtml($block->getMethodCode());
 
-$ccType = $block->getInfoData('cc_type');
+$code       = $block->escapeHtml($block->getMethodCode());
+
+$ccType     = $block->getInfoData('cc_type');
 $ccExpMonth = $block->getInfoData('cc_exp_month');
-$ccExpYear = $block->getInfoData('cc_exp_year');
+$ccExpYear  = $block->getInfoData('cc_exp_year');
 ?>
 
 <fieldset class="admin__fieldset payment-method"
@@ -20,6 +19,7 @@ $ccExpYear = $block->getInfoData('cc_exp_year');
                class="admin__field-label">
             <span><?= $block->escapeHtml(__('Credit Card Type')); ?></span>
         </label>
+        
         <div class="admin__field-control">
             <select id="<?= /* @noEscape */ $code; ?>_cc_type"
                     name="payment[cc_type]"

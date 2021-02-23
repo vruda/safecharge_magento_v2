@@ -78,15 +78,15 @@
         </arguments>
     </type>
 	
-<!--	<type name="Magento\Checkout\Model\Cart">
+	<type name="Magento\Checkout\Model\Cart">
         <plugin name="prevent_add_to" 
 				type="Nuvei\Payments\Plugin\PreventAddToCart"/>
-    </type>-->
+    </type>
 	
-<!--	<type name="Magento\Payment\Model\Checks\ZeroTotal">
+	<type name="Magento\Payment\Model\Checks\ZeroTotal">
 		<plugin name="nuvei_zero_total" 
 				type="Nuvei\Payments\Plugin\ZeroTotal" />
-	</type>-->
+	</type>
 	
 <!--	<type name="Magento\Catalog\Model\Product">
 		<plugin name="change_product" 

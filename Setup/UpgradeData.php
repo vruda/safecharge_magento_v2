@@ -370,7 +370,7 @@ class UpgradeData extends \Nuvei\Payments\Setup\InstallSchema implements Upgrade
                     'visible'                   => true,
                     'required'                  => false,
                     'user_defined'              => true,
-                    'default'                   => '0',
+                    'default'                   => '',
                     'searchable'                => false,
                     'filterable'                => true,
                     'visible_on_front'          => true,
