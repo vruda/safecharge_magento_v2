@@ -116,6 +116,8 @@ class Config
     private $remoteIp;
     private $customerSession;
     private $cookie;
+    private $productObj;
+    private $productRepository;
     
     private $clientUniqueIdPostfix = '_sandbox_apm'; // postfix for Sandbox APM payments
 
@@ -141,7 +143,9 @@ class Config
         \Magento\Framework\HTTP\Header $httpHeader,
         \Magento\Framework\HTTP\PhpEnvironment\RemoteAddress $remoteIp,
         \Magento\Customer\Model\Session $customerSession,
-        \Magento\Framework\Stdlib\CookieManagerInterface $cookie
+        \Magento\Framework\Stdlib\CookieManagerInterface $cookie,
+        \Magento\Catalog\Model\Product $productObj,
+        \Magento\Catalog\Api\ProductRepositoryInterface $productRepository
     ) {
         $this->scopeConfig = $scopeConfig;
         $this->storeManager = $storeManager;
@@ -153,11 +157,14 @@ class Config
         $this->remoteIp = $remoteIp;
         $this->customerSession = $customerSession;
 
-        $this->storeId          = $this->getStoreId();
-        $this->versionNum       = (int) str_replace('.', '', $this->productMetadata->getVersion());
-        $this->formKey          = $formKey;
-        $this->directory        = $directory;
-        $this->cookie           = $cookie;
+        $this->storeId              = $this->getStoreId();
+        $this->storeId              = $this->getStoreId();
+        $this->versionNum           = (int) str_replace('.', '', $this->productMetadata->getVersion());
+        $this->formKey              = $formKey;
+        $this->directory            = $directory;
+        $this->cookie               = $cookie;
+        $this->productObj           = $productObj;
+        $this->productRepository    = $productRepository;
     }
 
     /**
@@ -857,5 +864,109 @@ class Config
         }
         
         return $email;
+    }
+    
+    /**
+     * Function getProductPlanData
+     * 
+     * Search for the product with Payment Plan in the quote
+     * 
+     * @return bool
+     */
+    public function getProductPlanData()
+    {
+        if($this->checkoutSession->getQuote()->getItemsCount() == 0) {
+            return [];
+        }
+        
+        $items      = $this->checkoutSession->getQuote()->getItems();
+        $plan_data  = [];
+        
+        foreach ($items as $item) {
+            $options = $item->getProduct()->getTypeInstance(true)->getOrderOptions($item->getProduct());
+            
+            $this->createLog($options, 'getProductPlanData $options');
+            
+            // 1.1 in case of configurable product
+            if(!empty($options['info_buyRequest']) 
+                && is_array($options['info_buyRequest'])
+                && !empty($options['info_buyRequest']['selected_configurable_option'])
+            ) {
+                $product = $this->productObj
+                    ->load($options['info_buyRequest']['selected_configurable_option']);
+                
+                $recurr_unit        = $product->getCustomAttribute(self::PAYMENT_SUBS_RECURR_UNITS)->getValue();
+                $recurr_period      = $product->getCustomAttribute(self::PAYMENT_SUBS_RECURR_PERIOD)->getValue();
+                
+                $trial_unit         = $product->getCustomAttribute(self::PAYMENT_SUBS_TRIAL_UNITS)->getValue();
+                $trial_period       = $product->getCustomAttribute(self::PAYMENT_SUBS_TRIAL_PERIOD)->getValue();
+                
+                $end_after_unit     = $product->getCustomAttribute(self::PAYMENT_SUBS_END_AFTER_UNITS)->getValue();
+                $end_after_period   = $product->getCustomAttribute(self::PAYMENT_SUBS_END_AFTER_PERIOD)->getValue();
+                
+                $plan_data[$options['info_buyRequest']['selected_configurable_option']] = [
+                    'planId'            => $product->getCustomAttribute(self::PAYMENT_PLANS_ATTR_NAME)->getValue(),
+                    'initialAmount'     => 0,
+                    'recurringAmount'   => number_format($product->getCustomAttribute
+                        (self::PAYMENT_SUBS_REC_AMOUNT)->getValue(), 2, '.', ''),
+                    
+                    'recurringPeriod'   => [strtolower($recurr_unit)    => $recurr_period],
+                    'startAfter'        => [strtolower($trial_unit)     => $trial_period],
+                    'endAfter'          => [strtolower($end_after_unit) => $end_after_period],
+                ];
+                
+                $items_data[$options['info_buyRequest']['selected_configurable_option']] = [
+                    'quantity'  => $item->getQty(),
+                    'price'     => round((float) $item->getPrice(), 2),
+                ];
+                
+                if ($product->getCustomAttribute(self::PAYMENT_SUBS_ENABLE)->getValue() == 1) {
+                    return [
+                        'subs_data'     => $plan_data,
+                        'items_data'    => $items_data,
+                    ];
+                }
+            }
+            
+            // 1.2 in case of simple product
+            $product            = $this->productObj->load($options['info_buyRequest']['product']);
+            $payment_enabled    = $product->getData(self::PAYMENT_SUBS_ENABLE);
+            
+            $recurr_unit        = $product->getData(self::PAYMENT_SUBS_RECURR_UNITS);
+            $recurr_period      = $product->getData(self::PAYMENT_SUBS_RECURR_PERIOD);
+
+            $trial_unit         = $product->getData(self::PAYMENT_SUBS_TRIAL_UNITS);
+            $trial_period       = $product->getData(self::PAYMENT_SUBS_TRIAL_PERIOD);
+
+            $end_after_unit     = $product->getData(self::PAYMENT_SUBS_END_AFTER_UNITS);
+            $end_after_period   = $product->getData(self::PAYMENT_SUBS_END_AFTER_PERIOD);
+            
+            $plan_data[$options['info_buyRequest']['product']] = [
+                'planId'            => $product->getData(self::PAYMENT_PLANS_ATTR_NAME),
+                'initialAmount'     => '0.00',
+                'recurringAmount'   => number_format($product->getData(self::PAYMENT_SUBS_REC_AMOUNT), 2, '.', ''),
+
+                'recurringPeriod'   => [strtolower($recurr_unit)    => $recurr_period],
+                'startAfter'        => [strtolower($trial_unit)     => $trial_period],
+                'endAfter'          => [strtolower($end_after_unit) => $end_after_period],
+            ];
+            
+            $items_data[$item->getId()] = [
+                'quantity'  => $item->getQty(),
+                'price'     => round((float) $item->getPrice(), 2),
+            ];
+            
+            if(!empty($payment_enabled)
+                && is_numeric($payment_enabled)
+                && $payment_enabled == 1
+            ) {
+                return [
+                    'subs_data'     => $plan_data,
+                    'items_data'    => $items_data,
+                ];
+            }
+        }
+        
+        return [];
     }
 }

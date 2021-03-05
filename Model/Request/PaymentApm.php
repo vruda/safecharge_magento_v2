@@ -53,8 +53,8 @@ class PaymentApm extends AbstractRequest implements RequestInterface
             $responseFactory
         );
 
-        $this->requestFactory    = $requestFactory;
-        $this->checkoutSession    = $checkoutSession;
+        $this->requestFactory   = $requestFactory;
+        $this->checkoutSession  = $checkoutSession;
     }
     
     public function process()

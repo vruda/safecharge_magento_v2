@@ -22,6 +22,9 @@ class CreateSubscription extends AbstractRequest implements RequestInterface
     
     protected $plan_id;
     protected $upo_id;
+    
+    private $order_id;
+    private $request_data;
 
     /**
      * @param Config           $config
@@ -46,15 +49,26 @@ class CreateSubscription extends AbstractRequest implements RequestInterface
         $this->requestFactory = $requestFactory;
     }
     
-    // by default 1 -> no plan
-    public function setPlanId($plan_id = 1)
+    /**
+     * @return AbstractResponse
+     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws PaymentException
+     */
+    public function process()
     {
-        $this->plan_id = $plan_id;
+        return $this->sendRequest(true);
     }
     
-    public function setUpoId($upo_id = 0)
+    public function setOrderId($order_id = 0)
     {
-        $this->upo_id = $upo_id;
+        $this->order_id = $order_id;
+        return $this;
+    }
+    
+    public function setData(array $request_data = [])
+    {
+        $this->request_data = $request_data;
+        return $this;
     }
 
     /**
@@ -64,7 +78,7 @@ class CreateSubscription extends AbstractRequest implements RequestInterface
      */
     protected function getRequestMethod()
     {
-        return self::CREATE_SUBSCRIPTION;
+        return self::CREATE_SUBSCRIPTION_METHOD;
     }
 
     /**
@@ -74,19 +88,7 @@ class CreateSubscription extends AbstractRequest implements RequestInterface
      */
     protected function getResponseHandlerType()
     {
-        return AbstractResponse::CREATE_SUBSCRIPTION_HANDLER;
-    }
-
-    /**
-     * @return AbstractResponse
-     * @throws \Magento\Framework\Exception\LocalizedException
-     * @throws PaymentException
-     */
-    public function process()
-    {
-        $this->sendRequest();
-
-        return $this->getResponseHandler()->process();
+        return '';
     }
 
     /**
@@ -96,13 +98,7 @@ class CreateSubscription extends AbstractRequest implements RequestInterface
      */
     protected function getParams()
     {
-        $params = [
-            'planId'                => $this->plan_id,
-            'userPaymentOptionId'    => $this->upo_id,
-            'initialAmount'            => '0.00',
-        ];
-
-        $params = array_merge_recursive(parent::getParams(), $params);
+        $params = array_merge_recursive($this->request_data, parent::getParams());
         
         return $params;
     }
@@ -121,6 +117,8 @@ class CreateSubscription extends AbstractRequest implements RequestInterface
             'planId',
             'userPaymentOptionId',
             'initialAmount',
+            'recurringAmount',
+            'currency',
             'timeStamp',
         ];
     }

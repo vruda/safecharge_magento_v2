@@ -13,10 +13,10 @@ class DeleteUPO extends AbstractRequest implements RequestInterface
     private $upo_id;
     
     /**
-     * @param Logger           $logger
-     * @param Config           $config
-     * @param Curl             $curl
-     * @param ResponseFactory  $responseFactory
+     * @param Logger            $logger
+     * @param Config            $config
+     * @param Curl              $curl
+     * @param ResponseFactory   $responseFactory
      */
     public function __construct(
         \Nuvei\Payments\Model\Logger $logger,

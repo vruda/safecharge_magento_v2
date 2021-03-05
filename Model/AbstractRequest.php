@@ -4,8 +4,6 @@ namespace Nuvei\Payments\Model;
 
 use Magento\Framework\Exception\PaymentException;
 use Magento\Quote\Model\Quote;
-use Magento\Sales\Api\Data\OrderAddressInterface;
-use Magento\Sales\Model\Order;
 use Nuvei\Payments\Lib\Http\Client\Curl;
 use Nuvei\Payments\Model\Logger as Logger;
 use Nuvei\Payments\Model\Response\Factory as ResponseFactory;
@@ -160,7 +158,7 @@ abstract class AbstractRequest extends AbstractApi
     
     private $params_validation_email = [
         'length'    => 79,
-        'flag'        => FILTER_VALIDATE_EMAIL
+        'flag'      => FILTER_VALIDATE_EMAIL
     ];
 
     /**
@@ -182,8 +180,8 @@ abstract class AbstractRequest extends AbstractApi
             $config
         );
 
-        $this->curl = $curl;
-        $this->responseFactory = $responseFactory;
+        $this->curl             = $curl;
+        $this->responseFactory  = $responseFactory;
     }
 
     /**
@@ -237,9 +235,10 @@ abstract class AbstractRequest extends AbstractApi
         if ($this->config->isTestModeEnabled() === true) {
             $endpoint = self::TEST_ENDPOINT;
         }
-        $endpoint .= 'api/v1/';
+        
+        $endpoint   .= 'api/v1/';
 
-        $method = $this->getRequestMethod();
+        $method     = $this->getRequestMethod();
 
         return $endpoint . $method . '.do';
     }
@@ -279,10 +278,10 @@ abstract class AbstractRequest extends AbstractApi
             'clientRequestId'   => (string)$this->getRequestId(),
             'timeStamp'         => date('YmdHis'),
             'webMasterId'       => $this->config->getSourcePlatformField(),
-            'sourceApplication'    => $this->config->getSourceApplication(),
-            'encoding'            => 'UTF-8',
+            'sourceApplication' => $this->config->getSourceApplication(),
+            'encoding'          => 'UTF-8',
             'merchantDetails'   => [
-                'customField3' => 'Magento v.' . $this->config->getMagentoVersion(), // Magento version
+                'customField3'      => 'Magento v.' . $this->config->getMagentoVersion(), // Magento version
             ],
             
         ];
@@ -439,14 +438,14 @@ abstract class AbstractRequest extends AbstractApi
      */
     protected function sendRequest($continue_process = false, $accept_error_status = false)
     {
-        $endpoint    = $this->getEndpoint();
+        $endpoint   = $this->getEndpoint();
         $headers    = $this->getHeaders();
         $params     = $this->prepareParams();
 
         $this->curl->setHeaders($headers);
 
         $this->config->createLog([
-            'Request Endpoint'    => $endpoint,
+            'Request Endpoint'  => $endpoint,
             'Request params'    => $params
         ]);
         
@@ -489,75 +488,78 @@ abstract class AbstractRequest extends AbstractApi
      *
      * @return array
      */
-    protected function getQuoteData(Quote $quote)
-    {
-        /** @var OrderAddressInterface $billing */
-        $billing = $quote->getBillingAddress();
-
-        $shipping = 0;
-        $totalTax = 0;
-        $shippingAddress = $quote->getShippingAddress();
-        if ($shippingAddress !== null) {
-            $shipping = $shippingAddress->getBaseShippingAmount();
-            $totalTax = $shippingAddress->getBaseTaxAmount();
-        }
-
-        $quoteData = [
-            'clientUniqueId' => $quote->getReservedOrderId() ?: $this->config->getReservedOrderId(),
-            'currency' => $quote->getBaseCurrencyCode(),
-            'amountDetails'    => [
-                'totalShipping' => (float)$shipping,
-                'totalHandling' => (float)0,
-                'totalDiscount' => (float)abs($quote->getBaseSubtotal() - $quote->getBaseSubtotalWithDiscount()),
-                'totalTax' => (float)$totalTax,
-            ],
-            'items' => [],
-            'deviceDetails' => [
-                'deviceType' => 'DESKTOP',
-                'ipAddress' => $quote->getRemoteIp(),
-            ],
-            'ipAddress' => $quote->getRemoteIp(),
-        ];
-
-        if ($billing !== null) {
-            $state = $billing->getRegionCode();
-            if (strlen($state) > 5) {
-                $state = substr($state, 0, 2);
-            }
-            
-            $quoteData['billingAddress'] = [
-                'firstName'    => $billing->getFirstname(),
-                'lastName'  => $billing->getLastname(),
-                'address'   => is_array($billing->getStreet())
-                    ? implode(' ', $billing->getStreet()) : '',
-                'cell'      => '',
-                'phone'     => $billing->getTelephone(),
-                'zip'       => $billing->getPostcode(),
-                'city'      => $billing->getCity(),
-                'country'   => $billing->getCountryId(),
-                'state'     => $state,
-                'email'     => $billing->getEmail(),
-            ];
-            $quoteData = array_merge($quoteData, $quoteData['billingAddress']);
-        }
-
-        // Add items details.
-        $quoteItems = $quote->getAllVisibleItems();
-        foreach ($quoteItems as $quoteItem) {
-            $price = (float)$quoteItem->getBasePrice();
-            if (!$price) {
-                continue;
-            }
-
-            $quoteData['items'][] = [
-                'name'        => $quoteItem->getName(),
-                'price'        => $price,
-                'quantity'    => (int)$quoteItem->getQty(),
-            ];
-        }
-
-        return $quoteData;
-    }
+//    protected function getQuoteData(Quote $quote)
+//    {
+//        /** @var OrderAddressInterface $billing */
+//        $billing = $quote->getBillingAddress();
+//
+//        $shipping = 0;
+//        $totalTax = 0;
+//        $shippingAddress = $quote->getShippingAddress();
+//        if ($shippingAddress !== null) {
+//            $shipping = $shippingAddress->getBaseShippingAmount();
+//            $totalTax = $shippingAddress->getBaseTaxAmount();
+//        }
+//
+//        $quoteData = [
+//            'clientUniqueId'    => $quote->getReservedOrderId() ?: $this->config->getReservedOrderId(),
+//            'currency'          => $quote->getBaseCurrencyCode(),
+//            'items'             => [],
+//            'ipAddress'         => $quote->getRemoteIp(),
+//            
+//            'amountDetails'     => [
+//                'totalShipping'     => (float) $shipping,
+//                'totalHandling'     => (float) 0,
+//                'totalDiscount'     => (float )abs($quote->getBaseSubtotal() 
+//                    - $quote->getBaseSubtotalWithDiscount()),
+//                'totalTax'          => (float)$totalTax,
+//            ],
+//            
+//            'deviceDetails'     => [
+//                'deviceType'        => 'DESKTOP',
+//                'ipAddress'         => $quote->getRemoteIp(),
+//            ],
+//        ];
+//
+//        if ($billing !== null) {
+//            $state = $billing->getRegionCode();
+//            if (strlen($state) > 5) {
+//                $state = substr($state, 0, 2);
+//            }
+//            
+//            $quoteData['billingAddress'] = [
+//                'firstName' => $billing->getFirstname(),
+//                'lastName'  => $billing->getLastname(),
+//                'address'   => is_array($billing->getStreet())
+//                    ? implode(' ', $billing->getStreet()) : '',
+//                'cell'      => '',
+//                'phone'     => $billing->getTelephone(),
+//                'zip'       => $billing->getPostcode(),
+//                'city'      => $billing->getCity(),
+//                'country'   => $billing->getCountryId(),
+//                'state'     => $state,
+//                'email'     => $billing->getEmail(),
+//            ];
+//            $quoteData = array_merge($quoteData, $quoteData['billingAddress']);
+//        }
+//
+//        // Add items details.
+//        $quoteItems = $quote->getAllVisibleItems();
+//        foreach ($quoteItems as $quoteItem) {
+//            $price = (float)$quoteItem->getBasePrice();
+//            if (!$price) {
+//                continue;
+//            }
+//
+//            $quoteData['items'][] = [
+//                'name'      => $quoteItem->getName(),
+//                'price'     => $price,
+//                'quantity'  => (int)$quoteItem->getQty(),
+//            ];
+//        }
+//
+//        return $quoteData;
+//    }
     
     protected function checkResponse($accept_error_status)
     {
@@ -585,6 +587,95 @@ abstract class AbstractRequest extends AbstractApi
         return $resp_body;
     }
     
+    /**
+     * Function prepareSubscrData
+     * 
+     * Prepare and return short Items data
+     * and the data for the Subscription plan, if there is
+     * 
+     * @param Quote $quote
+     * @return array
+     */
+    protected function prepareSubscrData($quote) {
+        $items_data = [];
+        $subs_data  = [];
+        $items      = $quote->getItems();
+        
+        $this->config->createLog(count($items), 'order items count');
+        
+        if (is_array($items)) {
+            foreach ($items as $item) {
+                $product    = $item->getProduct();
+                $options    = $product->getTypeInstance(true)->getOrderOptions($product);
+                
+                $this->config->createLog($options, '$item $options');
+                
+                $items_data[$item->getId()] = [
+                    'quantity'  => $item->getQty(),
+                    'price'     => round((float) $item->getPrice(), 2),
+                ];
+
+//                $attributes = $product->getAttributes();
+                
+//                $this->config->createLog($item->getProduct()->getData(), '$item->getProduct()->getData()');
+//                $this->config->createLog($attributes, '$item $attributes');
+
+                
+
+
+
+
+                // if subscription is not enabled continue witht the next product
+                if($item->getProduct()->getData(\Nuvei\Payments\Model\Config::PAYMENT_SUBS_ENABLE) != 1) {
+                    continue;
+                }
+
+                // mandatory data
+                $subs_data[$product->getId()] = array(
+                    'planId' => $item->getProduct()->getData(\Nuvei\Payments\Model\Config::PAYMENT_PLANS_ATTR_NAME),
+
+//                    'initialAmount' => number_format($item->getProduct()
+//                        ->getData(\Nuvei\Payments\Model\Config::PAYMENT_SUBS_INTIT_AMOUNT), 2, '.', ''),
+                    'initialAmount' => 0,
+
+                    'recurringAmount' => number_format($item->getProduct()
+                        ->getData(\Nuvei\Payments\Model\Config::PAYMENT_SUBS_REC_AMOUNT), 2, '.', ''),
+                );
+
+                # optional data
+                $recurr_unit    = $item->getProduct()
+                    ->getData(\Nuvei\Payments\Model\Config::PAYMENT_SUBS_RECURR_UNITS);
+                
+                $recurr_period  = $item->getProduct()
+                    ->getData(\Nuvei\Payments\Model\Config::PAYMENT_SUBS_RECURR_PERIOD);
+                
+                $subs_data[$product->getId()]['recurringPeriod'][strtolower($recurr_unit)] = $recurr_period;
+
+                $trial_unit     = $item->getProduct()
+                    ->getData(\Nuvei\Payments\Model\Config::PAYMENT_SUBS_TRIAL_UNITS);
+                
+                $trial_period   = $item->getProduct()
+                    ->getData(\Nuvei\Payments\Model\Config::PAYMENT_SUBS_TRIAL_PERIOD);
+                
+                $subs_data[$product->getId()]['startAfter'][strtolower($trial_unit)] = $trial_period;
+
+                $end_after_unit = $item->getProduct()
+                    ->getData(\Nuvei\Payments\Model\Config::PAYMENT_SUBS_END_AFTER_UNITS);
+                
+                $end_after_period = $item->getProduct()
+                    ->getData(\Nuvei\Payments\Model\Config::PAYMENT_SUBS_END_AFTER_PERIOD);
+
+                $subs_data[$product->getId()]['endAfter'][strtolower($end_after_unit)] = $end_after_period;
+                # optional data END
+            }
+        }
+        
+        return [
+            'items_data'    => $items_data,
+            'subs_data'     => $subs_data,
+        ];
+    }
+    
     private function getResponseStatus($body = [])
     {
         $httpStatus = $this->curl->getStatus();
@@ -594,8 +685,12 @@ abstract class AbstractRequest extends AbstractApi
         }
         
         $responseStatus             = strtolower(!empty($body['status']) ? $body['status'] : '');
-        $responseTransactionStatus  = strtolower(!empty($body['transactionStatus']) ? $body['transactionStatus'] : '');
-        $responseTransactionType    = strtolower(!empty($body['transactionType']) ? $body['transactionType'] : '');
+        
+        $responseTransactionStatus  = strtolower(!empty($body['transactionStatus'])
+            ? $body['transactionStatus'] : '');
+        
+        $responseTransactionType    = strtolower(!empty($body['transactionType'])
+            ? $body['transactionType'] : '');
 
         if (!(
                 (

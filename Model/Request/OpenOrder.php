@@ -26,11 +26,14 @@ class OpenOrder extends AbstractRequest implements RequestInterface
      * @var array
      */
     protected $orderData;
-    protected $cart;
     
     private $billingAddress; // array
     private $countryCode; // string
-    private $requestParams = [];
+    private $quote;
+    private $cart;
+    private $items; // the products in the cart
+    private $requestParams  = [];
+    private $is_rebilling   = false;
 
     /**
      * OpenOrder constructor.
@@ -56,7 +59,7 @@ class OpenOrder extends AbstractRequest implements RequestInterface
             $responseFactory
         );
 
-        $this->requestFactory    = $requestFactory;
+        $this->requestFactory   = $requestFactory;
         $this->cart             = $cart;
     }
 
@@ -78,8 +81,16 @@ class OpenOrder extends AbstractRequest implements RequestInterface
     public function process()
     {
         // first try to update order
-        $quote        = $this->cart->getQuote();
-        $order_data    = $quote->getPayment()->getAdditionalInformation(Payment::CREATE_ORDER_DATA);
+        $this->quote    = $this->cart->getQuote();
+        $this->items    = $this->quote->getItems();
+        $order_data     = $this->quote->getPayment()->getAdditionalInformation(Payment::CREATE_ORDER_DATA);
+        
+        // we must check for a product with rebilling plan
+        foreach ($this->items as $item) {
+            $options = $item->getProduct()->getTypeInstance(true)->getOrderOptions($item->getProduct());
+            
+        }
+        // we must check for a product with rebilling plan END
         
         // first try - update order
         if (!empty($order_data)) {
@@ -101,12 +112,12 @@ class OpenOrder extends AbstractRequest implements RequestInterface
         $this->ooAmount     = $req_resp['merchantDetails']['customField1'];
 
         // save the session token in the Quote
-        $quote->getPayment()->setAdditionalInformation(
+        $this->quote->getPayment()->setAdditionalInformation(
             Payment::CREATE_ORDER_DATA,
             [
-                'sessionToken'        => $req_resp['sessionToken'],
-                'clientRequestId'    => $req_resp['clientRequestId'],
-                'orderId'            => $req_resp['orderId'],
+                'sessionToken'      => $req_resp['sessionToken'],
+                'clientRequestId'   => $req_resp['clientRequestId'],
+                'orderId'           => $req_resp['orderId'],
             ]
         );
         $this->cart->getQuote()->save();
@@ -145,85 +156,31 @@ class OpenOrder extends AbstractRequest implements RequestInterface
             throw new PaymentException(__('There is no Cart data.'));
         }
         
-        $quote        = $this->cart->getQuote();
-        $items        = $quote->getItems();
-        $items_data    = [];
-        
         // check in the cart for Nuvei Payment Plan
-        $subs_data    = [];
-        
+        $quote = $this->cart->getQuote();
         // iterate over Items and search for Subscriptions
-        if (is_array($items)) {
-            foreach ($items as $item) {
-                $items_data[$item->getId()] = [
-                    'quantity'    => $item->getQty(),
-                    'price'        => $item->getPrice(),
-                ];
-
-                /*
-                $product    = $item->getProduct();
-                $attributes    = $product->getAttributes();
-
-                // if subscription is not enabled continue witht the next product
-                if($item->getProduct()->getData(\Nuvei\Payments\Model\Config::PAYMENT_SUBS_ENABLE) != 1) {
-                    continue;
-                }
-
-                // mandatory data
-                $subs_data[$product->getId()] = array(
-                    'planId' => $item->getProduct()->getData(\Nuvei\Payments\Model\Config::PAYMENT_PLANS_ATTR_NAME),
-
-                    'initialAmount' => number_format($item->getProduct()
-                        ->getData(\Nuvei\Payments\Model\Config::PAYMENT_SUBS_INTIT_AMOUNT), 2, '.', ''),
-
-                    'recurringAmount' => number_format($item->getProduct()
-                        ->getData(\Nuvei\Payments\Model\Config::PAYMENT_SUBS_REC_AMOUNT), 2, '.', ''),
-                );
-
-                $this->config->createLog($subs_data, '$subs_data');
-
-                # optional data
-                $recurr_unit = $item->getProduct()->getData(\Nuvei\Payments\Model\Config::PAYMENT_SUBS_RECURR_UNITS);
-                $recurr_period = $item->getProduct()->getData(\Nuvei\Payments\Model\Config::PAYMENT_SUBS_RECURR_PERIOD);
-                $subs_data[$product->getId()]['recurringPeriod'][strtolower($recurr_unit)] = $recurr_period;
-
-                $trial_unit = $item->getProduct()->getData(\Nuvei\Payments\Model\Config::PAYMENT_SUBS_TRIAL_UNITS);
-                $trial_period = $item->getProduct()->getData(\Nuvei\Payments\Model\Config::PAYMENT_SUBS_TRIAL_PERIOD);
-                $subs_data[$product->getId()]['startAfter'][strtolower($trial_unit)] = $trial_period;
-
-                $end_after_unit = $item
-                    ->getProduct()
-                    ->getData(\Nuvei\Payments\Model\Config::PAYMENT_SUBS_END_AFTER_UNITS);
-                $end_after_period = $item
-                    ->getProduct()
-                    ->getData(\Nuvei\Payments\Model\Config::PAYMENT_SUBS_END_AFTER_PERIOD);
-
-                $subs_data[$product->getId()]['endAfter'][strtolower($end_after_unit)] = $end_after_period;
-                # optional data END
-                 */
-            }
-        }
+        $items_data = $this->config->getProductPlanData();
         
-        $this->config->setNuveiUseCcOnly(!empty($subs_data) ? true : false);
+        $this->config->setNuveiUseCcOnly(!empty($items_data['subs_data']) ? true : false);
         
         $billing_address = $this->config->getQuoteBillingAddress();
         if (!empty($this->billingAddress)) {
-            $billing_address['firstName']    = $this->billingAddress['firstname'] ?: $billing_address['firstName'];
+            $billing_address['firstName']   = $this->billingAddress['firstname'] ?: $billing_address['firstName'];
             $billing_address['lastName']    = $this->billingAddress['lastname'] ?: $billing_address['lastName'];
             
             if (is_array($this->billingAddress['street']) && !empty($this->billingAddress['street'])) {
                 $billing_address['address'] = implode(' ', $this->billingAddress['street']);
             }
             
-            $billing_address['phone']    = $this->billingAddress['telephone'] ?: $billing_address['phone'];
-            $billing_address['zip']        = $this->billingAddress['postcode'] ?: $billing_address['zip'];
+            $billing_address['phone']   = $this->billingAddress['telephone'] ?: $billing_address['phone'];
+            $billing_address['zip']     = $this->billingAddress['postcode'] ?: $billing_address['zip'];
             $billing_address['city']    = $this->billingAddress['city'] ?: $billing_address['city'];
-            $billing_address['country']    = $this->billingAddress['countryId'] ?: $billing_address['country'];
+            $billing_address['country'] = $this->billingAddress['countryId'] ?: $billing_address['country'];
         }
         
-        $currency = $quote->getOrderCurrencyCode();
+        $currency = $this->quote->getOrderCurrencyCode();
         if (empty($currency)) {
-            $currency = $quote->getStoreCurrencyCode();
+            $currency = $this->quote->getStoreCurrencyCode();
         }
         if (empty($currency)) {
             $currency = $this->config->getQuoteBaseCurrency();
@@ -233,10 +190,11 @@ class OpenOrder extends AbstractRequest implements RequestInterface
             [
                 'clientUniqueId'    => $this->config->getCheckoutSession()->getQuoteId(),
                 'currency'          => $currency,
-                'amount'            => (string) number_format($quote->getGrandTotal(), 2, '.', ''),
+                'amount'            => (string) number_format($this->quote->getGrandTotal(), 2, '.', ''),
                 'deviceDetails'     => $this->config->getDeviceDetails(),
                 'shippingAddress'   => $this->config->getQuoteShippingAddress(),
                 'billingAddress'    => $billing_address,
+                'transactionType'   => $this->config->getPaymentAction(),
                 
                 'urlDetails'        => [
                     'successUrl'        => $this->config->getCallbackSuccessUrl(),
@@ -246,20 +204,33 @@ class OpenOrder extends AbstractRequest implements RequestInterface
                     'notificationUrl'   => $this->config->getCallbackDmnUrl(),
                 ],
                 
-                'paymentOption'      => ['card' => ['threeD' => ['isDynamic3D' => 1]]],
-                'transactionType'    => $this->config->getPaymentAction(),
-                
                 'merchantDetails'    => [
-                    'customField1' => (string) number_format($quote->getGrandTotal(), 2, '.', ''), // pass amount
-                    'customField2' => json_encode($subs_data), // subscription data
-                //    'customField3' => 'Magento v.' . $this->config->getMagentoVersion(), // pass it in AbstractRequest
+                    'customField1' => (string) number_format($this->quote->getGrandTotal(), 2, '.', ''), // pass amount
+                    'customField2' => json_encode($items_data['subs_data']), // subscription data
+                    // customField3 is passed in AbstractRequest
                     'customField4' => time(), // time when we create the request
-                    'customField5' => json_encode($items_data), // list of Order items
+                    'customField5' => json_encode($items_data['items_data']), // list of Order items
+                ],
+                
+                'paymentOption'      => [
+                    'card' => [
+                        'threeD' => [
+                            'isDynamic3D' => 1
+                        ]
+                    ]
                 ],
             ],
             parent::getParams()
         );
         
+        // for rebilling
+        if(!empty($this->config->getProductPlanData())) {
+            $this->requestParams['isRebilling'] = 0;
+            $this->requestParams['paymentOption']['card']['threeD']['rebillFrequency'] = 1;
+            $this->requestParams['paymentOption']['card']['threeD']['rebillExpiry']      
+                = date('Ymd', strtotime("+10 years"));
+        }
+            
         $this->requestParams['userDetails'] = $this->requestParams['billingAddress'];
         
         return $this->requestParams;

@@ -25,10 +25,10 @@ class GetMerchantPaymentMethods extends AbstractRequest implements RequestInterf
      */
     protected $countryCode;
     
-    protected $cart;
     protected $store;
     
     private $billing_address;
+    private $cart;
     
     /**
      * @param Logger $logger
@@ -43,8 +43,8 @@ class GetMerchantPaymentMethods extends AbstractRequest implements RequestInterf
         Curl $curl,
         ResponseFactory $responseFactory,
         RequestFactory $requestFactory,
-        \Magento\Checkout\Model\Cart $cart,
-        \Magento\Store\Api\Data\StoreInterface $store
+        \Magento\Store\Api\Data\StoreInterface $store,
+        \Magento\Checkout\Model\Cart $cart
     ) {
         parent::__construct(
             $logger,
@@ -53,9 +53,9 @@ class GetMerchantPaymentMethods extends AbstractRequest implements RequestInterf
             $responseFactory
         );
 
-        $this->requestFactory    = $requestFactory;
-        $this->cart             = $cart;
+        $this->requestFactory   = $requestFactory;
         $this->store            = $store;
+        $this->cart             = $cart;
     }
 
     /**

@@ -52,17 +52,23 @@ class UpgradeData extends \Nuvei\Payments\Setup\InstallSchema implements Upgrade
      */
     public function upgrade(ModuleDataSetupInterface $setup, ModuleContextInterface $context)
     {
+        /**
+         * To have Configurable attributes we must set the following parameters:
+         * 
+         * 'source'         => some_source_class
+         * 'global'         => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL
+         * 'user_defined'   => true
+         * 'visible'        => true,
+         */
         // try to add main plugin table if not exists, and remove old plugin table if exists
         $this->install($this->install, $context);
         
         $setup->startSetup();
         $eavSetup = $this->eavSetupFactory->create(['setup' => $setup]);
         
-//        $categorySetup = $this->categorySetupFactory->create(['setup' => $setup]);
-        
 //        $eavSetup->removeAttribute(
 //            \Magento\Catalog\Model\Product::ENTITY,
-//            \Nuvei\Payments\Model\Config::PAYMENT_SUBS_INTIT_AMOUNT
+//            'nuvei_test_attr'
 //        );
         
         // add few new Order States
@@ -115,57 +121,57 @@ class UpgradeData extends \Nuvei\Payments\Setup\InstallSchema implements Upgrade
         }
          */
         
-        if (version_compare($context->getVersion(), '3.0.2', '<')) {
+        //if (version_compare($context->getVersion(), '3.0.2', '<')) {
             // Enable subscription
-            $eavSetup->addAttribute(
-                \Magento\Catalog\Model\Product::ENTITY,
-                \Nuvei\Payments\Model\Config::PAYMENT_SUBS_ENABLE,
-                [
-                    'label'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_ENABLE_LABEL,
-                    'global'    => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
-                    'source'    => 'Magento\Eav\Model\Entity\Attribute\Source\Boolean',
-                    'group'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
-                    
-                    'type'                      => 'int',
-                    'input'                     => 'boolean',
-                    'visible'                   => true,
-                    'required'                  => false,
-                    'user_defined'              => true,
-                    'default'                   => '',
-                    'searchable'                => true,
-                    'filterable'                => true,
-                    'visible_on_front'          => false,
-                    'used_in_product_listing'   => true,
-                    'sort_order'                => 10,
-                    'class'                     => 'sc_enable_subscr',
-                    'note'                      => 'note',
-                ]
-            );
+//            $eavSetup->addAttribute(
+//                \Magento\Catalog\Model\Product::ENTITY,
+//                \Nuvei\Payments\Model\Config::PAYMENT_SUBS_ENABLE,
+//                [
+//                    'label'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_ENABLE_LABEL,
+//                    'global'    => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
+//                    'source'    => 'Magento\Eav\Model\Entity\Attribute\Source\Boolean',
+//                    'group'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
+//                    
+//                    'type'                      => 'int',
+//                    'input'                     => 'boolean',
+//                    'visible'                   => true,
+//                    'required'                  => false,
+//                    'user_defined'              => true,
+//                    'default'                   => '',
+//                    'searchable'                => true,
+//                    'filterable'                => true,
+//                    'visible_on_front'          => false,
+//                    'used_in_product_listing'   => true,
+//                    'sort_order'                => 10,
+//                    'class'                     => 'sc_enable_subscr',
+//                    'note'                      => 'note',
+//                ]
+//            );
 
             // Plan IDs
-            $eavSetup->addAttribute(
-                \Magento\Catalog\Model\Product::ENTITY,
-                \Nuvei\Payments\Model\Config::PAYMENT_PLANS_ATTR_NAME,
-                [
-                    'label'     => \Nuvei\Payments\Model\Config::PAYMENT_PLANS_ATTR_LABEL,
-                    'global'    => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
-                    'source'    => 'Nuvei\Payments\Model\Config\Source\PaymentPlansOptions',
-                    'group'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
-                    
-                    'type'                      => 'int',
-                    'input'                     => 'select',
-                    'visible'                   => true,
-                    'required'                  => false,
-                    'user_defined'              => false,
-                    'default'                   => '',
-                    'searchable'                => true,
-                    'filterable'                => true,
-                    'visible_on_front'          => false,
-                    'used_in_product_listing'   => true,
-                    'option'                    => ['values' => []],
-                    'sort_order'                => 20,
-                ]
-            );
+//            $eavSetup->addAttribute(
+//                \Magento\Catalog\Model\Product::ENTITY,
+//                \Nuvei\Payments\Model\Config::PAYMENT_PLANS_ATTR_NAME,
+//                [
+//                    'label'     => \Nuvei\Payments\Model\Config::PAYMENT_PLANS_ATTR_LABEL,
+//                    'global'    => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
+//                    'source'    => 'Nuvei\Payments\Model\Config\Source\PaymentPlansOptions',
+//                    'group'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
+//                    
+//                    'type'                      => 'int',
+//                    'input'                     => 'select',
+//                    'visible'                   => true,
+//                    'required'                  => false,
+//                    'user_defined'              => true,
+//                    'default'                   => '',
+//                    'searchable'                => true,
+//                    'filterable'                => true,
+//                    'visible_on_front'          => false,
+//                    'used_in_product_listing'   => true,
+//                    'option'                    => ['values' => []],
+//                    'sort_order'                => 20,
+//                ]
+//            );
 
             // Initial Amount
 //            $eavSetup->addAttribute(
@@ -190,195 +196,231 @@ class UpgradeData extends \Nuvei\Payments\Setup\InstallSchema implements Upgrade
 //            );
 
             // Recurring Amount
-            $eavSetup->addAttribute(
-                \Magento\Catalog\Model\Product::ENTITY,
-                \Nuvei\Payments\Model\Config::PAYMENT_SUBS_REC_AMOUNT,
-                [
-                    'label'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_REC_AMOUNT_LABEL,
-                    'global'    => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
-                    'group'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
-                    
-                    'type'                      => 'decimal',
-                    'input'                     => 'price',
-                    'visible'                   => true,
-                    'required'                  => false,
-                    'user_defined'              => true,
-                    'default'                   => '0',
-                    'searchable'                => true,
-                    'filterable'                => true,
-                    'visible_on_front'          => false,
-                    'used_in_product_listing'   => true,
-                    'sort_order'                => 40,
-                ]
-            );
+//            $eavSetup->addAttribute(
+//                \Magento\Catalog\Model\Product::ENTITY,
+//                \Nuvei\Payments\Model\Config::PAYMENT_SUBS_REC_AMOUNT,
+//                [
+//                    'label'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_REC_AMOUNT_LABEL,
+//                    'global'    => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
+//                    'group'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
+//                    
+//                    'type'                      => 'decimal',
+//                    'input'                     => 'price',
+//                    'visible'                   => true,
+//                    'required'                  => false,
+//                    'user_defined'              => true,
+//                    'default'                   => '0',
+//                    'searchable'                => true,
+//                    'filterable'                => true,
+//                    'visible_on_front'          => false,
+//                    'used_in_product_listing'   => true,
+//                    'sort_order'                => 40,
+//                ]
+//            );
 
             // Recurring Units
-            $eavSetup->addAttribute(
-                \Magento\Catalog\Model\Product::ENTITY,
-                \Nuvei\Payments\Model\Config::PAYMENT_SUBS_RECURR_UNITS,
-                [
-                    'label'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_RECURR_UNITS_LABEL,
-                    'global'    => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
-                    'source'    => 'Nuvei\Payments\Model\Config\Source\SubscriptionUnits',
-                    'group'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
-                    
-                    'type'                      => 'text',
-                    'input'                     => 'select',
-                    'visible'                   => true,
-                    'required'                  => false,
-                    'user_defined'              => false,
-                    'default'                   => 'day',
-                    'searchable'                => false,
-                    'filterable'                => false,
-                    'visible_on_front'          => false,
-                    'used_in_product_listing'   => false,
-                    'option'                    => ['values' => []],
-                    'sort_order'                => 50,
-                ]
-            );
+//            $eavSetup->removeAttribute(
+//                \Magento\Catalog\Model\Product::ENTITY,
+//                \Nuvei\Payments\Model\Config::PAYMENT_SUBS_RECURR_UNITS
+//            );
+//            
+//            $eavSetup->addAttribute(
+//                \Magento\Catalog\Model\Product::ENTITY,
+//                \Nuvei\Payments\Model\Config::PAYMENT_SUBS_RECURR_UNITS,
+//                [
+//                    'label'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_RECURR_UNITS_LABEL,
+//                    'global'    => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
+//                    'source'    => 'Nuvei\Payments\Model\Config\Source\SubscriptionUnits',
+//                    'group'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
+//                    
+//                    'type'                      => 'text',
+//                    'input'                     => 'select',
+//                    'visible'                   => true,
+//                    'required'                  => false,
+//                    'user_defined'              => true,
+//                    'default'                   => 'day',
+//                    'searchable'                => false,
+//                    'filterable'                => false,
+//                    'visible_on_front'          => false,
+//                    'used_in_product_listing'   => false,
+//                    'option'                    => ['values' => []],
+//                    'sort_order'                => 50,
+//                ]
+//            );
 
             // Recurring Period
-            $eavSetup->addAttribute(
-                \Magento\Catalog\Model\Product::ENTITY,
-                \Nuvei\Payments\Model\Config::PAYMENT_SUBS_RECURR_PERIOD,
-                [
-                    'label'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_RECURR_PERIOD_LABEL,
-                    'global'    => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
-                    'group'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
-                    
-                    'type'                      => 'int',
-                    'input'                     => 'text',
-                    'visible'                   => true,
-                    'required'                  => false,
-                    'user_defined'              => false,
-                    'default'                   => '',
-                    'searchable'                => false,
-                    'filterable'                => false,
-                    'visible_on_front'          => false,
-                    'used_in_product_listing'   => false,
-                    'sort_order'                => 60,
-                ]
-            );
+//            $eavSetup->removeAttribute(
+//                \Magento\Catalog\Model\Product::ENTITY,
+//                \Nuvei\Payments\Model\Config::PAYMENT_SUBS_RECURR_PERIOD
+//            );
+//            
+//            $eavSetup->addAttribute(
+//                \Magento\Catalog\Model\Product::ENTITY,
+//                \Nuvei\Payments\Model\Config::PAYMENT_SUBS_RECURR_PERIOD,
+//                [
+//                    'label'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_RECURR_PERIOD_LABEL,
+//                    'global'    => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
+//                    'group'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
+//                    'source'    => 'Nuvei\Payments\Model\Config\Source\SubscriptionPeriod',
+//                    
+//                    'type'                      => 'text',
+//                    'input'                     => 'select',
+//                    'visible'                   => true,
+//                    'required'                  => false,
+//                    'user_defined'              => true,
+//                    'default'                   => '0',
+//                    'searchable'                => false,
+//                    'filterable'                => false,
+//                    'visible_on_front'          => false,
+//                    'used_in_product_listing'   => false,
+//                    'sort_order'                => 60,
+//                    'option'                    => ['values' => []],
+//                ]
+//            );
 
             // Trial Units
-            $eavSetup->addAttribute(
-                \Magento\Catalog\Model\Product::ENTITY,
-                \Nuvei\Payments\Model\Config::PAYMENT_SUBS_TRIAL_UNITS,
-                [
-                    'label'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_TRIAL_UNITS_LABEL,
-                    'global'    => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
-                    'source'    => 'Nuvei\Payments\Model\Config\Source\SubscriptionUnits',
-                    'group'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
-                    
-                    'type'                      => 'text',
-                    'input'                     => 'select',
-                    'visible'                   => true,
-                    'required'                  => false,
-                    'user_defined'              => false,
-                    'default'                   => 'day',
-                    'searchable'                => false,
-                    'filterable'                => false,
-                    'visible_on_front'          => false,
-                    'used_in_product_listing'   => false,
-                    'option'                    => ['values' => []],
-                    'sort_order'                => 70,
-                ]
-            );
+//            $eavSetup->removeAttribute(
+//                \Magento\Catalog\Model\Product::ENTITY,
+//                \Nuvei\Payments\Model\Config::PAYMENT_SUBS_TRIAL_UNITS
+//            );
+//            
+//            $eavSetup->addAttribute(
+//                \Magento\Catalog\Model\Product::ENTITY,
+//                \Nuvei\Payments\Model\Config::PAYMENT_SUBS_TRIAL_UNITS,
+//                [
+//                    'label'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_TRIAL_UNITS_LABEL,
+//                    'global'    => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
+//                    'source'    => 'Nuvei\Payments\Model\Config\Source\SubscriptionUnits',
+//                    'group'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
+//                    
+//                    'type'                      => 'text',
+//                    'input'                     => 'select',
+//                    'visible'                   => true,
+//                    'required'                  => false,
+//                    'user_defined'              => true,
+//                    'default'                   => 'day',
+//                    'searchable'                => false,
+//                    'filterable'                => false,
+//                    'visible_on_front'          => false,
+//                    'used_in_product_listing'   => false,
+//                    'option'                    => ['values' => []],
+//                    'sort_order'                => 70,
+//                ]
+//            );
 
             // Trial Period
-            $eavSetup->addAttribute(
-                \Magento\Catalog\Model\Product::ENTITY,
-                \Nuvei\Payments\Model\Config::PAYMENT_SUBS_TRIAL_PERIOD,
-                [
-                    'label'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_TRIAL_PERIOD_LABEL,
-                    'global'    => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
-                    'group'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
-                    
-                    'type'                      => 'int',
-                    'input'                     => 'text',
-                    'visible'                   => true,
-                    'required'                  => false,
-                    'user_defined'              => false,
-                    'default'                   => '',
-                    'searchable'                => false,
-                    'filterable'                => false,
-                    'visible_on_front'          => false,
-                    'used_in_product_listing'   => false,
-                    'sort_order'                => 80,
-                ]
-            );
+//            $eavSetup->removeAttribute(
+//                \Magento\Catalog\Model\Product::ENTITY,
+//                \Nuvei\Payments\Model\Config::PAYMENT_SUBS_TRIAL_PERIOD
+//            );
+//            
+//            $eavSetup->addAttribute(
+//                \Magento\Catalog\Model\Product::ENTITY,
+//                \Nuvei\Payments\Model\Config::PAYMENT_SUBS_TRIAL_PERIOD,
+//                [
+//                    'label'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_TRIAL_PERIOD_LABEL,
+//                    'global'    => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
+//                    'group'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
+//                    'source'    => 'Nuvei\Payments\Model\Config\Source\SubscriptionPeriod',
+//                    
+//                    'type'                      => 'text',
+//                    'input'                     => 'select',
+//                    'visible'                   => true,
+//                    'required'                  => false,
+//                    'user_defined'              => true,
+//                    'default'                   => '0',
+//                    'searchable'                => false,
+//                    'filterable'                => false,
+//                    'visible_on_front'          => false,
+//                    'used_in_product_listing'   => false,
+//                    'sort_order'                => 80,
+//                    'option'                    => ['values' => []],
+//                ]
+//            );
 
             // End After Units
-            $eavSetup->addAttribute(
-                \Magento\Catalog\Model\Product::ENTITY,
-                \Nuvei\Payments\Model\Config::PAYMENT_SUBS_END_AFTER_UNITS,
-                [
-                    'label'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_END_AFTER_UNITS_LABEL,
-                    'global'    => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
-                    'source'    => 'Nuvei\Payments\Model\Config\Source\SubscriptionUnits',
-                    'group'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
-                    
-                    'type'                      => 'text',
-                    'input'                     => 'select',
-                    'visible'                   => true,
-                    'required'                  => false,
-                    'user_defined'              => false,
-                    'default'                   => 'day',
-                    'searchable'                => false,
-                    'filterable'                => false,
-                    'visible_on_front'          => false,
-                    'used_in_product_listing'   => false,
-                    'option'                    => ['values' => []],
-                    'sort_order'                => 90,
-                ]
-            );
+//            $eavSetup->removeAttribute(
+//                \Magento\Catalog\Model\Product::ENTITY,
+//                \Nuvei\Payments\Model\Config::PAYMENT_SUBS_END_AFTER_UNITS
+//            );
+//            
+//            $eavSetup->addAttribute(
+//                \Magento\Catalog\Model\Product::ENTITY,
+//                \Nuvei\Payments\Model\Config::PAYMENT_SUBS_END_AFTER_UNITS,
+//                [
+//                    'label'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_END_AFTER_UNITS_LABEL,
+//                    'global'    => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
+//                    'source'    => 'Nuvei\Payments\Model\Config\Source\SubscriptionUnits',
+//                    'group'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
+//                    
+//                    'type'                      => 'text',
+//                    'input'                     => 'select',
+//                    'visible'                   => true,
+//                    'required'                  => false,
+//                    'user_defined'              => true,
+//                    'default'                   => 'day',
+//                    'searchable'                => false,
+//                    'filterable'                => false,
+//                    'visible_on_front'          => false,
+//                    'used_in_product_listing'   => false,
+//                    'option'                    => ['values' => []],
+//                    'sort_order'                => 90,
+//                ]
+//            );
 
             // End After Period
-            $eavSetup->addAttribute(
-                \Magento\Catalog\Model\Product::ENTITY,
-                \Nuvei\Payments\Model\Config::PAYMENT_SUBS_END_AFTER_PERIOD,
-                [
-                    'label'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_END_AFTER_PERIOD_LABEL,
-                    'global'    => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
-                    'group'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
-                    
-                    'type'                      => 'int',
-                    'input'                     => 'text',
-                    'visible'                   => true,
-                    'required'                  => false,
-                    'user_defined'              => false,
-                    'default'                   => '',
-                    'searchable'                => false,
-                    'filterable'                => false,
-                    'visible_on_front'          => false,
-                    'used_in_product_listing'   => false,
-                    'sort_order'                => 100,
-                ]
-            );
+//            $eavSetup->removeAttribute(
+//                \Magento\Catalog\Model\Product::ENTITY,
+//                \Nuvei\Payments\Model\Config::PAYMENT_SUBS_END_AFTER_PERIOD
+//            );
+//            
+//            $eavSetup->addAttribute(
+//                \Magento\Catalog\Model\Product::ENTITY,
+//                \Nuvei\Payments\Model\Config::PAYMENT_SUBS_END_AFTER_PERIOD,
+//                [
+//                    'label'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_END_AFTER_PERIOD_LABEL,
+//                    'global'    => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
+//                    'group'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
+//                    'source'    => 'Nuvei\Payments\Model\Config\Source\SubscriptionPeriod',
+//                    
+//                    'type'                      => 'text',
+//                    'input'                     => 'select',
+//                    'visible'                   => true,
+//                    'required'                  => false,
+//                    'user_defined'              => true,
+//                    'default'                   => '0',
+//                    'searchable'                => false,
+//                    'filterable'                => false,
+//                    'visible_on_front'          => false,
+//                    'used_in_product_listing'   => false,
+//                    'sort_order'                => 100,
+//                    'option'                    => ['values' => []],
+//                ]
+//            );
 
             // description of the Subscription for the store
-            $eavSetup->addAttribute(
-                \Magento\Catalog\Model\Product::ENTITY,
-                \Nuvei\Payments\Model\Config::PAYMENT_SUBS_STORE_DESCR,
-                [
-                    'label'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_STORE_DESCR_LABEL,
-                    'global'    => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
-                    'group'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
-                    
-                    'type'                      => 'text',
-                    'input'                     => 'textarea',
-                    'visible'                   => true,
-                    'required'                  => false,
-                    'user_defined'              => true,
-                    'default'                   => '',
-                    'searchable'                => false,
-                    'filterable'                => true,
-                    'visible_on_front'          => true,
-                    'used_in_product_listing'   => true,
-                    'sort_order'                => 110,
-                ]
-            );
-        }
+//            $eavSetup->addAttribute(
+//                \Magento\Catalog\Model\Product::ENTITY,
+//                \Nuvei\Payments\Model\Config::PAYMENT_SUBS_STORE_DESCR,
+//                [
+//                    'label'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_STORE_DESCR_LABEL,
+//                    'global'    => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
+//                    'group'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
+//                    
+//                    'type'                      => 'text',
+//                    'input'                     => 'textarea',
+//                    'visible'                   => true,
+//                    'required'                  => false,
+//                    'user_defined'              => true,
+//                    'default'                   => '',
+//                    'searchable'                => false,
+//                    'filterable'                => true,
+//                    'visible_on_front'          => true,
+//                    'used_in_product_listing'   => true,
+//                    'sort_order'                => 110,
+//                ]
+//            );
+        //}
         
         $setup->endSetup();
     }
