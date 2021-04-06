@@ -88,6 +88,9 @@
 				type="Nuvei\Payments\Plugin\ZeroTotal" />
 	</type>
 	
+	<preference for="Magento\Sales\Block\Order\History"
+				type="Nuvei\Payments\Block\Frontend\Customer\OrdersHistory" />
+	
     <!-- Interface preferences. -->
     <preference for="Nuvei\Payments\Api\RequestLogRepositoryInterface"
                 type="Nuvei\Payments\Model\ResourceModel\RequestLogRepository"/>

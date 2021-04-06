@@ -163,11 +163,17 @@ class UpdateOrder extends AbstractRequest implements RequestInterface
                 ]],
                 
                 'merchantDetails'   => [
-                    'customField1'  => (string) number_format($quote->getGrandTotal(), 2, '.', ''), // pass amount
-                    'customField2'  => json_encode($items_data['subs_data']), // subscription data
-                    // customField3 is passed in AbstractRequest
-                    'customField4'  => time(), // time when we create the request
-                    'customField5'  => json_encode($items_data['items_data']), // list of Order items
+                    // pass amount
+                    'customField1'  => (string) number_format($quote->getGrandTotal(), 2, '.', ''),
+                    // subscription data
+                    'customField2'  => isset($items_data['subs_data'])
+                        ? json_encode($items_data['subs_data']) : '',
+                    # customField3 is passed in AbstractRequest
+                    // time when we create the request
+                    'customField4'  => time(),
+                    // list of Order items
+                    'customField5'  => isset($items_data['items_data'])
+                        ? json_encode($items_data['items_data']) : '',
                 ],
             ]
         );

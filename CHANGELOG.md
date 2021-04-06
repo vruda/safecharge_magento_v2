@@ -4,6 +4,7 @@
 
 ### 3.0.2.x
 ```
+	* In Store, My Account menu, is added menu to show only the Orders with approved Nuvei Subscription.
 	* Do not allow an Order including a product with Payment plan with other products.
 	* On Product edit/create page, populate Nuvei Plan fields by selected plan.
 	* When merchant try to get its payment plans, if there are no plans - create a default one.

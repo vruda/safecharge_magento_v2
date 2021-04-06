@@ -51,12 +51,13 @@ class CreateSubscription extends AbstractRequest implements RequestInterface
     
     /**
      * @return AbstractResponse
+     * 
      * @throws \Magento\Framework\Exception\LocalizedException
      * @throws PaymentException
      */
     public function process()
     {
-        return $this->sendRequest(true);
+        return $this->sendRequest(true, true);
     }
     
     public function setOrderId($order_id = 0)

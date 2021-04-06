@@ -56,7 +56,7 @@ class Payment extends Cc implements TransparentInterface
     const TRANSACTION_PAYMENT_METHOD            = 'external_payment_method';
     const TRANSACTION_STATUS                    = 'status';
     const TRANSACTION_TYPE                      = 'transaction_type';
-    const TRANSACTION_SUBS                      = 'transaction_subs';
+    const IS_ACTIVE_SUBS_ORDER                  = 'is_active_subs_order'; // flag for active subsc in the order
     const TRANSACTION_UPO_ID                    = 'upo_id';
     const TRANSACTION_TOTAL_AMOUN               = 'total_amount';
     const REFUND_TRANSACTION_AMOUNT             = 'refund_amount';
