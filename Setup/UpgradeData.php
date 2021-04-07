@@ -261,7 +261,7 @@ class UpgradeData extends \Nuvei\Payments\Setup\InstallSchema implements Upgrade
 //                    'label'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_RECURR_PERIOD_LABEL,
 //                    'global'    => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
 //                    'group'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
-//                    'source'    => 'Nuvei\Payments\Model\Config\Source\SubscriptionPeriod',
+//                    'source'    => 'Nuvei\Payments\Model\Config\Source\SubscriptionPeriodFrom1',
 //                    
 //                    'type'                      => 'text',
 //                    'input'                     => 'select',
@@ -321,7 +321,7 @@ class UpgradeData extends \Nuvei\Payments\Setup\InstallSchema implements Upgrade
 //                    'label'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_TRIAL_PERIOD_LABEL,
 //                    'global'    => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
 //                    'group'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
-//                    'source'    => 'Nuvei\Payments\Model\Config\Source\SubscriptionPeriod',
+//                    'source'    => 'Nuvei\Payments\Model\Config\Source\SubscriptionPeriodFrom0',
 //                    
 //                    'type'                      => 'text',
 //                    'input'                     => 'select',
@@ -381,7 +381,7 @@ class UpgradeData extends \Nuvei\Payments\Setup\InstallSchema implements Upgrade
 //                    'label'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_END_AFTER_PERIOD_LABEL,
 //                    'global'    => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
 //                    'group'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
-//                    'source'    => 'Nuvei\Payments\Model\Config\Source\SubscriptionPeriod',
+//                    'source'    => 'Nuvei\Payments\Model\Config\Source\SubscriptionPeriodFrom1',
 //                    
 //                    'type'                      => 'text',
 //                    'input'                     => 'select',
@@ -395,29 +395,6 @@ class UpgradeData extends \Nuvei\Payments\Setup\InstallSchema implements Upgrade
 //                    'used_in_product_listing'   => false,
 //                    'sort_order'                => 100,
 //                    'option'                    => ['values' => []],
-//                ]
-//            );
-
-            // description of the Subscription for the store
-//            $eavSetup->addAttribute(
-//                \Magento\Catalog\Model\Product::ENTITY,
-//                \Nuvei\Payments\Model\Config::PAYMENT_SUBS_STORE_DESCR,
-//                [
-//                    'label'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_STORE_DESCR_LABEL,
-//                    'global'    => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
-//                    'group'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
-//                    
-//                    'type'                      => 'text',
-//                    'input'                     => 'textarea',
-//                    'visible'                   => true,
-//                    'required'                  => false,
-//                    'user_defined'              => true,
-//                    'default'                   => '',
-//                    'searchable'                => false,
-//                    'filterable'                => true,
-//                    'visible_on_front'          => true,
-//                    'used_in_product_listing'   => true,
-//                    'sort_order'                => 110,
 //                ]
 //            );
         //}

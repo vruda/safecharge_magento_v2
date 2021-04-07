@@ -25,11 +25,11 @@ class PreventAddToCart
         \Magento\Catalog\Api\ProductRepositoryInterface $productRepository,
         \Magento\ConfigurableProduct\Model\Product\Type\Configurable $productTypeInstance 
     ) {
-        $this->config       = $config;
-        $this->request      = $request;
-        $this->messanger    = $messanger;
-        $this->product_obj  = $product_obj;
-        $this->productRepository  = $productRepository;
+        $this->config               = $config;
+        $this->request              = $request;
+        $this->messanger            = $messanger;
+        $this->product_obj          = $product_obj;
+        $this->productRepository    = $productRepository;
         $this->productTypeInstance  = $productTypeInstance ;
     }
 

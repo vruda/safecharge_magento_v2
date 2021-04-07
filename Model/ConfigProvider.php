@@ -44,14 +44,14 @@ class ConfigProvider extends CcGenericConfigProvider
     /**
      * ConfigProvider constructor.
      *
-     * @param CcConfig            $ccConfig
-     * @param PaymentHelper        $paymentHelper
+     * @param CcConfig          $ccConfig
+     * @param PaymentHelper     $paymentHelper
      * @param Config            $moduleConfig
-     * @param CustomerSession    $customerSession
-     * @param UrlInterface        $urlBuilder
+     * @param CustomerSession   $customerSession
+     * @param UrlInterface      $urlBuilder
      * @param RequestFactory    $requestFactory
-     * @param array                $methodCodes
-     * @param AssetRepository    $assetRepo
+     * @param array             $methodCodes
+     * @param AssetRepository   $assetRepo
      */
     public function __construct(
         CcConfig $ccConfig,
@@ -67,7 +67,7 @@ class ConfigProvider extends CcGenericConfigProvider
         \Magento\Framework\View\Asset\Repository $assetRepo
     ) {
         $this->moduleConfig     = $moduleConfig;
-        $this->customerSession    = $customerSession;
+        $this->customerSession  = $customerSession;
         $this->urlBuilder       = $urlBuilder;
         $this->requestFactory   = $requestFactory;
         $this->storeManager     = $storeManager;

@@ -46,9 +46,6 @@ class Config
     const PAYMENT_SUBS_END_AFTER_PERIOD         = 'nuvei_sub_end_after_period';
     const PAYMENT_SUBS_END_AFTER_PERIOD_LABEL   = 'End After Period';
     
-    const PAYMENT_SUBS_STORE_DESCR              = 'nuvei_sub_store_decr';
-    const PAYMENT_SUBS_STORE_DESCR_LABEL        = 'Subscription details';
-    
     /**
      * Scope config object.
      *
