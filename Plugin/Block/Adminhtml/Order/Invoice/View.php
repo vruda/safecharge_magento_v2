@@ -73,8 +73,8 @@ class View extends \Magento\Backend\Block\Widget\Form\Container
                 // hide the button all the time, looks like we have order with multi partial settled items,
                 // the Void logic is different than the logic of the Void button in Information tab
                 if ('cc_card' !== $payment_method
-                    || in_array($ord_status,
-//                      [Payment::SC_REFUNDED, Payment::SC_PROCESSING, Payment::SC_VOIDED, 'closed']
+                    || in_array(
+                        $ord_status,
                         [Payment::SC_REFUNDED, Payment::SC_PROCESSING]
                     )
                     || $invoiceDetails->getState() == Invoice::STATE_CANCELED

@@ -209,7 +209,7 @@ class OpenOrder extends AbstractRequest implements RequestInterface
                     'customField1' => (string) number_format($this->quote->getGrandTotal(), 2, '.', ''),
                     // subscription data
                     'customField2' => isset($items_data['subs_data'])
-                        ? json_encode($items_data['subs_data']) : '', 
+                        ? json_encode($items_data['subs_data']) : '',
                     // customField3 is passed in AbstractRequest
                     // time when we create the request
                     'customField4' => time(),
@@ -230,10 +230,10 @@ class OpenOrder extends AbstractRequest implements RequestInterface
         );
         
         // for rebilling
-        if(!empty($this->config->getProductPlanData())) {
+        if (!empty($this->config->getProductPlanData())) {
             $this->requestParams['isRebilling'] = 0;
             $this->requestParams['paymentOption']['card']['threeD']['rebillFrequency'] = 1;
-            $this->requestParams['paymentOption']['card']['threeD']['rebillExpiry']      
+            $this->requestParams['paymentOption']['card']['threeD']['rebillExpiry']
                 = date('Ymd', strtotime("+10 years"));
         }
             

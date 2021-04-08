@@ -51,7 +51,7 @@ class CreateSubscription extends AbstractRequest implements RequestInterface
     
     /**
      * @return AbstractResponse
-     * 
+     *
      * @throws \Magento\Framework\Exception\LocalizedException
      * @throws PaymentException
      */

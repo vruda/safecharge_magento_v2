@@ -506,15 +506,15 @@ abstract class AbstractRequest extends AbstractApi
 //            'currency'          => $quote->getBaseCurrencyCode(),
 //            'items'             => [],
 //            'ipAddress'         => $quote->getRemoteIp(),
-//            
+//
 //            'amountDetails'     => [
 //                'totalShipping'     => (float) $shipping,
 //                'totalHandling'     => (float) 0,
-//                'totalDiscount'     => (float )abs($quote->getBaseSubtotal() 
+//                'totalDiscount'     => (float )abs($quote->getBaseSubtotal()
 //                    - $quote->getBaseSubtotalWithDiscount()),
 //                'totalTax'          => (float)$totalTax,
 //            ],
-//            
+//
 //            'deviceDetails'     => [
 //                'deviceType'        => 'DESKTOP',
 //                'ipAddress'         => $quote->getRemoteIp(),
@@ -526,7 +526,7 @@ abstract class AbstractRequest extends AbstractApi
 //            if (strlen($state) > 5) {
 //                $state = substr($state, 0, 2);
 //            }
-//            
+//
 //            $quoteData['billingAddress'] = [
 //                'firstName' => $billing->getFirstname(),
 //                'lastName'  => $billing->getLastname(),
@@ -589,14 +589,15 @@ abstract class AbstractRequest extends AbstractApi
     
     /**
      * Function prepareSubscrData
-     * 
+     *
      * Prepare and return short Items data
      * and the data for the Subscription plan, if there is
-     * 
+     *
      * @param Quote $quote
      * @return array
      */
-    protected function prepareSubscrData($quote) {
+    protected function prepareSubscrData($quote)
+    {
         $items_data = [];
         $subs_data  = [];
         $items      = $quote->getItems();
@@ -626,12 +627,12 @@ abstract class AbstractRequest extends AbstractApi
 
 
                 // if subscription is not enabled continue witht the next product
-                if($item->getProduct()->getData(\Nuvei\Payments\Model\Config::PAYMENT_SUBS_ENABLE) != 1) {
+                if ($item->getProduct()->getData(\Nuvei\Payments\Model\Config::PAYMENT_SUBS_ENABLE) != 1) {
                     continue;
                 }
 
                 // mandatory data
-                $subs_data[$product->getId()] = array(
+                $subs_data[$product->getId()] = [
                     'planId' => $item->getProduct()->getData(\Nuvei\Payments\Model\Config::PAYMENT_PLANS_ATTR_NAME),
 
 //                    'initialAmount' => number_format($item->getProduct()
@@ -640,7 +641,7 @@ abstract class AbstractRequest extends AbstractApi
 
                     'recurringAmount' => number_format($item->getProduct()
                         ->getData(\Nuvei\Payments\Model\Config::PAYMENT_SUBS_REC_AMOUNT), 2, '.', ''),
-                );
+                ];
 
                 # optional data
                 $recurr_unit    = $item->getProduct()

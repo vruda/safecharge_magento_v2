@@ -1,27 +1,23 @@
-<?php if(1 == $block->isProductWithPlan()):
+<?php if (1 == $block->isProductWithPlan()):
     $nuvei_texts    = $block->getTexts(); ?>
 
     <div id="nuvei_plan_details" style="display: none;">
-        <h4><?= $nuvei_texts['table_title']; ?></h4>
+        <h4><?= $block->escapeHtml($nuvei_texts['table_title']); ?></h4>
         <table border="1">
             <tr>
-                <td><?= $nuvei_texts['rec_length']; ?></td>
+                <td><?= $block->escapeHtml($nuvei_texts['rec_length']); ?></td>
                 <td id="nuvei_rec_length">&nbsp;</td>
             </tr>
             <tr>
-                <td><?= $nuvei_texts['rec_period']; ?></td>
+                <td><?= $block->escapeHtml($nuvei_texts['rec_period']); ?></td>
                 <td id="nuvei_rec_period">&nbsp;</td>
             </tr>
             <tr>
-                <td><?= $nuvei_texts['rec_amount']; ?></td>
-                <td id="nuvei_rec_amount"><?= $this->helper('Magento\Framework\Pricing\Helper\Data')->currency(number_format(10,2),true,false); ?></td>
+                <td><?= $block->escapeHtml($nuvei_texts['rec_amount']); ?></td>
+                <td id="nuvei_rec_amount">&nbsp;</td>
             </tr>
-<!--            <tr>
-                <td>Initial amount</td>
-                <td>&nbsp;</td>
-            </tr>-->
             <tr>
-                <td><?= $nuvei_texts['trial_period']; ?></td>
+                <td><?= $block->escapeHtml($nuvei_texts['trial_period']); ?></td>
                 <td id="nuvei_trial_period">&nbsp;</td>
             </tr>
         </table>
@@ -69,19 +65,17 @@
                     }
                     
                     // do an ajax call to get the data for the selected product variation
-                    console.log('do ajax call');
-                    
                     $.ajax({
-	                    dataType: "json",
-						type: 'post',
-	                    url: '<?= $nuvei_texts['nuvei_ajax_url']; ?>',
-	                    data: {
-                            prodId      : '<?= $nuvei_texts['nuvei_prod_id']; ?>',
+                        dataType: "json",
+                        type: 'post',
+                        url: '<?= $block->escapeUrl($nuvei_texts['nuvei_ajax_url']); ?>',
+                        data: {
+                            prodId      : '<?= /* @noEscape */ $nuvei_texts['nuvei_prod_id']; ?>',
                             prodOptions : prodOptions
                         },
-	                    cache: false,
-	                    showLoader: true
-	                })
+                        cache: false,
+                        showLoader: true
+                    })
                         .done(function(resp){
                             console.log(resp);
                             

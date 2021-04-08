@@ -54,7 +54,7 @@ class UpgradeData extends \Nuvei\Payments\Setup\InstallSchema implements Upgrade
     {
         /**
          * To have Configurable attributes we must set the following parameters:
-         * 
+         *
          * 'source'         => some_source_class
          * 'global'         => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL
          * 'user_defined'   => true
@@ -123,7 +123,7 @@ class UpgradeData extends \Nuvei\Payments\Setup\InstallSchema implements Upgrade
                 [
                     'label'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_ENABLE_LABEL,
                     'global'    => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
-                    'source'    => 'Magento\Eav\Model\Entity\Attribute\Source\Boolean',
+                    'source'    => \Magento\Eav\Model\Entity\Attribute\Source\Boolean::class,
                     'group'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
                     
                     'type'                      => 'int',
@@ -149,7 +149,7 @@ class UpgradeData extends \Nuvei\Payments\Setup\InstallSchema implements Upgrade
                 [
                     'label'     => \Nuvei\Payments\Model\Config::PAYMENT_PLANS_ATTR_LABEL,
                     'global'    => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
-                    'source'    => 'Nuvei\Payments\Model\Config\Source\PaymentPlansOptions',
+                    'source'    => \Nuvei\Payments\Model\Config\Source\PaymentPlansOptions::class,
                     'group'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
                     
                     'type'                      => 'int',
@@ -197,7 +197,7 @@ class UpgradeData extends \Nuvei\Payments\Setup\InstallSchema implements Upgrade
                 [
                     'label'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_RECURR_UNITS_LABEL,
                     'global'    => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
-                    'source'    => 'Nuvei\Payments\Model\Config\Source\SubscriptionUnits',
+                    'source'    => \Nuvei\Payments\Model\Config\Source\SubscriptionUnits::class,
                     'group'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
                     
                     'type'                      => 'text',
@@ -223,7 +223,7 @@ class UpgradeData extends \Nuvei\Payments\Setup\InstallSchema implements Upgrade
                     'label'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_RECURR_PERIOD_LABEL,
                     'global'    => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
                     'group'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
-                    'source'    => 'Nuvei\Payments\Model\Config\Source\SubscriptionPeriodFrom1',
+                    'source'    => \Nuvei\Payments\Model\Config\Source\SubscriptionPeriodFrom1::class,
                     
                     'type'                      => 'text',
                     'input'                     => 'select',
@@ -247,7 +247,7 @@ class UpgradeData extends \Nuvei\Payments\Setup\InstallSchema implements Upgrade
                 [
                     'label'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_TRIAL_UNITS_LABEL,
                     'global'    => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
-                    'source'    => 'Nuvei\Payments\Model\Config\Source\SubscriptionUnits',
+                    'source'    => \Nuvei\Payments\Model\Config\Source\SubscriptionUnits::class,
                     'group'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
                     
                     'type'                      => 'text',
@@ -273,7 +273,7 @@ class UpgradeData extends \Nuvei\Payments\Setup\InstallSchema implements Upgrade
                     'label'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_TRIAL_PERIOD_LABEL,
                     'global'    => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
                     'group'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
-                    'source'    => 'Nuvei\Payments\Model\Config\Source\SubscriptionPeriodFrom0',
+                    'source'    => \Nuvei\Payments\Model\Config\Source\SubscriptionPeriodFrom0::class,
                     
                     'type'                      => 'text',
                     'input'                     => 'select',
@@ -297,7 +297,7 @@ class UpgradeData extends \Nuvei\Payments\Setup\InstallSchema implements Upgrade
                 [
                     'label'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_END_AFTER_UNITS_LABEL,
                     'global'    => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
-                    'source'    => 'Nuvei\Payments\Model\Config\Source\SubscriptionUnits',
+                    'source'    => \Nuvei\Payments\Model\Config\Source\SubscriptionUnits::class,
                     'group'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
                     
                     'type'                      => 'text',

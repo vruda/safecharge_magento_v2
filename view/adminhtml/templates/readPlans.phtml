@@ -2,7 +2,7 @@
     require([
         'jquery'
     ], function($){
-        var nuveiPaymentPlans   = <?= $block->getPaymentPlans(); ?>;
+        var nuveiPaymentPlans   = <?= /* @noEscape */ $block->getPaymentPlans(); ?>;
         
         function nuveiGetUnitsPeriodData(incomingObj) {
             var data = {

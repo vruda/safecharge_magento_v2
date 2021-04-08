@@ -177,7 +177,7 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
             
             $valid_resp = $this->validateChecksum($params, $orderIncrementId);
             
-            if(true !== $valid_resp) {
+            if (true !== $valid_resp) {
                 $jsonOutput->setData($valid_resp);
                 return $jsonOutput;
             }
@@ -195,39 +195,39 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
             ];
             
             // some subscription DMNs does not have TransactionID
-            if(isset($params['TransactionID'])) {
+            if (isset($params['TransactionID'])) {
                 $this->curr_trans_info[Payment::TRANSACTION_ID] = $params['TransactionID'];
             }
-            if(isset($params['AuthCode'])) {
+            if (isset($params['AuthCode'])) {
                 $this->curr_trans_info[Payment::TRANSACTION_AUTH_CODE] = $params['AuthCode'];
             }
-            if(isset($params['Status'])) {
+            if (isset($params['Status'])) {
                 $this->curr_trans_info[Payment::TRANSACTION_STATUS] = $params['Status'];
             }
-            if(isset($params['transactionType'])) {
+            if (isset($params['transactionType'])) {
                 $this->curr_trans_info[Payment::TRANSACTION_TYPE] = $params['transactionType'];
             }
-            if(isset($params['userPaymentOptionId'])) {
+            if (isset($params['userPaymentOptionId'])) {
                 $this->curr_trans_info[Payment::TRANSACTION_UPO_ID] = $params['userPaymentOptionId'];
             }
-            if(isset($params['totalAmount'])) {
+            if (isset($params['totalAmount'])) {
                 $this->curr_trans_info[Payment::TRANSACTION_TOTAL_AMOUN] = $params['totalAmount'];
             }
-            if(isset($params['payment_method'])) {
+            if (isset($params['payment_method'])) {
                 $this->curr_trans_info[Payment::TRANSACTION_PAYMENT_METHOD] = $params['payment_method'];
             }
-            if(isset($params['customField2'])) {
+            if (isset($params['customField2'])) {
                 $this->curr_trans_info['start_subscr_data'] = $params['customField2'];
             }
             # prepare current transaction data for save END
             
             # in case this is Subscription confirm DMN
-            if(!empty($params['dmnType']) && 'subscription' == $params['dmnType']) {
+            if (!empty($params['dmnType']) && 'subscription' == $params['dmnType']) {
                 $this->getOrCreateOrder($params, $orderIncrementId, $jsonOutput);
 
                 $this->orderPayment = $this->order->getPayment();
 
-                if(empty($this->orderPayment)) {
+                if (empty($this->orderPayment)) {
                     $this->moduleConfig->createLog('Order Payment data is empty for order #' . $orderIncrementId);
                     $jsonOutput->setData('Order Payment data is empty for order #' . $orderIncrementId);
 
@@ -241,28 +241,27 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
 //                }
 //                if(!empty($params['customField2'])) {
 //                    $subs = json_decode($params['customField2'], true);
-//                    
+//
 //                }
 //
 //                $this->orderPayment->setAdditionalInformation(Payment::TRANSACTION_SUBS, $subs);
                 
-                if(!empty($params['subscriptionState'])) {
-                    if('active' == strtolower($params['subscriptionState'])) {
+                if (!empty($params['subscriptionState'])) {
+                    if ('active' == strtolower($params['subscriptionState'])) {
 //                        $this->order->setData('state', Order::STATE_PROCESSING);
 //                        $this->order->setStatus(Payment::SC_SUBSCRT_STARTED);
                         
                         $this->order->addStatusHistoryComment(
                             __('Subscription started.')
-//                            ,$this->sc_transaction_type
+                            //                            ,$this->sc_transaction_type
                         );
-                    }
-                    elseif('inactive' == strtolower($params['subscriptionState'])) {
+                    } elseif ('inactive' == strtolower($params['subscriptionState'])) {
 //                        $this->order->setData('state', Order::STATE_COMPLETE);
 //                        $this->order->setStatus(Payment::SC_SUBSCRT_ENDED);
                         
                         $this->order->addStatusHistoryComment(
                             __('Subscription ended.')
-//                            ,$this->sc_transaction_type
+                            //                            ,$this->sc_transaction_type
                         );
                     }
                 }
@@ -328,7 +327,7 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
             $tr_type_param = strtolower($params['transactionType']);
             
             # Subscription transaction DMN
-            if(!empty($params['dmnType'])
+            if (!empty($params['dmnType'])
                 && 'subscriptionPayment' == $params['dmnType']
                 && !empty($params['TransactionID'])
             ) {
@@ -487,10 +486,10 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
                     && !isset($params['dmnType'])
                 ) { // SALE and SETTLE
                     $this->processSaleAndSettleDMN(
-                        $params, 
-                        $order_total, 
-                        $dmn_total, 
-                        $tr_type_param, 
+                        $params,
+                        $order_total,
+                        $dmn_total,
+                        $tr_type_param,
                         $last_record
                     );
                 } elseif (in_array($tr_type_param, ['void', 'voidcredit'])) { // VOID
@@ -509,7 +508,6 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
                     if (!empty($invCollection)) {
                         foreach ($invCollection as $invoice) {
                             $this->moduleConfig->createLog($invoice->getId(), 'Invoice');
-                            
                             
                             if ($invoice->getId() == $this->curr_trans_info['invoice_id']) {
                                 $this->moduleConfig->createLog($invoice->getId(), 'Invoice to be Canceld');
@@ -547,7 +545,7 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
                     . $params['transactionType'] . '</b> ';
 
                 $this->order->addStatusHistoryComment(
-                    $msg_transaction 
+                    $msg_transaction
                     . __("request, response status is") . ' <b>' . $params['Status'] . '</b>.<br/>'
                     . __('Transaction ID: ') . $params['TransactionID'] .', '
                     . __('Related Transaction ID: ') . $params['relatedTransactionId'] .', '
@@ -584,19 +582,19 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
             $jsonOutput->setData('DMN process end for order #' . $orderIncrementId);
             
             # start Subscription plans if we need to
-            if($this->start_subscr) {
+            if ($this->start_subscr) {
                 $customField2       = json_decode($params['customField2'], true);
                 $start_subsc_data   = [];
                 
-                if(!empty($customField2) && is_array($customField2)) {
+                if (!empty($customField2) && is_array($customField2)) {
                     $start_subsc_data = $customField2;
-                } elseif (!empty($last_record[Payment::TRANSACTION_UPO_ID]) 
+                } elseif (!empty($last_record[Payment::TRANSACTION_UPO_ID])
                     && is_numeric($last_record[Payment::TRANSACTION_UPO_ID])
                 ) {
                     $start_subsc_data = $last_record['start_subscr_data'];
                 }
                 
-                if(!empty($start_subsc_data)) {
+                if (!empty($start_subsc_data)) {
                     foreach ($start_subsc_data as $item_id => $subsc_data) {
                         $subsc_data['userPaymentOptionId'] = $params['userPaymentOptionId'];
                         $subsc_data['userTokenId']         = $params['email'];
@@ -607,10 +605,10 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
                         $resp = $this->createSubscription($subsc_data, $orderIncrementId);
                         
                         // add note to the Order
-                        if('success' == strtolower($resp['status'])) {
+                        if ('success' == strtolower($resp['status'])) {
                             $this->order->addStatusHistoryComment(
-                                __("<b>Subscription</b> was created. Subscription ID " 
-                                    . $resp['subscriptionId']). '. ' 
+                                __("<b>Subscription</b> was created. Subscription ID "
+                                    . $resp['subscriptionId']). '. '
                                     . __('Recurring amount: ') . $params['currency'] . ' '
                                     . $subsc_data['recurringAmount'],
                                 $this->sc_transaction_type
@@ -623,7 +621,7 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
 //                                . json_encode($subsc_data);
                             $msg = __("<b>Error</b> when try to create Subscription by this Order. ");
 
-                            if(!empty($resp['reason'])) {
+                            if (!empty($resp['reason'])) {
                                 $msg .= '<br/>' . __('Reason: ') . $resp['reason'] . '.';
                             }
 
@@ -639,7 +637,7 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
             $msg = $e->getMessage();
 
             $this->moduleConfig->createLog(
-                $msg . "\n\r" . $e->getTraceAsString(), 
+                $msg . "\n\r" . $e->getTraceAsString(),
                 'DMN Excception:'
             );
             
@@ -710,7 +708,7 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
         $dmn_inv_id                 = $this->httpRequest->getParam('invoice_id');
         $is_cpanel_settle           = false;
         
-        if(!empty($params["merchant_unique_id"])
+        if (!empty($params["merchant_unique_id"])
             && $params["merchant_unique_id"] != $params["order"]
 //            && (float) $params['totalAmount'] < $inv_amount
         ) {
@@ -718,10 +716,9 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
         }
 
         // set Start Subscription flag
-        if('sale' == $tr_type_param && !empty($params['customField2'])) {
+        if ('sale' == $tr_type_param && !empty($params['customField2'])) {
             $this->start_subscr = true;
-        }
-        elseif ('settle' == $tr_type_param 
+        } elseif ('settle' == $tr_type_param
             && !empty($last_tr_record)
             && !empty($last_tr_record['start_subscr_data'])
         ) {
@@ -816,7 +813,7 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
                 ->setState(Invoice::STATE_PAID);
             
             // in case of Cpanel Partial Settle
-            if($is_cpanel_settle && (float) $params['totalAmount'] < $inv_amount) {
+            if ($is_cpanel_settle && (float) $params['totalAmount'] < $inv_amount) {
                 $inv_amount = round((float) $params['totalAmount'], 2);
             }
             
@@ -894,7 +891,7 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
     
     /**
      * Place order.
-     * 
+     *
      * @param array $params
      */
     private function placeOrder($params)
@@ -966,10 +963,10 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
     
     /**
      * Function validateChecksum
-     * 
+     *
      * @param array $params
      * @param string $orderIncrementId
-     * 
+     *
      * @return mixed
      */
     private function validateChecksum($params, $orderIncrementId)
@@ -1051,7 +1048,7 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
      *
      * @param array $subsc_data - one array to rule them all
      * @param int $order_id - this is increment ID !!!
-     * 
+     *
      * @return type
      */
     private function createSubscription($subsc_data, $order_id)

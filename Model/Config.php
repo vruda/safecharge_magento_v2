@@ -271,7 +271,7 @@ class Config
                 );
             }
         } catch (exception $e) {
-
+            return;
         }
     }
     
@@ -865,14 +865,14 @@ class Config
     
     /**
      * Function getProductPlanData
-     * 
+     *
      * Search for the product with Payment Plan in the quote
-     * 
+     *
      * @return bool
      */
     public function getProductPlanData()
     {
-        if($this->checkoutSession->getQuote()->getItemsCount() == 0) {
+        if ($this->checkoutSession->getQuote()->getItemsCount() == 0) {
             return [];
         }
         
@@ -885,7 +885,7 @@ class Config
             $this->createLog($options, 'getProductPlanData $options');
             
             // 1.1 in case of configurable product
-            if(!empty($options['info_buyRequest']) 
+            if (!empty($options['info_buyRequest'])
                 && is_array($options['info_buyRequest'])
                 && !empty($options['info_buyRequest']['selected_configurable_option'])
             ) {
@@ -904,8 +904,9 @@ class Config
                 $plan_data[$options['info_buyRequest']['selected_configurable_option']] = [
                     'planId'            => $product->getCustomAttribute(self::PAYMENT_PLANS_ATTR_NAME)->getValue(),
                     'initialAmount'     => 0,
-                    'recurringAmount'   => number_format($product->getCustomAttribute
-                        (self::PAYMENT_SUBS_REC_AMOUNT)->getValue(), 2, '.', ''),
+                    'recurringAmount'   => number_format($product->getCustomAttribute(
+                        self::PAYMENT_SUBS_REC_AMOUNT
+                    )->getValue(), 2, '.', ''),
                     
                     'recurringPeriod'   => [strtolower($recurr_unit)    => $recurr_period],
                     'startAfter'        => [strtolower($trial_unit)     => $trial_period],
@@ -953,7 +954,7 @@ class Config
                 'price'     => round((float) $item->getPrice(), 2),
             ];
             
-            if(!empty($payment_enabled)
+            if (!empty($payment_enabled)
                 && is_numeric($payment_enabled)
                 && $payment_enabled == 1
             ) {

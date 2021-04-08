@@ -96,7 +96,7 @@ class Cancel extends AbstractPayment implements RequestInterface
                 if (strtolower($trans[Payment::TRANSACTION_STATUS]) == 'approved'
                     && in_array(strtolower($trans[Payment::TRANSACTION_TYPE]), ['auth', 'settle', 'sale'])
                 ) {
-                    if(0 == $key) {
+                    if (0 == $key) {
                         $last_voidable = $trans;
                     }
                     
@@ -104,7 +104,7 @@ class Cancel extends AbstractPayment implements RequestInterface
                     if (!empty($trans['invoice_id'])
                         && !empty($inv_id)
                         && $trans['invoice_id'] == $inv_id
-                    ) { 
+                    ) {
                         $trans_to_void_data = $trans;
                         break;
                     }
@@ -116,7 +116,7 @@ class Cancel extends AbstractPayment implements RequestInterface
          * there was not settle Transaction, or we can not find transaction
          * based on Invoice ID. In this case use last voidable transaction.
          */
-        if(empty($trans_to_void_data)) {
+        if (empty($trans_to_void_data)) {
             $trans_to_void_data = $last_voidable;
         }
         
@@ -159,10 +159,10 @@ class Cancel extends AbstractPayment implements RequestInterface
             'merchant_unique_id'    => $order->getIncrementId(),
             'urlDetails'            => [
                 'notificationUrl' => $this->config->getCallbackDmnUrl(
-                                        $order->getIncrementId(),
-                                        $order->getStoreId(),
-                                        ['invoice_id' => $inv_id]
-                                    ),
+                    $order->getIncrementId(),
+                    $order->getStoreId(),
+                    ['invoice_id' => $inv_id]
+                ),
             ],
         ];
 

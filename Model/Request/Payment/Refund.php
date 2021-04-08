@@ -102,7 +102,7 @@ class Refund extends AbstractPayment implements RequestInterface
                     && in_array(strtolower($trans[Payment::TRANSACTION_TYPE]), ['sale', 'settle'])
                 ) {
                     // sale
-                    if(strtolower($trans[Payment::TRANSACTION_TYPE]) == 'sale') {
+                    if (strtolower($trans[Payment::TRANSACTION_TYPE]) == 'sale') {
                         $trans_to_refund_data = $trans;
                         break;
                     } elseif (!empty($trans['invoice_id'])

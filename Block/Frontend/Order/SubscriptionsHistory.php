@@ -97,7 +97,7 @@ class SubscriptionsHistory extends \Magento\Sales\Block\Order\History
                 ->join(
                     ["sop" => "sales_order_payment"],
                     'main_table.entity_id = sop.parent_id',
-                    array('additional_information')
+                    ['additional_information']
                 )
                 ->where('sop.additional_information LIKE \'%"is_active_subs_order":1%\'');
         }

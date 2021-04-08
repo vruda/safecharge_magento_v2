@@ -35,14 +35,14 @@ class GetPlansList extends AbstractRequest implements RequestInterface
         $this->config->createLog($plans, 'Get Plans response');
         
         // there are no active plans, we must create at least one active
-        if(!isset($plans['plans']) || !isset($plans['total']) || 0 == $plans['total']) {
+        if (!isset($plans['plans']) || !isset($plans['total']) || 0 == $plans['total']) {
             $create_plan_request = $this->requestFactory
                 ->create(AbstractRequest::CREATE_MERCHANT_PAYMENT_PLAN);
             
             $resp = $create_plan_request->process();
             
             // on success try to get the new plan
-            if(!empty($resp['planId'])) {
+            if (!empty($resp['planId'])) {
                 $plans = $this->sendRequest(true);
             }
         }

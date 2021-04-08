@@ -8,7 +8,7 @@ class SubscriptionPeriodFrom0 extends \Magento\Eav\Model\Entity\Attribute\Source
     {
         $options = [];
         
-        for($i = 0; $i <= 31; $i++) {
+        for ($i = 0; $i <= 31; $i++) {
             $options[] = [
                 'label' => (string) $i,
                 'value' => (string) $i

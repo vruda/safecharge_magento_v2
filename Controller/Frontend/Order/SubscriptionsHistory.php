@@ -2,15 +2,12 @@
 
 namespace Nuvei\Payments\Controller\Frontend\Order;
 
-//use Magento\Sales\Controller\OrderInterface;
-//use Magento\Framework\App\Action\HttpGetActionInterface;
-
 use Magento\Framework\App\Request\InvalidRequestException;
 use Magento\Framework\App\RequestInterface;
 use Nuvei\Payments\Model\Config;
+use Magento\Framework\App\CsrfAwareActionInterface;
 
-//class SubscriptionsHistory extends \Magento\Framework\App\Action\Action implements OrderInterface, HttpGetActionInterface
-class SubscriptionsHistory extends \Magento\Framework\App\Action\Action implements \Magento\Framework\App\CsrfAwareActionInterface
+class SubscriptionsHistory extends \Magento\Framework\App\Action\Action implements CsrfAwareActionInterface
 {
     protected $resultPageFactory;
     
@@ -72,7 +69,7 @@ class SubscriptionsHistory extends \Magento\Framework\App\Action\Action implemen
      */
     public function execute()
     {
-        if($this->httpRequest->isAjax()) {
+        if ($this->httpRequest->isAjax()) {
             $data = $this->getProductDetails();
             
             $jsonOutput = $this->jsonResultFactory->create();
@@ -100,8 +97,8 @@ class SubscriptionsHistory extends \Magento\Framework\App\Action\Action implemen
 
             $this->config->createLog($params, 'SubscriptionsHistory $params');
 
-            if(empty($params) 
-                || empty($params['prodId']) 
+            if (empty($params)
+                || empty($params['prodId'])
                 || !is_numeric($params['prodId'])
                 || empty($params['prodOptions'])
                 || !is_array($params['prodOptions'])
@@ -121,25 +118,24 @@ class SubscriptionsHistory extends \Magento\Framework\App\Action\Action implemen
                 'years'     => __('years'),
             ];
             
-            // 
+            //
             $rec_len    = '';
             $period     = $usedChild->getCustomAttribute(Config::PAYMENT_SUBS_END_AFTER_PERIOD);
             $unit       = $usedChild->getCustomAttribute(Config::PAYMENT_SUBS_END_AFTER_UNITS);
             
-            if(!empty($period)) {
+            if (!empty($period)) {
                 $period = $period->getValue();
             }
-            if(!empty($unit)) {
+            if (!empty($unit)) {
                 $unit = $unit->getValue();
             }
             
-            if(is_numeric($period)) {
+            if (is_numeric($period)) {
                 $rec_len    = $period . ' ';
                 
-                if($period > 1) {
+                if ($period > 1) {
                     $rec_len .= $units[$unit . 's'];
-                }
-                else {
+                } else {
                     $rec_len .= $units[$unit];
                 }
             }
@@ -150,20 +146,19 @@ class SubscriptionsHistory extends \Magento\Framework\App\Action\Action implemen
             $period     = $usedChild->getCustomAttribute(Config::PAYMENT_SUBS_RECURR_PERIOD);
             $unit       = $usedChild->getCustomAttribute(Config::PAYMENT_SUBS_RECURR_UNITS);
             
-            if(!empty($period)) {
+            if (!empty($period)) {
                 $period = $period->getValue();
             }
-            if(!empty($unit)) {
+            if (!empty($unit)) {
                 $unit = $unit->getValue();
             }
             
-            if(is_numeric($period)) {
+            if (is_numeric($period)) {
                 $rec_period = __('Every') . ' ' . $period . ' ';
                 
-                if($period > 1) {
+                if ($period > 1) {
                     $rec_period .= $units[$unit . 's'];
-                }
-                else {
+                } else {
                     $rec_period .= $units[$unit];
                 }
             }
@@ -174,20 +169,19 @@ class SubscriptionsHistory extends \Magento\Framework\App\Action\Action implemen
             $period         = $period = $usedChild->getCustomAttribute(Config::PAYMENT_SUBS_TRIAL_PERIOD);
             $unit           = $usedChild->getCustomAttribute(Config::PAYMENT_SUBS_TRIAL_UNITS);
             
-            if(!empty($period)) {
+            if (!empty($period)) {
                 $period = $period->getValue();
             }
-            if(!empty($unit)) {
+            if (!empty($unit)) {
                 $unit = $unit->getValue();
             }
             
-            if(is_numeric($period) && $period > 0) {
+            if (is_numeric($period) && $period > 0) {
                 $trial_period = $period . ' ';
                 
-                if($period > 1) {
+                if ($period > 1) {
                     $trial_period .= $units[$unit . 's'];
-                }
-                else {
+                } else {
                     $trial_period .= $units[$unit];
                 }
             }
@@ -198,13 +192,12 @@ class SubscriptionsHistory extends \Magento\Framework\App\Action\Action implemen
                 'rec_period'    => $rec_period,
                 'trial_period'  => $trial_period,
                 'rec_amount'    => $this->helper->currency(
-                    $usedChild->getCustomAttribute(Config::PAYMENT_SUBS_REC_AMOUNT)->getValue(), 
-                    true, 
+                    $usedChild->getCustomAttribute(Config::PAYMENT_SUBS_REC_AMOUNT)->getValue(),
+                    true,
                     false
                 ),
             ];
-        }
-        catch(Exception $e) {
+        } catch (Exception $e) {
             $this->config->createLog($e->getMessage(), 'SubscriptionsHistory getProductDetails() Exception:');
             return [];
         }

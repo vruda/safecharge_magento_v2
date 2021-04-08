@@ -181,13 +181,14 @@ class UpdateOrder extends AbstractRequest implements RequestInterface
         $params['userDetails']      = $params['billingAddress'];
         $params['sessionToken']     = $this->orderData['sessionToken'];
         $params['orderId']          = isset($this->orderData['orderId']) ? $this->orderData['orderId'] : '';
-        $params['clientRequestId']  = isset($this->orderData['clientRequestId']) ? $this->orderData['clientRequestId'] : '';
+        $params['clientRequestId']  = isset($this->orderData['clientRequestId'])
+            ? $this->orderData['clientRequestId'] : '';
         
         // for rebilling
-        if(!empty($this->config->getProductPlanData())) {
+        if (!empty($this->config->getProductPlanData())) {
             $params['isRebilling'] = 0;
             $params['paymentOption']['card']['threeD']['rebillFrequency']   = 1;
-            $params['paymentOption']['card']['threeD']['rebillExpiry']      
+            $params['paymentOption']['card']['threeD']['rebillExpiry']
                 = date('Ymd', strtotime("+10 years"));
         } else { // for normal transaction
             $params['isRebilling'] = 1;

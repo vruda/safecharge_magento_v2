@@ -23,7 +23,7 @@ class PreventAddToCart
         \Magento\Framework\Message\ManagerInterface $messanger,
         \Magento\Catalog\Model\Product $product_obj,
         \Magento\Catalog\Api\ProductRepositoryInterface $productRepository,
-        \Magento\ConfigurableProduct\Model\Product\Type\Configurable $productTypeInstance 
+        \Magento\ConfigurableProduct\Model\Product\Type\Configurable $productTypeInstance
     ) {
         $this->config               = $config;
         $this->request              = $request;
@@ -37,7 +37,7 @@ class PreventAddToCart
     {
         try {
             # 1. first search for SC plan in the items in the cart
-            if(!empty($this->config->getProductPlanData())) {
+            if (!empty($this->config->getProductPlanData())) {
                 throw new \Magento\Framework\Exception\LocalizedException(
                     __('You can not add this product to product with a Payment Plan.')
                 );
@@ -52,12 +52,10 @@ class PreventAddToCart
             # 2. then search for SC plan in the incoming item
             if ($cartItemsCount > 0) {
                 // 2.1 when we have configurable product with option attribute
-                if(!empty($requestInfo['selected_configurable_option'])) {
+                if (!empty($requestInfo['selected_configurable_option'])) {
                     $payment_enabled = $productInfo
                         ->load($requestInfo['selected_configurable_option'])
                         ->getData(\Nuvei\Payments\Model\Config::PAYMENT_SUBS_ENABLE);
-                    
-                    
                 } else { // 2.2 when we have simple peoduct without options
                     $payment_enabled = $productInfo->getData(\Nuvei\Payments\Model\Config::PAYMENT_SUBS_ENABLE);
                 }

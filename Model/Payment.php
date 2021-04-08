@@ -334,7 +334,7 @@ class Payment extends Cc implements TransparentInterface
     public function capture(InfoInterface $payment, $amount)
     {
         parent::capture($payment, $amount);
-        
+
 //        $this->processPayment($payment, $amount);
 
         return $this;
@@ -344,7 +344,7 @@ class Payment extends Cc implements TransparentInterface
     {
         $authCode                = '';
         $ord_trans_addit_info    = $payment->getAdditionalInformation(self::ORDER_TRANSACTIONS_DATA);
-        
+
         if (is_array($ord_trans_addit_info) && !empty($ord_trans_addit_info)) {
             foreach ($ord_trans_addit_info as $trans) {
                 if (strtolower($trans[self::TRANSACTION_TYPE]) == 'auth'
@@ -355,12 +355,12 @@ class Payment extends Cc implements TransparentInterface
                 }
             }
         }
-        
+
         if (empty($authCode)) {
             $payment->setIsTransactionPending(true); // TODO do we need this
             return $this;
         }
-        
+
         $method = AbstractRequest::PAYMENT_SETTLE_METHOD;
 
         $request = $this->paymentRequestFactory->create(
@@ -368,9 +368,9 @@ class Payment extends Cc implements TransparentInterface
             $payment,
             $amount
         );
-        
+
         $response = $request->process();
-        
+
         if ($authCode === null) {
             $this->checkoutSession->setRedirectUrl($response->getRedirectUrl());
         }

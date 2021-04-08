@@ -101,7 +101,7 @@ class AfterSave implements ObserverInterface
             }
             
             foreach ($ord_trans_addit_info as $trans) {
-                if(strtolower($trans[Payment::TRANSACTION_STATUS]) == 'approved') {
+                if (strtolower($trans[Payment::TRANSACTION_STATUS]) == 'approved') {
                     if (strtolower($trans[Payment::TRANSACTION_TYPE]) == 'sale') {
                         $this->config->createLog('After Save Invoice observer - Sale');
                         return $this;

@@ -61,7 +61,7 @@ class Register implements ObserverInterface
         $ord_trans_addit_info = $payment->getAdditionalInformation(Payment::ORDER_TRANSACTIONS_DATA);
         
         // in case of Sale
-        if(!is_array($ord_trans_addit_info) || count($ord_trans_addit_info) < 1) {
+        if (!is_array($ord_trans_addit_info) || count($ord_trans_addit_info) < 1) {
             $inv_state  = Invoice::STATE_PAID;
         }
         
