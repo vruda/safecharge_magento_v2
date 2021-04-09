@@ -75,7 +75,6 @@ class GetMerchantPaymentMethods extends AbstractResponse implements ResponseInte
             }
             
             // when we have product with a Payment plan, skip all APMs
-            /*
             if(
                 $this->config->getNuveiUseCcOnly()
                 && !empty($method["paymentMethod"])
@@ -83,7 +82,6 @@ class GetMerchantPaymentMethods extends AbstractResponse implements ResponseInte
             ) {
                 continue;
             }
-             */
             
             $default_dnames    = [];
             $locale_dnames  = [];

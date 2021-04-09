@@ -95,6 +95,19 @@
 					<source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
 					<config_path>payment/nuvei/use_upos</config_path>
 				</field>
+				
+				<field id="allow_guests_subscr"
+					   translate="label"
+					   type="select"
+					   sortOrder="47"
+					   showInDefault="1"
+					   showInWebsite="1"
+					   showInStore="0" 
+					   canRestore="1">
+					<label>Allow Subscriptions for Guests</label>
+					<source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+					<config_path>payment/nuvei/allow_guests_subscr</config_path>
+				</field>
 
 				<field id="merchant_id"
 					   translate="label"

@@ -458,10 +458,10 @@ define(
 					payParams.paymentOption		= cardNumber;
 					payParams.cardHolderName	= document.getElementById('nuvei_cc_owner').value;
 					
-					if (
-						window.checkoutConfig.payment[self.getCode()].useUPOs == 1
-						&& ( self.typeOfChosenPayMethod() == 'cc_card' || self.typeOfChosenPayMethod() == 'apm' )
-						&& $('body').find('#nuvei_save_upo_cont input').val() == 1
+					if (1 == window.checkoutConfig.payment[self.getCode()].submitUserTokenForGuest
+						|| ( 1 == window.checkoutConfig.payment[self.getCode()].useUPOs
+							&& ( self.typeOfChosenPayMethod() == 'cc_card' || self.typeOfChosenPayMethod() == 'apm' )
+							&& $('body').find('#nuvei_save_upo_cont input').val() == 1 )
 					) {
 						payParams.userTokenId = window.checkoutConfig.payment[self.getCode()].userTokenId;
 					}

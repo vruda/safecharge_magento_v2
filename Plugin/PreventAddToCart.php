@@ -46,10 +46,11 @@ class PreventAddToCart
             $this->config->createLog($requestInfo, 'beforeAddProduct() $requestInfo');
             
             $cartItemsCount = $subject->getQuote()->getItemsCount();
-            $error_msg_1    = 'You can not add this product to product with a Payment Plan.';
-            $error_msg_2    = 'You can not add a product with Payment Plan to another products.';
+            $error_msg_1    = __('You can not add this product to product with a Payment Plan.');
+            $error_msg_2    = __('You can not add a product with Payment Plan to another products.');
+            $error_msg_3    = __('Only Registered users can purchase Products with Plans.');
             
-            # 2. then search for SC plan in the incoming item
+            # 2. then search for SC plan in the incoming item when there are products in the cart
             if ($cartItemsCount > 0) {
                 // 2.1 when we have configurable product with option attribute
                 if (!empty($requestInfo['selected_configurable_option'])) {
@@ -66,6 +67,8 @@ class PreventAddToCart
                 ) {
                     throw new \Magento\Framework\Exception\LocalizedException(__($error_msg_2));
                 }
+            } elseif(!$this->config->allowGuestsSubscr()) { // when cart is empty
+                throw new \Magento\Framework\Exception\LocalizedException(__($error_msg_3));
             }
         } catch (Exception $e) {
             $this->config->createLog($e->getMessage(), 'Exception:');

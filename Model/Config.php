@@ -507,6 +507,15 @@ class Config
         
         return false;
     }
+    
+    public function allowGuestsSubscr()
+    {
+        if(!$this->customerSession->isLoggedIn() && 0 == $this->getConfigValue('allow_guests_subscr')) {
+            return false;
+        }
+        
+        return true;
+    }
 
     /**
      * Return bool value depends of that if payment method debug mode

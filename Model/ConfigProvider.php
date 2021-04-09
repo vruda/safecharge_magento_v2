@@ -123,6 +123,8 @@ class ConfigProvider extends CcGenericConfigProvider
                     'checkoutLogoUrl'               => $this->assetRepo
                         ->getUrl("Nuvei_Payments::images/nuvei.png"),
                     'useUPOs'                       => $this->moduleConfig->canUseUpos(),
+                    'submitUserTokenForGuest'       => ($this->moduleConfig->allowGuestsSubscr() 
+                        && !empty($this->moduleConfig->getProductPlanData())) ? 1 : 0,
                     // we need this for the WebSDK
                     'merchantSiteId'                => $this->moduleConfig->getMerchantSiteId(),
                     'merchantId'                    => $this->moduleConfig->getMerchantId(),
@@ -134,7 +136,7 @@ class ConfigProvider extends CcGenericConfigProvider
                 ],
             ],
         ];
-
+        
         return $config;
     }
 }

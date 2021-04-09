@@ -4,6 +4,7 @@
 
 ### 3.0.2.x
 ```
+	* Added an option to allow Guest users to purchase products with plans.
 	* In product preview page was added a table with Nuvei Subscriprion Details, based on selected product configuration.
 	* Replaced SubscriptionPeriod class (returns array in range [0, 100]) with two new - SubscriptionPeriodFrom0 (returns array in range [0, 31]) and SubscriptionPeriodFrom1 (returns array in range [1, 60]).
 	* In Store, My Account menu, is added menu to show only the Orders with approved Nuvei Subscription.
