@@ -166,12 +166,12 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
             } elseif (!empty($params['dmnType'])
                 && in_array($params['dmnType'], ['subscriptionPayment', 'subscription'])
                 && !empty($params['clientRequestId'])
-                && false!== strpos ($params['clientRequestId'], '_')
+                && false!== strpos($params['clientRequestId'], '_')
             ) {
                 $orderIncrementId       = 0;
                 $clientRequestId_arr    = explode('_', $params["clientRequestId"]);
                 
-                if(!empty($clientRequestId_arr[1]) && is_numeric($clientRequestId_arr[1])) {
+                if (!empty($clientRequestId_arr[1]) && is_numeric($clientRequestId_arr[1])) {
                     $orderIncrementId = $clientRequestId_arr[1];
                 }
             } else {
@@ -253,11 +253,11 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
                     } elseif ('inactive' == strtolower($params['subscriptionState'])) {
                         $subscr_msg = __('Subscription is Inactive. ');
                         
-                        if(!empty($params['subscriptionId'])) {
+                        if (!empty($params['subscriptionId'])) {
                             $subscr_msg .= __('Subscription ID: ') . $params['subscriptionId'];
                         }
                         
-                        if(!empty($params['subscriptionId'])) {
+                        if (!empty($params['subscriptionId'])) {
                             $subscr_msg .= __(', Plan ID: ') . $params['planId'];
                         }
                         

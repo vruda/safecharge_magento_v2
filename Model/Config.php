@@ -510,7 +510,7 @@ class Config
     
     public function allowGuestsSubscr()
     {
-        if(!$this->customerSession->isLoggedIn() && 0 == $this->getConfigValue('allow_guests_subscr')) {
+        if (!$this->customerSession->isLoggedIn() && 0 == $this->getConfigValue('allow_guests_subscr')) {
             return false;
         }
         

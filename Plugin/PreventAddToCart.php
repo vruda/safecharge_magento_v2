@@ -67,7 +67,7 @@ class PreventAddToCart
                 ) {
                     throw new \Magento\Framework\Exception\LocalizedException(__($error_msg_2));
                 }
-            } elseif(!$this->config->allowGuestsSubscr()) { // when cart is empty
+            } elseif (!$this->config->allowGuestsSubscr()) { // when cart is empty
                 throw new \Magento\Framework\Exception\LocalizedException(__($error_msg_3));
             }
         } catch (Exception $e) {
