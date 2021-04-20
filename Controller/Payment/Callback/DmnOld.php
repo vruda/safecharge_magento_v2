@@ -553,10 +553,10 @@ class DmnOld extends \Magento\Framework\App\Action\Action
                 }
                 
                 // we create as many Subscriptions as the Product quantity is
-                if(!empty($customField5) && is_array($customField5)) {
+                if (!empty($customField5) && is_array($customField5)) {
                     $customField5_curr = current($customField5);
                     
-                    if(isset($customField5_curr['quantity']) && is_numeric($customField5_curr['quantity'])) {
+                    if (isset($customField5_curr['quantity']) && is_numeric($customField5_curr['quantity'])) {
                         $subscr_count = (int) $customField5_curr['quantity'];
                     }
                 } else {
@@ -564,7 +564,7 @@ class DmnOld extends \Magento\Framework\App\Action\Action
                     
                     foreach ($items as $item) {
                         $subscr_count += $item->getQtyOrdered();
-                    } 
+                    }
                 }
                 
                 if (!empty($subsc_data) && $subscr_count > 0) {
@@ -598,7 +598,7 @@ class DmnOld extends \Magento\Framework\App\Action\Action
                         $this->orderResourceModel->save($this->order);
                         
                         $subscr_count--;
-                    } while($subscr_count > 0);
+                    } while ($subscr_count > 0);
                 }
             }
             # start Subscription plans if we need to END
