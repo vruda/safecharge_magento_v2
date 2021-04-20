@@ -534,20 +534,42 @@ class DmnOld extends \Magento\Framework\App\Action\Action
             $jsonOutput->setData('DMN process end for order #' . $orderIncrementId);
             
             # start Subscription plans if we need to
+            $this->moduleConfig->createLog($this->start_subscr, '$this->start_subscr');
+            
             if ($this->start_subscr) {
-                $customField2       = json_decode($params['customField2'], true);
-                $start_subsc_data   = [];
+                $customField2   = json_decode($params['customField2'], true);
+                $customField5   = json_decode($params['customField5'], true);
+                $subsc_data     = [];
+                $subscr_count   = 0;
                 
+                // we allow only one Product in the Order to be with Payment Plan,
+                // so the list with the products must be with length = 1
                 if (!empty($customField2) && is_array($customField2)) {
-                    $start_subsc_data = $customField2;
+                    $subsc_data = current($customField2);
                 } elseif (!empty($last_record[Payment::TRANSACTION_UPO_ID])
                     && is_numeric($last_record[Payment::TRANSACTION_UPO_ID])
                 ) {
-                    $start_subsc_data = $last_record['start_subscr_data'];
+                    $subsc_data = current($last_record['start_subscr_data']);
                 }
                 
-                if (!empty($start_subsc_data)) {
-                    foreach ($start_subsc_data as $item_id => $subsc_data) {
+                // we create as many Subscriptions as the Product quantity is
+                if(!empty($customField5) && is_array($customField5)) {
+                    $customField5_curr = current($customField5);
+                    
+                    if(isset($customField5_curr['quantity']) && is_numeric($customField5_curr['quantity'])) {
+                        $subscr_count = (int) $customField5_curr['quantity'];
+                    }
+                } else {
+                    $items = $this->order->getAllItems();
+                    
+                    foreach ($items as $item) {
+                        $subscr_count += $item->getQtyOrdered();
+                    } 
+                }
+                
+                if (!empty($subsc_data) && $subscr_count > 0) {
+                    // create subscriptions for each of the Products
+                    do {
                         $subsc_data['userPaymentOptionId'] = $params['userPaymentOptionId'];
                         $subsc_data['userTokenId']         = $params['email'];
                         $subsc_data['currency']            = $params['currency'];
@@ -574,7 +596,9 @@ class DmnOld extends \Magento\Framework\App\Action\Action
                         }
                         
                         $this->orderResourceModel->save($this->order);
-                    }
+                        
+                        $subscr_count--;
+                    } while($subscr_count > 0);
                 }
             }
             # start Subscription plans if we need to END
