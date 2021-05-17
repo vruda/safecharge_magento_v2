@@ -534,7 +534,7 @@ class DmnOld extends \Magento\Framework\App\Action\Action
             $jsonOutput->setData('DMN process end for order #' . $orderIncrementId);
             
             # start Subscription plans if we need to
-            $this->moduleConfig->createLog($this->start_subscr, '$this->start_subscr');
+            $this->moduleConfig->createLog($this->start_subscr, 'start_subscr');
             
             if ($this->start_subscr) {
                 $customField2   = json_decode($params['customField2'], true);

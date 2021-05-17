@@ -60,6 +60,7 @@ class UpgradeData extends \Nuvei\Payments\Setup\InstallSchema implements Upgrade
          * 'user_defined'   => true
          * 'visible'        => true,
          */
+        
         // try to add main plugin table if not exists, and remove old plugin table if exists
         $this->install($this->install, $context);
         
@@ -115,7 +116,8 @@ class UpgradeData extends \Nuvei\Payments\Setup\InstallSchema implements Upgrade
         }
          */
         
-        if (version_compare($context->getVersion(), '3.0.2', '<')) {
+        //if (version_compare($context->getVersion(), '3.0.2', '<')) {
+            # Admin > Product > Nuvei Subscription details
             // Enable subscription
             $eavSetup->addAttribute(
                 \Magento\Catalog\Model\Product::ENTITY,
@@ -132,13 +134,12 @@ class UpgradeData extends \Nuvei\Payments\Setup\InstallSchema implements Upgrade
                     'required'                  => false,
                     'user_defined'              => true,
                     'default'                   => '',
-                    'searchable'                => true,
-                    'filterable'                => true,
+                    'searchable'                => false,
+                    'filterable'                => false,
                     'visible_on_front'          => false,
                     'used_in_product_listing'   => true,
                     'sort_order'                => 10,
                     'class'                     => 'sc_enable_subscr',
-                    'note'                      => 'note',
                 ]
             );
 
@@ -156,10 +157,10 @@ class UpgradeData extends \Nuvei\Payments\Setup\InstallSchema implements Upgrade
                     'input'                     => 'select',
                     'visible'                   => true,
                     'required'                  => false,
-                    'user_defined'              => true,
+                    'user_defined'              => false,
                     'default'                   => '',
-                    'searchable'                => true,
-                    'filterable'                => true,
+                    'searchable'                => false,
+                    'filterable'                => false,
                     'visible_on_front'          => false,
                     'used_in_product_listing'   => true,
                     'option'                    => ['values' => []],
@@ -182,8 +183,8 @@ class UpgradeData extends \Nuvei\Payments\Setup\InstallSchema implements Upgrade
                     'required'                  => false,
                     'user_defined'              => true,
                     'default'                   => '0',
-                    'searchable'                => true,
-                    'filterable'                => true,
+                    'searchable'                => false,
+                    'filterable'                => false,
                     'visible_on_front'          => false,
                     'used_in_product_listing'   => true,
                     'sort_order'                => 40,
@@ -204,7 +205,7 @@ class UpgradeData extends \Nuvei\Payments\Setup\InstallSchema implements Upgrade
                     'input'                     => 'select',
                     'visible'                   => true,
                     'required'                  => false,
-                    'user_defined'              => true,
+                    'user_defined'              => false,
                     'default'                   => 'day',
                     'searchable'                => false,
                     'filterable'                => false,
@@ -223,10 +224,9 @@ class UpgradeData extends \Nuvei\Payments\Setup\InstallSchema implements Upgrade
                     'label'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_RECURR_PERIOD_LABEL,
                     'global'    => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
                     'group'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
-                    'source'    => \Nuvei\Payments\Model\Config\Source\SubscriptionPeriodFrom1::class,
                     
-                    'type'                      => 'text',
-                    'input'                     => 'select',
+                    'type'                      => 'int',
+                    'input'                     => 'text',
                     'visible'                   => true,
                     'required'                  => false,
                     'user_defined'              => true,
@@ -236,7 +236,7 @@ class UpgradeData extends \Nuvei\Payments\Setup\InstallSchema implements Upgrade
                     'visible_on_front'          => false,
                     'used_in_product_listing'   => false,
                     'sort_order'                => 60,
-                    'option'                    => ['values' => []],
+                    'note'                      => __('Integer value, bigger than 0.'),
                 ]
             );
 
@@ -254,7 +254,7 @@ class UpgradeData extends \Nuvei\Payments\Setup\InstallSchema implements Upgrade
                     'input'                     => 'select',
                     'visible'                   => true,
                     'required'                  => false,
-                    'user_defined'              => true,
+                    'user_defined'              => false,
                     'default'                   => 'day',
                     'searchable'                => false,
                     'filterable'                => false,
@@ -273,10 +273,9 @@ class UpgradeData extends \Nuvei\Payments\Setup\InstallSchema implements Upgrade
                     'label'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_TRIAL_PERIOD_LABEL,
                     'global'    => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
                     'group'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
-                    'source'    => \Nuvei\Payments\Model\Config\Source\SubscriptionPeriodFrom0::class,
                     
-                    'type'                      => 'text',
-                    'input'                     => 'select',
+                    'type'                      => 'int',
+                    'input'                     => 'text',
                     'visible'                   => true,
                     'required'                  => false,
                     'user_defined'              => true,
@@ -286,7 +285,7 @@ class UpgradeData extends \Nuvei\Payments\Setup\InstallSchema implements Upgrade
                     'visible_on_front'          => false,
                     'used_in_product_listing'   => false,
                     'sort_order'                => 80,
-                    'option'                    => ['values' => []],
+                    'note'                      => __('Integer value, bigger or equal to 0.'),
                 ]
             );
 
@@ -304,7 +303,7 @@ class UpgradeData extends \Nuvei\Payments\Setup\InstallSchema implements Upgrade
                     'input'                     => 'select',
                     'visible'                   => true,
                     'required'                  => false,
-                    'user_defined'              => true,
+                    'user_defined'              => false,
                     'default'                   => 'day',
                     'searchable'                => false,
                     'filterable'                => false,
@@ -323,10 +322,9 @@ class UpgradeData extends \Nuvei\Payments\Setup\InstallSchema implements Upgrade
                     'label'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_END_AFTER_PERIOD_LABEL,
                     'global'    => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
                     'group'     => \Nuvei\Payments\Model\Config::PAYMENT_SUBS_GROUP,
-                    'source'    => 'Nuvei\Payments\Model\Config\Source\SubscriptionPeriodFrom1',
                     
-                    'type'                      => 'text',
-                    'input'                     => 'select',
+                    'type'                      => 'int',
+                    'input'                     => 'text',
                     'visible'                   => true,
                     'required'                  => false,
                     'user_defined'              => true,
@@ -336,10 +334,11 @@ class UpgradeData extends \Nuvei\Payments\Setup\InstallSchema implements Upgrade
                     'visible_on_front'          => false,
                     'used_in_product_listing'   => false,
                     'sort_order'                => 100,
-                    'option'                    => ['values' => []],
+                    'note'                      => __('Integer value, bigger than 0.'),
                 ]
             );
-        }
+            # Admin > Product > Nuvei Subscription details END
+        //}
         
         $setup->endSetup();
     }

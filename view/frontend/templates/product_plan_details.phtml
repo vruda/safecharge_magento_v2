@@ -79,9 +79,15 @@
                         .done(function(resp){
                             console.log(resp);
                             
-                            
                             if(typeof resp != 'undefined' && '' != resp) {
                                 var respObj = JSON.parse(resp);
+                                
+                                if(respObj.hasOwnProperty('rec_enabled')
+                                    && 0 == respObj.rec_enabled
+                                ) {
+                                    $('#nuvei_plan_details').css('display', 'none');
+                                    return;
+                                }
                                 
                                 if(respObj.hasOwnProperty('rec_len')) {
                                     $('#nuvei_rec_length').html(respObj.rec_len);

@@ -46,6 +46,12 @@ class Config
     const PAYMENT_SUBS_END_AFTER_PERIOD         = 'nuvei_sub_end_after_period';
     const PAYMENT_SUBS_END_AFTER_PERIOD_LABEL   = 'End After Period';
     
+    const STORE_SUBS_DROPDOWN                   = 'nuvei_sub_store_dropdown';
+    const STORE_SUBS_DROPDOWN_LABEL             = 'Nuvei Subscription Options';
+//    
+//    const STORE_SUBS_SWATCH                     = 'nuvei_sub_store_swatch';
+//    const STORE_SUBS_SWATCH_LABEL               = 'Nuvei Subscription Swatch';
+    
     /**
      * Scope config object.
      *
@@ -901,14 +907,23 @@ class Config
                 $product = $this->productObj
                     ->load($options['info_buyRequest']['selected_configurable_option']);
                 
-                $recurr_unit        = $product->getCustomAttribute(self::PAYMENT_SUBS_RECURR_UNITS)->getValue();
-                $recurr_period      = $product->getCustomAttribute(self::PAYMENT_SUBS_RECURR_PERIOD)->getValue();
+                $recurr_unit_obj        = $product->getCustomAttribute(self::PAYMENT_SUBS_RECURR_UNITS);
+                $recurr_unit            = is_object($recurr_unit_obj) ? $recurr_unit_obj->getValue() : 'month';
                 
-                $trial_unit         = $product->getCustomAttribute(self::PAYMENT_SUBS_TRIAL_UNITS)->getValue();
-                $trial_period       = $product->getCustomAttribute(self::PAYMENT_SUBS_TRIAL_PERIOD)->getValue();
+                $recurr_period_obj      = $product->getCustomAttribute(self::PAYMENT_SUBS_RECURR_PERIOD);
+                $recurr_period          = is_object($recurr_period_obj) ? $recurr_period_obj->getValue() : 0;
                 
-                $end_after_unit     = $product->getCustomAttribute(self::PAYMENT_SUBS_END_AFTER_UNITS)->getValue();
-                $end_after_period   = $product->getCustomAttribute(self::PAYMENT_SUBS_END_AFTER_PERIOD)->getValue();
+                $trial_unit_obj         = $product->getCustomAttribute(self::PAYMENT_SUBS_TRIAL_UNITS);
+                $trial_unit             = is_object($trial_unit_obj) ? $trial_unit_obj->getValue() : 'month';
+                
+                $trial_period_obj       = $product->getCustomAttribute(self::PAYMENT_SUBS_TRIAL_PERIOD);
+                $trial_period           = is_object($trial_period_obj) ? $trial_period_obj->getValue() : 0;
+                
+                $end_after_unit_obj     = $product->getCustomAttribute(self::PAYMENT_SUBS_END_AFTER_UNITS);
+                $end_after_unit         = is_object($end_after_unit_obj) ? $end_after_unit_obj->getValue() : 'month';
+                
+                $end_after_period_obj   = $product->getCustomAttribute(self::PAYMENT_SUBS_END_AFTER_PERIOD);
+                $end_after_period       = is_object($end_after_period_obj) ? $end_after_period_obj->getValue() : 0;
                 
                 $plan_data[$options['info_buyRequest']['selected_configurable_option']] = [
                     'planId'            => $product->getCustomAttribute(self::PAYMENT_PLANS_ATTR_NAME)->getValue(),
@@ -926,6 +941,8 @@ class Config
                     'quantity'  => $item->getQty(),
                     'price'     => round((float) $item->getPrice(), 2),
                 ];
+                
+                $this->createLog($plan_data, '$plan_data');
                 
                 if ($product->getCustomAttribute(self::PAYMENT_SUBS_ENABLE)->getValue() == 1) {
                     return [

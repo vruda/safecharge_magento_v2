@@ -5,9 +5,9 @@
 
 $code       = $block->escapeHtml($block->getMethodCode());
 
-$ccType     = $block->getInfoData('cc_type');
-$ccExpMonth = $block->getInfoData('cc_exp_month');
-$ccExpYear  = $block->getInfoData('cc_exp_year');
+//$ccType     = $block->getInfoData('cc_type');
+//$ccExpMonth = $block->getInfoData('cc_exp_month');
+//$ccExpYear  = $block->getInfoData('cc_exp_year');
 ?>
 
 <fieldset class="admin__fieldset payment-method"
@@ -20,7 +20,7 @@ $ccExpYear  = $block->getInfoData('cc_exp_year');
             <span><?= $block->escapeHtml(__('Credit Card Type')); ?></span>
         </label>
         
-        <div class="admin__field-control">
+<!--        <div class="admin__field-control">
             <select id="<?= /* @noEscape */ $code; ?>_cc_type"
                     name="payment[cc_type]"
                     class="required-entry validate-cc-type-select
@@ -39,7 +39,7 @@ $ccExpYear  = $block->getInfoData('cc_exp_year');
                     </option>
                 <?php endforeach; ?>
             </select>
-        </div>
+        </div>-->
     </div>
 
     <div class="admin__field _required">
@@ -63,7 +63,7 @@ $ccExpYear  = $block->getInfoData('cc_exp_year');
             <span><?= $block->escapeHtml(__('Expiration Date')); ?></span>
         </label>
 
-        <div class="admin__field-control">
+<!--        <div class="admin__field-control">
             <select id="<?= /* @noEscape */ $code; ?>_expiration"
                     name="payment[cc_exp_month]"
                     class="validate-cc-exp required-entry admin__control-select
@@ -97,7 +97,7 @@ $ccExpYear  = $block->getInfoData('cc_exp_year');
                     </option>
                 <?php endforeach; ?>
             </select>
-        </div>
+        </div>-->
     </div>
 
     <div class="admin__field _required">

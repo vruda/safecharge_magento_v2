@@ -188,6 +188,7 @@ class SubscriptionsHistory extends \Magento\Framework\App\Action\Action implemen
             //
             
             return [
+                'rec_enabled'   => $usedChild->getCustomAttribute(Config::PAYMENT_SUBS_ENABLE)->getValue(),
                 'rec_len'       => $rec_len,
                 'rec_period'    => $rec_period,
                 'trial_period'  => $trial_period,
