@@ -116,7 +116,7 @@ class UpgradeData extends \Nuvei\Payments\Setup\InstallSchema implements Upgrade
         }
          */
         
-        //if (version_compare($context->getVersion(), '3.0.2', '<')) {
+        if (version_compare($context->getVersion(), '3.0.2', '<')) {
             # Admin > Product > Nuvei Subscription details
             // Enable subscription
             $eavSetup->addAttribute(
@@ -338,7 +338,7 @@ class UpgradeData extends \Nuvei\Payments\Setup\InstallSchema implements Upgrade
                 ]
             );
             # Admin > Product > Nuvei Subscription details END
-        //}
+        }
         
         $setup->endSetup();
     }
