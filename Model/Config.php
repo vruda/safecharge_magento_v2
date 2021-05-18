@@ -48,9 +48,6 @@ class Config
     
     const STORE_SUBS_DROPDOWN                   = 'nuvei_sub_store_dropdown';
     const STORE_SUBS_DROPDOWN_LABEL             = 'Nuvei Subscription Options';
-//    
-//    const STORE_SUBS_SWATCH                     = 'nuvei_sub_store_swatch';
-//    const STORE_SUBS_SWATCH_LABEL               = 'Nuvei Subscription Swatch';
     
     /**
      * Scope config object.

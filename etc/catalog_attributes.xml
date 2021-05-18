@@ -4,7 +4,6 @@
     <group name="quote_item">
         <attribute name="nuvei_sub_enabled"/>
         <attribute name="nuvei_payment_plans"/>
-        <!--<attribute name="safecharge_sub_init_amount"/>-->
         <attribute name="nuvei_sub_rec_amount"/>
         <attribute name="nuvei_sub_recurr_units"/>
         <attribute name="nuvei_sub_recurr_period"/>
@@ -12,6 +11,5 @@
         <attribute name="nuvei_sub_trial_period"/>
         <attribute name="nuvei_sub_end_after_units"/>
         <attribute name="nuvei_sub_end_after_period"/>
-        <!--<attribute name="nuvei_sub_store_decr"/>-->
     </group>
 </config>

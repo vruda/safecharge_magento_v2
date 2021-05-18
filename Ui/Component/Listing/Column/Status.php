@@ -2,51 +2,74 @@
 
 namespace Nuvei\Payments\Ui\Component\Listing\Column;
 
-use Nuvei\Payments\Model\AbstractResponse;
 use Magento\Ui\Component\Listing\Columns\Column;
+use Magento\Framework\View\Element\UiComponent\ContextInterface;
+use Magento\Framework\View\Element\UiComponentFactory;
+use Magento\Sales\Model\ResourceModel\Order\Status\CollectionFactory;
+use Nuvei\Payments\Model\Payment;
 
 /**
- * Nuvei Payments status column handler.
+ * Add additional marker for Nuvei Payment Plan.
  */
 class Status extends Column
 {
-    const NAME = 'status';
+    /**
+     * @var string[]
+     */
+    protected $statuses;
+    
+    private $config;
+    private $collection;
 
     /**
-     * @param array $dataSource
+     * Constructor
      *
+     * @param ContextInterface $context
+     * @param UiComponentFactory $uiComponentFactory
+     * @param CollectionFactory $collectionFactory
+     * @param array $components
+     * @param array $data
+     */
+    public function __construct(
+        ContextInterface $context,
+        UiComponentFactory $uiComponentFactory,
+        CollectionFactory $collectionFactory,
+        \Nuvei\Payments\Model\Config $config,
+        \Magento\Sales\Model\Order $collection,
+        array $components = [],
+        array $data = []
+    ) {
+        $this->statuses     = $collectionFactory->create()->toOptionHash();
+        $this->config       = $config;
+        $this->collection   = $collection;
+        
+        parent::__construct($context, $uiComponentFactory, $components, $data);
+    }
+
+    /**
+     * Prepare Data Source
+     *
+     * @param array $dataSource
      * @return array
      */
     public function prepareDataSource(array $dataSource)
     {
-        foreach ($dataSource['data']['items'] as &$itemData) {
-            $itemData['status'] = $this->formatOutputHtml($itemData['status']);
+        if (isset($dataSource['data']['items'])) {
+            foreach ($dataSource['data']['items'] as $key => $item) {
+                try {
+                    $order_info     = $this->collection->loadByIncrementId($item['increment_id']);
+                    $orderPayment   = $order_info->getPayment();
+                    $has_subscr     = $orderPayment->getAdditionalInformation(Payment::IS_ACTIVE_SUBS_ORDER);
+
+                    $dataSource['data']['items'][$key]['has_nuvei_subscr'] = 1 == $has_subscr ? 1 : 0;
+                }
+                catch(Exception $e) {
+                    $this->config->createLog($e->getMessage(), 'Exeception in Order Grid Status class:');
+                    $dataSource['data']['items'][$key]['has_nuvei_subscr'] = 0;
+                }
+            }
         }
 
         return $dataSource;
-    }
-
-    /**
-     * @param int $status
-     *
-     * @return string
-     */
-    private function formatOutputHtml($status)
-    {
-        $class = '';
-        $text = '';
-
-        switch ((int)$status) {
-            case AbstractResponse::STATUS_FAILED:
-                $class = 'grid-severity-critical';
-                $text = __('Failed');
-                break;
-            case AbstractResponse::STATUS_SUCCESS:
-                $class = 'grid-severity-notice';
-                $text = __('Success');
-                break;
-        }
-
-        return '<span class="' . $class . '"><span>' . $text . '</span></span>';
     }
 }

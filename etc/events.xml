@@ -10,30 +10,16 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
 	
-	<!-- sales_order_invoice_register  - original-->
-	<!-- sales_order_invoice_save_after  - use this so can get Invoice ID-->
-	<!-- controller_action_postdispatch_sales_order_invoice_save - not tested-->
     <event name="sales_order_invoice_register">
         <observer name="nuvei_capture_order_status_update"
                   instance="Nuvei\Payments\Observer\Sales\Order\Invoice\Register"/>
     </event>
     
-<!--    <event name="sales_order_invoice_pay">
-        <observer name="nuvei_invoice_pay"
-                  instance="Nuvei\Payments\Observer\Sales\Order\Invoice\Pay"/>
-    </event>-->
-	
     <event name="sales_order_invoice_save_after">
         <observer name="nuvei_invoice_pay"
                   instance="Nuvei\Payments\Observer\Sales\Order\Invoice\AfterSave"/>
     </event>
 	
-	
-	
-	
-	
-	
-    
     <event name="sales_order_payment_void">
         <observer name="nuvei_void_order_status_update"
                   instance="Nuvei\Payments\Observer\Sales\Order\Cancel\Register"/>

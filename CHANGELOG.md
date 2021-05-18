@@ -4,6 +4,8 @@
 
 ### 3.0.2.x
 ```
+	* Added marker for Nuvei Payment Plan in Sales > Order grid.
+	* Removed Sales > Nuvei > Api Request page.
 	* Added an option to allow Guest users to purchase products with plans.
 	* In product preview page was added a table with Nuvei Subscriprion Details, based on selected product configuration.
 	* In Store, My Account menu, was added menu to show only the Orders with approved Nuvei Subscription.

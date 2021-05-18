@@ -17,13 +17,5 @@
              sortOrder="20"
              parent="Magento_Sales::sales"
              resource="Nuvei_Payments::sales_nuvei"/>
-        <add id="Nuvei_Payments::sales_nuvei_request"
-             title="Api Requests"
-             translate="title"
-             module="Nuvei_Payments"
-             sortOrder="10"
-             parent="Nuvei_Payments::sales_nuvei"
-             action="nuvei/request"
-             resource="Nuvei_Payments::sales_nuvei_request"/>
     </menu>
 </config>
