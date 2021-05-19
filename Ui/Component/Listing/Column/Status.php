@@ -62,8 +62,7 @@ class Status extends Column
                     $has_subscr     = $orderPayment->getAdditionalInformation(Payment::IS_ACTIVE_SUBS_ORDER);
 
                     $dataSource['data']['items'][$key]['has_nuvei_subscr'] = 1 == $has_subscr ? 1 : 0;
-                }
-                catch(Exception $e) {
+                } catch (Exception $e) {
                     $this->config->createLog($e->getMessage(), 'Exeception in Order Grid Status class:');
                     $dataSource['data']['items'][$key]['has_nuvei_subscr'] = 0;
                 }
