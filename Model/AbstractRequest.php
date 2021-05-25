@@ -36,6 +36,7 @@ abstract class AbstractRequest extends AbstractApi
     const GET_MERCHANT_PAYMENT_PLANS_METHOD     = 'getPlansList';
     const CREATE_MERCHANT_PAYMENT_PLAN          = 'createPlan';
     const CREATE_SUBSCRIPTION_METHOD            = 'createSubscription';
+    const CANCEL_SUBSCRIPTION_METHOD            = 'cancelSubscription';
     const SETTLE_METHOD                         = 'settleTransaction';
 
     /**

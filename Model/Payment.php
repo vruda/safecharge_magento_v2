@@ -51,12 +51,11 @@ class Payment extends Cc implements TransparentInterface
     const TRANSACTION_ORDER_ID                  = 'nuvei_order_id';
     const TRANSACTION_AUTH_CODE                 = 'authorization_code';
     const TRANSACTION_ID                        = 'transaction_id';
-//    const TRANSACTION_USER_PAYMENT_OPTION_ID    = 'user_payment_option_id';
     const TRANSACTION_PAYMENT_SOLUTION          = 'payment_solution';
     const TRANSACTION_PAYMENT_METHOD            = 'external_payment_method';
     const TRANSACTION_STATUS                    = 'status';
     const TRANSACTION_TYPE                      = 'transaction_type';
-    const IS_ACTIVE_SUBS_ORDER                  = 'is_active_subs_order'; // flag for active subsc in the order
+    const SUBSCR_IDS                            = 'subscr_ids'; // list with subscription IDs
     const TRANSACTION_UPO_ID                    = 'upo_id';
     const TRANSACTION_TOTAL_AMOUN               = 'total_amount';
     const REFUND_TRANSACTION_AMOUNT             = 'refund_amount';

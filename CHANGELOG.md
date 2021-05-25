@@ -4,6 +4,7 @@
 
 ### 3.0.2.x
 ```
+	* When the merchant Void an Order with Subscriptions, all subscriptions are also canceled.
 	* Added marker for Nuvei Payment Plan in Sales > Order grid.
 	* Removed Sales > Nuvei > Api Request page.
 	* Added an option to allow Guest users to purchase products with plans.

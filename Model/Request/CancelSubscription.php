@@ -11,20 +11,15 @@ use Nuvei\Payments\Model\RequestInterface;
 use Nuvei\Payments\Model\Response\Factory as ResponseFactory;
 
 /**
- * Nuvei Payments Create Subscription request model.
+ * Nuvei Payments Cancel Subscription request model.
  */
-class CreateSubscription extends AbstractRequest implements RequestInterface
+class CancelSubscription extends AbstractRequest implements RequestInterface
 {
     /**
      * @var RequestFactory
      */
     protected $requestFactory;
-    
-    protected $plan_id;
-    protected $upo_id;
-    
-    private $order_id;
-    private $request_data;
+    protected $subscr_id;
 
     /**
      * @param Config           $config
@@ -60,18 +55,12 @@ class CreateSubscription extends AbstractRequest implements RequestInterface
         return $this->sendRequest(true, true);
     }
     
-    public function setOrderId($order_id = 0)
+    public function setSubscrId($subscr_id = 0)
     {
-        $this->order_id = $order_id;
+        $this->subscr_id = $subscr_id;
         return $this;
     }
     
-    public function setData(array $request_data = [])
-    {
-        $this->request_data = $request_data;
-        return $this;
-    }
-
     /**
      * {@inheritdoc}
      *
@@ -79,7 +68,7 @@ class CreateSubscription extends AbstractRequest implements RequestInterface
      */
     protected function getRequestMethod()
     {
-        return self::CREATE_SUBSCRIPTION_METHOD;
+        return self::CANCEL_SUBSCRIPTION_METHOD;
     }
 
     /**
@@ -99,10 +88,10 @@ class CreateSubscription extends AbstractRequest implements RequestInterface
      */
     protected function getParams()
     {
-        $params = array_merge_recursive($this->request_data, parent::getParams());
-        
-        // append Order ID to the Request ID
-        $params['clientRequestId'] .= '_' . $this->order_id;
+        $params = array_merge_recursive(
+           ['subscriptionId' => $this->subscr_id],
+            parent::getParams()
+        );
         
         return $params;
     }
@@ -117,12 +106,7 @@ class CreateSubscription extends AbstractRequest implements RequestInterface
         return [
             'merchantId',
             'merchantSiteId',
-            'userTokenId',
-            'planId',
-            'userPaymentOptionId',
-            'initialAmount',
-            'recurringAmount',
-            'currency',
+            'subscriptionId',
             'timeStamp',
         ];
     }

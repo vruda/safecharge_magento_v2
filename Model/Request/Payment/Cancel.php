@@ -138,8 +138,6 @@ class Cancel extends AbstractPayment implements RequestInterface
         $auth_code  = !empty($trans_to_refund_data[Payment::TRANSACTION_AUTH_CODE])
             ? $trans_to_refund_data[Payment::TRANSACTION_AUTH_CODE] : '';
         
-        $this->config->createLog($auth_code, '$auth_code');
-        
         if (empty($amount) || $amount < 0) {
             $this->config->createLog(
                 $trans_to_void_data,

@@ -20,8 +20,12 @@ class Factory
     private $invokableClasses = [
         AbstractRequest::GET_MERCHANT_PAYMENT_METHODS_METHOD
             => \Nuvei\Payments\Model\Request\GetMerchantPaymentMethods::class,
+        
         AbstractRequest::CREATE_SUBSCRIPTION_METHOD
             => \Nuvei\Payments\Model\Request\CreateSubscription::class,
+        
+        AbstractRequest::CANCEL_SUBSCRIPTION_METHOD
+            => \Nuvei\Payments\Model\Request\CancelSubscription::class,
         
         AbstractRequest::GET_USER_DETAILS_METHOD            => \Nuvei\Payments\Model\Request\GetUserDetails::class,
         AbstractRequest::OPEN_ORDER_METHOD                  => \Nuvei\Payments\Model\Request\OpenOrder::class,
