@@ -62,18 +62,18 @@ class Status extends Column
                     $ord_trans_data = $orderPayment->getAdditionalInformation(Payment::ORDER_TRANSACTIONS_DATA);
                     $subscr_ids     = '';
                     
-                    if(2000000116 <= $item['increment_id']) {
+                    if (2000000116 <= $item['increment_id']) {
                         $this->config->createLog($item['increment_id']);
                         $this->config->createLog($ord_trans_data);
                     }
                     
-                    if(empty($ord_trans_data) || !is_array($ord_trans_data)) {
+                    if (empty($ord_trans_data) || !is_array($ord_trans_data)) {
                         $dataSource['data']['items'][$key]['has_nuvei_subscr'] = 0;
                         continue;
                     }
                         
-                    foreach(array_reverse($ord_trans_data) as $data) {
-                        if(!in_array(strtolower($data['transaction_type']), ['sale', 'settle'])) {
+                    foreach (array_reverse($ord_trans_data) as $data) {
+                        if (!in_array(strtolower($data['transaction_type']), ['sale', 'settle'])) {
                             continue;
                         }
                         

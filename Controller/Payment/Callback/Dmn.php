@@ -192,15 +192,15 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
             /**
              * Try to create the Order.
              * With this call if there are no errors we set:
-             * 
+             *
              * $this->order
              * $this->orderPayment
              */
             $resp = $this->getOrCreateOrder($params, $orderIncrementId);
             
-            if(is_string($resp)) {
+            if (is_string($resp)) {
                 $this->jsonOutput->setData($resp);
-                return $this->jsonOutput; 
+                return $this->jsonOutput;
             }
             // Try to create the Order END
             
@@ -268,7 +268,7 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
             # check for Subscription State DMN
             $resp = $this->processSubscrDmn($params, $orderIncrementId, $ord_trans_addit_info);
             
-            if(is_string($resp)) {
+            if (is_string($resp)) {
                 $this->jsonOutput->setData($resp);
                 return $this->jsonOutput;
             }
@@ -782,16 +782,16 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
     
     /**
      * Work with Subscription status DMN.
-     * 
+     *
      * @param array $params
      * @param int   $orderIncrementId
      * @param array   $ord_trans_addit_info
-     * 
+     *
      * @return bool|string
      */
     private function processSubscrDmn($params, $orderIncrementId, $ord_trans_addit_info)
     {
-        if(empty($params['dmnType']) 
+        if (empty($params['dmnType'])
             || 'subscription' != $params['dmnType']
             || empty($params['subscriptionState'])
         ) {
@@ -807,17 +807,17 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
             );
 
             // Save the Subscription ID
-            foreach($ord_trans_addit_info as $key => $data) {
-                if(!in_array(strtolower($data['transaction_type']), ['sale', 'settle'])) {
+            foreach ($ord_trans_addit_info as $key => $data) {
+                if (!in_array(strtolower($data['transaction_type']), ['sale', 'settle'])) {
                     $this->moduleConfig->createLog($data['transaction_type'], 'processSubscrDmn() active continue');
                     continue;
                 }
 
                 $subsc_ids = json_decode($data[Payment::SUBSCR_IDS]);
                 
-                if(empty($subsc_ids)) {
+                if (empty($subsc_ids)) {
                     $subsc_ids = [];
-                } elseif(in_array($params['subscriptionId'], $subsc_ids)) {
+                } elseif (in_array($params['subscriptionId'], $subsc_ids)) {
                     continue;
                 }
 
@@ -825,7 +825,7 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
                 $ord_trans_addit_info[$key][Payment::SUBSCR_IDS]    = json_encode($subsc_ids);
                 
                 $this->orderPayment->setAdditionalInformation(
-                    Payment::ORDER_TRANSACTIONS_DATA, 
+                    Payment::ORDER_TRANSACTIONS_DATA,
                     $ord_trans_addit_info
                 );
                 break;
@@ -858,7 +858,6 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
 
         return 'Process Subscr DMN ends for order #' . $orderIncrementId;
     }
-
 
     /**
      * Place order.
@@ -1017,11 +1016,11 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
     
     /**
      * Try to create Subscriptions.
-     * 
+     *
      * @param array $params
      * @param array $last_record
      * @param int   $orderIncrementId
-     * 
+     *
      * @return bool
      */
     
@@ -1065,7 +1064,7 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
         }
 
         // Error - missing Subscription details
-        if(empty($subsc_data) || 0 == $subscr_count) {
+        if (empty($subsc_data) || 0 == $subscr_count) {
             $this->moduleConfig->createLog(
                 [
                     'subsc_data'    => $subsc_data,
@@ -1125,7 +1124,7 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
     
     /**
      * Cancel a Subscription.
-     * 
+     *
      * @param array $last_record
      * @return bool
      */
@@ -1135,7 +1134,7 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
         
         $subsc_ids = json_decode($last_record[Payment::SUBSCR_IDS]);
 
-        if(empty($subsc_ids) || !is_array($subsc_ids)) {
+        if (empty($subsc_ids) || !is_array($subsc_ids)) {
             $this->moduleConfig->createLog($subsc_ids, 'cancelSubscription() Error - $subsc_ids is empty or not an array.');
             return false;
         }
@@ -1143,7 +1142,7 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
         $request    = $this->requestFactory->create(AbstractRequest::CANCEL_SUBSCRIPTION_METHOD);
         $msg        = '';
 
-        foreach($subsc_ids as $id) {
+        foreach ($subsc_ids as $id) {
             $resp = $request
                 ->setSubscrId($id)
                 ->process();

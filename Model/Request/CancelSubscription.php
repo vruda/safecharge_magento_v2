@@ -89,7 +89,7 @@ class CancelSubscription extends AbstractRequest implements RequestInterface
     protected function getParams()
     {
         $params = array_merge_recursive(
-           ['subscriptionId' => $this->subscr_id],
+            ['subscriptionId' => $this->subscr_id],
             parent::getParams()
         );
         
