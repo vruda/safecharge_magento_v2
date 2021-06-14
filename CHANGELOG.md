@@ -2,6 +2,12 @@
 
 ---
 
+### 3.1.0.x
+```
+	* Fixed a JS bug when Collect the Plans.
+	* Added Apple Pay support.
+```
+
 ### 3.0.2.x
 ```
 	* When the merchant Void an Order with Subscriptions, all subscriptions are also canceled.

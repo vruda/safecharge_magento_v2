@@ -39,6 +39,53 @@
 				<!-- ko template: getTemplate() --><!-- /ko -->
             <!--/ko-->
         </div>
+		
+		<!-- ko if: applePayData -->
+			<div id="nuvei_apple_pay" data-bind="applePayData">
+				<div class="nuvei-apm-method-container">
+					<input type="radio" 
+						   data-bind="
+								checkedValue: applePayData().paymentMethod,
+								checked: chosenApmMethod,
+								attr: {
+									'id': getCode() + '_' + applePayData().paymentMethod,
+									'name': getCode() + '_' + applePayData().paymentMethod
+								}" />
+					
+					<label class="label nuvei-apm-method-label" 
+						   data-bind="attr: {'for': getCode() + '_' + applePayData().paymentMethod}">
+
+						<span class="nuvei-apm-method-icon">
+							<img onerror="this.style.display='none'" data-bind="
+								attr: {
+									'src': applePayData().logoURL,
+									'alt' : $t('Apple Pay')
+								}" />
+						</span>
+
+						<span class="label nuvei-apm-method-label-title" data-bind="text: $t('Apple Pay')"></span>
+					</label>
+
+					<div id="nuvei_apple_pay_error" class="nuvei-apm-method-note" style="display: none; ">
+						<!-- ko i18n: "You can not use Apple Pay" --><!-- /ko -->
+					</div>
+					
+					<div>
+						<br/>
+						<button id="nuvei_apple_pay_btn" 
+								type="button" 
+								class="action checkout" 
+								style="padding: 0; margin: 0; width: auto; height: auto; background: none; border: none; box-shadow: none; display: none;">
+							<img onerror="this.style.display='none'" data-bind="
+								attr: {
+									'src': getApplePayBtnImg(),
+									'alt' : $t('Apple Pay')
+								}" />
+						</button>
+					</div>
+				</div>
+			</div>
+		<!--/ko-->
 
 		<h3 data-bind="text: $t('Choose from yours preferred payment methods')" id="nuvei_upos_title"></h3>
 		<div id="nuvei_upos" data-bind="foreach: upos">
@@ -153,8 +200,22 @@
 								</div>
 							</fieldset>
 						<!--/ko-->
+						
+						<!-- ko if: ($data.paymentMethod === 'ppp_ApplePay') -->
+							<div id="nuvei_apple_pay_error" class="nuvei-apm-method-note">
+								<!-- ko i18n: "You can not use Apple Pay" --><!-- /ko -->
+							</div>
+						
+							<div>
+								<button id="nuvei_apple_pay_btn" 
+										type="button" 
+										class="action primary checkout">
+									<span data-bind="i18n: 'Pay'"></span>
+								</button>
+							</div>
+						<!--/ko-->
 				
-						<!-- ko if: ($data.fields.length == 0) -->
+						<!-- ko if: ($data.fields.length == 0 && $data.paymentMethod !== 'ppp_ApplePay') -->
 							<div class="nuvei-apm-method-note">
 								<!-- ko i18n: "Please click 'Place Order' in order to proceed" --><!-- /ko -->
 							</div>
@@ -228,15 +289,6 @@
 								</div>
 							</div>
 						</div>
-
-<!--						<input type="hidden" name="payment[cc_token]" data-bind="
-							attr: {
-								id: $parent.getCode() + '_cc_token',
-								'data-container': $parent.getCode() + '-cc-token',
-							},
-							value: $parent.creditCardToken,
-							valueUpdate: 'change'
-						" />-->
 					</fieldset>
                 <!--/ko-->
             </div>
@@ -260,14 +312,18 @@
             
 			<div class="actions-toolbar">
                 <div class="primary">
-                    <button data-role="review-save" type="submit" class="action primary checkout" data-bind="
-                        attr: {
-                            title: $t('Place Order')
-                        },
-                        click: placeOrder,
-                        css: {
-                            disabled: !isPlaceOrderActionAllowed()
-                        }">
+                    <button id="nuvei_default_pay_btn" 
+							data-role="review-save" 
+							type="submit" 
+							class="action primary checkout" 
+							data-bind="
+								attr: {
+									title: $t('Place Order')
+								},
+								click: placeOrder,
+								css: {
+									disabled: !isPlaceOrderActionAllowed()
+								}">
                         <span data-bind="i18n: 'Place Order'"></span>
                     </button>
                 </div>

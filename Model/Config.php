@@ -462,6 +462,11 @@ class Config
 
         return $this->getConfigValue('merchant_site_id');
     }
+    
+    public function getMerchantApplePayLabel()
+    {
+        return $this->getConfigValue('apple_pay_label');
+    }
 
     /**
      * Return merchant secret key.

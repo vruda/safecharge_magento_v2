@@ -65,13 +65,24 @@ class GetMerchantPaymentMethods extends Action
                 'error_message' => __('Nuvei payments module is not active at the moment!')
             ]);
         }
-
+        
+        $applePayData   = [];
         $apmMethodsData = $this->getApmMethods();
         $upos           = $this->getUpos($apmMethodsData);
+        
+//        $this->moduleConfig->createLog($apmMethodsData, '$apmMethodsData');
+        
+        foreach($apmMethodsData['apmMethods'] as $k => $d) {
+            if('ppp_ApplePay' == $d["paymentMethod"]) {
+                $applePayData = $d;
+                unset($apmMethodsData['apmMethods'][$k]);
+            }
+        }
         
         return $result->setData([
             "error"         => 0,
             "apmMethods"    => $apmMethodsData['apmMethods'],
+            "applePayData"  => $applePayData,
             "upos"          => $upos,
             "sessionToken"  => $apmMethodsData['sessionToken'],
             "message"       => "Success"
@@ -88,7 +99,7 @@ class GetMerchantPaymentMethods extends Action
     {
         try {
             $request    = $this->requestFactory->create(AbstractRequest::GET_MERCHANT_PAYMENT_METHODS_METHOD);
-            $apmMethods    = $request
+            $apmMethods = $request
                 ->setBillingAddress($this->getRequest()->getParam('billingAddress'))
                 ->process();
 
