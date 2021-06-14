@@ -106,14 +106,14 @@ class GetMerchantPaymentMethods extends AbstractResponse implements ResponseInte
             }
             
             // check for Apple Pay
-            if('ppp_ApplePay' == $method["paymentMethod"]) {
+            if ('ppp_ApplePay' == $method["paymentMethod"]) {
                 $pm['logoURL'] = $this->assetRepo->getUrl("Nuvei_Payments::images/applepay.svg");
                 
                 // fix for the payment name
-                if(!isset($method['paymentMethodDisplayName']['message'])
+                if (!isset($method['paymentMethodDisplayName']['message'])
                     && isset($method['paymentMethodDisplayName'][0]['message'])
                 ) {
-                    $pm['paymentMethodDisplayName']['message'] 
+                    $pm['paymentMethodDisplayName']['message']
                         = $method['paymentMethodDisplayName'][0]['message'];
                 }
             }
@@ -139,7 +139,7 @@ class GetMerchantPaymentMethods extends AbstractResponse implements ResponseInte
 //        // put Apple Pay at the begining
 //        if(!empty($apple_pay_data)) {
 //            $this->scPaymentMethods = array_merge([0 => $apple_pay_data], $this->scPaymentMethods);
-//            
+//
 //            $this->config->createLog($this->scPaymentMethods, '$this->scPaymentMethods');
 //        }
         
