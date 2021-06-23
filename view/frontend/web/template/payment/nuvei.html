@@ -40,6 +40,12 @@
             <!--/ko-->
         </div>
 		
+		<div class="sc_error" id="nuvei_general_error" style="display: none;">
+			<div class="message error">
+				<div data-bind="text: $t('General error.')"></div>
+			</div>
+		</div>
+		
 		<!-- ko if: applePayData -->
 			<div id="nuvei_apple_pay" data-bind="applePayData">
 				<div class="nuvei-apm-method-container">

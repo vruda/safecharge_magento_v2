@@ -4,6 +4,7 @@
 
 ### 3.1.0.x
 ```
+	* Fix - on Checkout, if the user do not select some of the availavle APMs, stop the process and show error message.
 	* Fixed a JS bug when Collect the Plans.
 	* Added Apple Pay support.
 ```

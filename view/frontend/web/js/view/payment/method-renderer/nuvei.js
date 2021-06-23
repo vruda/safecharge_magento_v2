@@ -217,7 +217,7 @@ define(
 			setChosenApmMethod: function() {
 				console.log('setChosenApmMethod()', self.chosenApmMethod());
 				
-				$('#nuvei_apple_pay_error, #nuvei_apple_pay_btn').hide();
+				$('#nuvei_apple_pay_error, #nuvei_apple_pay_btn, #nuvei_general_error').hide();
 				
 				// CC
 				if(self.chosenApmMethod() == 'cc_card') {
@@ -415,6 +415,12 @@ define(
 			
             placeOrder: function(data, event) {
 				console.log('placeOrder()');
+				
+				if(self.chosenApmMethod() === '') {
+					console.error('chosenApmMethod is empty');
+					self.showGeneralError('Please, choose some of the available payment options!')
+					return;
+				}
 				
 				$('body').trigger('processStart'); // show loader
 				
@@ -767,6 +773,12 @@ define(
                 return false;
             },
             
+			showGeneralError: function(msg) {
+				jQuery('#nuvei_general_error .message div').html(jQuery.mage.__(msg));
+				jQuery('#nuvei_general_error').show();
+				document.getElementById("nuvei_general_error").scrollIntoView();
+			},
+			
             initFields: function() {
 				console.log('initFields()')
 				
