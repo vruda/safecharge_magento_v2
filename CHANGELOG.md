@@ -5,7 +5,7 @@
 ### 3.1.0.x
 ```
 	* When we have CC in the APMs - preselect it. If CC is missing and there is only one APM - preselect it.
-	* Fix - on Checkout, if the user do not select some of the availavle APMs, stop the process and show error message.
+	* Fix - on Checkout, if the user do not select some of the available APMs, stop the process and show error message.
 	* Fixed a JS bug when Collect the Plans.
 	* Added Apple Pay support.
 ```
