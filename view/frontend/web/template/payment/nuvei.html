@@ -77,11 +77,10 @@
 					</div>
 					
 					<div>
-						<br/>
 						<button id="nuvei_apple_pay_btn" 
 								type="button" 
 								class="action checkout" 
-								style="padding: 0; margin: 0; width: auto; height: auto; background: none; border: none; box-shadow: none; display: none;">
+								style="padding: 0; margin: 0; width: auto; height: auto; background: none; border: none; box-shadow: none; margin-top: 12px; display: none;">
 							<img onerror="this.style.display='none'" data-bind="
 								attr: {
 									'src': getApplePayBtnImg(),
@@ -207,20 +206,6 @@
 							</fieldset>
 						<!--/ko-->
 						
-						<!-- ko if: ($data.paymentMethod === 'ppp_ApplePay') -->
-							<div id="nuvei_apple_pay_error" class="nuvei-apm-method-note">
-								<!-- ko i18n: "You can not use Apple Pay" --><!-- /ko -->
-							</div>
-						
-							<div>
-								<button id="nuvei_apple_pay_btn" 
-										type="button" 
-										class="action primary checkout">
-									<span data-bind="i18n: 'Pay'"></span>
-								</button>
-							</div>
-						<!--/ko-->
-				
 						<!-- ko if: ($data.fields.length == 0 && $data.paymentMethod !== 'ppp_ApplePay') -->
 							<div class="nuvei-apm-method-note">
 								<!-- ko i18n: "Please click 'Place Order' in order to proceed" --><!-- /ko -->

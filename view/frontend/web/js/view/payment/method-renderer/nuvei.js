@@ -98,14 +98,14 @@ define(
 				// CC
 				if(_self.val() == 'cc_card') {
 					lastCvcHolder = '#sc_card_cvc';
-					self.initFields();
+					self.nuveiInitFields();
 					return;
 				}
 				
 				// UPO CC
 				if ('cc_card' == _self.attr('data-upo-name')) {
 					lastCvcHolder = '#sc_upo_'+ _self.val() +'_cvc';
-					self.initFields();
+					self.nuveiInitFields();
 					return;
 				}
 				
@@ -387,13 +387,21 @@ define(
 						if (res.apmMethods.length > 0) {
 							$('#nuvei_apms_title').show();
 							
+							var isThereCcOption	= false;
+							
 							for(var i in res.apmMethods) {
 								if('cc_card' == res.apmMethods[i].paymentMethod) {
 									scData.sessionToken	= res.sessionToken;
+									isThereCcOption		= true
 									
-									self.initFields();
+									self.nuveiInitFields();
+									document.getElementById("nuvei_cc_card").click();
 									break;
 								}
+							}
+							
+							if(!isThereCcOption && 1 == res.apmMethods.length) {
+								document.getElementById("nuvei_" + res.apmMethods[0].paymentMethod).click();
 							}
                         }
 						else {
@@ -779,11 +787,11 @@ define(
 				document.getElementById("nuvei_general_error").scrollIntoView();
 			},
 			
-            initFields: function() {
-				console.log('initFields()')
+            nuveiInitFields: function() {
+				console.log('nuveiInitFields()')
 				
 				if('nuvei' != self.scPaymentMethod) {
-					console.log('initFields() - slected payment method is not Nuvei');
+					console.log('nuveiInitFields() - slected payment method is not Nuvei');
 					$('body').trigger('processStop');
 					
 					return;
@@ -1046,7 +1054,7 @@ define(
 						}
 						
 						if('cc_card' == self.typeOfChosenPayMethod() || 'upo_cc' == self.typeOfChosenPayMethod()) {
-							self.initFields();
+							self.nuveiInitFields();
 						}
 					}
 					else {
