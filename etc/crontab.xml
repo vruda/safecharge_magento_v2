@@ -15,5 +15,12 @@
              method="execute">
             <schedule>0 1 * * *</schedule>
         </job>
+        
+		<!-- At 00:00 on Sunday. -->
+		<job name="nuvei_check_for_new_version"
+             instance="Nuvei\Payments\Cron\CheckForLatestVersion"
+             method="execute">
+            <schedule>0 0 * * 0</schedule>
+        </job>
     </group>
 </config>
