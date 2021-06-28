@@ -11,6 +11,17 @@ class LatestPluginVersionMessage implements \Magento\Framework\Notification\Mess
 {
     const MESSAGE_IDENTITY = 'nuvei_plugin_version_message';
     
+    private $directory;
+    private $modulConfig;
+    
+    public function __construct(
+        \Magento\Framework\Filesystem\DirectoryList $directory,
+        \Nuvei\Payments\Model\Config $modulConfig
+    ) {
+        $this->directory    = $directory;
+        $this->modulConfig  = $modulConfig;
+    }
+
     /**
     * Retrieve unique system message identity
     *
@@ -28,7 +39,22 @@ class LatestPluginVersionMessage implements \Magento\Framework\Notification\Mess
     */
     public function isDisplayed()
     {
-        return true;
+        $file = $this->directory->getPath('log') . DIRECTORY_SEPARATOR . 'nuvei-plugin-latest-version.txt';
+        
+        if(!is_readable($file)) {
+            return false;
+        }
+        
+        $git_version = (int) str_replace('.', '', trim(file_get_contents($file)));
+        
+        $this_version = str_replace('Magento Plugin ', '', $this->modulConfig->getSourcePlatformField());
+        $this_version = (int) str_replace('.', '', $this_version);
+        
+        if($git_version > $this_version) {
+            return true;
+        }
+        
+        return false;
     }
     
     /**
