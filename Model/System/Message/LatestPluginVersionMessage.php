@@ -39,9 +39,10 @@ class LatestPluginVersionMessage implements \Magento\Framework\Notification\Mess
     */
     public function isDisplayed()
     {
-        $file = $this->directory->getPath('log') . DIRECTORY_SEPARATOR . 'nuvei-plugin-latest-version.txt';
+        $file = $this->directory->getPath('tmp') . DIRECTORY_SEPARATOR . 'nuvei-plugin-latest-version.txt';
         
-        if(!is_readable($file)) {
+        if(file_exists($file) && !is_readable($file)) {
+            $this->modulConfig->createLog('LatestPluginVersionMessage Error - version file exists, but is not readable!');
             return false;
         }
         
@@ -64,7 +65,7 @@ class LatestPluginVersionMessage implements \Magento\Framework\Notification\Mess
     */
     public function getText()
     {
-        return __('A new version of Nuvei Plugin is available in the GIT repo. Please, consider to upgrade!');
+        return __('There is a new version of Nuvei Plugin available. <a href="https://github.com/SafeChargeInternational/safecharge_magento_v2/blob/master/CHANGELOG.md" target="_blank">View version details.</a>');
     }
     
     /**
