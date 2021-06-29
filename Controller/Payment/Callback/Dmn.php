@@ -879,7 +879,7 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
         try {
             $quote = $this->quoteFactory->create()->loadByIdWithoutStore((int) $params['quote']);
             
-            if(!is_object($quote)) {
+            if (!is_object($quote)) {
                 $this->moduleConfig->createLog($quote, 'placeOrder error - the quote is not an object.');
 
                 return $result
@@ -1146,7 +1146,10 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
         $subsc_ids = json_decode($last_record[Payment::SUBSCR_IDS]);
 
         if (empty($subsc_ids) || !is_array($subsc_ids)) {
-            $this->moduleConfig->createLog($subsc_ids, 'cancelSubscription() Error - $subsc_ids is empty or not an array.');
+            $this->moduleConfig->createLog(
+                $subsc_ids,
+                'cancelSubscription() Error - $subsc_ids is empty or not an array.'
+            );
             return false;
         }
 

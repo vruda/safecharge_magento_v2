@@ -23,26 +23,27 @@ class LatestPluginVersionMessage implements \Magento\Framework\Notification\Mess
     }
 
     /**
-    * Retrieve unique system message identity
-    *
-    * @return string
-    */
+     * Retrieve unique system message identity
+     *
+     * @return string
+     */
     public function getIdentity()
     {
         return self::MESSAGE_IDENTITY;
     }
     
     /**
-    * Check whether the system message should be shown
-    *
-    * @return bool
-    */
+     * Check whether the system message should be shown
+     *
+     * @return bool
+     */
     public function isDisplayed()
     {
         $file = $this->directory->getPath('tmp') . DIRECTORY_SEPARATOR . 'nuvei-plugin-latest-version.txt';
         
-        if(file_exists($file) && !is_readable($file)) {
-            $this->modulConfig->createLog('LatestPluginVersionMessage Error - version file exists, but is not readable!');
+        if (file_exists($file) && !is_readable($file)) {
+            $this->modulConfig->createLog('LatestPluginVersionMessage Error - '
+                . 'version file exists, but is not readable!');
             return false;
         }
         
@@ -51,7 +52,7 @@ class LatestPluginVersionMessage implements \Magento\Framework\Notification\Mess
         $this_version = str_replace('Magento Plugin ', '', $this->modulConfig->getSourcePlatformField());
         $this_version = (int) str_replace('.', '', $this_version);
         
-        if($git_version > $this_version) {
+        if ($git_version > $this_version) {
             return true;
         }
         
@@ -59,25 +60,27 @@ class LatestPluginVersionMessage implements \Magento\Framework\Notification\Mess
     }
     
     /**
-    * Retrieve system message text
-    *
-    * @return \Magento\Framework\Phrase
-    */
+     * Retrieve system message text
+     *
+     * @return \Magento\Framework\Phrase
+     */
     public function getText()
     {
-        return __('There is a new version of Nuvei Plugin available. <a href="https://github.com/SafeChargeInternational/safecharge_magento_v2/blob/master/CHANGELOG.md" target="_blank">View version details.</a>');
+        return __('There is a new version of Nuvei Plugin available. <a href="https://github.'
+            . 'com/SafeChargeInternational/safecharge_magento_v2/blob/master/CHANGELOG.md" '
+            . 'target="_blank">View version details.</a>');
     }
     
     /**
-    * Retrieve system message severity
-    * Possible default system message types:
-    * - MessageInterface::SEVERITY_CRITICAL
-    * - MessageInterface::SEVERITY_MAJOR
-    * - MessageInterface::SEVERITY_MINOR
-    * - MessageInterface::SEVERITY_NOTICE
-    *
-    * @return int
-    */
+     * Retrieve system message severity
+     * Possible default system message types:
+     * - MessageInterface::SEVERITY_CRITICAL
+     * - MessageInterface::SEVERITY_MAJOR
+     * - MessageInterface::SEVERITY_MINOR
+     * - MessageInterface::SEVERITY_NOTICE
+     *
+     * @return int
+     */
     public function getSeverity()
     {
         return self::SEVERITY_NOTICE;

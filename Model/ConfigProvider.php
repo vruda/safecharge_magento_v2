@@ -133,7 +133,7 @@ class ConfigProvider extends CcGenericConfigProvider
                     'userTokenId'               => $this->moduleConfig->getQuoteBillingAddress()['email'],
                     'applePayLabel'             => $this->moduleConfig->getMerchantApplePayLabel(),
                     'currencyCode'              => trim($this->storeManager->getStore()->getCurrentCurrencyCode()),
-//                    'total'                         => (string) number_format($this->cart->getQuote()->getGrandTotal(), 2, '.', ''),
+//                    'total'                   => (string) number_format($this->cart->getQuote()->getGrandTotal(), 2, '.', ''),
                 ],
             ],
         ];

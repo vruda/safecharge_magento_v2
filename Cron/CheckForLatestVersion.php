@@ -8,20 +8,21 @@ class CheckForLatestVersion
     private $directory;
 
     public function __construct(
-        \Nuvei\Payments\Model\Config $moduleConfig
-        ,\Magento\Framework\Filesystem\DirectoryList $directory
+        \Nuvei\Payments\Model\Config $moduleConfig,
+        \Magento\Framework\Filesystem\DirectoryList $directory
     ) {
         $this->moduleConfig = $moduleConfig;
         $this->directory    = $directory;
     }
 
-    public function execute() {
+    public function execute()
+    {
         if ($this->moduleConfig->isActive() === false) {
             $this->moduleConfig->createLog('CheckForLatestVersion Error - the module is not active.');
             return;
         }
         
-        $this->moduleConfig->createLog('CheckForLatestVersion Cron'); 
+        $this->moduleConfig->createLog('CheckForLatestVersion Cron');
         
         try {
             $ch = curl_init();
@@ -40,7 +41,7 @@ class CheckForLatestVersion
 
             $array = json_decode($data, true);
             
-            if(empty($array['version'])) {
+            if (empty($array['version'])) {
                 $this->moduleConfig->createLog($data, 'CheckForLatestVersion Error - missing version.');
                 return;
             }
@@ -52,7 +53,7 @@ class CheckForLatestVersion
                 $array['version']
             );
             
-            if(!$res) {
+            if (!$res) {
                 $this->moduleConfig->createLog('CheckForLatestVersion Error - file was not created.');
             }
         } catch (Exception $ex) {
