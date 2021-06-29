@@ -877,15 +877,26 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
         }
         
         try {
-            $quote  = $this->quoteFactory->create()->loadByIdWithoutStore((int) $params['quote']);
+            $quote = $this->quoteFactory->create()->loadByIdWithoutStore((int) $params['quote']);
+            
+            if (!is_object($quote)) {
+                $this->moduleConfig->createLog($quote, 'placeOrder error - the quote is not an object.');
+
+                return $result
+                    ->setData('error', true)
+                    ->setData('message', 'The quote is not an object.');
+            }
+            
             $method = $quote->getPayment()->getMethod();
             
             $this->moduleConfig->createLog(
                 [
-                    'quote Method'  => $method,
-                    'quote id'      => $quote->getQuoteId(),
+                    'quote payment Method'  => $method,
+                    'quote id'              => $quote->getEntityId(),
+                    'quote is active'       => $quote->getIsActive(),
+                    'quote reserved ord id' => $quote->getReservedOrderId(),
                 ],
-                '$method'
+                'Quote data'
             );
 
             if ((int) $quote->getIsActive() == 0) {
@@ -1135,7 +1146,10 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
         $subsc_ids = json_decode($last_record[Payment::SUBSCR_IDS]);
 
         if (empty($subsc_ids) || !is_array($subsc_ids)) {
-            $this->moduleConfig->createLog($subsc_ids, 'cancelSubscription() Error - $subsc_ids is empty or not an array.');
+            $this->moduleConfig->createLog(
+                $subsc_ids,
+                'cancelSubscription() Error - $subsc_ids is empty or not an array.'
+            );
             return false;
         }
 
@@ -1238,7 +1252,7 @@ class Dmn extends \Magento\Framework\App\Action\Action implements \Magento\Frame
         $this->order = current($orderList);
         
         if (null === $this->order) {
-            $this->moduleConfig->createLog('DMN error - Order object is null.');
+            $this->moduleConfig->createLog($orderList, 'DMN error - Order object is null.');
 
             return 'DMN error - Order object is null.';
         }

@@ -49,7 +49,7 @@ class Register implements ObserverInterface
         }
 
         if ($payment->getMethod() !== Payment::METHOD_CODE) {
-            $this->config->createLog($payment->getMethod(), 'Invoice Register Observer Error - payment method is');
+            $this->config->createLog($payment->getMethod(), 'Invoice Register - payment method is not Nuvei, but');
             
             return $this;
         }

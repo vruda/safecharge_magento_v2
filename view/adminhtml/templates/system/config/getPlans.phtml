@@ -17,11 +17,11 @@
                 
                 complete: function(xhr, textStatus) {
                     var resultText = '';
-
+                    
                     if (xhr.status > 200) {
-                        resultText = xhr.statusText;
+                        resultText = textStatus;
                     } else {
-                        resultText = 'success' == statusText ? 'Success' : 'Error';
+                        resultText = ('success' == textStatus) ? 'Success' : 'Error';
                         jQuery('#loading_span .loaded').show();
                     }
 

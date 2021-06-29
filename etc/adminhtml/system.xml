@@ -184,7 +184,17 @@
 					<comment>Value provided by Nuvei.</comment>
 					<config_path>payment/nuvei/sandbox_merchant_secret_key</config_path>
 				</field>
-                    
+				
+				<field id="apple_pay_label"
+					   translate="label"
+					   type="text"
+					   sortOrder="105"
+					   showInDefault="1"
+					   showInWebsite="1"
+					   showInStore="0">
+					<label>Apple Pay Label</label>
+				</field>
+				
 <!--				<field id="save_order_before_success"
 					   translate="label"
 					   type="select"

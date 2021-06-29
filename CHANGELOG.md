@@ -2,6 +2,15 @@
 
 ---
 
+### 3.1.0.x
+```
+	* Added a cron job to check every week for a new plugin version in the GIT repo. If it is available, a system message will appear in the admin.
+	* When we have CC in the APMs - preselect it. If CC is missing and there is only one APM - preselect it.
+	* Fix - on Checkout, if the user do not select some of the available APMs, stop the process and show error message.
+	* Fixed a JS bug when Collect the Plans.
+	* Added Apple Pay support.
+```
+
 ### 3.0.2.x
 ```
 	* When the merchant Void an Order with Subscriptions, all subscriptions are also canceled.

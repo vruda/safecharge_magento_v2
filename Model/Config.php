@@ -183,9 +183,9 @@ class Config
             return;
         }
         
-        $logsPath    = $this->directory->getPath('log');
-        $d            = $data;
-        $string        = '';
+        $logsPath   = $this->directory->getPath('log');
+        $d          = $data;
+        $string     = '';
         
         if (!empty($data)) {
             if (is_array($data)) {
@@ -461,6 +461,11 @@ class Config
         }
 
         return $this->getConfigValue('merchant_site_id');
+    }
+    
+    public function getMerchantApplePayLabel()
+    {
+        return $this->getConfigValue('apple_pay_label');
     }
 
     /**

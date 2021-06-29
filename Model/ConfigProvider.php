@@ -107,32 +107,33 @@ class ConfigProvider extends CcGenericConfigProvider
         $config = [
             'payment' => [
                 Payment::METHOD_CODE => [
-                    'countryId'                     => $this->moduleConfig->getQuoteCountryCode(),
-                    'redirectUrl'                   => $this->urlBuilder
-                        ->getUrl('nuvei_payments/payment/redirect'),
-                    'paymentApmUrl'                 => $this->urlBuilder->getUrl('nuvei_payments/payment/apm'),
-                    'getMerchantPaymentMethodsUrl'  => $this->urlBuilder
+                    'getMerchantPaymentMethodsUrl' => $this->urlBuilder
                         ->getUrl('nuvei_payments/payment/GetMerchantPaymentMethods'),
-                    'getUPOsUrl'                    => $this->urlBuilder->getUrl('nuvei_payments/payment/GetUpos'),
-                    'getUpdateOrderUrl'             => $this->urlBuilder
-                        ->getUrl('nuvei_payments/payment/OpenOrder'),
-                    'updateQuotePM'                 => $this->urlBuilder
-                        ->getUrl('nuvei_payments/payment/UpdateQuotePaymentMethod'),
-                    'getRemoveUpoUrl'               => $this->urlBuilder
-                        ->getUrl('nuvei_payments/payment/DeleteUpo'),
-                    'checkoutLogoUrl'               => $this->assetRepo
-                        ->getUrl("Nuvei_Payments::images/nuvei.png"),
-                    'useUPOs'                       => $this->moduleConfig->canUseUpos(),
-                    'submitUserTokenForGuest'       => ($this->moduleConfig->allowGuestsSubscr()
+                    
+                    'redirectUrl'               => $this->urlBuilder->getUrl('nuvei_payments/payment/redirect'),
+                    'paymentApmUrl'             => $this->urlBuilder->getUrl('nuvei_payments/payment/apm'),
+                    'getUPOsUrl'                => $this->urlBuilder->getUrl('nuvei_payments/payment/GetUpos'),
+                    'getUpdateOrderUrl'         => $this->urlBuilder->getUrl('nuvei_payments/payment/OpenOrder'),
+                    'getRemoveUpoUrl'           => $this->urlBuilder->getUrl('nuvei_payments/payment/DeleteUpo'),
+                    'checkoutLogoUrl'           => $this->assetRepo->getUrl("Nuvei_Payments::images/nuvei.png"),
+                    'checkoutApplePayBtn'       => $this->assetRepo->getUrl("Nuvei_Payments::images/ApplePay-Button.png"),
+                    
+                    'countryId'                 => $this->moduleConfig->getQuoteCountryCode(),
+                    'updateQuotePM'             => $this->urlBuilder->getUrl('nuvei_payments/payment/UpdateQuotePaymentMethod'),
+                    'useUPOs'                   => $this->moduleConfig->canUseUpos(),
+                    'submitUserTokenForGuest'   => ($this->moduleConfig->allowGuestsSubscr()
                         && !empty($this->moduleConfig->getProductPlanData())) ? 1 : 0,
                     // we need this for the WebSDK
-                    'merchantSiteId'                => $this->moduleConfig->getMerchantSiteId(),
-                    'merchantId'                    => $this->moduleConfig->getMerchantId(),
-                    'isTestMode'                    => $this->moduleConfig->isTestModeEnabled(),
-                    'locale'                        => substr($locale, 0, 2),
-                    'webMasterId'                   => $this->moduleConfig->getSourcePlatformField(),
-                    'sourceApplication'             => $this->moduleConfig->getSourceApplication(),
-                    'userTokenId'                   => $this->moduleConfig->getQuoteBillingAddress()['email'],
+                    'merchantSiteId'            => $this->moduleConfig->getMerchantSiteId(),
+                    'merchantId'                => $this->moduleConfig->getMerchantId(),
+                    'isTestMode'                => $this->moduleConfig->isTestModeEnabled(),
+                    'locale'                    => substr($locale, 0, 2),
+                    'webMasterId'               => $this->moduleConfig->getSourcePlatformField(),
+                    'sourceApplication'         => $this->moduleConfig->getSourceApplication(),
+                    'userTokenId'               => $this->moduleConfig->getQuoteBillingAddress()['email'],
+                    'applePayLabel'             => $this->moduleConfig->getMerchantApplePayLabel(),
+                    'currencyCode'              => trim($this->storeManager->getStore()->getCurrentCurrencyCode()),
+//                    'total'                   => (string) number_format($this->cart->getQuote()->getGrandTotal(), 2, '.', ''),
                 ],
             ],
         ];

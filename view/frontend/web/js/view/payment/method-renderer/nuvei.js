@@ -86,22 +86,47 @@ define(
 				$('#cc_name_error_msg').hide();
 			});
 			
+			// when change the Payment Method
 			$('body').on('change', 'input[name="nuvei_payment_method"]', function() {
 				console.log('change nuvei_payment_method', $(this).val());
 				
 				var _self = $(this);
 				self.scCleanCard();
 				
+				$('#nuvei_default_pay_btn').show();
+				
 				// CC
 				if(_self.val() == 'cc_card') {
 					lastCvcHolder = '#sc_card_cvc';
-					self.initFields();
+					self.nuveiInitFields();
+					return;
 				}
+				
 				// UPO CC
-				else if ('cc_card' == _self.attr('data-upo-name')) {
+				if ('cc_card' == _self.attr('data-upo-name')) {
 					lastCvcHolder = '#sc_upo_'+ _self.val() +'_cvc';
-					self.initFields();
+					self.nuveiInitFields();
+					return;
 				}
+				
+				// Apple Pay
+				if(_self.val() == 'ppp_ApplePay') {
+					if(!window.ApplePaySession) {
+						$('#nuvei_apple_pay_btn').hide();
+						$('#nuvei_apple_pay_error, #nuvei_default_pay_btn').show();
+						return;
+					}
+					
+					$('#nuvei_apple_pay_error, #nuvei_default_pay_btn').hide();
+					$('#nuvei_apple_pay_btn').show();
+					return;
+				}
+			});
+			
+			// when click on Apple Pay button
+			$('body').on('click', '#nuvei_apple_pay_btn', function() {
+				console.log('call apple pay')
+				$('#nuvei_default_pay_btn').trigger('click');
 			});
 			
 			$('body').on('change', '#nuvei_save_upo_cont input', function() {
@@ -115,6 +140,7 @@ define(
                 template				: 'Nuvei_Payments/payment/nuvei',
 				apmMethods				: [],
 				upos					: [],
+				applePayData			: {},
                 chosenApmMethod			: '',
                 typeOfChosenPayMethod	: '',
                 countryId				: ''
@@ -135,6 +161,7 @@ define(
                     .observe([
 						'apmMethods',
 						'upos',
+						'applePayData',
                         'chosenApmMethod',
                         'typeOfChosenPayMethod',
                         'countryId'
@@ -188,40 +215,62 @@ define(
             },
 			
 			setChosenApmMethod: function() {
-				console.log('setChosenApmMethod()');
+				console.log('setChosenApmMethod()', self.chosenApmMethod());
+				
+				$('#nuvei_apple_pay_error, #nuvei_apple_pay_btn, #nuvei_general_error').hide();
 				
 				// CC
 				if(self.chosenApmMethod() == 'cc_card') {
 					self.typeOfChosenPayMethod('cc_card');
 					
+					console.log(self.typeOfChosenPayMethod());
+					
 					if(window.checkoutConfig.payment[self.getCode()].useUPOs == 1) {
 						$('body').find('#nuvei_save_upo_cont').show();
 					}
+					
+					return;
 				}
+				
+				// Apple Pay
+				if(self.chosenApmMethod() == 'ppp_ApplePay') {
+					//self.typeOfChosenPayMethod('cc_card');
+					
+					if(typeof ApplePaySession != 'function') {
+						$('#nuvei_apple_pay_error').show();
+						return;
+					}
+					
+					$('body').find('#nuvei_save_upo_cont, #nuvei_apple_pay_error, #nuvei_default_pay_btn').hide();
+					$('#nuvei_apple_pay_btn').show();
+					
+					return;
+				}
+				
 				// APM
-				else if(isNaN(self.chosenApmMethod())) {
+				if(isNaN(self.chosenApmMethod()) && self.chosenApmMethod() != 'ppp_ApplePay') {
 					self.typeOfChosenPayMethod('apm');
 					
+					console.log(self.typeOfChosenPayMethod());
 					console.log('show checkbox');
 					
 					if(window.checkoutConfig.payment[self.getCode()].useUPOs == 1) {
 						$('body').find('#nuvei_save_upo_cont').show();
 					}
 				}
+				
 				// UPOs
+				console.log('hide checkbox');
+
+				$('body').find('#nuvei_save_upo_cont').hide();
+
+				var selectedOption = $('body').find('#nuvei_' + self.chosenApmMethod());
+
+				if(selectedOption.attr('data-upo-name') == 'cc_card') {
+					self.typeOfChosenPayMethod('upo_cc');
+				}
 				else {
-					console.log('hide checkbox');
-					
-					$('body').find('#nuvei_save_upo_cont').hide();
-					
-					var selectedOption = $('body').find('#nuvei_' + self.chosenApmMethod());
-					
-					if(selectedOption.attr('data-upo-name') == 'cc_card') {
-						self.typeOfChosenPayMethod('upo_cc');
-					}
-					else {
-						self.typeOfChosenPayMethod('upo_apm');
-					}
+					self.typeOfChosenPayMethod('upo_apm');
 				}
 				
 				console.log(self.typeOfChosenPayMethod());
@@ -256,7 +305,11 @@ define(
             },
 			
 			getNuveiIconUrl: function() {
-				return window.checkoutConfig.payment[self.getCode()].checkoutLogoUrl
+				return window.checkoutConfig.payment[self.getCode()].checkoutLogoUrl;
+			},
+			
+			getApplePayBtnImg: function() {
+				return window.checkoutConfig.payment[self.getCode()].checkoutApplePayBtn;
 			},
 			
 			removeUpo: function(_upoId) {
@@ -322,7 +375,10 @@ define(
 					
                     if (res && res.error == 0) {
                         self.apmMethods(res.apmMethods);
+                        self.applePayData(res.applePayData);
                         self.upos(res.upos);
+						
+						console.log('applePayData', self.applePayData)
                         
 						if (res.upos.length > 0) {
 							$('#nuvei_upos_title').show();
@@ -331,13 +387,21 @@ define(
 						if (res.apmMethods.length > 0) {
 							$('#nuvei_apms_title').show();
 							
+							var isThereCcOption	= false;
+							
 							for(var i in res.apmMethods) {
 								if('cc_card' == res.apmMethods[i].paymentMethod) {
 									scData.sessionToken	= res.sessionToken;
+									isThereCcOption		= true
 									
-									self.initFields();
+									self.nuveiInitFields();
+									document.getElementById("nuvei_cc_card").click();
 									break;
 								}
+							}
+							
+							if(!isThereCcOption && 1 == res.apmMethods.length) {
+								document.getElementById("nuvei_" + res.apmMethods[0].paymentMethod).click();
 							}
                         }
 						else {
@@ -359,6 +423,12 @@ define(
 			
             placeOrder: function(data, event) {
 				console.log('placeOrder()');
+				
+				if(self.chosenApmMethod() === '') {
+					console.error('chosenApmMethod is empty');
+					self.showGeneralError('Please, choose some of the available payment options!')
+					return;
+				}
 				
 				$('body').trigger('processStart'); // show loader
 				
@@ -398,8 +468,35 @@ define(
 				
 				var payParams = {
 					sessionToken	: scData.sessionToken,
+					merchantId		: window.checkoutConfig.payment[self.getCode()].merchantId,
+					merchantSiteId	: window.checkoutConfig.payment[self.getCode()].merchantSiteId,
 					webMasterId		: window.checkoutConfig.payment[self.getCode()].webMasterId,
+					//env				: window.checkoutConfig.payment[self.getCode()].isTestMode == true ? 'int' : 'prod'
 				};
+				
+				// Apple Pay
+				if(self.chosenApmMethod() === 'ppp_ApplePay') {
+					if(typeof ApplePaySession != 'function') {
+						alert($.mage.__('Unexpected session error. Please, try different payment method!'));
+						$('body').trigger('processStop');
+						
+						console.error('ApplePaySession is not a Function.')
+						return;
+					}
+					
+					payParams.countryCode		= window.checkoutConfig.payment[self.getCode()].countryId;
+					payParams.currencyCode		= window.checkoutConfig.payment[self.getCode()].currencyCode;
+					payParams.amount			= self.scOrderTotal;
+					payParams.total				= {
+						label	: window.checkoutConfig.payment[self.getCode()].applePayLabel,
+						amount	: self.scOrderTotal
+					};
+					
+					console.log(payParams)
+					
+					self.createPayment(payParams, true);
+					return;
+				}
 				
 				// CC
 				if(self.chosenApmMethod() === 'cc_card') {
@@ -468,9 +565,11 @@ define(
 					
                     // create payment with WebSDK
                     self.createPayment(payParams);
+					return;
                 }
+				
 				// in case of CC UPO
-				else if(self.typeOfChosenPayMethod() === 'upo_cc') {
+				if(self.typeOfChosenPayMethod() === 'upo_cc') {
 					// checks
 					if( (!isCVVEmpty && !isCVVComplete) || isCVVEmpty ) {
 						$('#sc_upo_'+ self.chosenApmMethod() +'_cvc').css('box-shadow', 'red 0px 0px 3px 1px');
@@ -506,55 +605,70 @@ define(
                 else {
                     self.continueWithOrder();
                 }
+				
+				return;
 			},
 			
 			// a repeating part of the code
-			createPayment: function(payParams) {
-				sfc.createPayment(payParams, function(resp){
-					console.log('create payment');
+			createPayment: function(payParams, isApplePay) {
+				// Apple Pay
+				if(typeof isApplePay != 'undefined') {
+					sfc.createApplePayPayment(payParams, function(resp){
+						self.afterSdkResponse(resp);
+					});
+				}
+				// other payments
+				else {
+					sfc.createPayment(payParams, function(resp){
+						self.afterSdkResponse(resp);
+					});
+				}
+			},
+			
+			afterSdkResponse: function(resp) {
+				console.log('create payment');
 
-					if(typeof resp != 'undefined' && resp.hasOwnProperty('result')) {
-						if(resp.result == 'APPROVED' && resp.transactionId != 'undefined') {
-							self.continueWithOrder(resp.transactionId);
-						}
-						else if(resp.result == 'DECLINED') {
-							if(!alert($.mage.__('Your Payment was DECLINED. Please try another payment method!'))) {
-								$('body').trigger('processStop');
-							}
-						}
-						else {
-							var respError = 'Error with your Payment. Please try again later!';
-
-							if(resp.hasOwnProperty('errorDescription') && '' != resp.errorDescription) {
-								respError = resp.errorDescription;
-							}
-							else if(resp.hasOwnProperty('reason') && '' != resp.reason) {
-								respError = resp.reason;
-							}
-
-							console.error(resp);
-
-							if(!alert($.mage.__(respError))) {
-								self.scCleanCard();
-								self.getApmMethods();
-								$('body').trigger('processStop');
-
-								return;
-							}
+				if(typeof resp != 'undefined' && resp.hasOwnProperty('result')) {
+					if(resp.result == 'APPROVED' && resp.transactionId != 'undefined') {
+						self.continueWithOrder(resp.transactionId);
+					}
+					else if(resp.result == 'DECLINED') {
+						if(!alert($.mage.__('Your Payment was DECLINED. Please try another payment method!'))) {
+							$('body').trigger('processStop');
 						}
 					}
 					else {
-						if(!alert($.mage.__('Unexpected error, please try again later!'))) {
-							window.location.reload();
+						var respError = 'Error with your Payment. Please try again later!';
+
+						if(resp.hasOwnProperty('errorDescription') && '' != resp.errorDescription) {
+							respError = resp.errorDescription;
+						}
+						else if(resp.hasOwnProperty('reason') && '' != resp.reason) {
+							respError = resp.reason;
+						}
+
+						console.error(resp);
+
+						if(!alert($.mage.__(respError))) {
+							self.scCleanCard();
+							self.getApmMethods();
+							$('body').trigger('processStop');
+
 							return;
 						}
 					}
-				});
+				}
+				else {
+					if(!alert($.mage.__('Unexpected error, please try again later!'))) {
+						window.location.reload();
+						return;
+					}
+				}
 			},
 			
             continueWithOrder: function(transactionId) {
 				console.log('continueWithOrder()');
-				//debugger;
+				
                 if (self.validate()) {
                     self.isPlaceOrderActionAllowed(false);
 
@@ -667,11 +781,17 @@ define(
                 return false;
             },
             
-            initFields: function() {
-				console.log('initFields()')
+			showGeneralError: function(msg) {
+				jQuery('#nuvei_general_error .message div').html(jQuery.mage.__(msg));
+				jQuery('#nuvei_general_error').show();
+				document.getElementById("nuvei_general_error").scrollIntoView();
+			},
+			
+            nuveiInitFields: function() {
+				console.log('nuveiInitFields()')
 				
 				if('nuvei' != self.scPaymentMethod) {
-					console.log('initFields() - slected payment method is not Nuvei');
+					console.log('nuveiInitFields() - slected payment method is not Nuvei');
 					$('body').trigger('processStop');
 					
 					return;
@@ -878,7 +998,6 @@ define(
 			
 			scBillingAddrChange: function() {
 				console.log('scBillingAddrChange()');
-//				console.log('scBillingAddrChange()', quote.billingAddress());
 				
 				if(quote.billingAddress() == null) {
 					console.log('scBillingAddrChange() - the BillingAddr is null. Stop here.');
@@ -889,8 +1008,6 @@ define(
 					console.log('scBillingAddrChange() - the country is same. Stop here.');
 					return;
 				}
-				
-//				console.log('scBillingAddrChange()', JSON.stringify(quote.billingAddress()));
 				
 				console.log('scBillingAddrChange() - the country was changed to', quote.billingAddress().countryId);
 				self.scBillingCountry = quote.billingAddress().countryId;
@@ -917,7 +1034,6 @@ define(
 			},
 			
 			scPaymentMethodChange: function() {
-//				console.log('scPaymentMethodChange()', quote.paymentMethod);
 				console.log('scPaymentMethodChange()');
 				
 				if(
@@ -938,7 +1054,7 @@ define(
 						}
 						
 						if('cc_card' == self.typeOfChosenPayMethod() || 'upo_cc' == self.typeOfChosenPayMethod()) {
-							self.initFields();
+							self.nuveiInitFields();
 						}
 					}
 					else {
@@ -949,8 +1065,6 @@ define(
 			
 			scUpdateQuotePM: function() {
 				console.log('scUpdateQuotePM()');
-//				console.log('self.scPaymentMethod', self.scPaymentMethod);
-//				console.log('quote.paymentMethod._latestValue.method', quote.paymentMethod._latestValue.method);
 				
 				var scAjaxQuoteUpdateParams = {
 					dataType	: "json",
