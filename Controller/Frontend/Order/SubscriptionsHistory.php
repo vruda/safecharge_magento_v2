@@ -95,7 +95,7 @@ class SubscriptionsHistory extends \Magento\Framework\App\Action\Action implemen
     
     /**
      * Get Product and Product child based on attributes combination.
-     * 
+     *
      * @return array
      */
     private function getProductDetails()
@@ -115,7 +115,7 @@ class SubscriptionsHistory extends \Magento\Framework\App\Action\Action implemen
                 return [];
             }
             
-            if(is_string($params['params'])) {
+            if (is_string($params['params'])) {
                 parse_str($params['params'], $hash_params);
             } else {
                 $hash_params = $params['params'];
@@ -128,8 +128,8 @@ class SubscriptionsHistory extends \Magento\Framework\App\Action\Action implemen
             }
             
             // sometimes the key can be the options codes, we need the IDs
-            foreach($hash_params as $key => $val) {
-                if(is_numeric($key)) {
+            foreach ($hash_params as $key => $val) {
+                if (is_numeric($key)) {
                     $prod_options[$key] = $val;
                     continue;
                 }
@@ -137,7 +137,7 @@ class SubscriptionsHistory extends \Magento\Framework\App\Action\Action implemen
                 // get the option ID by its key
                 $attributeId = $this->eavAttribute->getIdByCode('catalog_product', $key);
                 
-                if(!$attributeId) {
+                if (!$attributeId) {
                     $this->config->createLog($attributeId, 'SubscriptionsHistory Error - attribute ID must be int.');
                     continue;
                 }
@@ -145,7 +145,7 @@ class SubscriptionsHistory extends \Magento\Framework\App\Action\Action implemen
                 $prod_options[$attributeId] = $val;
             }
             
-            if(empty($prod_options)) {
+            if (empty($prod_options)) {
                 return [];
             }
             

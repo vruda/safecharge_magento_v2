@@ -57,7 +57,7 @@ class PreventAddToCart
             
             # 2. then search for SC plan in the incoming item when there are products in the cart
             // 2.1 when we have configurable product with option attribute
-            if(!empty($requestInfo['super_attribute'])) {
+            if (!empty($requestInfo['super_attribute'])) {
                 // get the configurable product by its attributes
                 $conProd = $this->configurableProduct->getProductByAttributes($requestInfo['super_attribute'], $productInfo);
                 $payment_enabled = (bool) $conProd->getData(\Nuvei\Payments\Model\Config::PAYMENT_SUBS_ENABLE);

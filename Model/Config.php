@@ -190,14 +190,11 @@ class Config
         
         if (is_bool($data)) {
             $d = $data ? 'true' : 'false';
-        }
-        elseif (is_string($data) || is_numeric($data)) {
+        } elseif (is_string($data) || is_numeric($data)) {
             $d = $data;
-        }
-        elseif ('' === $data) {
+        } elseif ('' === $data) {
             $d = 'Data is Empty.';
-        }
-        elseif (is_array($data)) {
+        } elseif (is_array($data)) {
             // do not log accounts if on prod
             if (!$this->isTestModeEnabled()) {
                 if (isset($data['userAccountDetails']) && is_array($data['userAccountDetails'])) {
@@ -226,11 +223,9 @@ class Config
             }
 
             $d = $this->isTestModeEnabled() ? print_r($data, true) : json_encode($data);
-        }
-        elseif (is_object($data)) {
+        } elseif (is_object($data)) {
             $d = $this->isTestModeEnabled() ? print_r($data, true) : json_encode($data);
-        }
-        else {
+        } else {
             $d = $this->isTestModeEnabled() ? print_r($data, true) : json_encode($data);
         }
         
