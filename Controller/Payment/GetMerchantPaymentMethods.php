@@ -66,11 +66,9 @@ class GetMerchantPaymentMethods extends Action
             ]);
         }
         
-        $applePayData   = [];
+        $applePayData   = null;
         $apmMethodsData = $this->getApmMethods();
         $upos           = $this->getUpos($apmMethodsData);
-        
-//        $this->moduleConfig->createLog($apmMethodsData, '$apmMethodsData');
         
         foreach ($apmMethodsData['apmMethods'] as $k => $d) {
             if ('ppp_ApplePay' == $d["paymentMethod"]) {
@@ -78,6 +76,8 @@ class GetMerchantPaymentMethods extends Action
                 unset($apmMethodsData['apmMethods'][$k]);
             }
         }
+        
+        $this->moduleConfig->createLog($applePayData, 'GetMerchantPaymentMethods');
         
         return $result->setData([
             "error"         => 0,

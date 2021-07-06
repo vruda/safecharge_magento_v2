@@ -48,6 +48,7 @@ class Config
     
     const STORE_SUBS_DROPDOWN                   = 'nuvei_sub_store_dropdown';
     const STORE_SUBS_DROPDOWN_LABEL             = 'Nuvei Subscription Options';
+    const STORE_SUBS_DROPDOWN_NAME              = 'nuvei_subscription_options';
     
     /**
      * Scope config object.
@@ -187,43 +188,50 @@ class Config
         $d          = $data;
         $string     = '';
         
-        if (!empty($data)) {
-            if (is_array($data)) {
-                // do not log accounts if on prod
-                if (!$this->isTestModeEnabled()) {
-                    if (isset($data['userAccountDetails']) && is_array($data['userAccountDetails'])) {
-                        $data['userAccountDetails'] = 'account details';
-                    }
-                    if (isset($data['userPaymentOption']) && is_array($data['userPaymentOption'])) {
-                        $data['userPaymentOption'] = 'user payment options details';
-                    }
-                    if (isset($data['paymentOption']) && is_array($data['paymentOption'])) {
-                        $data['paymentOption'] = 'payment options details';
-                    }
-                }
-                // do not log accounts if on prod
-                
-                if (!empty($data['paymentMethods']) && is_array($data['paymentMethods'])) {
-                    $data['paymentMethods'] = json_encode($data['paymentMethods']);
-                }
-                if (!empty($data['Response data']['paymentMethods'])
-                    && is_array($data['Response data']['paymentMethods'])
-                ) {
-                    $data['Response data']['paymentMethods'] = json_encode($data['Response data']['paymentMethods']);
-                }
-                
-                if (!empty($data['plans']) && is_array($data['plans'])) {
-                    $data['plans'] = json_encode($data['plans']);
-                }
-
-                $d = $this->isTestModeEnabled() ? print_r($data, true) : json_encode($data);
-            } elseif (is_object($data)) {
-                $d = $this->isTestModeEnabled() ? print_r($data, true) : json_encode($data);
-            } elseif (is_bool($data)) {
-                $d = $data ? 'true' : 'false';
-            }
-        } else {
+        if (is_bool($data)) {
+            $d = $data ? 'true' : 'false';
+        }
+        elseif (is_string($data) || is_numeric($data)) {
+            $d = $data;
+        }
+        elseif ('' === $data) {
             $d = 'Data is Empty.';
+        }
+        elseif (is_array($data)) {
+            // do not log accounts if on prod
+            if (!$this->isTestModeEnabled()) {
+                if (isset($data['userAccountDetails']) && is_array($data['userAccountDetails'])) {
+                    $data['userAccountDetails'] = 'account details';
+                }
+                if (isset($data['userPaymentOption']) && is_array($data['userPaymentOption'])) {
+                    $data['userPaymentOption'] = 'user payment options details';
+                }
+                if (isset($data['paymentOption']) && is_array($data['paymentOption'])) {
+                    $data['paymentOption'] = 'payment options details';
+                }
+            }
+            // do not log accounts if on prod
+
+            if (!empty($data['paymentMethods']) && is_array($data['paymentMethods'])) {
+                $data['paymentMethods'] = json_encode($data['paymentMethods']);
+            }
+            if (!empty($data['Response data']['paymentMethods'])
+                && is_array($data['Response data']['paymentMethods'])
+            ) {
+                $data['Response data']['paymentMethods'] = json_encode($data['Response data']['paymentMethods']);
+            }
+
+            if (!empty($data['plans']) && is_array($data['plans'])) {
+                $data['plans'] = json_encode($data['plans']);
+            }
+
+            $d = $this->isTestModeEnabled() ? print_r($data, true) : json_encode($data);
+        }
+        elseif (is_object($data)) {
+            $d = $this->isTestModeEnabled() ? print_r($data, true) : json_encode($data);
+        }
+        else {
+            $d = $this->isTestModeEnabled() ? print_r($data, true) : json_encode($data);
         }
         
         $string .= '[v.' . $this->moduleList->getOne(self::MODULE_NAME)['setup_version'] . '] | ';

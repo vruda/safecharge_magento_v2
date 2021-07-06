@@ -41,7 +41,12 @@ class LatestPluginVersionMessage implements \Magento\Framework\Notification\Mess
     {
         $file = $this->directory->getPath('tmp') . DIRECTORY_SEPARATOR . 'nuvei-plugin-latest-version.txt';
         
-        if (file_exists($file) && !is_readable($file)) {
+        if (!file_exists($file)) {
+            $this->modulConfig->createLog('LatestPluginVersionMessage - version file does not exists.');
+            return false;
+        }
+        
+        if (!is_readable($file)) {
             $this->modulConfig->createLog('LatestPluginVersionMessage Error - '
                 . 'version file exists, but is not readable!');
             return false;
