@@ -2,6 +2,14 @@
 
 ---
 
+### 3.1.1.x
+```
+	* Small changes in createLog method.
+	* Fix for the Nuvei Payment details table in the store.
+	* Fix for showing Apple Pay, when is not active.
+	* Fix for the Admin Warning message about missing nuvei-plugin-latest-version.txt file.
+```
+
 ### 3.1.0.x
 ```
 	* Added a cron job to check every week for a new plugin version in the GIT repo. If it is available, a system message will appear in the admin.

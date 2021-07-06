@@ -17,6 +17,7 @@ class SubscriptionsHistory extends \Magento\Framework\App\Action\Action implemen
     private $request;
     private $configurable;
     private $helper;
+    private $eavAttribute;
     private $config;
 
     /**
@@ -32,6 +33,7 @@ class SubscriptionsHistory extends \Magento\Framework\App\Action\Action implemen
         \Magento\Framework\App\RequestInterface $request,
         \Magento\ConfigurableProduct\Model\Product\Type\Configurable $configurable,
         \Magento\Framework\Pricing\Helper\Data $helper,
+        \Magento\Eav\Model\ResourceModel\Entity\Attribute $eavAttribute,
         Config $config
     ) {
         $this->resultPageFactory    = $resultPageFactory;
@@ -41,6 +43,7 @@ class SubscriptionsHistory extends \Magento\Framework\App\Action\Action implemen
         $this->request              = $request;
         $this->configurable         = $configurable;
         $this->helper               = $helper;
+        $this->eavAttribute         = $eavAttribute;
         $this->config               = $config;
         
         parent::__construct($context);
@@ -90,25 +93,65 @@ class SubscriptionsHistory extends \Magento\Framework\App\Action\Action implemen
         return $resultPage;
     }
     
+    /**
+     * Get Product and Product child based on attributes combination.
+     *
+     * @return array
+     */
     private function getProductDetails()
     {
         try {
-            $params = $this->request->getParams();
+            $params         = $this->request->getParams();
+            $hash_params    = [];
+            $prod_options   = []; // the final array to pass
 
             $this->config->createLog($params, 'SubscriptionsHistory $params');
-
+            
             if (empty($params)
                 || empty($params['prodId'])
                 || !is_numeric($params['prodId'])
-                || empty($params['prodOptions'])
-                || !is_array($params['prodOptions'])
+                || empty($params['params'])
             ) {
                 return [];
             }
-
+            
+            if (is_string($params['params'])) {
+                parse_str($params['params'], $hash_params);
+            } else {
+                $hash_params = $params['params'];
+            }
+            
+            if (empty($hash_params)
+                || !is_array($hash_params)
+            ) {
+                return [];
+            }
+            
+            // sometimes the key can be the options codes, we need the IDs
+            foreach ($hash_params as $key => $val) {
+                if (is_numeric($key)) {
+                    $prod_options[$key] = $val;
+                    continue;
+                }
+                
+                // get the option ID by its key
+                $attributeId = $this->eavAttribute->getIdByCode('catalog_product', $key);
+                
+                if (!$attributeId) {
+                    $this->config->createLog($attributeId, 'SubscriptionsHistory Error - attribute ID must be int.');
+                    continue;
+                }
+                
+                $prod_options[$attributeId] = $val;
+            }
+            
+            if (empty($prod_options)) {
+                return [];
+            }
+            
             $product_id = (int) $params['prodId'];
             $product    = $this->productRepository->getById($product_id);
-            $usedChild  = $this->configurable->getProductByAttributes($params['prodOptions'], $product);
+            $usedChild  = $this->configurable->getProductByAttributes($prod_options, $product);
             $units      = [
                 'day'       => __('day'),
                 'days'      => __('days'),

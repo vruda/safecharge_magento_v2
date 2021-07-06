@@ -8,6 +8,7 @@ class NuveiPlanDetails extends \Magento\Catalog\Block\Product\View
 {
     private $urlBuilder;
     private $configurable;
+    private $eavAttribute;
     
     public function __construct(
         \Magento\Catalog\Block\Product\Context $context,
@@ -22,6 +23,7 @@ class NuveiPlanDetails extends \Magento\Catalog\Block\Product\View
         \Magento\Framework\Pricing\PriceCurrencyInterface $priceCurrency,
         \Magento\ConfigurableProduct\Model\Product\Type\Configurable $configurable,
         \Magento\Framework\UrlInterface $urlBuilder,
+        \Magento\Eav\Model\ResourceModel\Entity\Attribute $eavAttribute,
         array $data = []
     ) {
         parent::__construct(
@@ -40,6 +42,7 @@ class NuveiPlanDetails extends \Magento\Catalog\Block\Product\View
         
         $this->configurable = $configurable;
         $this->urlBuilder   = $urlBuilder;
+        $this->eavAttribute = $eavAttribute;
     }
 
     /**
@@ -82,6 +85,9 @@ class NuveiPlanDetails extends \Magento\Catalog\Block\Product\View
      */
     public function getTexts()
     {
+        $nuvei_prod_attr_code   = \Nuvei\Payments\Model\Config::STORE_SUBS_DROPDOWN_NAME;
+        $nuvei_prod_attr_id     = $this->eavAttribute->getIdByCode('catalog_product', $nuvei_prod_attr_code);
+        
         return [
             'table_title'       => __('Nuvei Plan Details'),
             'rec_length'        => __('Recurring length'),
@@ -90,6 +96,8 @@ class NuveiPlanDetails extends \Magento\Catalog\Block\Product\View
             'trial_period'      => __('Trial period'),
             'nuvei_ajax_url'    => $this->urlBuilder->getUrl('nuvei_payments/frontend/order_subscriptionsHistory'),
             'nuvei_prod_id'     => $this->getProduct()->getId(),
+//            'nuvei_attr_code'   => $nuvei_prod_attr_code,
+            'nuvei_attr_id'     => $nuvei_prod_attr_id,
         ];
     }
 }

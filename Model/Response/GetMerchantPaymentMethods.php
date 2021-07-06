@@ -136,13 +136,6 @@ class GetMerchantPaymentMethods extends AbstractResponse implements ResponseInte
             }
         }
         
-//        // put Apple Pay at the begining
-//        if(!empty($apple_pay_data)) {
-//            $this->scPaymentMethods = array_merge([0 => $apple_pay_data], $this->scPaymentMethods);
-//
-//            $this->config->createLog($this->scPaymentMethods, '$this->scPaymentMethods');
-//        }
-        
         return $this;
     }
 
