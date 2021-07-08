@@ -64,7 +64,7 @@ class NuveiPlanDetails extends \Magento\Catalog\Block\Product\View
         
         $productAttributeOptions = $this->configurable->getConfigurableAttributesAsArray($product);
         
-        foreach ($productAttributeOptions as $key => $data) {
+        foreach ($productAttributeOptions as $data) {
             if (isset($data['attribute_code'])
                 && false !== strpos($data['attribute_code'], 'nuvei')
             ) {

@@ -149,9 +149,12 @@ class SubscriptionsHistory extends \Magento\Framework\App\Action\Action implemen
                 return [];
             }
             
-            $product_id = (int) $params['prodId'];
-            $product    = $this->productRepository->getById($product_id);
-            $usedChild  = $this->configurable->getProductByAttributes($prod_options, $product);
+            $product_data = $this->config->getProductPlanData($params['prodId'], $prod_options);
+            
+            if(empty($product_data) || !is_array($product_data)) {
+                return [];
+            }
+            
             $units      = [
                 'day'       => __('day'),
                 'days'      => __('days'),
@@ -162,81 +165,45 @@ class SubscriptionsHistory extends \Magento\Framework\App\Action\Action implemen
             ];
             
             //
-            $rec_len    = '';
-            $period     = $usedChild->getCustomAttribute(Config::PAYMENT_SUBS_END_AFTER_PERIOD);
-            $unit       = $usedChild->getCustomAttribute(Config::PAYMENT_SUBS_END_AFTER_UNITS);
-            
-            if (!empty($period)) {
-                $period = $period->getValue();
+            $period     = current($product_data['endAfter']);
+            $unit       = current(array_keys($product_data['endAfter']));
+            $rec_len    = $period . ' ';
+
+            if ($period > 1) {
+                $rec_len .= $units[$unit . 's'];
+            } else {
+                $rec_len .= $units[$unit];
             }
-            if (!empty($unit)) {
-                $unit = $unit->getValue();
-            }
             
-            if (is_numeric($period)) {
-                $rec_len    = $period . ' ';
+            //
+            $period     = current($product_data['recurringPeriod']);
+            $unit       = current(array_keys($product_data['recurringPeriod']));
+            $rec_period = __('Every') . ' ' . $period . ' ';
                 
-                if ($period > 1) {
-                    $rec_len .= $units[$unit . 's'];
-                } else {
-                    $rec_len .= $units[$unit];
-                }
+            if ($period > 1) {
+                $rec_period .= $units[$unit . 's'];
+            } else {
+                $rec_period .= $units[$unit];
             }
-            //
             
             //
-            $rec_period = '';
-            $period     = $usedChild->getCustomAttribute(Config::PAYMENT_SUBS_RECURR_PERIOD);
-            $unit       = $usedChild->getCustomAttribute(Config::PAYMENT_SUBS_RECURR_UNITS);
-            
-            if (!empty($period)) {
-                $period = $period->getValue();
-            }
-            if (!empty($unit)) {
-                $unit = $unit->getValue();
-            }
-            
-            if (is_numeric($period)) {
-                $rec_period = __('Every') . ' ' . $period . ' ';
+            $period         = current($product_data['startAfter']);
+            $unit           = current(array_keys($product_data['startAfter']));
+            $trial_period   = $period . ' ';
                 
-                if ($period > 1) {
-                    $rec_period .= $units[$unit . 's'];
-                } else {
-                    $rec_period .= $units[$unit];
-                }
+            if ($period > 1) {
+                $trial_period .= $units[$unit . 's'];
+            } else {
+                $trial_period .= $units[$unit];
             }
-            //
-            
-            //
-            $trial_period   = __('None');
-            $period         = $period = $usedChild->getCustomAttribute(Config::PAYMENT_SUBS_TRIAL_PERIOD);
-            $unit           = $usedChild->getCustomAttribute(Config::PAYMENT_SUBS_TRIAL_UNITS);
-            
-            if (!empty($period)) {
-                $period = $period->getValue();
-            }
-            if (!empty($unit)) {
-                $unit = $unit->getValue();
-            }
-            
-            if (is_numeric($period) && $period > 0) {
-                $trial_period = $period . ' ';
-                
-                if ($period > 1) {
-                    $trial_period .= $units[$unit . 's'];
-                } else {
-                    $trial_period .= $units[$unit];
-                }
-            }
-            //
             
             return [
-                'rec_enabled'   => $usedChild->getCustomAttribute(Config::PAYMENT_SUBS_ENABLE)->getValue(),
+                'rec_enabled'   => 1,
                 'rec_len'       => $rec_len,
                 'rec_period'    => $rec_period,
                 'trial_period'  => $trial_period,
                 'rec_amount'    => $this->helper->currency(
-                    $usedChild->getCustomAttribute(Config::PAYMENT_SUBS_REC_AMOUNT)->getValue(),
+                    $product_data['recurringAmount'],
                     true,
                     false
                 ),

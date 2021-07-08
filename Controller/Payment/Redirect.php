@@ -91,8 +91,6 @@ class Redirect extends Action
      */
     private function saveOrder()
     {
-        $orderId = '';
-        
         try {
             $result = $this->dataObjectFactory->create();
 

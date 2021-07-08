@@ -70,7 +70,7 @@ class GetMerchantPaymentMethods extends AbstractResponse implements ResponseInte
         $langCode           = $this->getStoreLocale(true);
         $countryCode        = $countryCode ?: $this->config->getQuoteCountryCode();
         
-        foreach ((array) $body['paymentMethods'] as $k => $method) {
+        foreach ((array) $body['paymentMethods'] as $method) {
             if (!$countryCode && isset($method["paymentMethod"]) && $method["paymentMethod"] !== 'cc_card') {
                 continue;
             }
@@ -88,7 +88,7 @@ class GetMerchantPaymentMethods extends AbstractResponse implements ResponseInte
             $pm             = $method;
             
             if (isset($method["paymentMethodDisplayName"]) && is_array($method["paymentMethodDisplayName"])) {
-                foreach ($method["paymentMethodDisplayName"] as $kk => $dname) {
+                foreach ($method["paymentMethodDisplayName"] as $dname) {
                     if ($dname["language"] === $langCode) {
                         $locale_dnames = $dname;
                         break;

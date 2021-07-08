@@ -128,8 +128,6 @@ class Refund extends AbstractPayment implements RequestInterface
             throw new PaymentException(__('Refund Error - Transaction ID is empty.'));
         }
 
-        $payment_method = $orderPayment->getAdditionalInformation(Payment::TRANSACTION_PAYMENT_METHOD);
-
         if (Payment::APM_METHOD_CC == $trans_to_refund_data[Payment::TRANSACTION_PAYMENT_METHOD]
             && empty($trans_to_refund_data[Payment::TRANSACTION_AUTH_CODE])
         ) {

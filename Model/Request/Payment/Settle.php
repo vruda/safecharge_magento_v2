@@ -59,9 +59,6 @@ class Settle extends AbstractPayment implements RequestInterface
             }
         }
         
-//        $auth_data      = $orderPayment->getAdditionalInformation(Payment::AUTH_PARAMS);
-//        $nuvei_data        = $orderPayment->getAdditionalInformation('nuvei');
-        
         if (empty($trans_to_settle[Payment::TRANSACTION_AUTH_CODE])
             || empty($trans_to_settle[Payment::TRANSACTION_ID])
         ) {
@@ -71,15 +68,6 @@ class Settle extends AbstractPayment implements RequestInterface
             
             throw new PaymentException(__($msg));
         }
-        
-//        $invCollection    = $order->getInvoiceCollection();
-//        $inv_ids        = [];
-//
-//        if(!empty($invCollection) && is_array($invCollection)) {
-//            foreach ($invCollection as $invoice) {
-//                $inv_ids[] = $invoice->getId();
-//            }
-//        }
         
         $getIncrementId = $order->getIncrementId();
 

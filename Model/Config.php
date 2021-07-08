@@ -119,6 +119,8 @@ class Config
     private $cookie;
     private $productObj;
     private $productRepository;
+    private $configurable;
+    private $eavAttribute;
     
     private $clientUniqueIdPostfix = '_sandbox_apm'; // postfix for Sandbox APM payments
 
@@ -146,7 +148,9 @@ class Config
         \Magento\Customer\Model\Session $customerSession,
         \Magento\Framework\Stdlib\CookieManagerInterface $cookie,
         \Magento\Catalog\Model\Product $productObj,
-        \Magento\Catalog\Api\ProductRepositoryInterface $productRepository
+        \Magento\Catalog\Api\ProductRepositoryInterface $productRepository,
+        \Magento\ConfigurableProduct\Model\Product\Type\Configurable $configurable,
+        \Magento\Eav\Model\ResourceModel\Entity\Attribute $eavAttribute
     ) {
         $this->scopeConfig = $scopeConfig;
         $this->storeManager = $storeManager;
@@ -166,6 +170,8 @@ class Config
         $this->cookie               = $cookie;
         $this->productObj           = $productObj;
         $this->productRepository    = $productRepository;
+        $this->configurable         = $configurable;
+        $this->eavAttribute         = $eavAttribute;
     }
 
     /**
@@ -311,7 +317,6 @@ class Config
             'blackberry', 'trident'];
         $SC_DEVICES_TYPES   = ['macintosh', 'tablet', 'mobile', 'tv', 'windows', 'linux', 'tv', 'smarttv',
             'googletv', 'appletv', 'hbbtv', 'pov_tv', 'netcast.tv', 'bluray'];
-        $SC_DEVICES_OS        = ['android', 'windows', 'linux', 'mac os'];
         
         $device_details = [
             'deviceType'    => 'UNKNOWN', // DESKTOP, SMARTPHONE, TABLET, TV, and UNKNOWN
@@ -326,7 +331,7 @@ class Config
             $device_details['ipAddress']    = (string) $this->remoteIp->getRemoteAddress();
             $ua                                = $this->httpHeader->getHttpUserAgent();
         } catch (Exception $ex) {
-            $this->createLog($e->getMessage(), 'getDeviceDetails Exception');
+            $this->createLog($ex->getMessage(), 'getDeviceDetails Exception');
             return $device_details;
         }
         
@@ -744,7 +749,7 @@ class Config
 
     public function getQuoteBaseCurrency()
     {
-        $quote = $this->checkoutSession->getQuote()->getBaseCurrencyCode();
+        return $this->checkoutSession->getQuote()->getBaseCurrencyCode();
     }
     
     public function getQuoteBillingAddress()
@@ -869,7 +874,7 @@ class Config
             $email = $quote->getCustomerEmail();
         }
         
-        if (empty($mail) && $empty_on_fail) {
+        if (empty($email) && $empty_on_fail) {
             return '';
         }
         
@@ -884,118 +889,210 @@ class Config
     }
     
     /**
-     * Function getProductPlanData
+     * Search for the product with Payment Plan.
      *
-     * Search for the product with Payment Plan in the quote
-     *
-     * @return bool
+     * @param int $product_id
+     * @param array $params pairs option key id with option value
+     * 
+     * @return array $return_arr
      */
-    public function getProductPlanData()
+    public function getProductPlanData($product_id = 0, array $params = [])
     {
-        if ($this->checkoutSession->getQuote()->getItemsCount() == 0) {
-            return [];
-        }
-        
-        $items      = $this->checkoutSession->getQuote()->getItems();
+        $items_data = [];
         $plan_data  = [];
+        $return_arr = [];
         
-        foreach ($items as $item) {
-            $options = $item->getProduct()->getTypeInstance(true)->getOrderOptions($item->getProduct());
+        try {
+            # 1. when we search in the Cart
+            if (0 == $product_id && empty($params)) {
+                $items = $this->checkoutSession->getQuote()->getItems();
             
-            $this->createLog($options, 'getProductPlanData $options');
-            
-            // 1.1 in case of configurable product
-            if (!empty($options['info_buyRequest'])
-                && is_array($options['info_buyRequest'])
-                && !empty($options['info_buyRequest']['selected_configurable_option'])
-            ) {
-                $product = $this->productObj
-                    ->load($options['info_buyRequest']['selected_configurable_option']);
+                if(empty($items) || !is_array($items)) {
+                    $this->createLog(
+                        $items,
+                        'getProductPlanData() Error - there are no Items in the Cart or $items is not an array'
+                    );
+
+                    return $return_arr;
+                }
                 
-                $recurr_unit_obj        = $product->getCustomAttribute(self::PAYMENT_SUBS_RECURR_UNITS);
-                $recurr_unit            = is_object($recurr_unit_obj) ? $recurr_unit_obj->getValue() : 'month';
+                // if there are more than 1 products in the Cart we assume there are no product with a Plan
+                if(count($items) > 1) {
+                    $this->createLog('getProductPlanData() - the Items in the Cart are more than 1. We assume there is no Product with a plan amongs them.');
+                    return $return_arr;
+                }
                 
-                $recurr_period_obj      = $product->getCustomAttribute(self::PAYMENT_SUBS_RECURR_PERIOD);
-                $recurr_period          = is_object($recurr_period_obj) ? $recurr_period_obj->getValue() : 0;
+                $item = current($items);
                 
-                $trial_unit_obj         = $product->getCustomAttribute(self::PAYMENT_SUBS_TRIAL_UNITS);
-                $trial_unit             = is_object($trial_unit_obj) ? $trial_unit_obj->getValue() : 'month';
-                
-                $trial_period_obj       = $product->getCustomAttribute(self::PAYMENT_SUBS_TRIAL_PERIOD);
-                $trial_period           = is_object($trial_period_obj) ? $trial_period_obj->getValue() : 0;
-                
-                $end_after_unit_obj     = $product->getCustomAttribute(self::PAYMENT_SUBS_END_AFTER_UNITS);
-                $end_after_unit         = is_object($end_after_unit_obj) ? $end_after_unit_obj->getValue() : 'month';
-                
-                $end_after_period_obj   = $product->getCustomAttribute(self::PAYMENT_SUBS_END_AFTER_PERIOD);
-                $end_after_period       = is_object($end_after_period_obj) ? $end_after_period_obj->getValue() : 0;
-                
-                $plan_data[$options['info_buyRequest']['selected_configurable_option']] = [
-                    'planId'            => $product->getCustomAttribute(self::PAYMENT_PLANS_ATTR_NAME)->getValue(),
-                    'initialAmount'     => 0,
-                    'recurringAmount'   => number_format($product->getCustomAttribute(
-                        self::PAYMENT_SUBS_REC_AMOUNT
-                    )->getValue(), 2, '.', ''),
-                    
-                    'recurringPeriod'   => [strtolower($recurr_unit)    => $recurr_period],
-                    'startAfter'        => [strtolower($trial_unit)     => $trial_period],
-                    'endAfter'          => [strtolower($end_after_unit) => $end_after_period],
-                ];
-                
-                $items_data[$options['info_buyRequest']['selected_configurable_option']] = [
+                if(!is_object($item)) {
+                    $this->createLog('getProductPlanData() Error - the Item in the Cart is not an Object.');
+                    return $return_arr;
+                }
+
+                $options = $item->getProduct()->getTypeInstance(true)->getOrderOptions($item->getProduct());
+
+                $this->createLog($options, 'getProductPlanData $options');
+
+                // 1.1 in case of configurable product
+                if (!empty($options['info_buyRequest'])
+                    && is_array($options['info_buyRequest'])
+                ) {
+                    // 1.1.1. when we have selected_configurable_option paramter
+                    if(!empty($options['info_buyRequest']['selected_configurable_option'])) {
+                        $product = $this->productObj
+                            ->load($options['info_buyRequest']['selected_configurable_option']);
+                    }
+                    // 1.1.2. when we have super_attribute
+                    elseif(!empty($options['info_buyRequest']['super_attribute'])
+                        && !empty($options['info_buyRequest']['product'])
+                    ) {
+                        $parent     = $this->productRepository->getById($options['info_buyRequest']['product']);
+                        $product    = $this->configurable->getProductByAttributes(
+                            $options['info_buyRequest']['super_attribute'],
+                            $parent
+                        );
+                    }
+                    // 1.1.3. no elements to hold variations, stop process
+                    else {
+                        return $return_arr;
+                    }
+
+                    $plan_data[$options['info_buyRequest']['selected_configurable_option']] = 
+                        $this->buildPlanDetailsArray($product);
+
+                    $items_data[$options['info_buyRequest']['selected_configurable_option']] = [
+                        'quantity'  => $item->getQty(),
+                        'price'     => round((float) $item->getPrice(), 2),
+                    ];
+
+                    // return plan details only if the subscription is enabled
+                    if (!empty($plan_data[$options['info_buyRequest']['selected_configurable_option']])) {
+                        $return_arr = [
+                            'subs_data'     => $plan_data,
+                            'items_data'    => $items_data,
+                        ];
+                    }
+
+                    return $return_arr;
+                }
+
+                // 1.2 in case of simple product
+                $product= $this->productObj->load($options['info_buyRequest']['product']);
+
+                $plan_data[$options['info_buyRequest']['product']] = $this->buildPlanDetailsArray($product);
+
+                $items_data[$item->getId()] = [
                     'quantity'  => $item->getQty(),
                     'price'     => round((float) $item->getPrice(), 2),
                 ];
-                
-                $this->createLog($plan_data, '$plan_data');
-                
-                if ($product->getCustomAttribute(self::PAYMENT_SUBS_ENABLE)->getValue() == 1) {
-                    return [
+
+                if (!empty($plan_data[$options['info_buyRequest']['product']])) {
+                    $return_arr = [
                         'subs_data'     => $plan_data,
                         'items_data'    => $items_data,
                     ];
                 }
+
+                return $return_arr;
             }
-            
-            // 1.2 in case of simple product
-            $product            = $this->productObj->load($options['info_buyRequest']['product']);
-            $payment_enabled    = $product->getData(self::PAYMENT_SUBS_ENABLE);
-            
-            $recurr_unit        = $product->getData(self::PAYMENT_SUBS_RECURR_UNITS);
-            $recurr_period      = $product->getData(self::PAYMENT_SUBS_RECURR_PERIOD);
 
-            $trial_unit         = $product->getData(self::PAYMENT_SUBS_TRIAL_UNITS);
-            $trial_period       = $product->getData(self::PAYMENT_SUBS_TRIAL_PERIOD);
-
-            $end_after_unit     = $product->getData(self::PAYMENT_SUBS_END_AFTER_UNITS);
-            $end_after_period   = $product->getData(self::PAYMENT_SUBS_END_AFTER_PERIOD);
-            
-            $plan_data[$options['info_buyRequest']['product']] = [
-                'planId'            => $product->getData(self::PAYMENT_PLANS_ATTR_NAME),
-                'initialAmount'     => '0.00',
-                'recurringAmount'   => number_format($product->getData(self::PAYMENT_SUBS_REC_AMOUNT), 2, '.', ''),
-
-                'recurringPeriod'   => [strtolower($recurr_unit)    => $recurr_period],
-                'startAfter'        => [strtolower($trial_unit)     => $trial_period],
-                'endAfter'          => [strtolower($end_after_unit) => $end_after_period],
-            ];
-            
-            $items_data[$item->getId()] = [
-                'quantity'  => $item->getQty(),
-                'price'     => round((float) $item->getPrice(), 2),
-            ];
-            
-            if (!empty($payment_enabled)
-                && is_numeric($payment_enabled)
-                && $payment_enabled == 1
-            ) {
-                return [
-                    'subs_data'     => $plan_data,
-                    'items_data'    => $items_data,
-                ];
+            # 2. in case we pass product ID and product options as array.
+            # we do not serach in the Cart and may be there is not Item data
+            if(0 == $product_id || empty($params)) {
+                return $return_arr;
             }
+
+            $prod_options = [];
+
+            // sometimes the key can be the options codes, we need the IDs
+            foreach ($params as $key => $val) {
+                if (is_numeric($key)) {
+                    $prod_options[$key] = $val;
+                    continue;
+                }
+
+                // get the option ID by its key
+                $attributeId = $this->eavAttribute->getIdByCode('catalog_product', $key);
+
+                if (!$attributeId) {
+                    $this->config->createLog(
+                        [$key, $attributeId],
+                        'SubscriptionsHistory Error - attribute ID must be int.'
+                    );
+                    continue;
+                }
+
+                $prod_options[$attributeId] = $val;
+            }
+
+            if (empty($prod_options)) {
+                return [];
+            }
+
+            $parent     = $this->productRepository->getById($product_id);
+            $product    = $this->configurable->getProductByAttributes($prod_options, $parent);
+
+            $plan_data = $this->buildPlanDetailsArray($product);
+
+            if(!empty($plan_data)) {
+                return $plan_data;
+            }
+
+            return $return_arr;
+        } catch(Exception $e) {
+            $this->createLog($e->getMessage(), 'getProductPlanData() Exception:');
+            return [];
+        }
+    }
+    
+    /**
+     * Help function for getProductPlanData.
+     * We moved here few a repeating part of code.
+     * 
+     * @params MagentoProduct
+     * @return array
+     */
+    private function buildPlanDetailsArray($product)
+    {
+        $subscription_enabled   = $product->getCustomAttribute(self::PAYMENT_SUBS_ENABLE)->getValue();
+        
+        if(0 == $subscription_enabled) {
+            $this->createLog('buildPlanDetailsArray() - for this product the Subscription is not enabled or not set.');
+            return [];
         }
         
-        return [];
+        $recurr_unit_obj        = $product->getCustomAttribute(self::PAYMENT_SUBS_RECURR_UNITS);
+        $recurr_unit            = is_object($recurr_unit_obj) ? $recurr_unit_obj->getValue() : 'month';
+
+        $recurr_period_obj      = $product->getCustomAttribute(self::PAYMENT_SUBS_RECURR_PERIOD);
+        $recurr_period          = is_object($recurr_period_obj) ? $recurr_period_obj->getValue() : 0;
+
+        $trial_unit_obj         = $product->getCustomAttribute(self::PAYMENT_SUBS_TRIAL_UNITS);
+        $trial_unit             = is_object($trial_unit_obj) ? $trial_unit_obj->getValue() : 'month';
+
+        $trial_period_obj       = $product->getCustomAttribute(self::PAYMENT_SUBS_TRIAL_PERIOD);
+        $trial_period           = is_object($trial_period_obj) ? $trial_period_obj->getValue() : 0;
+
+        $end_after_unit_obj     = $product->getCustomAttribute(self::PAYMENT_SUBS_END_AFTER_UNITS);
+        $end_after_unit         = is_object($end_after_unit_obj) ? $end_after_unit_obj->getValue() : 'month';
+
+        $end_after_period_obj   = $product->getCustomAttribute(self::PAYMENT_SUBS_END_AFTER_PERIOD);
+        $end_after_period       = is_object($end_after_period_obj) ? $end_after_period_obj->getValue() : 0;
+        
+        $rec_amount             = $product->getCustomAttribute(self::PAYMENT_SUBS_REC_AMOUNT)->getValue();
+        
+        $return_arr = [
+            'planId'            => $product->getCustomAttribute(self::PAYMENT_PLANS_ATTR_NAME)->getValue(),
+            'initialAmount'     => 0,
+            'recurringAmount'   => number_format($rec_amount, 2, '.', ''),
+            'recurringPeriod'   => [strtolower($recurr_unit)    => $recurr_period],
+            'startAfter'        => [strtolower($trial_unit)     => $trial_period],
+            'endAfter'          => [strtolower($end_after_unit) => $end_after_period],
+        ];
+        
+        $this->createLog($return_arr, 'buildPlanDetailsArray()');
+
+        return $return_arr;
     }
+    
 }

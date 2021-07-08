@@ -2,6 +2,12 @@
 
 ---
 
+### 3.1.2.x
+```
+	* Removed unused variables.
+	* Fix in the logic when check for a Product with a Payment Plan.
+```
+
 ### 3.1.1.x
 ```
 	* Small changes in createLog method.
