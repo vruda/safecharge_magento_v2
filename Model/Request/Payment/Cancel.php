@@ -91,7 +91,6 @@ class Cancel extends AbstractPayment implements RequestInterface
         $last_voidable          = [];
         
         if (is_array($ord_trans_addit_info) && !empty($ord_trans_addit_info)) {
-            
             foreach (array_reverse($ord_trans_addit_info) as $key => $trans) {
                 if (strtolower($trans[Payment::TRANSACTION_STATUS]) == 'approved'
                     && in_array(strtolower($trans[Payment::TRANSACTION_TYPE]), ['auth', 'settle', 'sale'])
