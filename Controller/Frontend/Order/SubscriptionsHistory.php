@@ -151,7 +151,7 @@ class SubscriptionsHistory extends \Magento\Framework\App\Action\Action implemen
             
             $product_data = $this->config->getProductPlanData($params['prodId'], $prod_options);
             
-            if(empty($product_data) || !is_array($product_data)) {
+            if (empty($product_data) || !is_array($product_data)) {
                 return [];
             }
             
@@ -193,8 +193,10 @@ class SubscriptionsHistory extends \Magento\Framework\App\Action\Action implemen
                 
             if ($period > 1) {
                 $trial_period .= $units[$unit . 's'];
-            } else {
+            } elseif (1 == $period) {
                 $trial_period .= $units[$unit];
+            } else {
+                $trial_period = __('None');
             }
             
             return [
