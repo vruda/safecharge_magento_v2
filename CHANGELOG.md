@@ -4,6 +4,7 @@
 
 ### 3.1.2.x
 ```
+	* On the checkout page hide by default ApplePay. If the conditions are correct show it.
 	* Removed unused variables.
 	* Fix in the logic when check for a Product with a Payment Plan.
 ```
