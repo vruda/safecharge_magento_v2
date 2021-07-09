@@ -508,7 +508,6 @@ class DmnOld extends \Magento\Framework\App\Action\Action
             
             # try to create Subscription plans
             $resp = $this->createSubscription($params, $last_record, $orderIncrementId);
-            
         } catch (Exception $e) {
             $msg = $e->getMessage();
 
@@ -1093,7 +1092,6 @@ class DmnOld extends \Magento\Framework\App\Action\Action
                         . $resp['subscriptionId']). '. '
                         . __('Recurring amount: ') . $params['currency'] . ' '
                         . $subsc_data['recurringAmount'];
-                    
                 } else { // Error, Decline
                     $msg = __("<b>Error</b> when try to create Subscription by this Order. ");
 
