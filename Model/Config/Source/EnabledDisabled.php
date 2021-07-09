@@ -6,7 +6,7 @@ class EnabledDisabled extends \Magento\Eav\Model\Entity\Attribute\Source\Abstrac
 {
     public function getAllOptions()
     {
-         $this->_options = [
+        $this->_options = [
             [
                 'label' => __('Enabled'),
                 'value' => '1'
@@ -17,6 +17,6 @@ class EnabledDisabled extends \Magento\Eav\Model\Entity\Attribute\Source\Abstrac
             ],
          ];
         
-         return $this->_options;
+        return $this->_options;
     }
 }
