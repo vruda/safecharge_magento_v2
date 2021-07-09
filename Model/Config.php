@@ -241,8 +241,8 @@ class Config
             if (is_string($title)) {
                 $string .= $title;
             } else {
-                $string .= "\r\n" . ( $this->isTestModeEnabled()
-                    ? json_encode($title, JSON_PRETTY_PRINT) : json_encode($title) );
+                $string .= "\r\n" . ($this->isTestModeEnabled()
+                    ? json_encode($title, JSON_PRETTY_PRINT) : json_encode($title));
             }
             
             $string .= "\r\n";
@@ -640,7 +640,7 @@ class Config
         ];
 
         if ($this->versionNum != 0 && $this->versionNum < 220) {
-                return $this->urlBuilder->getUrl(
+            return $this->urlBuilder->getUrl(
                     'nuvei_payments/payment/callback_errorold',
                     $params
                 );
@@ -893,7 +893,7 @@ class Config
      *
      * @param int $product_id
      * @param array $params pairs option key id with option value
-     * 
+     *
      * @return array $return_arr
      */
     public function getProductPlanData($product_id = 0, array $params = [])
@@ -907,7 +907,7 @@ class Config
             if (0 == $product_id && empty($params)) {
                 $items = $this->checkoutSession->getQuote()->getItems();
             
-                if(empty($items) || !is_array($items)) {
+                if (empty($items) || !is_array($items)) {
                     $this->createLog(
                         $items,
                         'getProductPlanData() Error - there are no Items in the Cart or $items is not an array'
@@ -917,14 +917,14 @@ class Config
                 }
                 
                 // if there are more than 1 products in the Cart we assume there are no product with a Plan
-                if(count($items) > 1) {
+                if (count($items) > 1) {
                     $this->createLog('getProductPlanData() - the Items in the Cart are more than 1. We assume there is no Product with a plan amongs them.');
                     return $return_arr;
                 }
                 
                 $item = current($items);
                 
-                if(!is_object($item)) {
+                if (!is_object($item)) {
                     $this->createLog('getProductPlanData() Error - the Item in the Cart is not an Object.');
                     return $return_arr;
                 }
@@ -938,12 +938,12 @@ class Config
                     && is_array($options['info_buyRequest'])
                 ) {
                     // 1.1.1. when we have selected_configurable_option paramter
-                    if(!empty($options['info_buyRequest']['selected_configurable_option'])) {
+                    if (!empty($options['info_buyRequest']['selected_configurable_option'])) {
                         $product = $this->productObj
                             ->load($options['info_buyRequest']['selected_configurable_option']);
                     }
                     // 1.1.2. when we have super_attribute
-                    elseif(!empty($options['info_buyRequest']['super_attribute'])
+                    elseif (!empty($options['info_buyRequest']['super_attribute'])
                         && !empty($options['info_buyRequest']['product'])
                     ) {
                         $parent     = $this->productRepository->getById($options['info_buyRequest']['product']);
@@ -957,7 +957,7 @@ class Config
                         return $return_arr;
                     }
 
-                    $plan_data[$options['info_buyRequest']['selected_configurable_option']] = 
+                    $plan_data[$options['info_buyRequest']['selected_configurable_option']] =
                         $this->buildPlanDetailsArray($product);
 
                     $items_data[$options['info_buyRequest']['selected_configurable_option']] = [
@@ -998,7 +998,7 @@ class Config
 
             # 2. in case we pass product ID and product options as array.
             # we do not serach in the Cart and may be there is not Item data
-            if(0 == $product_id || empty($params)) {
+            if (0 == $product_id || empty($params)) {
                 return $return_arr;
             }
 
@@ -1034,12 +1034,12 @@ class Config
 
             $plan_data = $this->buildPlanDetailsArray($product);
 
-            if(!empty($plan_data)) {
+            if (!empty($plan_data)) {
                 return $plan_data;
             }
 
             return $return_arr;
-        } catch(Exception $e) {
+        } catch (Exception $e) {
             $this->createLog($e->getMessage(), 'getProductPlanData() Exception:');
             return [];
         }
@@ -1048,7 +1048,7 @@ class Config
     /**
      * Help function for getProductPlanData.
      * We moved here few a repeating part of code.
-     * 
+     *
      * @params MagentoProduct
      * @return array
      */
@@ -1056,7 +1056,7 @@ class Config
     {
         $subscription_enabled   = $product->getCustomAttribute(self::PAYMENT_SUBS_ENABLE)->getValue();
         
-        if(0 == $subscription_enabled) {
+        if (0 == $subscription_enabled) {
             $this->createLog('buildPlanDetailsArray() - for this product the Subscription is not enabled or not set.');
             return [];
         }
@@ -1094,5 +1094,4 @@ class Config
 
         return $return_arr;
     }
-    
 }
