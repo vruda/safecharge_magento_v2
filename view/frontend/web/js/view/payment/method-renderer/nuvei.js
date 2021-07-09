@@ -79,8 +79,6 @@ define(
 			agreementsInputPath	= '.payment-method._active div.checkout-agreements input';
 		
 		$(function() {
-			console.log('document ready')
-			
 			$('body').on('change', '#nuvei_cc_owner', function(){
 				$('#nuvei_cc_owner').css('box-shadow', 'inherit');
 				$('#cc_name_error_msg').hide();
@@ -236,7 +234,7 @@ define(
 				if(self.chosenApmMethod() == 'ppp_ApplePay') {
 					//self.typeOfChosenPayMethod('cc_card');
 					
-					if(typeof ApplePaySession != 'function') {
+					if(typeof window.ApplePaySession != 'function') {
 						$('#nuvei_apple_pay_error').show();
 						return;
 					}
@@ -378,8 +376,13 @@ define(
                         self.applePayData(res.applePayData);
                         self.upos(res.upos);
 						
-						console.log('applePayData', self.applePayData)
-                        
+						if(typeof window.ApplePaySession == 'function'
+							&& typeof res.applePayData == 'object' 
+							&& res.applePayData.hasOwnProperty('paymentMethod')
+						) {
+							$('#nuvei_apple_pay').show();
+						}
+						
 						if (res.upos.length > 0) {
 							$('#nuvei_upos_title').show();
 						}
@@ -476,7 +479,7 @@ define(
 				
 				// Apple Pay
 				if(self.chosenApmMethod() === 'ppp_ApplePay') {
-					if(typeof ApplePaySession != 'function') {
+					if(typeof window.ApplePaySession != 'function') {
 						alert($.mage.__('Unexpected session error. Please, try different payment method!'));
 						$('body').trigger('processStop');
 						
@@ -788,7 +791,7 @@ define(
 			},
 			
             nuveiInitFields: function() {
-				console.log('nuveiInitFields()')
+				console.log('nuveiInitFields()');
 				
 				if('nuvei' != self.scPaymentMethod) {
 					console.log('nuveiInitFields() - slected payment method is not Nuvei');
