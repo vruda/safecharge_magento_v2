@@ -57,9 +57,7 @@
                         if(typeof resp != 'undefined' && '' != resp) {
                             var respObj = JSON.parse(resp);
 
-                            if(respObj.hasOwnProperty('rec_enabled')
-                                && 0 == respObj.rec_enabled
-                            ) {
+                            if(!respObj.hasOwnProperty('rec_amount')) {
                                 $('#nuvei_plan_details').css('display', 'none');
                                 return;
                             }

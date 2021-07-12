@@ -397,7 +397,7 @@ abstract class AbstractRequest extends AbstractApi
             }
 
             if (is_array($params[$checksumKey])) {
-                foreach ($params[$checksumKey] as $subKey => $subVal) {
+                foreach ($params[$checksumKey] as $subVal) {
                     $concat .= $subVal;
                 }
             } else {

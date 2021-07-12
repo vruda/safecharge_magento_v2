@@ -66,12 +66,13 @@ class DeleteUPO extends AbstractRequest implements RequestInterface
         $billing_address    = $this->config->getQuoteBillingAddress();
         $email              = $billing_address['email'] ?: $this->config->getUserEmail(true);
         
-        $params = [
-            'userTokenId'            => $email, // logged user email
-            'userPaymentOptionId'    => $this->upo_id,
-        ];
-
-        $params = array_merge_recursive(parent::getParams(), $params);
+        $params = array_merge_recursive(
+            parent::getParams(),
+            [
+                'userTokenId'            => $email, // logged user email
+                'userPaymentOptionId'    => $this->upo_id,
+            ]
+        );
         
         return $params;
     }

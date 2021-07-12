@@ -6,7 +6,7 @@ class SubscriptionUnits extends \Magento\Eav\Model\Entity\Attribute\Source\Abstr
 {
     public function getAllOptions()
     {
-         $this->_options = [
+        $this->_options = [
             [
                 'label' => __('DAY'),
                 'value' => 'day'
@@ -21,6 +21,6 @@ class SubscriptionUnits extends \Magento\Eav\Model\Entity\Attribute\Source\Abstr
             ],
          ];
         
-         return $this->_options;
+        return $this->_options;
     }
 }

@@ -7,25 +7,12 @@ use Magento\Framework\App\Action\Context;
 use Magento\Framework\App\ResponseInterface;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Nuvei\Payments\Model\Config as ModuleConfig;
-use Nuvei\Payments\Model\Logger as Logger;
-use Nuvei\Payments\Model\Redirect\Url as RedirectUrlBuilder;
-use Nuvei\Payments\Model\Request\Factory as RequestFactory;
 
 /**
  * Nuvei Payments UpdateQuotePaymentMethod controller.
  */
 class UpdateQuotePaymentMethod extends Action
 {
-    /**
-     * @var RedirectUrlBuilder
-     */
-    private $redirectUrlBuilder;
-
-    /**
-     * @var Logger
-     */
-    private $logger;
-
     /**
      * @var ModuleConfig
      */
@@ -37,27 +24,16 @@ class UpdateQuotePaymentMethod extends Action
     private $jsonResultFactory;
 
     /**
-     * @var RequestFactory
-     */
-    private $requestFactory;
-
-    /**
      * Redirect constructor.
      *
-     * @param Context            $context
-     * @param RedirectUrlBuilder $redirectUrlBuilder
-     * @param Logger   $logger
-     * @param ModuleConfig       $moduleConfig
-     * @param JsonFactory        $jsonResultFactory
-     * @param RequestFactory     $requestFactory
+     * @param Context               $context
+     * @param ModuleConfig          $moduleConfig
+     * @param JsonFactory           $jsonResultFactory
      */
     public function __construct(
         Context $context,
-        RedirectUrlBuilder $redirectUrlBuilder,
-        Logger $logger,
         ModuleConfig $moduleConfig,
-        JsonFactory $jsonResultFactory,
-        RequestFactory $requestFactory
+        JsonFactory $jsonResultFactory
     ) {
         parent::__construct($context);
 

@@ -85,13 +85,6 @@ class OpenOrder extends AbstractRequest implements RequestInterface
         $this->items    = $this->quote->getItems();
         $order_data     = $this->quote->getPayment()->getAdditionalInformation(Payment::CREATE_ORDER_DATA);
         
-        // we must check for a product with rebilling plan
-        foreach ($this->items as $item) {
-            $options = $item->getProduct()->getTypeInstance(true)->getOrderOptions($item->getProduct());
-            
-        }
-        // we must check for a product with rebilling plan END
-        
         // first try - update order
         if (!empty($order_data)) {
             $update_order_request = $this->requestFactory->create(AbstractRequest::UPDATE_ORDER_METHOD);
@@ -156,8 +149,6 @@ class OpenOrder extends AbstractRequest implements RequestInterface
             throw new PaymentException(__('There is no Cart data.'));
         }
         
-        // check in the cart for Nuvei Payment Plan
-        $quote = $this->cart->getQuote();
         // iterate over Items and search for Subscriptions
         $items_data = $this->config->getProductPlanData();
         

@@ -66,7 +66,7 @@ class GetUserUPOs extends AbstractRequest implements RequestInterface
         $pms = [];
         
         if (!empty($res['paymentMethods']) && is_array($res['paymentMethods'])) {
-            foreach ($res['paymentMethods'] as $k => $method) {
+            foreach ($res['paymentMethods'] as $method) {
                 if (!empty($method['expiryDate']) && date('Ymd') > $method['expiryDate']) {
                     continue;
                 }

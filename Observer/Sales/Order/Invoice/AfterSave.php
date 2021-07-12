@@ -127,7 +127,7 @@ class AfterSave implements ObserverInterface
             
             $request = $this->objectManager->create(\Nuvei\Payments\Model\Request\SettleTransaction::class);
 
-            $resp = $request
+            $request
                 ->setPayment($payment)
                 ->setInvoiceId($invoice->getId())
                 ->setInvoiceAmount($invoice->getGrandTotal())

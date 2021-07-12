@@ -59,7 +59,7 @@ abstract class AbstractResponse extends AbstractApi
     /**
      * AbstractResponse constructor.
      *
-     * @param Logger $Logger
+     * @param Logger $logger
      * @param Config $config
      * @param int    $requestId
      * @param Curl   $curl

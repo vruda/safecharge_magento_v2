@@ -479,7 +479,7 @@ class DmnOld extends \Magento\Framework\App\Action\Action
                     $this->sc_transaction_type
                 );
             } elseif (in_array($status, ['declined', 'error'])) { // DECLINED/ERROR TRANSACTION
-                $this->processDeclinedSaleOrSettleDmn();
+                $this->processDeclinedSaleOrSettleDmn($params);
                 
                 $params['ErrCode']      = (isset($params['ErrCode'])) ? $params['ErrCode'] : "Unknown";
                 $params['ExErrCode']    = (isset($params['ExErrCode'])) ? $params['ExErrCode'] : "Unknown";
@@ -508,7 +508,6 @@ class DmnOld extends \Magento\Framework\App\Action\Action
             
             # try to create Subscription plans
             $resp = $this->createSubscription($params, $last_record, $orderIncrementId);
-            
         } catch (Exception $e) {
             $msg = $e->getMessage();
 
@@ -525,12 +524,11 @@ class DmnOld extends \Magento\Framework\App\Action\Action
     }
     
     /**
-     * @param array        $params
-     * @param float        $order_total
-     * @param float        $dmn_total
-     * @param string    $message
+     * @param array $params
+     * @param float $order_total
+     * @param float $dmn_total
      */
-    private function processAuthDmn($params, $order_total, $dmn_total, $message)
+    private function processAuthDmn($params, $order_total, $dmn_total)
     {
         $this->sc_transaction_type = Payment::SC_AUTH;
 
@@ -725,10 +723,12 @@ class DmnOld extends \Magento\Framework\App\Action\Action
         }
     }
     
-    private function processDeclinedSaleOrSettleDmn()
+    /**
+     * @param array $params the DMN parameters
+     */
+    private function processDeclinedSaleOrSettleDmn($params)
     {
         $invCollection  = $this->order->getInvoiceCollection();
-        $inv_amount     = round((float) $this->order->getBaseGrandTotal(), 2);
         $dmn_inv_id     = 0;
         
         // there are invoices
@@ -893,12 +893,12 @@ class DmnOld extends \Magento\Framework\App\Action\Action
                     ->setData('message', 'Quote payment method is "' . $method . '"');
             }
 
-            $params = array_merge(
-                $this->request->getParams(),
-                $this->request->getPostValue()
-            );
+//            $params = array_merge(
+//                $this->request->getParams(),
+//                $this->request->getPostValue()
+//            );
             
-            $orderId = $this->cartManagement->placeOrder((int) $params['quote']);
+            $orderId = $this->cartManagement->placeOrder($params);
 
             $result
                 ->setData('success', true)
@@ -953,7 +953,7 @@ class DmnOld extends \Magento\Framework\App\Action\Action
                 }
 
                 if (is_array($params[$checksumKey])) {
-                    foreach ($params[$checksumKey] as $subKey => $subVal) {
+                    foreach ($params[$checksumKey] as $subVal) {
                         $concat .= $subVal;
                     }
                 } else {
@@ -1092,7 +1092,6 @@ class DmnOld extends \Magento\Framework\App\Action\Action
                         . $resp['subscriptionId']). '. '
                         . __('Recurring amount: ') . $params['currency'] . ' '
                         . $subsc_data['recurringAmount'];
-                    
                 } else { // Error, Decline
                     $msg = __("<b>Error</b> when try to create Subscription by this Order. ");
 

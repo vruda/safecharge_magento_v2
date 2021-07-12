@@ -42,6 +42,8 @@ class GetPlans extends \Magento\Backend\App\Action
         try {
             $resp = $request->process();
         } catch (PaymentException $e) {
+            $this->moduleConfig->createLog($e->getMessage(), 'GetPlans Exception:');
+            
             return $result->setData([
                 "success"  => 0,
                 "message"  => "Error"

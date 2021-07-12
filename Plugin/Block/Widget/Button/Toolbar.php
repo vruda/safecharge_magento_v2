@@ -63,15 +63,15 @@ class Toolbar
 //            );
             
             // Examples
-    //        $buttonList->update('order_edit', 'class', 'edit');
-    //
-    //        $buttonList->add('order_review',
-    //            [
-    //                'label' => __('Review'),
-    //                'onclick' => 'setLocation(\'' . $context->getUrl('sales/*/review') . '\')',
-    //                'class' => 'review'
-    //            ]
-    //        );
+            //        $buttonList->update('order_edit', 'class', 'edit');
+            //
+            //        $buttonList->add('order_review',
+            //            [
+            //                'label' => __('Review'),
+            //                'onclick' => 'setLocation(\'' . $context->getUrl('sales/*/review') . '\')',
+            //                'class' => 'review'
+            //            ]
+            //        );
             
 //            $this->config->createLog($buttonList->getItems(), 'buttonList');
             

@@ -51,7 +51,6 @@ class PreventAddToCart
             
             $payment_enabled    = false;
             $cartItemsCount     = $subject->getQuote()->getItemsCount();
-            $error_msg_1        = __('You can not add this product to product with a Payment Plan.');
             $error_msg_2        = __('You can not add a product with Payment Plan to another products.');
             $error_msg_3        = __('Only Registered users can purchase Products with Plans.');
             

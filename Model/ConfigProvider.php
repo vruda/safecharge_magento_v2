@@ -98,7 +98,6 @@ class ConfigProvider extends CcGenericConfigProvider
             return [];
         }
         
-        $objectManager  = \Magento\Framework\App\ObjectManager::getInstance();
         $locale            = $this->scopeConfig->getValue(
             'general/locale/code',
             \Magento\Store\Model\ScopeInterface::SCOPE_STORE

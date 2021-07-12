@@ -138,7 +138,6 @@ class GetMerchantPaymentMethods extends Action
         foreach ($resp as $upo_data) {
             foreach ($apmMethodsData['apmMethods'] as $apm_data) {
                 if ($apm_data['paymentMethod'] === $upo_data['paymentMethodName']) {
-
                     $upo_data['logoURL']    = !empty($apm_data['logoURL']) ? $apm_data['logoURL'] : '';
                     $upo_data['name']        = !empty($apm_data['paymentMethodDisplayName'][0]['message'])
                         ? $apm_data['paymentMethodDisplayName'][0]['message'] : '';

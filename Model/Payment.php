@@ -69,7 +69,6 @@ class Payment extends Cc implements TransparentInterface
      */
     const SC_AUTH               = 'nuvei_auth';
     const SC_SETTLED            = 'nuvei_settled';
-//    const SC_PARTIALLY_SETTLED  = 'nuvei_partially_settled';
     const SC_VOIDED             = 'nuvei_voided';
     const SC_REFUNDED           = 'nuvei_refunded';
     const SC_PROCESSING         = 'nuvei_processing';
@@ -199,7 +198,6 @@ class Payment extends Cc implements TransparentInterface
      * @param PaymentRequestFactory           $paymentRequestFactory
      * @param CustomerSession                 $customerSession
      * @param ModuleConfig                    $moduleConfig
-     * @param PrivateDataKeysProvider         $privateDataKeysProvider
      * @param CheckoutSession                 $checkoutSession
      * @param AbstractResource|null           $resource
      * @param AbstractDb|null                 $resourceCollection
@@ -218,7 +216,6 @@ class Payment extends Cc implements TransparentInterface
         PaymentRequestFactory $paymentRequestFactory,
         CustomerSession $customerSession,
         ModuleConfig $moduleConfig,
-        PrivateDataKeysProvider $privateDataKeysProvider,
         CheckoutSession $checkoutSession,
         AbstractResource $resource = null,
         AbstractDb $resourceCollection = null,
@@ -314,69 +311,6 @@ class Payment extends Cc implements TransparentInterface
 
         return $this;
     }
-
-    /**
-     * Capture payment method.
-     *
-     * This method create the request too early.
-     * We use invoice observer, to create settle request.
-     *
-     * @param InfoInterface $payment
-     * @param float         $amount
-     *
-     * @return Payment
-     * @throws \Magento\Framework\Exception\LocalizedException
-     *
-     * @api
-     */
-    /*
-    public function capture(InfoInterface $payment, $amount)
-    {
-        parent::capture($payment, $amount);
-
-//        $this->processPayment($payment, $amount);
-
-        return $this;
-    }
-
-    private function processPayment(InfoInterface $payment, $amount)
-    {
-        $authCode                = '';
-        $ord_trans_addit_info    = $payment->getAdditionalInformation(self::ORDER_TRANSACTIONS_DATA);
-
-        if (is_array($ord_trans_addit_info) && !empty($ord_trans_addit_info)) {
-            foreach ($ord_trans_addit_info as $trans) {
-                if (strtolower($trans[self::TRANSACTION_TYPE]) == 'auth'
-                    && strtolower($trans[self::TRANSACTION_STATUS]) == 'approved'
-                ) {
-                    $authCode = $trans[self::TRANSACTION_AUTH_CODE];
-                    break;
-                }
-            }
-        }
-
-        if (empty($authCode)) {
-            $payment->setIsTransactionPending(true); // TODO do we need this
-            return $this;
-        }
-
-        $method = AbstractRequest::PAYMENT_SETTLE_METHOD;
-
-        $request = $this->paymentRequestFactory->create(
-            $method,
-            $payment,
-            $amount
-        );
-
-        $response = $request->process();
-
-        if ($authCode === null) {
-            $this->checkoutSession->setRedirectUrl($response->getRedirectUrl());
-        }
-
-        return $this;
-    }
-     */
 
     /**
      * Refund payment method.
