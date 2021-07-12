@@ -641,9 +641,9 @@ class Config
 
         if ($this->versionNum != 0 && $this->versionNum < 220) {
             return $this->urlBuilder->getUrl(
-                    'nuvei_payments/payment/callback_errorold',
-                    $params
-                );
+                'nuvei_payments/payment/callback_errorold',
+                $params
+            );
         }
         
         return $this->urlBuilder->getUrl(
