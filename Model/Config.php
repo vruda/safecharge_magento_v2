@@ -910,7 +910,7 @@ class Config
                 if (empty($items) || !is_array($items)) {
                     $this->createLog(
                         $items,
-                        'getProductPlanData() Error - there are no Items in the Cart or $items is not an array'
+                        'getProductPlanData() - there are no Items in the Cart or $items is not an array'
                     );
 
                     return $return_arr;
@@ -939,8 +939,8 @@ class Config
                 ) {
                     // 1.1.1. when we have selected_configurable_option paramter
                     if (!empty($options['info_buyRequest']['selected_configurable_option'])) {
-                        $product = $this->productObj
-                            ->load($options['info_buyRequest']['selected_configurable_option']);
+                        $product_id = $options['info_buyRequest']['selected_configurable_option'];
+                        $product    = $this->productObj->load($product_id);
                     }
                     // 1.1.2. when we have super_attribute
                     elseif (!empty($options['info_buyRequest']['super_attribute'])
@@ -951,22 +951,21 @@ class Config
                             $options['info_buyRequest']['super_attribute'],
                             $parent
                         );
+                        $product_id = $product->getId();
                     }
                     // 1.1.3. no elements to hold variations, stop process
                     else {
                         return $return_arr;
                     }
 
-                    $plan_data[$options['info_buyRequest']['selected_configurable_option']] =
-                        $this->buildPlanDetailsArray($product);
-
-                    $items_data[$options['info_buyRequest']['selected_configurable_option']] = [
+                    $plan_data[$product_id]     = $this->buildPlanDetailsArray($product);
+                    $items_data[$product_id]    = [
                         'quantity'  => $item->getQty(),
                         'price'     => round((float) $item->getPrice(), 2),
                     ];
 
                     // return plan details only if the subscription is enabled
-                    if (!empty($plan_data[$options['info_buyRequest']['selected_configurable_option']])) {
+                    if (!empty($plan_data[$product_id])) {
                         $return_arr = [
                             'subs_data'     => $plan_data,
                             'items_data'    => $items_data,

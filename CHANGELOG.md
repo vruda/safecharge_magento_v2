@@ -2,6 +2,12 @@
 
 ---
 
+### 3.1.3.x
+```
+	* Fix for the "Undefined index: selected_configurable_option" error.
+	* Hide JS logs on the checkout in Production mode.
+```
+
 ### 3.1.2.x
 ```
 	* On the checkout page hide by default ApplePay. If the conditions are correct show it.

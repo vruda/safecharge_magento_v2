@@ -86,7 +86,7 @@ define(
 			
 			// when change the Payment Method
 			$('body').on('change', 'input[name="nuvei_payment_method"]', function() {
-				console.log('change nuvei_payment_method', $(this).val());
+//				console.log('change nuvei_payment_method', $(this).val());
 				
 				var _self = $(this);
 				self.scCleanCard();
@@ -123,7 +123,7 @@ define(
 			
 			// when click on Apple Pay button
 			$('body').on('click', '#nuvei_apple_pay_btn', function() {
-				console.log('call apple pay')
+//				console.log('call apple pay')
 				$('#nuvei_default_pay_btn').trigger('click');
 			});
 			
@@ -151,7 +151,7 @@ define(
 			scPaymentMethod: '',
 			
             initObservable: function() {
-				console.log('initObservable()')
+//				console.log('initObservable()')
 				
                 self = this;
 				
@@ -213,15 +213,14 @@ define(
             },
 			
 			setChosenApmMethod: function() {
-				console.log('setChosenApmMethod()', self.chosenApmMethod());
+				self.writeLog('setChosenApmMethod()', self.chosenApmMethod());
 				
 				$('#nuvei_apple_pay_error, #nuvei_apple_pay_btn, #nuvei_general_error').hide();
 				
 				// CC
 				if(self.chosenApmMethod() == 'cc_card') {
 					self.typeOfChosenPayMethod('cc_card');
-					
-					console.log(self.typeOfChosenPayMethod());
+					self.writeLog(self.typeOfChosenPayMethod());
 					
 					if(window.checkoutConfig.payment[self.getCode()].useUPOs == 1) {
 						$('body').find('#nuvei_save_upo_cont').show();
@@ -248,9 +247,8 @@ define(
 				// APM
 				if(isNaN(self.chosenApmMethod()) && self.chosenApmMethod() != 'ppp_ApplePay') {
 					self.typeOfChosenPayMethod('apm');
-					
-					console.log(self.typeOfChosenPayMethod());
-					console.log('show checkbox');
+					self.writeLog(self.typeOfChosenPayMethod());
+					self.writeLog('show checkbox');
 					
 					if(window.checkoutConfig.payment[self.getCode()].useUPOs == 1) {
 						$('body').find('#nuvei_save_upo_cont').show();
@@ -258,7 +256,7 @@ define(
 				}
 				
 				// UPOs
-				console.log('hide checkbox');
+				self.writeLog('hide checkbox');
 
 				$('body').find('#nuvei_save_upo_cont').hide();
 
@@ -271,7 +269,7 @@ define(
 					self.typeOfChosenPayMethod('upo_apm');
 				}
 				
-				console.log(self.typeOfChosenPayMethod());
+				self.writeLog(self.typeOfChosenPayMethod());
 			},
 
             getRedirectUrl: function() {
@@ -311,7 +309,7 @@ define(
 			},
 			
 			removeUpo: function(_upoId) {
-				console.log('removeUpo', _upoId);
+				self.writeLog('removeUpo', _upoId);
 				
 				if(confirm($.mage.__('Are you sure, you want to delete this Preferred payment method?'))) {
 					$.ajax({
@@ -323,10 +321,10 @@ define(
 	                    showLoader: true
 	                })
 	                .done(function(res) {
-						console.log(res);
+						self.writeLog(res);
 						
 	                    if (res && res.hasOwnProperty('success') && res.success == 1) {
-							console.log('success');
+							self.writeLog('success');
 							
 							$('body')
 								.find('#nuvei_upos input#nuvei_' + _upoId)
@@ -334,14 +332,14 @@ define(
 								.remove();
 	                    }
 	                    else {
-	                        console.error(res);
+	                        self.writeLog(res, null, 'error');
 							self.isPlaceOrderActionAllowed(false);
 	                    }
 	
 						$('.loading-mask').css('display', 'none');
 	                })
 	                .fail(function(e) {
-	                    console.error(e.responseText);
+	                    self.writeLog(e.responseText, null, 'error');
 				
 						alert($.mage.__('Unexpected error, please try again later!'));
 				
@@ -351,10 +349,10 @@ define(
 			},
 			
             getApmMethods: function(billingAddress) {
-				console.log('getApmMethods()');
+				self.writeLog('getApmMethods()');
 				
 				if('nuvei' != self.scPaymentMethod) {
-					console.log('getApmMethods() - slected payment method is not Nuvei');
+					self.writeLog('getApmMethods() - slected payment method is not Nuvei');
 					return;
 				}
 				
@@ -369,7 +367,7 @@ define(
                     showLoader: true
                 })
                 .done(function(res) {
-					console.log(res);
+					self.writeLog(res);
 					
                     if (res && res.error == 0) {
                         self.apmMethods(res.apmMethods);
@@ -412,23 +410,23 @@ define(
 						}
                     }
                     else {
-                        console.error(res);
+                        self.writeLog(res, null, 'error');
 						self.isPlaceOrderActionAllowed(false);
                     }
 
 					$('.loading-mask').css('display', 'none');
                 })
                 .fail(function(e) {
-                    console.error(e.responseText);
+                    self.writeLog(e.responseText, null, 'error');
 					self.isPlaceOrderActionAllowed(false);
                 });
             },
 			
             placeOrder: function(data, event) {
-				console.log('placeOrder()');
+				self.writeLog('placeOrder()');
 				
 				if(self.chosenApmMethod() === '') {
-					console.error('chosenApmMethod is empty');
+					self.writeLog('chosenApmMethod is empty', null, 'error');
 					self.showGeneralError('Please, choose some of the available payment options!')
 					return;
 				}
@@ -447,7 +445,7 @@ define(
 						self.validateOrderData();
 					})
 					.done(function(resp) {
-						console.log(resp);
+						self.writeLog(resp);
 
 						if(
 							resp.hasOwnProperty('sessionToken')
@@ -467,7 +465,7 @@ define(
             },
             
 			validateOrderData: function() {
-				console.log('validateOrderData()');
+				self.writeLog('validateOrderData()');
 				
 				var payParams = {
 					sessionToken	: scData.sessionToken,
@@ -483,7 +481,7 @@ define(
 						alert($.mage.__('Unexpected session error. Please, try different payment method!'));
 						$('body').trigger('processStop');
 						
-						console.error('ApplePaySession is not a Function.')
+						self.writeLog('ApplePaySession is not a Function.', null, 'error')
 						return;
 					}
 					
@@ -495,7 +493,7 @@ define(
 						amount	: self.scOrderTotal
 					};
 					
-					console.log(payParams)
+					self.writeLog(payParams)
 					
 					self.createPayment(payParams, true);
 					return;
@@ -629,7 +627,7 @@ define(
 			},
 			
 			afterSdkResponse: function(resp) {
-				console.log('create payment');
+				self.writeLog('create payment');
 
 				if(typeof resp != 'undefined' && resp.hasOwnProperty('result')) {
 					if(resp.result == 'APPROVED' && resp.transactionId != 'undefined') {
@@ -650,7 +648,7 @@ define(
 							respError = resp.reason;
 						}
 
-						console.error(resp);
+						self.writeLog(resp, null, 'error');
 
 						if(!alert($.mage.__(respError))) {
 							self.scCleanCard();
@@ -670,7 +668,7 @@ define(
 			},
 			
             continueWithOrder: function(transactionId) {
-				console.log('continueWithOrder()');
+				self.writeLog('continueWithOrder()');
 				
                 if (self.validate()) {
                     self.isPlaceOrderActionAllowed(false);
@@ -680,7 +678,7 @@ define(
 						self.typeOfChosenPayMethod() === 'apm'
 						|| self.typeOfChosenPayMethod() === 'upo_apm'
 					) {
-						console.log('continueWithOrder() apm or upo_apm');
+						self.writeLog('continueWithOrder() apm or upo_apm');
 				
 						var choosenMethod	= self.chosenApmMethod();
 						var postData		= {
@@ -719,13 +717,13 @@ define(
 											return;
 										}
 										else {
-											console.error(res);
+											self.writeLog(res, null, 'error');
 											window.location.reload();
 											return;
 										}
 									})
 									.fail(function(e) {
-										console.error(e);
+										self.writeLog(e, null, 'error');
 										window.location.reload();
 										return;
 									});
@@ -791,10 +789,11 @@ define(
 			},
 			
             nuveiInitFields: function() {
-				console.log('nuveiInitFields()');
+				self.writeLog('nuveiInitFields()');
 				
 				if('nuvei' != self.scPaymentMethod) {
-					console.log('nuveiInitFields() - slected payment method is not Nuvei');
+					self.writeLog('nuveiInitFields() - slected payment method is not Nuvei');
+					
 					$('body').trigger('processStop');
 					
 					return;
@@ -830,12 +829,13 @@ define(
             },
 			
 			attachFields: function() {
-				console.log('attachFields()');
-				console.log('scFields', scFields);
-				console.log('lastCvcHolder', lastCvcHolder);
+				self.writeLog('attachFields()');
+				self.writeLog('scFields', scFields);
+				self.writeLog('lastCvcHolder', lastCvcHolder);
 				
 				if(null === scFields) {
-					console.log('scFields is null');
+					self.writeLog('scFields is null');
+					
 					$('body').trigger('processStop');
 					
 					return;
@@ -968,7 +968,7 @@ define(
 			 * @returns {Boolean}
 			*/
 			validate: function (hideError) {
-				console.log('validate()');
+				self.writeLog('validate()');
 				
 				var isValid = true;
 
@@ -989,7 +989,7 @@ define(
 			},
 		   
 			scCleanCard: function () {
-				console.log('scCleanCard()');
+				self.writeLog('scCleanCard()');
 				
 				cardNumber = cardExpiry = cardCvc = null;
 				$('#sc_card_number, #sc_card_expiry, #sc_card_cvc').html('');
@@ -1000,19 +1000,19 @@ define(
 			},
 			
 			scBillingAddrChange: function() {
-				console.log('scBillingAddrChange()');
+				self.writeLog('scBillingAddrChange()');
 				
 				if(quote.billingAddress() == null) {
-					console.log('scBillingAddrChange() - the BillingAddr is null. Stop here.');
+					self.writeLog('scBillingAddrChange() - the BillingAddr is null. Stop here.');
 					return;
 				}
 				
 				if(quote.billingAddress().countryId == self.scBillingCountry) {
-					console.log('scBillingAddrChange() - the country is same. Stop here.');
+					self.writeLog('scBillingAddrChange() - the country is same. Stop here.');
 					return;
 				}
 				
-				console.log('scBillingAddrChange() - the country was changed to', quote.billingAddress().countryId);
+				self.writeLog('scBillingAddrChange() - the country was changed to', quote.billingAddress().countryId);
 				self.scBillingCountry = quote.billingAddress().countryId;
 				
 				self.scCleanCard();
@@ -1020,16 +1020,16 @@ define(
 			},
 			
 			scTotalsChange: function() {
-				console.log('scTotalsChange()');
+				self.writeLog('scTotalsChange()');
 				
 				var currentTotal = parseFloat(quote.totals().base_grand_total).toFixed(2);
 				
 				if(currentTotal == self.scOrderTotal) {
-					console.log('scTotalsChange() - the total is same. Stop here.');
+					self.writeLog('scTotalsChange() - the total is same. Stop here.');
 					return;
 				}
 				
-				console.log('scTotalsChange() - the total was changed to', currentTotal);
+				self.writeLog('scTotalsChange() - the total was changed to', currentTotal);
 				self.scOrderTotal = currentTotal;
 				
 				self.scCleanCard();
@@ -1037,20 +1037,20 @@ define(
 			},
 			
 			scPaymentMethodChange: function() {
-				console.log('scPaymentMethodChange()');
+				self.writeLog('scPaymentMethodChange()');
 				
 				if(
 					quote.paymentMethod._latestValue != null
 					&& self.scPaymentMethod != quote.paymentMethod._latestValue.method
 				) {
-					console.log('new paymentMethod is', quote.paymentMethod._latestValue.method);
+					self.writeLog('new paymentMethod is', quote.paymentMethod._latestValue.method);
 					
 					self.scUpdateQuotePM();
 					
 					self.scPaymentMethod = quote.paymentMethod._latestValue.method;
 					
 					if('nuvei' == self.scPaymentMethod) {
-						console.log('sfc', sfc);
+						self.writeLog('sfc', sfc);
 						
 						if(null == sfc) {
 							self.getApmMethods();
@@ -1067,7 +1067,7 @@ define(
 			},
 			
 			scUpdateQuotePM: function() {
-				console.log('scUpdateQuotePM()');
+				self.writeLog('scUpdateQuotePM()');
 				
 				var scAjaxQuoteUpdateParams = {
 					dataType	: "json",
@@ -1079,15 +1079,48 @@ define(
 
 				// update new payment method
 				if('' != self.scPaymentMethod || quote.paymentMethod._latestValue.method != self.scPaymentMethod) {
-					console.log('update quote payment method', quote.paymentMethod._latestValue.method);
+					self.writeLog('update quote payment method', quote.paymentMethod._latestValue.method);
 
 					$.ajax(scAjaxQuoteUpdateParams)
 						.done(function(resp) {})
 						.fail(function(e) {
-							console.error(e.responseText);
+							self.writeLog(e.responseText, null, 'error');
 						});
 				}
+			},
+			
+			/**
+			 * Help function to show some logs in Sandbox
+			 * 
+			 * @param string _text text to print
+			 * @param mixed _param parameter to print
+			 * @param string _mode show log or error
+			 * 
+			 * @returns void
+			 */
+			writeLog: function(_text, _param = null, _mode = 'log') {
+				if(window.checkoutConfig.payment[self.getCode()].isTestMode !== true) {
+					return;
+				}
+				
+				if('log' == _mode) {
+					if(null === _param) {
+						console.log(_text);
+					}
+					else {
+						console.log(_text, _param);
+					}
+				}
+				else if('error' == _mode) {
+					if(null === _param) {
+						console.error(_text);
+					}
+					else {
+						console.error(_text, _param);
+					}
+				}
 			}
+			
         });
     }
 );
