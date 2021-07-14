@@ -1046,51 +1046,63 @@ class Config
     
     /**
      * Help function for getProductPlanData.
-     * We moved here few a repeating part of code.
+     * We moved here few of repeating part of code.
      *
      * @params MagentoProduct
      * @return array
      */
     private function buildPlanDetailsArray($product)
     {
-        $subscription_enabled   = $product->getCustomAttribute(self::PAYMENT_SUBS_ENABLE)->getValue();
+        $attr = $product->getCustomAttribute(self::PAYMENT_SUBS_ENABLE);
+        
+        if(null === $attr) {
+            $this->createLog('buildPlanDetailsArray() - there is no subscription attribute PAYMENT_SUBS_ENABLE');
+            return [];
+        }
+        
+        $subscription_enabled = $attr->getValue();
         
         if (0 == $subscription_enabled) {
             $this->createLog('buildPlanDetailsArray() - for this product the Subscription is not enabled or not set.');
             return [];
         }
         
-        $recurr_unit_obj        = $product->getCustomAttribute(self::PAYMENT_SUBS_RECURR_UNITS);
-        $recurr_unit            = is_object($recurr_unit_obj) ? $recurr_unit_obj->getValue() : 'month';
+        try {
+            $recurr_unit_obj        = $product->getCustomAttribute(self::PAYMENT_SUBS_RECURR_UNITS);
+            $recurr_unit            = is_object($recurr_unit_obj) ? $recurr_unit_obj->getValue() : 'month';
 
-        $recurr_period_obj      = $product->getCustomAttribute(self::PAYMENT_SUBS_RECURR_PERIOD);
-        $recurr_period          = is_object($recurr_period_obj) ? $recurr_period_obj->getValue() : 0;
+            $recurr_period_obj      = $product->getCustomAttribute(self::PAYMENT_SUBS_RECURR_PERIOD);
+            $recurr_period          = is_object($recurr_period_obj) ? $recurr_period_obj->getValue() : 0;
 
-        $trial_unit_obj         = $product->getCustomAttribute(self::PAYMENT_SUBS_TRIAL_UNITS);
-        $trial_unit             = is_object($trial_unit_obj) ? $trial_unit_obj->getValue() : 'month';
+            $trial_unit_obj         = $product->getCustomAttribute(self::PAYMENT_SUBS_TRIAL_UNITS);
+            $trial_unit             = is_object($trial_unit_obj) ? $trial_unit_obj->getValue() : 'month';
 
-        $trial_period_obj       = $product->getCustomAttribute(self::PAYMENT_SUBS_TRIAL_PERIOD);
-        $trial_period           = is_object($trial_period_obj) ? $trial_period_obj->getValue() : 0;
+            $trial_period_obj       = $product->getCustomAttribute(self::PAYMENT_SUBS_TRIAL_PERIOD);
+            $trial_period           = is_object($trial_period_obj) ? $trial_period_obj->getValue() : 0;
 
-        $end_after_unit_obj     = $product->getCustomAttribute(self::PAYMENT_SUBS_END_AFTER_UNITS);
-        $end_after_unit         = is_object($end_after_unit_obj) ? $end_after_unit_obj->getValue() : 'month';
+            $end_after_unit_obj     = $product->getCustomAttribute(self::PAYMENT_SUBS_END_AFTER_UNITS);
+            $end_after_unit         = is_object($end_after_unit_obj) ? $end_after_unit_obj->getValue() : 'month';
 
-        $end_after_period_obj   = $product->getCustomAttribute(self::PAYMENT_SUBS_END_AFTER_PERIOD);
-        $end_after_period       = is_object($end_after_period_obj) ? $end_after_period_obj->getValue() : 0;
-        
-        $rec_amount             = $product->getCustomAttribute(self::PAYMENT_SUBS_REC_AMOUNT)->getValue();
-        
-        $return_arr = [
-            'planId'            => $product->getCustomAttribute(self::PAYMENT_PLANS_ATTR_NAME)->getValue(),
-            'initialAmount'     => 0,
-            'recurringAmount'   => number_format($rec_amount, 2, '.', ''),
-            'recurringPeriod'   => [strtolower($recurr_unit)    => $recurr_period],
-            'startAfter'        => [strtolower($trial_unit)     => $trial_period],
-            'endAfter'          => [strtolower($end_after_unit) => $end_after_period],
-        ];
-        
-        $this->createLog($return_arr, 'buildPlanDetailsArray()');
+            $end_after_period_obj   = $product->getCustomAttribute(self::PAYMENT_SUBS_END_AFTER_PERIOD);
+            $end_after_period       = is_object($end_after_period_obj) ? $end_after_period_obj->getValue() : 0;
 
-        return $return_arr;
+            $rec_amount             = $product->getCustomAttribute(self::PAYMENT_SUBS_REC_AMOUNT)->getValue();
+
+            $return_arr = [
+                'planId'            => $product->getCustomAttribute(self::PAYMENT_PLANS_ATTR_NAME)->getValue(),
+                'initialAmount'     => 0,
+                'recurringAmount'   => number_format($rec_amount, 2, '.', ''),
+                'recurringPeriod'   => [strtolower($recurr_unit)    => $recurr_period],
+                'startAfter'        => [strtolower($trial_unit)     => $trial_period],
+                'endAfter'          => [strtolower($end_after_unit) => $end_after_period],
+            ];
+
+            $this->createLog($return_arr, 'buildPlanDetailsArray()');
+
+            return $return_arr;
+        } catch(Exception $e) {
+            $this->createLog($e->getMessage(), 'buildPlanDetailsArray() Exception');
+            return [];
+        }
     }
 }

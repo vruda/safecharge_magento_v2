@@ -2,6 +2,11 @@
 
 ---
 
+### 3.1.4.x
+```
+	* Added additional checks for Nuvei Subscription attributes, when try to get their values.
+```
+
 ### 3.1.3.x
 ```
 	* Fix for the "Undefined index: selected_configurable_option" error.

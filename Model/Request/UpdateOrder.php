@@ -232,15 +232,21 @@ class UpdateOrder extends AbstractRequest implements RequestInterface
     {
         $return = [];
 
-        $options = $attribute->getOptions();
-        foreach ($options as $option) {
-            if ($option->getValue()) {
-                $return[] = [
-                    'value' => $option->getLabel(),
-                    'label' => $option->getLabel(),
-                    'parentAttributeLabel' => $attribute->getDefaultFrontendLabel()
-                ];
+        try {
+            $options = $attribute->getOptions();
+            foreach ($options as $option) {
+                if ($option->getValue()) {
+                    $return[] = [
+                        'value' => $option->getLabel(),
+                        'label' => $option->getLabel(),
+                        'parentAttributeLabel' => $attribute->getDefaultFrontendLabel()
+                    ];
+                }
             }
+
+            return $return;
+        } catch(Exception $e) {
+            $this->config->createLog($e->getMessage(), 'getOptions() Exception');
         }
 
         return $return;
