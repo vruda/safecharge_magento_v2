@@ -1055,7 +1055,7 @@ class Config
     {
         $attr = $product->getCustomAttribute(self::PAYMENT_SUBS_ENABLE);
         
-        if(null === $attr) {
+        if (null === $attr) {
             $this->createLog('buildPlanDetailsArray() - there is no subscription attribute PAYMENT_SUBS_ENABLE');
             return [];
         }
@@ -1100,7 +1100,7 @@ class Config
             $this->createLog($return_arr, 'buildPlanDetailsArray()');
 
             return $return_arr;
-        } catch(Exception $e) {
+        } catch (Exception $e) {
             $this->createLog($e->getMessage(), 'buildPlanDetailsArray() Exception');
             return [];
         }

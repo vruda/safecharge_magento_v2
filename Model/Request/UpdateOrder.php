@@ -245,7 +245,7 @@ class UpdateOrder extends AbstractRequest implements RequestInterface
             }
 
             return $return;
-        } catch(Exception $e) {
+        } catch (Exception $e) {
             $this->config->createLog($e->getMessage(), 'getOptions() Exception');
         }
 
