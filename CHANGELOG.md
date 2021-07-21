@@ -2,6 +2,11 @@
 
 ---
 
+### 3.1.5
+```
+	* Added additional check for an object in PreventAddToCart class.
+```
+
 ### 3.1.4.x
 ```
 	* Added additional checks for Nuvei Subscription attributes, when try to get their values.
