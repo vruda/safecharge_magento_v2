@@ -117,7 +117,7 @@ class GetMerchantPaymentMethods extends AbstractRequest implements RequestInterf
             $languageCode = $this->store->getLocaleCode();
         }
         
-        $country_code = $this->billing_address['countryId'] ?: '';
+        $country_code = isset($this->billing_address['countryId']) ? $this->billing_address['countryId'] : '';
         if (empty($country_code)) {
             $country_code = $this->config->getQuoteCountryCode();
         }
