@@ -2,6 +2,14 @@
 
 ---
 
+# 3.1.7
+```
+	* Changed the place of a log.
+	* Fixed a spell error.
+	* Pass status 400 from v3.1.6 in Magento jsonOutput.
+	* When we get CARD_TOKENIZATION stop the process.
+```
+
 # 3.1.6
 ```
 	* If DMN can not create an Order send status 400 to the DMN sender.

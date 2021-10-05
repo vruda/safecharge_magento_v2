@@ -74,10 +74,11 @@ class GetMerchantPaymentMethods extends Action
             if ('ppp_ApplePay' == $d["paymentMethod"]) {
                 $applePayData = $d;
                 unset($apmMethodsData['apmMethods'][$k]);
+                
+                $this->moduleConfig->createLog($applePayData, 'GetMerchantPaymentMethods $applePayData');
+                break;
             }
         }
-        
-        $this->moduleConfig->createLog($applePayData, 'GetMerchantPaymentMethods');
         
         return $result->setData([
             "error"         => 0,

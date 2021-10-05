@@ -124,6 +124,11 @@ class DmnOld extends \Magento\Framework\App\Action\Action
             
             $this->moduleConfig->createLog($params, 'DMN params:');
             
+            if (!empty($params['type']) && 'CARD_TOKENIZATION' == $params['type']) {
+                $this->jsonOutput->setData('DMN report - this is Card Tokenization DMN.');
+                return $this->jsonOutput;
+            }
+            
             ### DEBUG
 //            $this->jsonOutput->setData('DMN manually stopped.');
 //            $this->moduleConfig->createLog(http_build_query($params), 'DMN params string:');
@@ -1225,7 +1230,7 @@ class DmnOld extends \Magento\Framework\App\Action\Action
                 'DMN Callback error - there is no Order and the code did not success to create it.'
             );
             
-            http_response_code(400);
+            $this->jsonOutput->setHttpResponseCode(400);
             return 'DMN Callback error - there is no Order and the code did not success to create it.';
         }
         

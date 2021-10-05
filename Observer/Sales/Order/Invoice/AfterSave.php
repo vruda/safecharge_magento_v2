@@ -57,7 +57,7 @@ class AfterSave implements ObserverInterface
             if (in_array($invoice->getState(), [Invoice::STATE_PAID, Invoice::STATE_CANCELED])) {
                 $this->config->createLog(
                     $invoice->getId(),
-                    'Invoice AfterSave Observer - the invoice already paid or canceld.'
+                    'Invoice AfterSave Observer - the invoice already paid or canceled.'
                 );
                 
                 return $this;
