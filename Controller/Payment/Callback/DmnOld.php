@@ -1222,10 +1222,11 @@ class DmnOld extends \Magento\Framework\App\Action\Action
         
         if (!$orderList || empty($orderList)) {
             $this->moduleConfig->createLog(
-                'DMN Callback error - there is no Order and the code did not success to made it.'
+                'DMN Callback error - there is no Order and the code did not success to create it.'
             );
             
-            return 'DMN Callback error - there is no Order and the code did not success to made it.';
+            http_response_code(400);
+            return 'DMN Callback error - there is no Order and the code did not success to create it.';
         }
         
         $this->order = current($orderList);

@@ -2,6 +2,11 @@
 
 ---
 
+# 3.1.6
+```
+	* If DMN can not create an Order send status 400 to the DMN sender.
+```
+
 ### 3.1.5
 ```
 	* Added additional check for an object in PreventAddToCart class.
