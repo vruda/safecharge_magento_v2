@@ -8,7 +8,7 @@ define(
     [
         'jquery',
         'Magento_Payment/js/view/payment/cc-form',
-        'Magento_Paypal/js/action/set-payment-method',
+        'Nuvei_Payments/js/action/set-payment-method',
         'jquery.redirect',
         'ko',
         'Magento_Checkout/js/model/quote',
