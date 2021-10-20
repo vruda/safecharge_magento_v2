@@ -7,7 +7,7 @@
  * @package  Nuvei_Payments
  */
 -->
-<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" layout="1column"
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" layout="checkout"
       xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <head>
         <script src="https://cdn.safecharge.com/safecharge_resources/v1/websdk/safecharge.js" src_type="url" />
