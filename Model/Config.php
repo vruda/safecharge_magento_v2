@@ -265,7 +265,7 @@ class Config
                     
 //                    \Magento\Framework\Filesystem\Driver\file_put_contents(
                     file_put_contents(
-                        $logsPath . DIRECTORY_SEPARATOR . 'Nuvei-' . date('Y-m-d') . '.txt',
+                        $logsPath . DIRECTORY_SEPARATOR . 'Nuvei-' . date('Y-m-d') . '.log',
                         date('H:i:s', time()) . ': ' . $string,
                         FILE_APPEND
                     );
@@ -277,7 +277,7 @@ class Config
             
             if (is_dir($logsPath)) {
                 return file_put_contents(
-                    $logsPath . DIRECTORY_SEPARATOR . $log_file_name . '.txt',
+                    $logsPath . DIRECTORY_SEPARATOR . $log_file_name . '.log',
                     date('H:i:s', time()) . ': ' . $string,
                     FILE_APPEND
                 );
