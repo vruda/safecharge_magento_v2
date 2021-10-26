@@ -183,8 +183,7 @@ class Complete extends \Magento\Framework\App\Action\Action implements \Magento\
                 ->setData('error', true)
                 ->setData(
                     'message',
-                    __('An error occurred on the server. '
-                        . 'Please check your Order History and if the Order is not there, try to place it again!')
+                    __($exception->getMessage())
                 );
         }
 
